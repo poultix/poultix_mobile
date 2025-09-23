@@ -65,23 +65,29 @@ export default function SignUpScreen() {
     }, [])
 
     const handleSignUp = async () => {
-
         try {
-            const response = await axios.post(`${hostConfig.host}/registerUser`, {
-                names: name,
-                email,
-                password,
-                role: isVeterinary ? 'veterinary' : 'farmer',
-            })
-            if (response.status == 200) navigation.navigate('SignIn')
+            const response = await axios.post(
+                `${hostConfig.host}/registerUser`,
+                {
+                    names: name,
+                    email,
+                    password,
+                    role: isVeterinary ? 'veterinary' : 'farmer',
+                },
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    timeout: 15000,
+                }
+            )
+            if (response.status === 200) navigation.navigate('SignIn')
         } catch (error) {
-            console.error(error)
             if (axios.isAxiosError(error)) {
                 if (!error.response) {
-                    navigation.navigate("NetworkError")
+                    navigation.navigate('NetworkError')
                     return
                 }
-                Alert.alert('Sign up error:', error.response.data.message)
+                const serverMessage = (error.response.data as any)?.message || 'Failed to sign up'
+                Alert.alert('Sign up error', serverMessage)
             } else {
                 Alert.alert('Unexpected error', 'Please try again later')
             }

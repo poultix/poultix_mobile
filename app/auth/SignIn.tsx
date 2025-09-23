@@ -138,8 +138,8 @@ export default function SignInScreen() {
         if (!password.trim()) {
             setPasswordError('Password is required')
             isValid = false
-        } else if (password.trim().length < 4) {
-            setPasswordError('Password must be at least 4 characters')
+        } else if (password.trim().length < 6) {
+            setPasswordError('Password must be at least 6 characters')
             isValid = false
         }
 
@@ -154,10 +154,17 @@ export default function SignInScreen() {
             animateButton()
             setIsLoading(true)
 
-            const response = await axios.post(hostConfig.host + '/signInUser', {
-                email: email.trim(),
-                password: password.trim(),
-            })
+            const response = await axios.post(
+                hostConfig.host + '/signInUser',
+                {
+                    email: email.trim(),
+                    password: password.trim(),
+                },
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    timeout: 15000,
+                }
+            )
             const { role, token } = await response.data
             // Handle success (save token, navigate)
             await AsyncStorage.setItem('token', token)
@@ -169,10 +176,23 @@ export default function SignInScreen() {
         } catch (error) {
             setIsLoading(false)
             if (axios.isAxiosError(error)) {
-                if (!error.response) navigation.navigate('NetworkError')
-                else if (error.response.status === 400) Alert.alert('Authentication Failed', error.response.data.message)
-            } else Alert.alert('Error', 'An unexpected error occurred')
-            console.log(error)
+                if (!error.response) {
+                    navigation.navigate('NetworkError')
+                } else {
+                    const status = error.response.status
+                    const serverMessage = (error.response.data as any)?.message || 'Authentication failed'
+                    Alert.alert(`Login error (${status})`, serverMessage)
+                    console.log('Login error details:', {
+                        status,
+                        data: error.response.data,
+                        url: error.config?.url,
+                        method: error.config?.method,
+                    })
+                }
+            } else {
+                Alert.alert('Error', 'An unexpected error occurred')
+                console.log('Unexpected error:', error)
+            }
             shakeAnimation()
             Vibration.vibrate([0, 30, 30, 30])
             setPassword('')
@@ -207,7 +227,7 @@ export default function SignInScreen() {
         inputContainer: (isFocused: boolean, hasError: boolean) => [
             tw`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border`,
             isFocused ? tw`border-orange-300` : tw`border-gray-200`,
-            hasError ? tw`border-red-500` : '',
+            hasError ? tw`border-red-500` : undefined,
             tw`shadow-sm`,
         ],
         iconContainer: tw`pl-4 pr-2`,

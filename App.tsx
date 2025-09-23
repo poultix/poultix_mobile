@@ -139,28 +139,8 @@ const DrawerNavigator = () => (
 );
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [role, setRole] = useState<string | null>(null);
-
-  // Check authentication state
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        const userRole = await AsyncStorage.getItem('role');
-        if (userRole) setRole(userRole);
-        setIsAuthenticated(!!token);
-      } catch (error) {
-        console.error('Auth check error:', error);
-        setIsAuthenticated(false);
-      }
-    };
-    checkAuth();
-  }, []);
-
-  if (isAuthenticated === null) {
-    return <LoadingScreen />;
-  }
+  const [isAuthenticated] = useState<boolean>(true);
+  const [role] = useState<string | null>(null);
 
   return (
     <Suspense fallback={<LoadingScreen />}>
