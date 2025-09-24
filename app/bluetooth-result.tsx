@@ -9,13 +9,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import tw from 'twrnc';
-import TopNavigation from '../navigation/TopNavigation';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { NavigationProps } from '@/interfaces/Navigation';
+import TopNavigation from '@/navigation/TopNavigation';
+
 import { Device } from '@/interfaces/Bluetooth';
 
 export default function BluetoothResultScreen() {
-    const navigation = useNavigation<NavigationProps>();
+    
     const route = useRoute();
     const { devices } = route.params as { devices: Device[] };
 

@@ -12,14 +12,13 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 import tw from 'twrnc'
-import { useNavigation } from '@react-navigation/native'
-import { NavigationProps } from '@/interfaces/Navigation'
-import TopNavigation from '../navigation/TopNavigation'
+import { router } from 'expo-router'
+import TopNavigation from '@/navigation/TopNavigation'
 import { FarmerData } from '@/interfaces/Farmer'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default function SettingsScreen() {
-  const router = useNavigation<NavigationProps>()
+  
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [farmerData, setFarmerData] = useState<FarmerData>({
     _id: '0',
@@ -75,7 +74,7 @@ export default function SettingsScreen() {
       toValue: 0.5,
       duration: 200,
       useNativeDriver: true,
-    }).start(() => router.navigate(path))
+    }).start(() => router.push(path))
   }
 
 
@@ -115,7 +114,7 @@ export default function SettingsScreen() {
             ]}
           >
             <Image
-              source={require('@/assets/logo.png')} // Replace with actual user image
+              source={require('../assets/logo.png')} // Replace with actual user image
               style={tw`w-16 h-16 rounded-full mr-4 border-2 border-[#EF4444]`}
             />
             <View style={tw`flex-1`}>

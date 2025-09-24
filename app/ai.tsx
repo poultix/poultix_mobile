@@ -17,7 +17,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
-import TopNavigation from '../navigation/TopNavigation';
+import TopNavigation from '@/navigation/TopNavigation';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {

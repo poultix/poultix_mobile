@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router'
 import tw from 'twrnc'
 import NewsComponent from '@/components/news/BodyNews'
 import StatusNews from '@/components/news/HeadNews'
-import TopNavigation from '../navigation/TopNavigation'
+import TopNavigation from '@/navigation/TopNavigation'
 
 export default function News() {
   const router = useRouter()

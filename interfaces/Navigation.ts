@@ -1,46 +1,36 @@
-import { StackNavigationProp } from '@react-navigation/stack';
+// Expo Router Navigation Types
 import { Device } from './Bluetooth';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Pharmacy } from './Pharmacy';
 
-export type RootStackParamList = {
-    SignIn: undefined;
-    SignUp: undefined;
-    ForgotPassword: undefined;
-    VerifyCode: { email: string };
-    VerifyYou: undefined;
-    GoogleSignIn: undefined;
-    Home: undefined;
-    News: undefined;
-    AiScreen: undefined;
-    Bluetooth_Setting: undefined;
-    Bluetooth_Result: { devices: Device[] | null };
-    Bluetooth_Pairing: undefined;
-    Farmer: undefined;
-    Farm: undefined;
-    Ph_Reader: undefined;
-    Settings: undefined;
-    CreateNewPassword: undefined;
-    NetworkError: undefined;
-    Testing: undefined;
-    Veterinary: undefined;
-    Pharmacies: {
-        pharmacies: Pharmacy[];
-    };
-    Drawer: undefined; // DrawerNavigator
-    Tester: undefined;
+// Expo Router uses file-based routing, so we only need parameter types
+export type RouteParams = {
+    '/bluetooth-result': { devices: Device[] | null };
+    '/pharmacies': { pharmacies: Pharmacy[] };
+    '/(auth)/verify-code': { email: string };
 };
 
-// Define drawer param list
-export type DrawerParamList = {
-    Home: undefined;
-    Farmer: undefined;
-    Farm: undefined;
-    Pharmacies: undefined;
-    Veterinary: undefined;
-    AiScreen: undefined;
-    Settings: undefined;
-    News: undefined;
-};
+// Screen names for reference (matches file structure)
+export type ScreenNames = 
+    | '/'
+    | '/farmer'
+    | '/farm' 
+    | '/ai'
+    | '/pharmacies'
+    | '/news'
+    | '/settings'
+    | '/veterinary'
+    | '/bluetooth-pairing'
+    | '/bluetooth-settings'
+    | '/bluetooth-result'
+    | '/ph-reader'
+    | '/network-error'
+    | '/tester'
+    | '/(auth)/sign-in'
+    | '/(auth)/sign-up'
+    | '/(auth)/forgot-password'
+    | '/(auth)/verify-code'
+    | '/(auth)/create-new-password'
+    | '/(auth)/google-sign-in';
 
-export type NavigationProps = StackNavigationProp<RootStackParamList> & DrawerNavigationProp<DrawerParamList>;
+// Legacy type for backward compatibility (deprecated)
+export type NavigationProps = any;

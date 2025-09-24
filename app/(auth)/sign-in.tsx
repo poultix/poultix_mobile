@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react'
-import axios from 'axios'
 import {
     View,
     Text,
@@ -13,14 +12,13 @@ import {
     Vibration,
     ActivityIndicator,
 } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-import hostConfig from '../../config/hostConfig'
+import { router } from 'expo-router'
+import { MockAuthService } from '@/services/mockData'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import tw from 'twrnc'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LinearGradient } from 'expo-linear-gradient'
 import { StatusBar } from "expo-status-bar";
-import { NavigationProps } from '@/interfaces/Navigation'
 
 export default function SignInScreen() {
     const [email, setEmail] = useState('')
@@ -31,13 +29,11 @@ export default function SignInScreen() {
     const [isLoading, setIsLoading] = useState(false)
     const [emailError, setEmailError] = useState('')
     const [passwordError, setPasswordError] = useState('')
-
     const fadeAnim = useRef(new Animated.Value(0)).current
     const slideAnim = useRef(new Animated.Value(30)).current
     const buttonScale = useRef(new Animated.Value(1)).current
     const shakeAnim = useRef(new Animated.Value(0)).current
 
-    const navigation = useNavigation<NavigationProps>()
     const { width } = Dimensions.get('window')
 
     const inputRefs = {
@@ -55,11 +51,15 @@ export default function SignInScreen() {
     useEffect(() => {
         const checkUserSignIn = async () => {
             try {
+                // Create development session if none exists (auto-login for development)
+                await MockAuthService.createDevelopmentSession()
+                
                 const token = await AsyncStorage.getItem('token')
                 const role = await AsyncStorage.getItem('role')
                 if (token && token != null) {
-                    if (role == 'farmer') navigation.navigate('Farmer')
-                    else if (role == 'veterinary') navigation.navigate('Veterinary')
+                    if (role == 'farmer') router.replace('/farmer' as any)
+                    else if (role == 'veterinary') router.replace('/veterinary' as any)
+                    else router.replace('/' as any)
                 }
             } catch (error) {
                 console.error('Error checking token:', error)
@@ -83,12 +83,12 @@ export default function SignInScreen() {
 
     const handleBack = () => {
         Vibration.vibrate(20)
-        navigation.goBack()
+        router.back()
     }
 
     const handleSignUp = () => {
         Vibration.vibrate(20)
-        navigation.navigate('SignUp')
+        router.push('/(auth)/sign-up' as any)
     }
 
     const animateButton = () => {
@@ -138,8 +138,8 @@ export default function SignInScreen() {
         if (!password.trim()) {
             setPasswordError('Password is required')
             isValid = false
-        } else if (password.trim().length < 6) {
-            setPasswordError('Password must be at least 6 characters')
+        } else if (password.trim().length < 4) {
+            setPasswordError('Password must be at least 4 characters')
             isValid = false
         }
 
@@ -154,45 +154,20 @@ export default function SignInScreen() {
             animateButton()
             setIsLoading(true)
 
-            const response = await axios.post(
-                hostConfig.host + '/signInUser',
-                {
-                    email: email.trim(),
-                    password: password.trim(),
-                },
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    timeout: 15000,
-                }
-            )
-            const { role, token } = await response.data
+            const { role, token } = await MockAuthService.signIn(email.trim(), password.trim())
+            
             // Handle success (save token, navigate)
             await AsyncStorage.setItem('token', token)
             await AsyncStorage.setItem('role', role)
             setIsLoading(false)
-            if (role == 'farmer') navigation.navigate('Farmer')
-            else if (role == 'veterinary') navigation.navigate('Veterinary')
-            else navigation.navigate('Home')
+            if (role == 'farmer') router.replace('/farmer' as any)
+            else if (role == 'veterinary') router.replace('/veterinary' as any)
+            else router.replace('/' as any)
         } catch (error) {
             setIsLoading(false)
-            if (axios.isAxiosError(error)) {
-                if (!error.response) {
-                    navigation.navigate('NetworkError')
-                } else {
-                    const status = error.response.status
-                    const serverMessage = (error.response.data as any)?.message || 'Authentication failed'
-                    Alert.alert(`Login error (${status})`, serverMessage)
-                    console.log('Login error details:', {
-                        status,
-                        data: error.response.data,
-                        url: error.config?.url,
-                        method: error.config?.method,
-                    })
-                }
-            } else {
-                Alert.alert('Error', 'An unexpected error occurred')
-                console.log('Unexpected error:', error)
-            }
+            const errorMessage = error instanceof Error ? error.message : 'Authentication failed'
+            Alert.alert('Login Error', errorMessage)
+            console.log('Login error:', error)
             shakeAnimation()
             Vibration.vibrate([0, 30, 30, 30])
             setPassword('')
@@ -201,13 +176,13 @@ export default function SignInScreen() {
 
     const handleForgotPassword = () => {
         Vibration.vibrate(20)
-        navigation.navigate('ForgotPassword')
+        router.push('/(auth)/forgot-password' as any)
     }
 
     const handleSocialSignIn = (provider: string) => {
         Vibration.vibrate(20)
         animateButton()
-        if (provider === 'Google') navigation.navigate('GoogleSignIn')
+        if (provider === 'Google') router.push('/(auth)/google-sign-in' as any)
     }
 
     // Enhanced styles
@@ -412,6 +387,40 @@ export default function SignInScreen() {
                             </TouchableOpacity>
                         </View>
                     </Animated.View>
+
+                    {/* Development Quick Login Buttons */}
+                    <View style={tw`mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200`}>
+                        <Text style={tw`text-gray-600 text-sm font-medium mb-3 text-center`}>🚀 Development Quick Login</Text>
+                        <View style={tw`flex-row justify-between gap-2`}>
+                            <TouchableOpacity
+                                onPress={async () => {
+                                    await MockAuthService.loginAsFarmer()
+                                    router.replace('/farmer' as any)
+                                }}
+                                style={tw`flex-1 bg-green-100 p-3 rounded-lg border border-green-200`}
+                            >
+                                <Text style={tw`text-green-700 text-xs font-semibold text-center`}>🚜 Farmer</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={async () => {
+                                    await MockAuthService.loginAsVeterinary()
+                                    router.replace('/veterinary' as any)
+                                }}
+                                style={tw`flex-1 bg-blue-100 p-3 rounded-lg border border-blue-200`}
+                            >
+                                <Text style={tw`text-blue-700 text-xs font-semibold text-center`}>🩺 Vet</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={async () => {
+                                    await MockAuthService.loginAsAdmin()
+                                    router.replace('/' as any)
+                                }}
+                                style={tw`flex-1 bg-purple-100 p-3 rounded-lg border border-purple-200`}
+                            >
+                                <Text style={tw`text-purple-700 text-xs font-semibold text-center`}>👑 Admin</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
 
                     {/* Sign Up Link */}
                     <View style={styles.signUpContainer}>

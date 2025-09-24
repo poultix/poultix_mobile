@@ -11,25 +11,25 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import axios from 'axios';
-import hostConfig from '../../config/hostConfig';
+import { MockDataService } from '@/services/mockData';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import tw from 'twrnc';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { NavigationProps } from '@/interfaces/Navigation';
+
 import { BlurView } from 'expo-blur';
-import { SharedElement } from 'react-navigation-shared-element';
+// import { SharedElement } from 'react-navigation-shared-element'; // Removed - not compatible with Expo Router
 import { FarmData } from '@/interfaces/Farm';
-import TopNavigation from '../navigation/TopNavigation';
+import TopNavigation from '@/navigation/TopNavigation';
+import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 const isPad = width >= 768;
 const isLargePhone = width >= 428;
 
 export default function FarmDataScreen() {
-  const router = useNavigation<NavigationProps>();
+  
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [farmData, setFarmData] = useState<FarmData>({
@@ -77,35 +77,19 @@ export default function FarmDataScreen() {
     if (showLoader) setLoading(true);
     try {
       const token = await AsyncStorage.getItem('token')
-      const response = await axios.get(hostConfig.host + '/userFarm', {
-        headers: {
-          Authorization: 'Bearer ' + token
-        }
-      })
-      setFarmData(response.data)
+      if (token) {
+        const farmData = await MockDataService.getFarmData(token)
+        setFarmData(farmData)
 
-      setWeatherPreview({
-        temp: Math.floor(Math.random() * 20) + 15,
-        condition: ['sunny', 'cloudy', 'rainy'][Math.floor(Math.random() * 3)],
-        humidity: Math.floor(Math.random() * 30) + 50,
-      })
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (!error.response) {
-          router.navigate("NetworkError")
-          return
-        }
-
-
-        if (error.response.status == 401) {
-          await AsyncStorage.removeItem('token');
-          router.navigate('SignIn');
-          return
-        }
-        Alert.alert('Error occured', error.response.data.message)
-      } else {
-        Alert.alert('Network error', ' Please check your connection.');
+        setWeatherPreview({
+          temp: Math.floor(Math.random() * 20) + 15,
+          condition: ['sunny', 'cloudy', 'rainy'][Math.floor(Math.random() * 3)],
+          humidity: Math.floor(Math.random() * 30) + 50,
+        })
       }
+    } catch (error) {
+      console.error('Error fetching farm data:', error)
+      Alert.alert('Error', 'Failed to load farm data. Please try again.')
     } finally {
       if (showLoader) setLoading(false);
       setRefreshing(false);
@@ -163,14 +147,14 @@ export default function FarmDataScreen() {
     }, [])
   );
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = (path: any) => {
     console.log(path)
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
     Animated.timing(fadeAnim, {
       toValue: 0.5,
       duration: 200,
       useNativeDriver: true,
-    }).start(() => router.navigate(path));
+    }).start(() => router.push(path));
   };
 
   const formatNumber = (num: number) => {
@@ -274,7 +258,7 @@ export default function FarmDataScreen() {
           {/* Farm Overview Card */}
           <View style={[tw`rounded-3xl overflow-hidden shadow-xl mb-6 border border-white/30`,]}
           >
-            <SharedElement id='' >
+            {/* SharedElement removed - not compatible with Expo Router */}
               <View style={tw`bg-orange-600 p-6 relative`}>
                 <BlurView intensity={25} tint="light" style={tw`absolute inset-0 rounded-3xl`} />
                 <View style={tw`absolute top-0 right-0 w-40 h-40 -mr-10 -mt-10 rounded-full bg-white/10`} />
@@ -283,12 +267,12 @@ export default function FarmDataScreen() {
                 {/* Card Header */}
                 <View style={tw`flex-row items-center justify-between mb-6 z-10 relative`}>
                   <View style={tw`flex-row items-center`}>
-                    <FontAwesome5 name='' size={20} color="white" style={tw`mr-3`} />
+                    <FontAwesome5 name='seedling' size={20} color="white" style={tw`mr-3`} />
                     <Text style={tw`text-white text-xl font-bold`}>Farm Overview</Text>
                   </View>
                   <TouchableOpacity
                     style={tw`rounded-full bg-white/20 p-2`}
-                    onPress={() => handleNavigation('FarmDetails')}
+                    onPress={() => handleNavigation('/farm-details' as any)}
                   >
                     <Ionicons name="information-circle-outline" size={22} color="white" />
                   </TouchableOpacity>
@@ -366,7 +350,7 @@ export default function FarmDataScreen() {
                   <View>
                     <TouchableOpacity
                       style={tw`bg-transparent rounded-xl py-3 px-4 flex-row items-center justify-center border border-white/30 flex-1 mr-3 shadow-md`}
-                      onPress={() => handleNavigation('FarmDetails')}
+                      onPress={() => handleNavigation('/farm-details' as any)}
                     >
                       <Ionicons name="analytics-outline" size={18} color="white" style={tw`mr-2`} />
                       <Text style={tw`text-white font-semibold bg-transparent`}>Analytics</Text>
@@ -376,7 +360,7 @@ export default function FarmDataScreen() {
                   <View                  >
                     <TouchableOpacity
                       style={tw`bg-transparent rounded-xl py-3 px-4 flex-row items-center justify-center border border-white/30  shadow-md`}
-                      onPress={() => handleNavigation('AddChicken')}
+                      onPress={() => handleNavigation('/add-chicken' as any)}
                     >
                       <Ionicons name="add-circle-outline" size={18} color="white" style={tw`mr-2`} />
                       <Text style={tw`text-white font-semibold`}>Add Chicken</Text>
@@ -384,7 +368,7 @@ export default function FarmDataScreen() {
                   </View>
                 </View>
               </View>
-            </SharedElement>
+            {/* End SharedElement */}
           </View>
 
           {/* Weather & Tools Row */}
@@ -395,7 +379,7 @@ export default function FarmDataScreen() {
             >
               <TouchableOpacity
                 style={tw`bg-white p-4 h-full`}
-                onPress={() => handleNavigation('WeatherCheck')}
+                onPress={() => handleNavigation('/weather-check' as any)}
                 activeOpacity={0.9}
               >
                 <View style={tw`flex-row items-center justify-between mb-3`}>
@@ -415,7 +399,7 @@ export default function FarmDataScreen() {
             >
               <TouchableOpacity
                 style={tw`bg-white p-4 h-full justify-between`}
-                onPress={() => handleNavigation('Ph_Reader')}
+                onPress={() => handleNavigation('/ph-reader' as any)}
                 activeOpacity={0.9}
               >
                 <View style={tw`flex-row items-center justify-between`}>
@@ -438,7 +422,7 @@ export default function FarmDataScreen() {
                 title: 'Stool Analysis',
                 description: 'Scan and analyze chicken stool samples',
                 icon: 'mic-circle-outline',
-                path: 'Ph_Reader',
+                path: '/ph-reader',
                 bgColor: 'bg-purple-50',
                 iconColor: 'text-purple-600',
                 borderColor: 'border-purple-100',
@@ -447,7 +431,7 @@ export default function FarmDataScreen() {
                 title: 'Chat with AI',
                 description: 'Get smart recommendations from our AI assistant',
                 icon: 'chatbox-ellipses-outline',
-                path: 'ChatWithAI',
+                path: '/ai',
                 bgColor: 'bg-blue-50',
                 iconColor: 'text-blue-600',
                 borderColor: 'border-blue-100',
@@ -456,7 +440,7 @@ export default function FarmDataScreen() {
                 title: 'Find Pharmacies',
                 description: 'Locate veterinary pharmacies nearby',
                 icon: 'location-outline',
-                path: 'Pharmacies',
+                path: '/pharmacies',
                 bgColor: 'bg-green-50',
                 iconColor: 'text-green-600',
                 borderColor: 'border-green-100',
@@ -485,7 +469,7 @@ export default function FarmDataScreen() {
                   activeOpacity={0.7}
                 >
                   <View style={tw`${item.bgColor} p-3 rounded-xl mr-4 ${item.borderColor} border`}>
-                    <Ionicons name={item.icon} size={24} color={item.iconColor.replace('text-', '')} />
+                    <Ionicons name={item.icon as any} size={24} color={item.iconColor.replace('text-', '#').replace('purple-600', '#9333EA').replace('blue-600', '#2563EB').replace('green-600', '#059669')} />
                   </View>
                   <View style={tw`flex-1`}>
                     <Text style={tw`text-gray-900 font-semibold text-lg`}>{item.title}</Text>
@@ -533,7 +517,7 @@ export default function FarmDataScreen() {
                 <View key={activity.title}>
                   <View style={tw`flex-row items-center p-4`}>
                     <View style={tw`${activity.iconBg} p-2 rounded-full mr-3`}>
-                      <Ionicons name={activity.icon} size={18} color={activity.iconColor} />
+                      <Ionicons name={activity.icon as any} size={18} color={activity.iconColor} />
                     </View>
                     <View style={tw`flex-1`}>
                       <Text style={tw`text-gray-900 font-medium`}>{activity.title}</Text>

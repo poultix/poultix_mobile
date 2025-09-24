@@ -10,11 +10,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import tw from 'twrnc';
-import { useNavigation } from '@react-navigation/native';
-import { NavigationProps } from '@/interfaces/Navigation';
+import { router } from 'expo-router';
 
 export default function BluetoothSettingsScreen() {
-    const router = useNavigation<NavigationProps>()
+    
     const { deviceId } = useLocalSearchParams();
 
     // Animation states
@@ -49,7 +48,7 @@ export default function BluetoothSettingsScreen() {
             useNativeDriver: true,
         }).start(() => {
             buttonScale.setValue(1);
-            router.goBack();
+            router.back();
         });
     };
 
@@ -63,7 +62,7 @@ export default function BluetoothSettingsScreen() {
 
     const handleDisconnect = () => {
         console.log('Disconnect device');
-        router.goBack();
+        router.back();
     };
 
     return (

@@ -15,11 +15,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import tw from 'twrnc';
-import { useNavigation } from '@react-navigation/native';
-import { NavigationProps } from '@/interfaces/Navigation';
+import { router } from 'expo-router';
 
 export default function CreateNewPasswordScreen() {
-  const router = useNavigation<NavigationProps>();
+  
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -68,13 +67,13 @@ export default function CreateNewPasswordScreen() {
       useNativeDriver: true,
     }).start(() => {
       // Simulate password update success and navigate back
-      router.goBack();
+      router.back();
     });
   };
 
   return (
     <ImageBackground
-      source={require('../../assets/images/chicken-farmer.webp')} // Replace with your image
+      source={require('@/assets/images/chicken-farmer.webp')} // Replace with your image
       style={tw`flex-1`}
       imageStyle={tw`opacity-5`}
     >
@@ -91,7 +90,7 @@ export default function CreateNewPasswordScreen() {
             <Animated.View style={[tw`flex-1 px-5 pt-12`, { opacity: fadeAnim }]}>
               {/* Header */}
               <View style={tw`flex-row items-center mb-8`}>
-                <TouchableOpacity onPress={() => router.goBack()}>
+                <TouchableOpacity onPress={() => router.back()}>
                   <Ionicons name="arrow-back" size={28} color="#6B7280" />
                 </TouchableOpacity>
                 <Text style={tw`text-gray-500 text-sm ml-4`}>

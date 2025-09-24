@@ -18,18 +18,17 @@ import * as Linking from 'expo-linking';
 import * as Location from 'expo-location';
 import axios from 'axios';
 import tw from 'twrnc';
-import { useNavigation } from '@react-navigation/native';
-import { NavigationProps } from '@/interfaces/Navigation';
+import { router } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import { SharedElement } from 'react-navigation-shared-element';
-import TopNavigation from '../navigation/TopNavigation';
+import TopNavigation from '@/navigation/TopNavigation';
 import { Pharmacy } from '@/interfaces/Pharmacy';
 
 
 const GOOGLE_API_KEY = 'YOUR_GOOGLE_API_KEY'; // Replace with your API key
 
 const PharmaciesScreen = () => {
-    const navigation = useNavigation<NavigationProps>();
+    
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
@@ -309,7 +308,7 @@ const PharmaciesScreen = () => {
                                 <SharedElement id={`pharmacy-${pharmacy.id}`}>
                                     <TouchableOpacity
                                         style={tw`bg-white rounded-2xl shadow-sm border border-gray-100 p-4`}
-                                        onPress={() => navigation.navigate('PharmacyDetails', { pharmacy })}
+                                        onPress={() => router.push('PharmacyDetails', { pharmacy })}
                                         activeOpacity={0.7}
                                     >
                                         <View style={tw`flex-row items-center justify-between mb-3`}>
