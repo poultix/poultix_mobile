@@ -8,13 +8,12 @@ import {
   Modal,
   SafeAreaView,
   ScrollView,
-  Image,
+  StatusBar,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import tw from 'twrnc';
-import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useApp } from '@/contexts/AppContext';
@@ -121,8 +120,11 @@ interface CustomDrawerProps {
 
 export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) {
   const { logout } = useApp();
-  const slideAnim = useRef(new Animated.Value(-350)).current;
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const drawerWidth = screenWidth * 0.85; // 85% of screen width
+  const slideAnim = useRef(new Animated.Value(-drawerWidth)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 0;
   const [userInfo, setUserInfo] = useState<UserInfo>({
     name: 'Loading...',
     email: 'Loading...',
@@ -167,12 +169,12 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
       Animated.parallel([
         Animated.spring(slideAnim, {
           toValue: 0,
-          tension: 50,
+          tension: 100,
           friction: 8,
           useNativeDriver: true,
         }),
         Animated.timing(overlayOpacity, {
-          toValue: 0.6,
+          toValue: 0.4,
           duration: 300,
           useNativeDriver: true,
         }),
@@ -180,7 +182,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
     } else {
       Animated.parallel([
         Animated.timing(slideAnim, {
-          toValue: -350,
+          toValue: -drawerWidth,
           duration: 250,
           useNativeDriver: true,
         }),
@@ -191,7 +193,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
         }),
       ]).start();
     }
-  }, [isVisible]);
+  }, [isVisible, drawerWidth]);
 
   const handleItemPress = (route: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -234,8 +236,9 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
       transparent
       animationType="none"
       onRequestClose={onClose}
+      statusBarTranslucent
     >
-      {/* Enhanced Overlay */}
+      {/* iOS-style Overlay */}
       <Animated.View
         style={[
           tw`absolute inset-0 bg-black`,
@@ -249,156 +252,170 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
         />
       </Animated.View>
 
-      {/* Enhanced Drawer */}
+      {/* iOS-style Full Height Drawer */}
       <Animated.View
         style={[
-          tw`absolute left-0 top-0 bottom-0 w-80 shadow-2xl`,
-          { transform: [{ translateX: slideAnim }] },
+          {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: drawerWidth,
+            height: screenHeight,
+            backgroundColor: '#FFFFFF',
+            transform: [{ translateX: slideAnim }],
+            shadowColor: '#000',
+            shadowOffset: { width: 2, height: 0 },
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 16,
+          },
         ]}
       >
-        <BlurView intensity={95} tint="light" style={tw`absolute inset-0`} />
-        
-        {/* Header with User Info */}
-        <LinearGradient
-          colors={[getRoleColor(userInfo.role), getRoleColor(userInfo.role) + 'CC']}
-          style={tw`pt-12 pb-6 px-6`}
-        >
-          <SafeAreaView>
-            <View style={tw`flex-row items-center mb-4`}>
-              <View style={tw`w-16 h-16 rounded-full bg-white bg-opacity-20 justify-center items-center mr-4`}>
+        <SafeAreaView style={tw`flex-1`}>
+          {/* iOS-style Header */}
+          <View style={[
+            tw`px-4 py-3 border-b border-gray-100`,
+            { paddingTop: statusBarHeight + 16 }
+          ]}>
+            <View style={tw`flex-row items-center justify-between mb-4`}>
+              <Text style={tw`text-3xl font-bold text-gray-900`}>Menu</Text>
+              <TouchableOpacity
+                onPress={onClose}
+                style={tw`w-8 h-8 rounded-full bg-gray-100 items-center justify-center`}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="close" size={18} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+            
+            {/* User Profile Section */}
+            <View style={tw`flex-row items-center py-3 px-3 bg-gray-50 rounded-2xl`}>
+              <View style={[
+                tw`w-12 h-12 rounded-full items-center justify-center mr-3`,
+                { backgroundColor: getRoleColor(userInfo.role) }
+              ]}>
                 <Ionicons 
                   name={getRoleIcon(userInfo.role) as keyof typeof Ionicons.glyphMap} 
-                  size={28} 
+                  size={20} 
                   color="white" 
                 />
               </View>
               <View style={tw`flex-1`}>
-                <Text style={tw`text-white text-xl font-bold`}>{userInfo.name}</Text>
-                <Text style={tw`text-white text-sm opacity-90`}>{userInfo.email}</Text>
-                <View style={tw`bg-white bg-opacity-20 rounded-full px-2 py-1 mt-1 self-start`}>
-                  <Text style={tw`text-white text-xs font-medium capitalize`}>
-                    {userInfo.role}
-                  </Text>
-                </View>
+                <Text style={tw`text-lg font-semibold text-gray-900`}>{userInfo.name}</Text>
+                <Text style={tw`text-sm text-gray-500 capitalize`}>{userInfo.role}</Text>
               </View>
+              <TouchableOpacity
+                onPress={() => handleItemPress('/user/profile')}
+                style={tw`p-2`}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* iOS-style Navigation Items */}
+          <ScrollView style={tw`flex-1`} showsVerticalScrollIndicator={false}>
+            <View style={tw`px-4 py-2`}>
+              {filteredItems.map((item, index) => (
+                <TouchableOpacity
+                  key={item.route}
+                  style={[
+                    tw`flex-row items-center py-3 px-3 rounded-xl mb-1`,
+                    tw`active:bg-gray-100`
+                  ]}
+                  onPress={() => handleItemPress(item.route)}
+                  activeOpacity={0.7}
+                >
+                  <View style={[
+                    tw`w-8 h-8 rounded-lg items-center justify-center mr-3`,
+                    { backgroundColor: (item.color || '#6B7280') + '15' }
+                  ]}>
+                    <Ionicons 
+                      name={item.icon} 
+                      size={18} 
+                      color={item.color || '#6B7280'} 
+                    />
+                  </View>
+                  <View style={tw`flex-1`}>
+                    <Text style={tw`text-gray-900 font-medium text-base`}>{item.label}</Text>
+                  </View>
+                  {item.badge && (
+                    <View style={[
+                      tw`px-2 py-1 rounded-full mr-2`,
+                      { backgroundColor: (item.color || '#6B7280') + '20' }
+                    ]}>
+                      <Text style={[
+                        tw`text-xs font-bold`,
+                        { color: item.color || '#6B7280' }
+                      ]}>
+                        {item.badge}
+                      </Text>
+                    </View>
+                  )}
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+              ))}
             </View>
             
-            <View style={tw`flex-row items-center`}>
-              <Text style={tw`text-white text-2xl font-bold mr-2`}>Poultix</Text>
-              <View style={tw`bg-white bg-opacity-20 rounded-full px-2 py-1`}>
-                <Text style={tw`text-white text-xs font-bold`}>v2.0</Text>
+            {/* iOS-style Quick Actions */}
+            <View style={tw`px-4 py-4 border-t border-gray-100 mt-2`}>
+              <Text style={tw`text-gray-600 font-semibold mb-3 text-sm uppercase tracking-wide`}>Quick Actions</Text>
+              <View style={tw`flex-row justify-between`}>
+                <TouchableOpacity
+                  style={tw`bg-blue-50 rounded-2xl p-4 flex-1 mr-2 items-center`}
+                  onPress={() => handleItemPress('/bluetooth/ph-reader')}
+                  activeOpacity={0.7}
+                >
+                  <View style={tw`w-10 h-10 bg-blue-100 rounded-full items-center justify-center mb-2`}>
+                    <Ionicons name="flask-outline" size={20} color="#3B82F6" />
+                  </View>
+                  <Text style={tw`text-blue-600 text-xs font-medium text-center`}>Quick Scan</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={tw`bg-green-50 rounded-2xl p-4 flex-1 mx-1 items-center`}
+                  onPress={() => handleItemPress('/farm')}
+                  activeOpacity={0.7}
+                >
+                  <View style={tw`w-10 h-10 bg-green-100 rounded-full items-center justify-center mb-2`}>
+                    <Ionicons name="add-circle-outline" size={20} color="#10B981" />
+                  </View>
+                  <Text style={tw`text-green-600 text-xs font-medium text-center`}>Add Record</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={tw`bg-red-50 rounded-2xl p-4 flex-1 ml-2 items-center`}
+                  onPress={() => handleItemPress('/farm/veterinary')}
+                  activeOpacity={0.7}
+                >
+                  <View style={tw`w-10 h-10 bg-red-100 rounded-full items-center justify-center mb-2`}>
+                    <Ionicons name="medical-outline" size={20} color="#EF4444" />
+                  </View>
+                  <Text style={tw`text-red-600 text-xs font-medium text-center`}>Emergency</Text>
+                </TouchableOpacity>
               </View>
             </View>
-          </SafeAreaView>
-        </LinearGradient>
+          </ScrollView>
 
-        {/* Navigation Items */}
-        <ScrollView style={tw`flex-1 bg-white`} showsVerticalScrollIndicator={false}>
-          <View style={tw`py-2`}>
-            {filteredItems.map((item, index) => (
-              <TouchableOpacity
-                key={item.route}
-                style={tw`flex-row items-center px-6 py-4 mx-2 rounded-xl mb-1`}
-                onPress={() => handleItemPress(item.route)}
-                accessibilityLabel={`Navigate to ${item.label}`}
-                accessibilityRole="button"
-              >
-                <View style={[
-                  tw`p-2 rounded-full mr-4`,
-                  { backgroundColor: (item.color || '#6B7280') + '20' }
-                ]}>
-                  <Ionicons
-                    name={item.icon}
-                    size={20}
-                    color={item.color || '#6B7280'}
-                  />
-                </View>
-                <View style={tw`flex-1`}>
-                  <View style={tw`flex-row items-center`}>
-                    <Text style={tw`text-gray-800 text-base font-semibold`}>
-                      {item.label}
-                    </Text>
-                    {item.badge && (
-                      <View style={[
-                        tw`ml-2 px-2 py-1 rounded-full`,
-                        { backgroundColor: (item.color || '#6B7280') + '20' }
-                      ]}>
-                        <Text style={[
-                          tw`text-xs font-bold`,
-                          { color: item.color || '#6B7280' }
-                        ]}>
-                          {item.badge}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                  {item.description && (
-                    <Text style={tw`text-gray-500 text-sm mt-1`}>
-                      {item.description}
-                    </Text>
-                  )}
-                </View>
-                <Ionicons
-                  name="chevron-forward-outline"
-                  size={18}
-                  color="#9CA3AF"
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Quick Actions */}
-          <View style={tw`px-6 py-4 border-t border-gray-100 mt-4`}>
-            <Text style={tw`text-gray-600 font-semibold mb-3`}>Quick Actions</Text>
-            <View style={tw`flex-row justify-between`}>
-              <TouchableOpacity
-                style={tw`bg-blue-100 rounded-xl p-3 flex-1 mr-2 items-center`}
-                onPress={() => handleItemPress('/bluetooth/ph-reader')}
-              >
-                <Ionicons name="flask-outline" size={20} color="#3B82F6" />
-                <Text style={tw`text-blue-600 text-xs font-medium mt-1`}>Quick Scan</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={tw`bg-green-100 rounded-xl p-3 flex-1 mx-1 items-center`}
-                onPress={() => handleItemPress('/farm')}
-              >
-                <Ionicons name="add-circle-outline" size={20} color="#10B981" />
-                <Text style={tw`text-green-600 text-xs font-medium mt-1`}>Add Record</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={tw`bg-red-100 rounded-xl p-3 flex-1 ml-2 items-center`}
-                onPress={() => handleItemPress('/farm/veterinary')}
-              >
-                <Ionicons name="medical-outline" size={20} color="#EF4444" />
-                <Text style={tw`text-red-600 text-xs font-medium mt-1`}>Emergency</Text>
-              </TouchableOpacity>
+          {/* iOS-style Footer with Logout */}
+          <View style={tw`px-4 py-4 border-t border-gray-100`}>
+            <TouchableOpacity
+              style={tw`flex-row items-center py-3 px-3 rounded-xl bg-red-50 mb-3`}
+              onPress={handleLogout}
+              activeOpacity={0.7}
+            >
+              <View style={tw`w-8 h-8 rounded-lg bg-red-100 items-center justify-center mr-3`}>
+                <Ionicons name="log-out-outline" size={18} color="#EF4444" />
+              </View>
+              <Text style={tw`text-red-600 font-medium text-base flex-1`}>Sign Out</Text>
+              <Ionicons name="chevron-forward" size={16} color="#EF4444" />
+            </TouchableOpacity>
+            
+            {/* App Version */}
+            <View style={tw`items-center`}>
+              <Text style={tw`text-gray-400 text-xs`}>Poultix v2.0</Text>
             </View>
           </View>
-        </ScrollView>
-
-        {/* Enhanced Footer */}
-        <View style={tw`p-6 border-t border-gray-200 bg-gray-50`}>
-          <TouchableOpacity
-            style={tw`flex-row items-center justify-center bg-red-500 rounded-xl py-3 px-4`}
-            onPress={handleLogout}
-            accessibilityLabel="Logout"
-            accessibilityRole="button"
-          >
-            <Ionicons
-              name="log-out-outline"
-              size={20}
-              color="white"
-              style={tw`mr-2`}
-            />
-            <Text style={tw`text-white font-semibold`}>
-              Logout
-            </Text>
-          </TouchableOpacity>
-          
-          <Text style={tw`text-center text-gray-400 text-xs mt-3`}>
-            Poultix Mobile v2.0 • Made with ❤️
-          </Text>
-        </View>
+        </SafeAreaView>
       </Animated.View>
     </Modal>
   );
