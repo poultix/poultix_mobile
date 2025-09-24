@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import tw from 'twrnc';
 import { useAuthRequest } from 'expo-auth-session';
 
@@ -48,7 +47,6 @@ export default function SignInWithGoogleScreen() {
 
     return (
         <SafeAreaView style={tw`flex-1 bg-white`}>
-            <StatusBar style="light" translucent />
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={tw`flex-1`}

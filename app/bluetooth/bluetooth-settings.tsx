@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import tw from 'twrnc';
 import { router } from 'expo-router';
 
@@ -67,7 +66,6 @@ export default function BluetoothSettingsScreen() {
 
     return (
         <SafeAreaView style={tw`flex-1 bg-white`}>
-            <StatusBar style="dark" translucent />
             <Animated.View
                 style={[
                     tw`flex-1 px-6 pt-8 pb-16 relative`,

@@ -21,7 +21,7 @@ import tw from 'twrnc';
 import { router } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import { SharedElement } from 'react-navigation-shared-element';
-import TopNavigation from '@/navigation/TopNavigation';
+
 import { Pharmacy } from '@/interfaces/Pharmacy';
 
 
@@ -205,7 +205,7 @@ const PharmaciesScreen = () => {
 
     return (
         <SafeAreaView style={tw`flex-1 bg-white`}>
-            <TopNavigation />
+            
             <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
                 {/* Map View */}
                 <View style={tw`h-80 mb-6`}>

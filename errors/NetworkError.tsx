@@ -10,7 +10,7 @@ export default function NetworkErrorScreen() {
     const onRetry = async () => {
         try {
             const response = await axios.get(hostConfig.host + '/ping')
-            if (response.status == 200) router.push('/farmer' as any)
+            if (response.status == 200) router.push('/farm/farmer' as any)
         } catch (error) {
             if (axios.isAxiosError(error)) if (!error.response) Alert.alert('Network Error!', 'Make sure you are connected to internet and try again.')
         }

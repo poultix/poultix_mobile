@@ -16,8 +16,6 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { BlurView } from 'expo-blur'
 import tw from 'twrnc'
 import { router } from 'expo-router'
-import TopNavigation from '@/navigation/TopNavigation'
-import { StatusBar } from "expo-status-bar";
 
 export default function SignUpScreen() {
     const [name, setName] = useState('')
@@ -82,7 +80,7 @@ export default function SignUpScreen() {
         <View
             style={tw`flex-1 bg-white`}
         >
-            <TopNavigation />
+            
             <ScrollView style={tw`flex-1 mt-15`}>
                 <Animated.View
                     style={[
@@ -94,11 +92,24 @@ export default function SignUpScreen() {
                     ]}
                 >
 
-                    {/* Header */}
-                    <View style={tw`mb-12 mt-8`}>
-                        <Text style={tw`text-4xl font-extrabold text-center tracking-tight text-gray-900`}>
-                            Join <Text style={tw`text-red-500`}>Poultix</Text>
-                        </Text>
+                    {/* Enhanced Header */}
+                    <View style={tw`mb-8 -mx-6`}>
+                        <LinearGradient
+                            colors={['#10B981', '#059669']}
+                            style={tw`rounded-b-3xl p-8 shadow-xl`}
+                        >
+                            <View style={tw`items-center mt-4`}>
+                                <View style={tw`w-20 h-20 bg-white bg-opacity-20 rounded-full items-center justify-center mb-4`}>
+                                    <Ionicons name="person-add" size={32} color="white" />
+                                </View>
+                                <Text style={tw`text-white text-3xl font-bold mb-2`}>
+                                    Join Poultix! 🚀
+                                </Text>
+                                <Text style={tw`text-green-100 text-base text-center`}>
+                                    Create your account to start managing your poultry farm
+                                </Text>
+                            </View>
+                        </LinearGradient>
                     </View>
 
                     {/* Form */}

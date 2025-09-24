@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import tw from 'twrnc';
-import TopNavigation from '@/navigation/TopNavigation';
+
 
 import { Device } from '@/interfaces/Bluetooth';
 
@@ -42,7 +42,7 @@ export default function BluetoothResultScreen() {
 
     return (
         <SafeAreaView style={tw`flex-1 bg-white`}>
-            <TopNavigation />
+            
             <ScrollView>
                 <Animated.View
                     style={[

@@ -13,14 +13,15 @@ import {
     ActivityIndicator,
 } from 'react-native'
 import { router } from 'expo-router'
-import { MockAuthService } from '@/services/mockData'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import tw from 'twrnc'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LinearGradient } from 'expo-linear-gradient'
-import { StatusBar } from "expo-status-bar";
+import { useApp } from '@/contexts/AppContext';
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { MockAuthService } from '@/services/mockData'
 
 export default function SignInScreen() {
+    const { login, state } = useApp()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -49,23 +50,24 @@ export default function SignInScreen() {
     }
 
     useEffect(() => {
-        const checkUserSignIn = async () => {
-            try {
-                // Create development session if none exists (auto-login for development)
-                await MockAuthService.createDevelopmentSession()
-                
-                const token = await AsyncStorage.getItem('token')
-                const role = await AsyncStorage.getItem('role')
-                if (token && token != null) {
-                    if (role == 'farmer') router.replace('/farmer' as any)
-                    else if (role == 'veterinary') router.replace('/veterinary' as any)
-                    else router.replace('/' as any)
-                }
-            } catch (error) {
-                console.error('Error checking token:', error)
+        // Check if user is already logged in
+        if (state.currentUser) {
+            switch (state.currentUser.role) {
+                case 'admin':
+                    router.replace('/dashboard/admin-dashboard')
+                    break
+                case 'farmer':
+                    router.replace('/dashboard/farmer-dashboard')
+                    break
+                case 'veterinary':
+                    router.replace('/dashboard/veterinary-dashboard')
+                    break
+                default:
+                    router.replace('/')
             }
+            return
         }
-        checkUserSignIn()
+
         // Animate elements when component mounts
         Animated.parallel([
             Animated.timing(fadeAnim, {
@@ -79,7 +81,7 @@ export default function SignInScreen() {
                 useNativeDriver: true,
             }),
         ]).start()
-    }, [])
+    }, [state.currentUser])
 
     const handleBack = () => {
         Vibration.vibrate(20)
@@ -154,15 +156,22 @@ export default function SignInScreen() {
             animateButton()
             setIsLoading(true)
 
-            const { role, token } = await MockAuthService.signIn(email.trim(), password.trim())
+            const user = await login(email.trim(), password.trim())
             
-            // Handle success (save token, navigate)
-            await AsyncStorage.setItem('token', token)
-            await AsyncStorage.setItem('role', role)
-            setIsLoading(false)
-            if (role == 'farmer') router.replace('/farmer' as any)
-            else if (role == 'veterinary') router.replace('/veterinary' as any)
-            else router.replace('/' as any)
+            // Navigate based on role
+            switch (user.role) {
+                case 'admin':
+                    router.replace('/dashboard/admin-dashboard')
+                    break
+                case 'farmer':
+                    router.replace('/dashboard/farmer-dashboard')
+                    break
+                case 'veterinary':
+                    router.replace('/dashboard/veterinary-dashboard')
+                    break
+                default:
+                    router.replace('/')
+            }
         } catch (error) {
             setIsLoading(false)
             const errorMessage = error instanceof Error ? error.message : 'Authentication failed'
@@ -171,6 +180,8 @@ export default function SignInScreen() {
             shakeAnimation()
             Vibration.vibrate([0, 30, 30, 30])
             setPassword('')
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -232,16 +243,30 @@ export default function SignInScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar style="dark" translucent={false} />
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
                 <Animated.View style={styles.mainContent}>
-                    {/* Header */}
-                    <View style={styles.headerContainer}>
-                        <Text style={styles.headerTitle}>Welcome Back</Text>
+                    {/* Enhanced Header */}
+                    <View style={tw`mb-8 -mx-7`}>
+                        <LinearGradient
+                            colors={['#F97316', '#EA580C']}
+                            style={tw`rounded-b-3xl p-8 shadow-xl`}
+                        >
+                            <View style={tw`items-center mt-4`}>
+                                <View style={tw`w-20 h-20 bg-white bg-opacity-20 rounded-full items-center justify-center mb-4`}>
+                                    <Ionicons name="leaf" size={32} color="white" />
+                                </View>
+                                <Text style={tw`text-white text-3xl font-bold mb-2`}>
+                                    Welcome Back! 🌱
+                                </Text>
+                                <Text style={tw`text-orange-100 text-base text-center`}>
+                                    Sign in to continue managing your poultry farm
+                                </Text>
+                            </View>
+                        </LinearGradient>
                     </View>
 
                     {/* Form */}
@@ -388,38 +413,12 @@ export default function SignInScreen() {
                         </View>
                     </Animated.View>
 
-                    {/* Development Quick Login Buttons */}
-                    <View style={tw`mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200`}>
-                        <Text style={tw`text-gray-600 text-sm font-medium mb-3 text-center`}>🚀 Development Quick Login</Text>
-                        <View style={tw`flex-row justify-between gap-2`}>
-                            <TouchableOpacity
-                                onPress={async () => {
-                                    await MockAuthService.loginAsFarmer()
-                                    router.replace('/farmer' as any)
-                                }}
-                                style={tw`flex-1 bg-green-100 p-3 rounded-lg border border-green-200`}
-                            >
-                                <Text style={tw`text-green-700 text-xs font-semibold text-center`}>🚜 Farmer</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={async () => {
-                                    await MockAuthService.loginAsVeterinary()
-                                    router.replace('/veterinary' as any)
-                                }}
-                                style={tw`flex-1 bg-blue-100 p-3 rounded-lg border border-blue-200`}
-                            >
-                                <Text style={tw`text-blue-700 text-xs font-semibold text-center`}>🩺 Vet</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={async () => {
-                                    await MockAuthService.loginAsAdmin()
-                                    router.replace('/' as any)
-                                }}
-                                style={tw`flex-1 bg-purple-100 p-3 rounded-lg border border-purple-200`}
-                            >
-                                <Text style={tw`text-purple-700 text-xs font-semibold text-center`}>👑 Admin</Text>
-                            </TouchableOpacity>
-                        </View>
+                    {/* Demo Credentials Info */}
+                    <View style={tw`mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200`}>
+                        <Text style={tw`text-blue-800 text-sm font-medium mb-2 text-center`}>📋 Demo Credentials</Text>
+                        <Text style={tw`text-blue-700 text-xs text-center mb-1`}>Admin: admin@poultix.rw / admin123</Text>
+                        <Text style={tw`text-blue-700 text-xs text-center mb-1`}>Farmer: john@gmail.com / farmer123</Text>
+                        <Text style={tw`text-blue-700 text-xs text-center`}>Vet: dr.patricia@vetcare.rw / vet123</Text>
                     </View>
 
                     {/* Sign Up Link */}

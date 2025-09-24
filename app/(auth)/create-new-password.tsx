@@ -9,7 +9,6 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
-  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -82,7 +81,6 @@ export default function CreateNewPasswordScreen() {
         style={tw`flex-1`}
       >
         <SafeAreaView style={tw`flex-1`}>
-          <StatusBar style="dark" backgroundColor="transparent" translucent />
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={tw`flex-1`}

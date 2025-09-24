@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { MockAuthService } from '@/services/mockData';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import tw from 'twrnc';
 
@@ -45,33 +46,35 @@ export default function ForgotPasswordScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={tw`flex-1`}
       >
-        <Animated.View style={[tw`flex-1 px-6 pt-10`, { opacity: fadeAnim }]}>
-          {/* Back Button */}
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={tw`h-12 w-12 items-center justify-center rounded-full bg-gray-100 shadow-md text-red-600`}
-          >
-            <Ionicons name="arrow-back" size={26} color="#000" />
-          </TouchableOpacity>
-
-          {/* Key Icon in Red Circle */}
-          <View style={tw`items-center mt-10`}>
-            <View
-              style={tw`w-20 h-20 rounded-full bg-red-600 items-center justify-center mb-6 shadow-lg border-4 border-red-700`}
+        <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
+          {/* Enhanced Header */}
+          <View style={tw`mb-8`}>
+            <LinearGradient
+              colors={['#EF4444', '#DC2626']}
+              style={tw`rounded-b-3xl p-8 shadow-xl`}
             >
-              <Ionicons name="key-outline" size={36} color="#fff" />
-            </View>
+              <View style={tw`items-center mt-4`}>
+                <TouchableOpacity
+                  onPress={() => router.back()}
+                  style={tw`absolute left-0 top-0 bg-white bg-opacity-20 p-3 rounded-2xl`}
+                >
+                  <Ionicons name="arrow-back" size={20} color="white" />
+                </TouchableOpacity>
+                
+                <View style={tw`w-20 h-20 bg-white bg-opacity-20 rounded-full items-center justify-center mb-4`}>
+                  <Ionicons name="key" size={32} color="white" />
+                </View>
+                <Text style={tw`text-white text-3xl font-bold mb-2`}>
+                  Reset Password 🔑
+                </Text>
+                <Text style={tw`text-red-100 text-base text-center`}>
+                  Enter your email to receive reset instructions
+                </Text>
+              </View>
+            </LinearGradient>
           </View>
 
-          {/* Title and Description */}
-          <View style={tw`mt-4`}>
-            <Text style={tw`text-3xl text-red-600 font-extrabold text-center tracking-tight`}>
-              Password Recovery
-            </Text>
-            <Text style={tw`text-gray-600 mt-3 text-center text-base leading-6`}>
-              Enter your registered email to receive{'\n'}password reset instructions
-            </Text>
-          </View>
+          <View style={tw`px-6`}>
 
           {/* Email Input */}
           <View style={tw`mt-10`}>
@@ -103,6 +106,7 @@ export default function ForgotPasswordScreen() {
                 Send Recovery Email
               </Text>
             </TouchableOpacity>
+          </View>
           </View>
         </Animated.View>
       </KeyboardAvoidingView>

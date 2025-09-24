@@ -24,14 +24,14 @@ const CustomDrawerContent = () => {
     try {
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('role');
-      router.push('/(auth)/sign-in' as any)
+      router.replace('/(auth)/sign-in' as any)
     } catch (error) {
       console.error('Logout error:', error);
     }
   };
 
   return (
-    <Animated.View style={[tw`flex-1 bg-white`, { opacity: fadeAnim }]}>
+    <Animated.View style={[tw`flex-1 bg-white absolute top-0 left-0`, { opacity: fadeAnim }]}>
       {/* Drawer Header */}
       <View style={tw`p-5 border-b border-gray-200 mb-4`}>
         <View style={tw`flex-row items-center`}>
@@ -49,11 +49,12 @@ const CustomDrawerContent = () => {
       <View style={tw`flex-1`}>
         {[
           { name: 'Home', icon: 'home-outline', route: '/' },
-          { name: 'Farmer', icon: 'person-outline', route: '/farmer' },
-          { name: 'Farm', icon: 'leaf-outline', route: '/farm' },
-          { name: 'AI Assistant', icon: 'chatbox-ellipses-outline', route: '/ai' },
-          { name: 'Pharmacies', icon: 'medical-outline', route: '/pharmacies' },
-          { name: 'News', icon: 'newspaper-outline', route: '/news' },
+          { name: 'Farmer Profile', icon: 'person-outline', route: '/farm/farmer' },
+          { name: 'Farm Management', icon: 'leaf-outline', route: '/farm' },
+          { name: 'AI Assistant', icon: 'chatbox-ellipses-outline', route: '/general/ai' },
+          { name: 'Pharmacies', icon: 'medical-outline', route: '/pharmacy' },
+          { name: 'News & Updates', icon: 'newspaper-outline', route: '/general/news' },
+          { name: 'Admin Panel', icon: 'shield-outline', route: '/admin' },
           { name: 'Settings', icon: 'settings-outline', route: '/settings' },
         ].map((item) => (
           <TouchableOpacity
@@ -69,17 +70,30 @@ const CustomDrawerContent = () => {
           </TouchableOpacity>
         ))}
 
-        {/* Help & Support */}
-        <TouchableOpacity
-          style={tw`flex-row items-center p-4 mt-4`}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
-            router.push('/settings' as any);
-          }}
-        >
-          <Ionicons name="help-circle-outline" size={24} color="#6B7280" style={tw`mr-4`} />
-          <Text style={tw`text-base font-medium text-gray-600`}>Help & Support</Text>
-        </TouchableOpacity>
+        {/* Additional Tools */}
+        <View style={tw`mt-4 pt-4 border-t border-gray-100`}>
+          <TouchableOpacity
+            style={tw`flex-row items-center p-4`}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
+              router.push('/bluetooth/ph-reader' as any);
+            }}
+          >
+            <Ionicons name="analytics-outline" size={24} color="#6B7280" style={tw`mr-4`} />
+            <Text style={tw`text-base font-medium text-gray-600`}>pH Reader</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={tw`flex-row items-center p-4`}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
+              router.push('/bluetooth/bluetooth-pairing' as any);
+            }}
+          >
+            <Ionicons name="bluetooth-outline" size={24} color="#6B7280" style={tw`mr-4`} />
+            <Text style={tw`text-base font-medium text-gray-600`}>Bluetooth Devices</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Footer with Logout Button */}
@@ -89,19 +103,7 @@ const CustomDrawerContent = () => {
           onPress={handleLogout}
         >
           <Ionicons name="log-out-outline" size={24} color="#EF4444" style={tw`mr-4`} />
-          <Text style={tw`text-base font-medium text-red-500`}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-
-
-      {/* Testing */}
-      <View style={tw`p-5 border-t border-gray-200`}>
-        <TouchableOpacity
-          style={tw`flex-row items-center`}
-          onPress={()=>router.push('/tester' as any)}
-        >
-          <Ionicons name="log-out-outline" size={24} color="#EF4444" style={tw`mr-4`} />
-          <Text style={tw`text-base font-medium text-red-500`}>Tester</Text>
+          <Text style={tw`text-base font-medium text-red-500`}>Sign Out</Text>
         </TouchableOpacity>
       </View>
     </Animated.View>

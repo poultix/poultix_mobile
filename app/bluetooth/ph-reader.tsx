@@ -15,7 +15,7 @@ import tw from 'twrnc';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import TopNavigation from '@/navigation/TopNavigation';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
@@ -269,25 +269,49 @@ export default function PoultryPHInputScreen() {
 
   return (
     <SafeAreaView style={tw`flex-1 bg-gray-50`}>
-      <TopNavigation />
+      
       <ScrollView contentContainerStyle={tw`pb-20 px-6`} showsVerticalScrollIndicator={false}>
         <Animated.View style={{ opacity: fadeAnim }}>
-          {/* Header Section */}
+          {/* Enhanced Header Section */}
           <LinearGradient
-            colors={['#F97316', '#EA580C']}
-            style={tw`rounded-3xl p-6 mb-6 shadow-lg`}
+            colors={['#F59E0B', '#D97706']}
+            style={tw`rounded-3xl p-8 mb-6 shadow-xl`}
           >
-            <View style={tw`flex-row items-center justify-between`}>
+            <View style={tw`flex-row items-center justify-between mb-4`}>
               <View style={tw`flex-1`}>
-                <Text style={tw`text-2xl font-bold text-white mb-2`}>
-                  🧪 pH Analyzer
+                <Text style={tw`text-white text-sm opacity-90`}>
+                  Smart Analysis Tool
                 </Text>
-                <Text style={tw`text-orange-100 text-sm opacity-90`}>
-                  Advanced poultry health monitoring through stool analysis
+                <Text style={tw`text-white text-2xl font-bold`}>
+                  pH Analyzer 🧪
+                </Text>
+                <Text style={tw`text-amber-100 text-sm mt-1`}>
+                  Advanced poultry health monitoring
                 </Text>
               </View>
-              <View style={tw`bg-white bg-opacity-20 rounded-2xl p-3`}>
-                <Ionicons name="analytics-outline" size={32} color="white" />
+              <TouchableOpacity
+                style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
+              >
+                <Ionicons name="flask-outline" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+            
+            {/* pH Range Indicator */}
+            <View style={tw`bg-white bg-opacity-15 rounded-2xl p-6 mt-4`}>
+              <Text style={tw`text-white font-bold text-lg mb-4`}>pH Health Ranges</Text>
+              <View style={tw`flex-row justify-between`}>
+                <View style={tw`items-center flex-1`}>
+                  <Text style={tw`text-red-200 text-2xl font-bold`}>4.5</Text>
+                  <Text style={tw`text-amber-100 text-xs font-medium`}>Critical</Text>
+                </View>
+                <View style={tw`items-center flex-1`}>
+                  <Text style={tw`text-green-200 text-2xl font-bold`}>6.5-7.5</Text>
+                  <Text style={tw`text-amber-100 text-xs font-medium`}>Healthy</Text>
+                </View>
+                <View style={tw`items-center flex-1`}>
+                  <Text style={tw`text-orange-200 text-2xl font-bold`}>8.5+</Text>
+                  <Text style={tw`text-amber-100 text-xs font-medium`}>Warning</Text>
+                </View>
               </View>
             </View>
           </LinearGradient>
