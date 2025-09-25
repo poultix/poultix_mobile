@@ -17,12 +17,13 @@ import tw from 'twrnc';
 import { router } from 'expo-router';
 
 export default function CreateNewPasswordScreen() {
-  
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isNewFocused, setIsNewFocused] = useState(false);
+  const [isConfirmFocused, setIsConfirmFocused] = useState(false);
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -65,19 +66,61 @@ export default function CreateNewPasswordScreen() {
       duration: 200,
       useNativeDriver: true,
     }).start(() => {
-      // Simulate password update success and navigate back
       router.back();
     });
   };
 
+  // Reusable Input Component
+  const PasswordInput = ({
+    value,
+    onChangeText,
+    placeholder,
+    show,
+    setShow,
+    isFocused,
+    setIsFocused,
+  }: {
+    value: string;
+    onChangeText: (text: string) => void;
+    placeholder: string;
+    show: boolean;
+    setShow: (val: boolean) => void;
+    isFocused: boolean;
+    setIsFocused: (val: boolean) => void;
+  }) => (
+    <View
+      style={tw`w-full flex-row items-center px-4 h-14 mb-4 rounded-xl border shadow-sm ${isFocused ? 'border-amber-500' : 'border-gray-200'} bg-white`}
+    >
+      <Ionicons name="key-outline" size={22} color="#64748B" />
+      <TextInput
+        style={tw`flex-1 ml-3 text-gray-900 text-base`}
+        placeholder={placeholder}
+        placeholderTextColor="#94A3AF"
+        secureTextEntry={!show}
+        value={value}
+        onChangeText={onChangeText}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        autoCapitalize="none"
+      />
+      <TouchableOpacity onPress={() => setShow(!show)}>
+        <Ionicons
+          name={show ? 'eye-off-outline' : 'eye-outline'}
+          size={22}
+          color="#64748B"
+        />
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <ImageBackground
-      source={require('@/assets/images/chicken-farmer.webp')} // Replace with your image
+      source={require('@/assets/images/chicken-farmer.webp')}
       style={tw`flex-1`}
       imageStyle={tw`opacity-5`}
     >
       <LinearGradient
-        colors={['#FFFFFF', '#FFF7ED']} // White to light orange-cream gradient
+        colors={['#FFF7ED', '#FFEDD5']}
         style={tw`flex-1`}
       >
         <SafeAreaView style={tw`flex-1`}>
@@ -87,18 +130,11 @@ export default function CreateNewPasswordScreen() {
           >
             <Animated.View style={[tw`flex-1 px-5 pt-12`, { opacity: fadeAnim }]}>
               {/* Header */}
-              <View style={tw`flex-row items-center mb-8`}>
-                <TouchableOpacity onPress={() => router.back()}>
-                  <Ionicons name="arrow-back" size={28} color="#6B7280" />
-                </TouchableOpacity>
-                <Text style={tw`text-gray-500 text-sm ml-4`}>
-                  {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </Text>
-              </View>
-
-              <Text style={tw`text-4xl font-extrabold text-[#EF4444] mb-2`}>Create New Password</Text>
+              <Text style={tw`text-4xl font-extrabold text-[#F97316] mb-2`}>
+                Create New Password
+              </Text>
               <Text style={tw`text-gray-500 text-lg mb-10`}>
-                Please, enter a new password below different from the previous password
+                Enter a new password different from your previous password
               </Text>
 
               {/* Error Message */}
@@ -113,44 +149,26 @@ export default function CreateNewPasswordScreen() {
               )}
 
               {/* New Password Input */}
-              <View style={tw`bg-gray-100 rounded-xl p-4 mb-4 flex-row items-center`}>
-                <TextInput
-                  style={tw`flex-1 text-gray-900 text-base`}
-                  placeholder="New password"
-                  placeholderTextColor="#6B7280"
-                  secureTextEntry={!showNewPassword}
-                  value={newPassword}
-                  onChangeText={setNewPassword}
-                  autoCapitalize="none"
-                />
-                <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)}>
-                  <Ionicons
-                    name={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={22}
-                    color="#6B7280"
-                  />
-                </TouchableOpacity>
-              </View>
+              <PasswordInput
+                value={newPassword}
+                onChangeText={setNewPassword}
+                placeholder="New password"
+                show={showNewPassword}
+                setShow={setShowNewPassword}
+                isFocused={isNewFocused}
+                setIsFocused={setIsNewFocused}
+              />
 
               {/* Confirm Password Input */}
-              <View style={tw`bg-gray-100 rounded-xl p-4 mb-8 flex-row items-center`}>
-                <TextInput
-                  style={tw`flex-1 text-gray-900 text-base`}
-                  placeholder="Confirm password"
-                  placeholderTextColor="#6B7280"
-                  secureTextEntry={!showConfirmPassword}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  autoCapitalize="none"
-                />
-                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                  <Ionicons
-                    name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={22}
-                    color="#6B7280"
-                  />
-                </TouchableOpacity>
-              </View>
+              <PasswordInput
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Confirm password"
+                show={showConfirmPassword}
+                setShow={setShowConfirmPassword}
+                isFocused={isConfirmFocused}
+                setIsFocused={setIsConfirmFocused}
+              />
 
               {/* Create New Password Button */}
               <Animated.View
@@ -171,8 +189,10 @@ export default function CreateNewPasswordScreen() {
                   onPress={handleCreatePassword}
                   activeOpacity={0.9}
                 >
-                  <View style={tw`bg-[#EF4444] py-4 items-center relative`}>
-                    <Text style={tw`text-white text-lg font-semibold z-10`}>Create new password</Text>
+                  <View style={tw`bg-[#F97316] py-4 items-center`}>
+                    <Text style={tw`text-white text-lg font-semibold`}>
+                      Create new password
+                    </Text>
                   </View>
                 </TouchableOpacity>
               </Animated.View>

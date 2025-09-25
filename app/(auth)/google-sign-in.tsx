@@ -1,96 +1,75 @@
-import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    SafeAreaView,
-    KeyboardAvoidingView,
-    Platform,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, SafeAreaView, Image, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { useRouter } from 'expo-router';
-import tw from 'twrnc';
-import { useAuthRequest } from 'expo-auth-session';
 
 export default function SignInWithGoogleScreen() {
     const router = useRouter();
-    const [request, response, promptAsync] = useAuthRequest({
-        clientId: 'YOUR_WEB_CLIENT_ID', // Replace with your Web client ID
-        redirectUri: 'https://auth.expo.io/@your-username/your-app-slug', // Use the correct redirect URL
-    });
+    const [user, setUser] = useState<any>(null);
 
-    const handleBack = () => {
-        router.back();
-    };
+    useEffect(() => {
+        GoogleSignin.configure({
+            webClientId: 'YOUR_WEB_CLIENT_ID',
+            offlineAccess: true,
+        });
+    }, []);
 
     const handleSignIn = async () => {
         try {
-            const result = await promptAsync();
-            if (result?.type === 'success') {
-                const { id_token, access_token } = result.params;
-                console.log('User Info:', { id_token, access_token });
-
-                // You can now use these tokens to fetch user data from Google
-                // or authenticate the user in your backend
+            await GoogleSignin.hasPlayServices();
+            const userInfo = await GoogleSignin.signIn();
+            setUser(userInfo?.data?.user);
+        } catch (error: any) {
+            if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+                console.log('User cancelled');
+            } else if (error.code === statusCodes.IN_PROGRESS) {
+                console.log('Signin in progress');
+            } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+                console.log('Play services not available');
             } else {
-                console.log('Sign-in failed', result);
+                console.log(error);
             }
-        } catch (error) {
-            console.log('Sign-in error', error);
         }
     };
 
-    const handleChooseAnotherAccount = () => {
-        // You can trigger the sign-in flow again if needed
-        console.log('Choosing another account');
+    const handleSignOut = async () => {
+        await GoogleSignin.signOut();
+        setUser(null);
     };
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-white`}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={tw`flex-1`}
-            >
-                <View style={tw`flex-1 px-6 pt-10 pb-6`}>
-                    {/* Back Button */}
-                    <TouchableOpacity onPress={handleBack} style={tw`mb-6`}>
-                        <Ionicons name="chevron-back" size={24} color="#6B7280" />
-                    </TouchableOpacity>
+        <SafeAreaView className="flex-1 bg-white">
+            <View className="flex-1 px-6 pt-10">
+                <TouchableOpacity onPress={() => router.back()} className="mb-6">
+                    <Ionicons name="chevron-back" size={24} color="#6B7280" />
+                </TouchableOpacity>
 
-                    {/* Title */}
-                    <Text style={tw`text-2xl font-semibold text-red-700 mb-6 text-center`}>
-                        Sign in with Google
-                    </Text>
+                <Text className="text-2xl font-semibold text-red-700 mb-6 text-center">Sign in with Google</Text>
 
-                    {/* Account Selection */}
-                    <View style={tw`w-full mb-6`}>
-                        {/* Selected Account */}
-                        <TouchableOpacity
-                            style={tw`w-full bg-gray-100 rounded-lg p-4 flex-row items-center mb-2 border border-gray-300`}
-                        >
-                            <Ionicons name="person-circle-outline" size={40} color="#6B7280" style={tw`mr-4`} />
-                            <Text style={tw`text-gray-700 text-lg`}>Liana Teata</Text>
-                        </TouchableOpacity>
-
-                        {/* Choose Another Account */}
-                        <TouchableOpacity
-                            onPress={handleChooseAnotherAccount}
-                            style={tw`w-full bg-gray-100 rounded-lg p-4 flex-row items-center border border-gray-300`}
-                        >
-                            <Ionicons name="person-add-outline" size={40} color="#6B7280" style={tw`mr-4`} />
-                            <Text style={tw`text-red-700 text-lg`}>Choose another account</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Sign In Button */}
+                {!user ? (
                     <TouchableOpacity
                         onPress={handleSignIn}
-                        style={tw`w-full h-12 bg-yellow-600 rounded-lg items-center justify-center mt-auto mb-6`}
+                        className="flex-row items-center justify-center h-14 bg-white rounded-lg border border-gray-300 shadow-md"
                     >
-                        <Text style={tw`text-white text-lg font-semibold`}>Sign in</Text>
+                        <Ionicons name="logo-google" size={24} color="#EA4335" className="mr-3" />
+                        <Text className="text-gray-700 font-semibold text-lg">Sign in with Google</Text>
                     </TouchableOpacity>
-                </View>
-            </KeyboardAvoidingView>
+                ) : (
+                    <View className="mt-6 items-center">
+                        <Image source={{ uri: user.photo }} className="w-20 h-20 rounded-full mb-3" />
+                        <Text className="text-gray-900 text-lg font-medium">{user.name}</Text>
+                        <Text className="text-gray-500 text-sm mb-4">{user.email}</Text>
+                        <TouchableOpacity
+                            onPress={handleSignOut}
+                            className="flex-row items-center justify-center h-12 bg-red-600 rounded-lg px-4"
+                        >
+                            <Ionicons name="exit-outline" size={20} color="#fff" className="mr-2" />
+                            <Text className="text-white font-semibold text-base">Sign Out</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </View>
         </SafeAreaView>
     );
 }
