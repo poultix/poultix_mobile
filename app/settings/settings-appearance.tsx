@@ -23,8 +23,8 @@ export default function AppearanceSettingsScreen() {
 
   return (
     <SafeAreaView style={tw`flex-1 bg-gray-50`}>
-      <View style={tw`px-4 pt-2 pb-4`}>
-        <LinearGradient colors={['#F59E0B', '#D97706']} style={tw`rounded-3xl p-8`}>
+      <View style={tw` pb-4`}>
+        <LinearGradient colors={['#F59E0B', '#D97706']} style={tw` p-8`}>
           <View style={tw`flex-row items-center justify-between mb-4`}>
             <TouchableOpacity onPress={() => router.back()}>
               <Ionicons name="arrow-back-outline" size={24} color="white" />

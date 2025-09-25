@@ -33,7 +33,7 @@ const CustomDrawerContent = () => {
   return (
     <Animated.View style={[tw`flex-1 bg-white absolute top-0 left-0`, { opacity: fadeAnim }]}>
       {/* Drawer Header */}
-      <View style={tw`p-5 border-b border-gray-200 mb-4`}>
+      <TouchableOpacity style={tw`p-5 border-b border-gray-200 mb-4`}>
         <View style={tw`flex-row items-center`}>
           <View style={tw`w-12 h-12 rounded-full bg-orange-500 justify-center items-center`}>
             <Ionicons name="leaf-outline" size={24} color="white" />
@@ -43,7 +43,7 @@ const CustomDrawerContent = () => {
             <Text style={tw`text-sm text-gray-500`}>User Name</Text>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
 
       {/* Drawer Items */}
       <View style={tw`flex-1`}>

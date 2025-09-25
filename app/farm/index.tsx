@@ -200,10 +200,10 @@ export default function FarmDataScreen() {
       >
         <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
           {/* Enhanced Header */}
-          <View style={tw`px-4 pt-2 pb-4`}>
+          <View style={tw`pb-4`}>
             <LinearGradient
               colors={['#10B981', '#059669']}
-              style={tw`rounded-3xl p-8 shadow-xl`}
+              style={tw` p-8 shadow-xl`}
             >
               <View style={tw`flex-row items-center justify-between mb-4`}>
                 <View style={tw`flex-1`}>
@@ -292,127 +292,12 @@ export default function FarmDataScreen() {
             </Animated.View>
           )} */}
 
-          {/* Farm Overview Card */}
-          <View style={[tw`rounded-3xl overflow-hidden shadow-xl mb-6 border border-white/30`,]}
-          >
-            {/* SharedElement removed - not compatible with Expo Router */}
-              <View style={tw`bg-orange-600 p-6 relative`}>
-                <View style={tw`absolute inset-0 rounded-3xl bg-white bg-opacity-10`} />
-                <View style={tw`absolute top-0 right-0 w-40 h-40 -mr-10 -mt-10 rounded-full bg-white/10`} />
-                <View style={tw`absolute bottom-0 left-0 w-20 h-20 -ml-5 -mb-5 rounded-full bg-white/5`} />
-
-                {/* Card Header */}
-                <View style={tw`flex-row items-center justify-between mb-6 z-10 relative`}>
-                  <View style={tw`flex-row items-center`}>
-                    <FontAwesome5 name='seedling' size={20} color="white" style={tw`mr-3`} />
-                    <Text style={tw`text-white text-xl font-bold`}>Farm Overview</Text>
-                  </View>
-                  <TouchableOpacity
-                    style={tw`rounded-full bg-white/20 p-2`}
-                    onPress={() => handleNavigation('/farm-details' as any)}
-                  >
-                    <Ionicons name="information-circle-outline" size={22} color="white" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Main Stats */}
-                <View style={tw`flex-row items-center mb-6 z-10 relative`}>
-                  <View
-                    style={[tw`justify-center items-center`,]}
-                  >
-                    <View style={tw`relative justify-center items-center mb-2`}>
-                      <View style={tw`w-26 h-26 rounded-full border-8 border-white/30`} />
-                      <View
-                        style={[
-                          tw`absolute top-0 left-0 w-26 h-26 rounded-full border-8`,
-                          {
-                            borderColor: '#10B981',
-                            borderLeftColor: 'transparent',
-                            borderBottomColor: 'transparent',
-                            borderRightColor: 'transparent',
-                            transform: [{ rotateZ: `${healthyPercentage * 3.6}deg` }],
-                          },
-                        ]}
-                      />
-                      <View
-                        style={[
-                          tw`absolute top-0 left-0 w-26 h-26 rounded-full border-8`,
-                          {
-                            borderColor: '#F59E0B',
-                            borderTopColor: 'transparent',
-                            borderRightColor: 'transparent',
-                            transform: [{ rotateZ: `${healthyPercentage * 3.6 + 90}deg` }],
-                          },
-                        ]}
-                      />
-                      <View
-                        style={[
-                          tw`absolute top-0 left-0 w-26 h-26 rounded-full border-8`,
-                          {
-                            borderColor: '#EF4444',
-                            borderTopColor: 'transparent',
-                            borderLeftColor: 'transparent',
-                            transform: [{ rotateZ: `${(healthyPercentage + atRiskPercentage) * 3.6 + 180}deg` }],
-                          },
-                        ]}
-                      />
-                      <View style={tw`absolute flex items-center justify-center`}>
-                        <Text style={tw`text-white text-2xl font-bold`}> {totalChickens}</Text>
-                        <Text style={tw`text-white/80 text-xs`}>chickens</Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  <View style={tw`flex-1 ml-5`}>
-                    <View style={tw`flex-row items-center mb-3`}>
-                      <View style={tw`w-3 h-3 rounded-full bg-green-500 mr-2`} />
-                      <Text style={tw`text-white text-base font-medium`}>Healthy:</Text>
-                      <Text style={tw`text-white font-bold ml-auto`}>{farmData.chickens.healthyChickens}</Text>
-                    </View>
-                    <View style={tw`flex-row items-center mb-3`}>
-                      <View style={tw`w-3 h-3 rounded-full bg-yellow-500 mr-2`} />
-                      <Text style={tw`text-white text-base font-medium`}>At Risk:</Text>
-                      <Text style={tw`text-white font-bold ml-auto`}>{farmData.chickens.riskChickens}</Text>
-                    </View>
-                    <View style={tw`flex-row items-center`}>
-                      <View style={tw`w-3 h-3 rounded-full bg-red-500 mr-2`} />
-                      <Text style={tw`text-white text-base font-medium`}>Sick:</Text>
-                      <Text style={tw`text-white font-bold ml-auto`}>{farmData.chickens.sickChickens}</Text>
-                    </View>
-                  </View>
-                </View>
-
-                {/* Quick Action Buttons */}
-                <View style={tw`flex-row justify-between z-10 relative`}>
-                  <View>
-                    <TouchableOpacity
-                      style={tw`bg-transparent rounded-xl py-3 px-4 flex-row items-center justify-center border border-white/30 flex-1 mr-3 shadow-md`}
-                      onPress={() => handleNavigation('/farm-details' as any)}
-                    >
-                      <Ionicons name="analytics-outline" size={18} color="white" style={tw`mr-2`} />
-                      <Text style={tw`text-white font-semibold bg-transparent`}>Analytics</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <View                  >
-                    <TouchableOpacity
-                      style={tw`bg-transparent rounded-xl py-3 px-4 flex-row items-center justify-center border border-white/30  shadow-md`}
-                      onPress={() => handleNavigation('/add-chicken' as any)}
-                    >
-                      <Ionicons name="add-circle-outline" size={18} color="white" style={tw`mr-2`} />
-                      <Text style={tw`text-white font-semibold`}>Add Chicken</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            {/* End SharedElement */}
-          </View>
-
+        
           {/* Weather & Tools Row */}
-          <View style={tw`flex-row justify-between h-96`}>
+          <View style={tw`flex-row justify-between flex-1 py-2`}>
             {/* Weather Preview */}
             <View
-              style={[tw`flex mr-3 rounded-3xl shadow-lg border border-gray-100 h-full `]}
+              style={[tw`flex mr-3  border border-gray-400 `]}
             >
               <TouchableOpacity
                 style={tw`bg-white p-4 h-full`}
@@ -432,7 +317,7 @@ export default function FarmDataScreen() {
 
             {/* Stool Analysis Quick Access */}
             <View
-              style={[tw`flex rounded-3xl shadow-lg border border-gray-100`]}
+              style={[tw`flex-1 border border-gray-400`]}
             >
               <TouchableOpacity
                 style={tw`bg-white p-4 h-full justify-between`}

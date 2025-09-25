@@ -187,7 +187,7 @@ export const mockPharmacies: Pharmacy[] = [
             latitude: -2.0500,
             longitude: 29.7800
         }
-    }
+    },
 ];
 
 // Mock messages data

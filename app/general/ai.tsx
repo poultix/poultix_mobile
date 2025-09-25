@@ -197,7 +197,7 @@ export default function AIScreen() {
             
             <KeyboardAvoidingView 
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={tw`flex-1`}
+                style={tw`flex-1 pb-10`}
             >
                 <Animated.View style={[
                     tw`flex-1`,
@@ -207,11 +207,11 @@ export default function AIScreen() {
                     }
                 ]}>
                     {/* iOS-style Header */}
-                    <View style={[tw`px-4 pt-4 pb-6`, { paddingTop: IOSDesign.spacing.lg }]}>
+                    <View style={[tw` pb-6`]}>
                         <View style={[
-                            tw`rounded-3xl p-6`,
+                            tw` p-6`,
                             {
-                                backgroundColor: IOSDesign.colors.systemTeal,
+                                backgroundColor: IOSDesign.colors.systemBlue,
                                 minHeight: 140,
                             },
                             IOSDesign.shadows.medium,
@@ -350,8 +350,8 @@ export default function AIScreen() {
                                     tw`w-12 h-12 rounded-full items-center justify-center`,
                                     {
                                         backgroundColor: question.trim() && !isLoading 
-                                            ? IOSDesign.colors.systemTeal 
-                                            : IOSDesign.colors.gray[300],
+                                            ? IOSDesign.colors.systemBlue 
+                                            : IOSDesign.colors.gray[500],
                                     }
                                 ]}
                                 onPress={handleAskQuestion}

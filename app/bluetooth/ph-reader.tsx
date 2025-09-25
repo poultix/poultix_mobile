@@ -53,10 +53,10 @@ interface PHRange {
 const getPhFeedback = (ph: number): Feedback => {
   // Get related diseases from local AI
   const diseases = LocalAIService.getDiseasesForPH(ph);
-  
+
   // Get quick measures from top disease
-  const quickMeasures = diseases.length > 0 && diseases[0].quickMeasures 
-    ? diseases[0].quickMeasures 
+  const quickMeasures = diseases.length > 0 && diseases[0].quickMeasures
+    ? diseases[0].quickMeasures
     : [];
 
   if (ph < 4.5) {
@@ -201,7 +201,7 @@ export default function PoultryPHInputScreen() {
   const simulateScanning = () => {
     setIsScanning(true);
     Vibration.vibrate(100);
-    
+
     // Animate scanning effect
     Animated.loop(
       Animated.sequence([
@@ -215,7 +215,7 @@ export default function PoultryPHInputScreen() {
       setIsScanning(false);
       scanAnim.stopAnimation();
       scanAnim.setValue(0);
-      
+
       // Generate a realistic pH reading
       const simulatedPH = (Math.random() * 6 + 4).toFixed(1); // Random pH between 4.0 and 10.0
       setPhReading(simulatedPH);
@@ -236,7 +236,7 @@ export default function PoultryPHInputScreen() {
     setError('');
     const feedbackResult = getPhFeedback(ph);
     setFeedback(feedbackResult);
-    
+
     // Save to history
     const reading: PHReading = {
       id: Date.now().toString(),
@@ -246,7 +246,7 @@ export default function PoultryPHInputScreen() {
       chickenId: chickenId || undefined
     };
     saveReading(reading);
-    
+
     // Vibrate based on severity
     if (feedbackResult.severity === 'critical') {
       Vibration.vibrate([0, 200, 100, 200, 100, 200]);
@@ -291,13 +291,13 @@ export default function PoultryPHInputScreen() {
 
   return (
     <SafeAreaView style={tw`flex-1 bg-gray-50`}>
-      
-      <ScrollView contentContainerStyle={tw`pb-20 px-6`} showsVerticalScrollIndicator={false}>
+
+      <ScrollView contentContainerStyle={tw`pb-20 `} showsVerticalScrollIndicator={false}>
         <Animated.View style={{ opacity: fadeAnim }}>
           {/* Enhanced Header Section */}
           <LinearGradient
             colors={['#F59E0B', '#D97706']}
-            style={tw`rounded-3xl p-8 mb-6 shadow-xl`}
+            style={tw` p-8 mb-6 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between mb-4`}>
               <View style={tw`flex-1`}>
@@ -317,29 +317,12 @@ export default function PoultryPHInputScreen() {
                 <Ionicons name="flask-outline" size={24} color="white" />
               </TouchableOpacity>
             </View>
-            
-            {/* pH Range Indicator */}
-            <View style={tw`bg-white bg-opacity-15 rounded-2xl p-6 mt-4`}>
-              <Text style={tw`text-white font-bold text-lg mb-4`}>pH Health Ranges</Text>
-              <View style={tw`flex-row justify-between`}>
-                <View style={tw`items-center flex-1`}>
-                  <Text style={tw`text-red-200 text-2xl font-bold`}>4.5</Text>
-                  <Text style={tw`text-amber-100 text-xs font-medium`}>Critical</Text>
-                </View>
-                <View style={tw`items-center flex-1`}>
-                  <Text style={tw`text-green-200 text-2xl font-bold`}>6.5-7.5</Text>
-                  <Text style={tw`text-amber-100 text-xs font-medium`}>Healthy</Text>
-                </View>
-                <View style={tw`items-center flex-1`}>
-                  <Text style={tw`text-orange-200 text-2xl font-bold`}>8.5+</Text>
-                  <Text style={tw`text-amber-100 text-xs font-medium`}>Warning</Text>
-                </View>
-              </View>
-            </View>
+
+
           </LinearGradient>
 
           {/* Quick Stats */}
-          <View style={tw`flex-row justify-between mb-6`}>
+          <View style={tw`flex-row justify-between mb-6 px-4`}>
             <View style={tw`bg-white rounded-2xl p-4 flex-1 mr-2 shadow-sm`}>
               <Text style={tw`text-gray-500 text-xs font-medium`}>TOTAL SCANS</Text>
               <Text style={tw`text-2xl font-bold text-gray-800`}>{history.length}</Text>
@@ -353,7 +336,7 @@ export default function PoultryPHInputScreen() {
           </View>
 
           {/* Action Buttons */}
-          <View style={tw`flex-row justify-between mb-6`}>
+          <View style={tw`flex-row justify-between mb-6 px-4`}>
             <TouchableOpacity
               style={tw`flex-1 mr-2`}
               onPress={simulateScanning}
@@ -386,7 +369,7 @@ export default function PoultryPHInputScreen() {
                 </View>
               </LinearGradient>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={tw`flex-1 ml-2`}
               onPress={() => setShowHistory(!showHistory)}
@@ -417,7 +400,7 @@ export default function PoultryPHInputScreen() {
           {!feedback && !showHistory && (
             <View style={tw`bg-white rounded-2xl p-6 mb-6 shadow-sm`}>
               <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>Manual pH Entry</Text>
-              
+
               {/* Chicken ID Input */}
               <View style={tw`mb-4`}>
                 <Text style={tw`text-gray-600 text-sm font-medium mb-2`}>Chicken ID (Optional)</Text>
@@ -462,7 +445,7 @@ export default function PoultryPHInputScreen() {
 
           {/* History Section */}
           {showHistory && (
-            <View style={tw`bg-white rounded-2xl p-6 mb-6 shadow-sm`}>
+            <View style={tw`bg-white rounded-2xl p-6 mb-6 shadow-sm `}>
               <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>Reading History</Text>
               {history.length === 0 ? (
                 <Text style={tw`text-gray-500 text-center py-8`}>No readings yet</Text>
@@ -536,10 +519,11 @@ export default function PoultryPHInputScreen() {
                     <View key={index} style={tw`mb-4 p-3 bg-red-50 rounded-xl border border-red-200`}>
                       <View style={tw`flex-row justify-between items-start mb-2`}>
                         <Text style={tw`text-red-800 font-bold flex-1`}>{disease.name}</Text>
-                        <View style={[tw`px-2 py-1 rounded-full`, { backgroundColor: 
-                          disease.severity === 'critical' ? '#DC2626' :
-                          disease.severity === 'high' ? '#EA580C' :
-                          disease.severity === 'medium' ? '#F59E0B' : '#10B981'
+                        <View style={[tw`px-2 py-1 rounded-full`, {
+                          backgroundColor:
+                            disease.severity === 'critical' ? '#DC2626' :
+                              disease.severity === 'high' ? '#EA580C' :
+                                disease.severity === 'medium' ? '#F59E0B' : '#10B981'
                         }]}>
                           <Text style={tw`text-white text-xs font-bold`}>{disease.severity.toUpperCase()}</Text>
                         </View>
@@ -582,7 +566,7 @@ export default function PoultryPHInputScreen() {
                       <Text style={tw`text-blue-600 text-sm`}>Locate nearby veterinary services</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={tw`bg-green-50 p-4 rounded-xl border border-green-200`}
-                    onPress={()=>router.push('/pharmacy')}>
+                      onPress={() => router.push('/pharmacy')}>
                       <Text style={tw`text-green-800 font-semibold mb-1`}>💊 Find Pharmacy</Text>
                       <Text style={tw`text-green-600 text-sm`}>Get medications and supplements</Text>
                     </TouchableOpacity>
@@ -591,13 +575,13 @@ export default function PoultryPHInputScreen() {
               )}
 
               <View style={tw`flex-row justify-between mt-6`}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={handleReset}
                   style={tw`flex-1 mr-2 bg-gray-100 p-4 rounded-2xl`}
                 >
                   <Text style={tw`text-gray-700 font-semibold text-center`}>New Reading</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => setShowHistory(true)}
                   style={tw`flex-1 ml-2 bg-blue-100 p-4 rounded-2xl`}
                 >

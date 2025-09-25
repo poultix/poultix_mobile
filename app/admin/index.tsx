@@ -201,13 +201,13 @@ export default function AdminScreen() {
           {/* Enhanced Header */}
           <Animated.View 
             style={[
-              tw`px-4 pt-2 pb-4`,
+              tw` pb-4`,
               { transform: [{ translateY: headerAnim }] }
             ]}
           >
             <LinearGradient
               colors={['#7C3AED', '#6D28D9']}
-              style={tw`rounded-3xl p-8 shadow-xl min-h-48`}
+              style={tw`p-8 shadow-xl min-h-48`}
             >
               <View style={tw`flex-row items-center justify-between mb-4`}>
                 <View style={tw`flex-1`}>

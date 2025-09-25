@@ -100,10 +100,10 @@ export default function ProfileScreen() {
     <SafeAreaView style={tw`flex-1 bg-gray-50`}>
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
         {/* Header */}
-        <View style={tw`px-4 pt-2 pb-4`}>
+        <View style={tw` pb-4`}>
           <LinearGradient
             colors={getRoleColor(state.currentUser.role)}
-            style={tw`rounded-3xl p-8 shadow-xl`}
+            style={tw` p-8 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between mb-6`}>
               <TouchableOpacity

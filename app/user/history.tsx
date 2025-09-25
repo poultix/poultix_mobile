@@ -83,10 +83,10 @@ export default function HistoryScreen() {
     <SafeAreaView style={tw`flex-1 bg-gray-50`}>
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
         {/* Header */}
-        <View style={tw`px-4 pt-2 pb-4`}>
+        <View style={tw` pb-4`}>
           <LinearGradient
             colors={['#8B5CF6', '#7C3AED']}
-            style={tw`rounded-3xl p-8 shadow-xl`}
+            style={tw` p-8 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between mb-4`}>
               <TouchableOpacity

@@ -300,7 +300,8 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
             </View>
             
             {/* User Profile Section */}
-            <View style={tw`flex-row items-center py-3 px-3 bg-gray-50 rounded-2xl`}>
+            <TouchableOpacity onPress={()=>router.push('/user/profile')}
+             style={tw`flex-row items-center py-3 px-3 bg-gray-50 rounded-2xl`}>
               <View style={[
                 tw`w-12 h-12 rounded-full items-center justify-center mr-3`,
                 { backgroundColor: getRoleColor(userInfo.role) }
@@ -322,7 +323,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
               >
                 <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
               </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           </View>
 
           {/* iOS-style Navigation Items */}
