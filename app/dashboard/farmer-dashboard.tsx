@@ -135,7 +135,7 @@ export default function FarmerDashboardScreen() {
           <View style={tw`relative w-32 h-32 rounded-full border-8 border-gray-200 items-center justify-center`}>
             <View 
               style={[
-                tw`absolute top-0 left-0 w-32 h-32 rounded-full border-8 border-green-500`,
+                tw`absolute -top-2 -left-2 w-32 h-32 rounded-full border-8 border-green-500`,
                 { 
                   borderTopColor: 'transparent',
                   borderRightColor: 'transparent',

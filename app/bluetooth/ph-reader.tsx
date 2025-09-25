@@ -17,6 +17,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LocalAIService, PH_DISEASE_DATABASE } from '@/services/localAIService';
+import { router } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -28,6 +30,8 @@ interface Feedback {
   severity: 'low' | 'medium' | 'high' | 'critical';
   color: string;
   bgColor: string;
+  diseases?: any[];
+  quickMeasures?: string[];
 }
 
 interface PHReading {
@@ -47,6 +51,14 @@ interface PHRange {
 }
 
 const getPhFeedback = (ph: number): Feedback => {
+  // Get related diseases from local AI
+  const diseases = LocalAIService.getDiseasesForPH(ph);
+  
+  // Get quick measures from top disease
+  const quickMeasures = diseases.length > 0 && diseases[0].quickMeasures 
+    ? diseases[0].quickMeasures 
+    : [];
+
   if (ph < 4.5) {
     return {
       isSick: true,
@@ -61,6 +73,8 @@ const getPhFeedback = (ph: number): Feedback => {
         'Avoid acidic feed.',
         'Monitor chicken closely for signs of distress.',
       ],
+      diseases,
+      quickMeasures
     };
   } else if (ph < 6.5) {
     return {
@@ -76,6 +90,8 @@ const getPhFeedback = (ph: number): Feedback => {
         'Monitor for symptoms of diarrhea or stress.',
         'Increase fresh vegetable intake.',
       ],
+      diseases,
+      quickMeasures
     };
   } else if (ph <= 7.5) {
     return {
@@ -91,6 +107,8 @@ const getPhFeedback = (ph: number): Feedback => {
         'Continue routine health checks.',
         'Keep up the excellent care!',
       ],
+      diseases,
+      quickMeasures
     };
   } else if (ph <= 8.5) {
     return {
@@ -106,6 +124,8 @@ const getPhFeedback = (ph: number): Feedback => {
         'Consult a vet if symptoms persist.',
         'Review recent dietary changes.',
       ],
+      diseases,
+      quickMeasures
     };
   } else {
     return {
@@ -121,6 +141,8 @@ const getPhFeedback = (ph: number): Feedback => {
         'Check water quality for high pH levels.',
         'Emergency vet consultation recommended.',
       ],
+      diseases,
+      quickMeasures
     };
   }
 };
@@ -503,6 +525,51 @@ export default function PoultryPHInputScreen() {
                 ))}
               </Card>
 
+              {/* Related Diseases Section */}
+              {feedback.diseases && feedback.diseases.length > 0 && (
+                <Card
+                  icon="warning-outline"
+                  iconColor="#EF4444"
+                  title="pH-Related Disease Risks"
+                >
+                  {feedback.diseases.slice(0, 3).map((disease, index) => (
+                    <View key={index} style={tw`mb-4 p-3 bg-red-50 rounded-xl border border-red-200`}>
+                      <View style={tw`flex-row justify-between items-start mb-2`}>
+                        <Text style={tw`text-red-800 font-bold flex-1`}>{disease.name}</Text>
+                        <View style={[tw`px-2 py-1 rounded-full`, { backgroundColor: 
+                          disease.severity === 'critical' ? '#DC2626' :
+                          disease.severity === 'high' ? '#EA580C' :
+                          disease.severity === 'medium' ? '#F59E0B' : '#10B981'
+                        }]}>
+                          <Text style={tw`text-white text-xs font-bold`}>{disease.severity.toUpperCase()}</Text>
+                        </View>
+                      </View>
+                      <Text style={tw`text-gray-600 text-sm mb-2`}>
+                        <Text style={tw`font-semibold`}>Symptoms:</Text> {disease.symptoms.slice(0, 3).join(', ')}
+                      </Text>
+                      <Text style={tw`text-gray-600 text-sm`}>
+                        <Text style={tw`font-semibold`}>Mortality Risk:</Text> {disease.mortality}
+                      </Text>
+                    </View>
+                  ))}
+                </Card>
+              )}
+
+              {/* Quick Measures Section */}
+              {feedback.quickMeasures && feedback.quickMeasures.length > 0 && (
+                <Card
+                  icon="flash-outline"
+                  iconColor="#F59E0B"
+                  title="Quick Emergency Measures"
+                >
+                  {feedback.quickMeasures.map((measure, index) => (
+                    <View key={index} style={tw`mb-3 last:mb-0`}>
+                      <Text style={tw`text-gray-800 leading-6`}>{measure}</Text>
+                    </View>
+                  ))}
+                </Card>
+              )}
+
               {feedback.isSick && (
                 <Card
                   icon="location-outline"
@@ -514,7 +581,8 @@ export default function PoultryPHInputScreen() {
                       <Text style={tw`text-blue-800 font-semibold mb-1`}>🏥 Find Veterinarian</Text>
                       <Text style={tw`text-blue-600 text-sm`}>Locate nearby veterinary services</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={tw`bg-green-50 p-4 rounded-xl border border-green-200`}>
+                    <TouchableOpacity style={tw`bg-green-50 p-4 rounded-xl border border-green-200`}
+                    onPress={()=>router.push('/pharmacy')}>
                       <Text style={tw`text-green-800 font-semibold mb-1`}>💊 Find Pharmacy</Text>
                       <Text style={tw`text-green-600 text-sm`}>Get medications and supplements</Text>
                     </TouchableOpacity>

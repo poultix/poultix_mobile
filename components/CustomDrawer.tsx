@@ -119,7 +119,7 @@ interface CustomDrawerProps {
 }
 
 export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) {
-  const { logout } = useApp();
+  const { logout, state } = useApp();
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const drawerWidth = screenWidth * 0.85; // 85% of screen width
   const slideAnim = useRef(new Animated.Value(-drawerWidth)).current;
@@ -133,8 +133,18 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
   const [filteredItems, setFilteredItems] = useState<DrawerItem[]>([]);
 
   useEffect(() => {
-    loadUserInfo();
-  }, []);
+    // Update user info when currentUser changes in AppContext
+    if (state.currentUser) {
+      setUserInfo({
+        name: state.currentUser.name,
+        email: state.currentUser.email,
+        role: state.currentUser.role
+      });
+    } else {
+      // Load from AsyncStorage if not in context (fallback)
+      loadUserInfo();
+    }
+  }, [state.currentUser]);
 
   useEffect(() => {
     filterItemsByRole();
@@ -142,6 +152,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
 
   const loadUserInfo = async () => {
     try {
+      // This is a fallback - should primarily use AppContext
       const role = await AsyncStorage.getItem('role') || 'farmer';
       const email = await AsyncStorage.getItem('userEmail') || 'user@example.com';
       const name = email.split('@')[0];

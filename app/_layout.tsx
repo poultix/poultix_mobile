@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { DrawerProvider } from '@/contexts/DrawerContext';
 import { AppProvider } from '@/contexts/AppContext';
+import '../global.css'
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();

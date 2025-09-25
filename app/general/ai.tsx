@@ -1,301 +1,377 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    SafeAreaView,
-    TextInput,
-    Animated,
-    ScrollView,
-} from 'react-native';
+import { IOSDesign } from '@/constants/iosDesign';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    ActivityIndicator,
+    Animated,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import tw from 'twrnc';
 
 import CustomDrawer from '@/components/CustomDrawer';
+import DrawerButton from '@/components/DrawerButton';
 import { useDrawer } from '@/contexts/DrawerContext';
+import { AIMessage, AIService, QUICK_SUGGESTIONS } from '@/services/aiService';
+import { LocalAIService } from '@/services/localAIService';
 
-interface Message {
-    id: string;
-    text: string;
-    isUser: boolean;
-}
-
-export default function AIFrontScreen() {
+export default function AIScreen() {
     const router = useRouter();
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
     const [question, setQuestion] = useState('');
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: '1',
-            text: 'Hello! I\'m your AI farming assistant. I can help with poultry health, nutrition, breeding, and farm management. What would you like to know? 🐔',
-            isUser: false,
-        },
-    ]);
+    const [messages, setMessages] = useState<AIMessage[]>([AIService.getWelcomeMessage()]);
+    const [isLoading, setIsLoading] = useState(false);
+    const scrollViewRef = useRef<ScrollView>(null);
     const fadeAnim = useRef(new Animated.Value(0)).current;
-    const slideAnim = useRef(new Animated.Value(-20)).current;
-    const headerAnim = useRef(new Animated.Value(-50)).current;
+    const slideAnim = useRef(new Animated.Value(20)).current;
 
     // Animation for initial mount
     useEffect(() => {
-        Animated.sequence([
+        Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
-                duration: 800,
+                duration: 600,
                 useNativeDriver: true,
             }),
-            Animated.parallel([
-                Animated.spring(headerAnim, {
-                    toValue: 0,
-                    tension: 50,
-                    friction: 8,
-                    useNativeDriver: true,
-                }),
-                Animated.spring(slideAnim, {
-                    toValue: 0,
-                    tension: 50,
-                    friction: 8,
-                    useNativeDriver: true,
-                }),
-            ]),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 400,
+                useNativeDriver: true,
+            }),
         ]).start();
     }, []);
 
-    const handleStyleSelect = (style: string) => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        // Style selection logic can be implemented here
-    };
-
-    const handleAskQuestion = () => {
-        if (question.trim()) {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            // Add user message to history
-            setMessages((prev) => [
-                ...prev,
-                {
-                    id: Date.now().toString(),
-                    text: question,
-                    isUser: true,
-                },
-            ]);
-            // Simulate AI response (for demo purposes)
+    // Auto-scroll to bottom when new messages are added
+    useEffect(() => {
+        if (scrollViewRef.current) {
             setTimeout(() => {
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        id: (Date.now() + 1).toString(),
-                        text: 'Great question! Let me help you with that. Based on current best practices in poultry farming...',
-                        isUser: false,
-                    },
-                ]);
-            }, 1000);
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+        }
+    }, [messages]);
+
+    const handleAskQuestion = async () => {
+        if (question.trim() && !isLoading) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            
+            const userMessage = AIService.createMessage(question.trim(), true);
+            const currentQuestion = question.trim();
+            
+            // Add user message
+            setMessages(prev => [...prev, userMessage]);
             setQuestion('');
+            setIsLoading(true);
+            
+            // Add typing indicator
+            const typingMessage = AIService.createMessage('', false, true);
+            setMessages(prev => [...prev, typingMessage]);
+            
+            try {
+                let response: string;
+                
+                // Check if question is pH-related for specialized response
+                const phMatch = currentQuestion.match(/\b(ph|pH|Ph)\s*(\d+\.?\d*)/);
+                
+                if (phMatch) {
+                    // Use local AI for pH analysis
+                    response = await LocalAIService.generateResponse(currentQuestion);
+                } else if (currentQuestion.toLowerCase().includes('acid') || 
+                           currentQuestion.toLowerCase().includes('alkalo') ||
+                           currentQuestion.toLowerCase().includes('disease')) {
+                    // Use local AI for disease-related questions
+                    response = await LocalAIService.generateResponse(currentQuestion);
+                } else {
+                    // Use general AI service for other questions
+                    response = await AIService.generateResponse(currentQuestion);
+                }
+                
+                // Remove typing indicator and add response
+                setMessages(prev => {
+                    const withoutTyping = prev.filter(msg => !msg.isTyping);
+                    const aiResponse = AIService.createMessage(response, false);
+                    return [...withoutTyping, aiResponse];
+                });
+            } catch (error) {
+                // Remove typing indicator and add error message
+                setMessages(prev => {
+                    const withoutTyping = prev.filter(msg => !msg.isTyping);
+                    const errorResponse = AIService.createMessage(
+                        'Sorry, I encountered an error. Please try again.', 
+                        false
+                    );
+                    return [...withoutTyping, errorResponse];
+                });
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
-    const quickQuestions = [
-        { text: 'What are common poultry diseases?', icon: 'medical-outline' },
-        { text: 'Best feeding practices for chickens?', icon: 'nutrition-outline' },
-        { text: 'How to improve egg production?', icon: 'trending-up-outline' },
-        { text: 'Optimal housing conditions?', icon: 'home-outline' },
-    ];
+    const handleQuickQuestion = (questionText: string) => {
+        setQuestion(questionText);
+        setTimeout(() => handleAskQuestion(), 100);
+    };
+
+    const formatTimestamp = (date: Date) => {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const renderMessage = (message: AIMessage, index: number) => {
+        if (message.isTyping) {
+            return (
+                <View key={message.id} style={tw`flex-row mb-4`}>
+                    <View style={[
+                        tw`bg-gray-100 rounded-2xl px-4 py-3 max-w-xs`,
+                        { borderBottomLeftRadius: 8 }
+                    ]}>
+                        <View style={tw`flex-row items-center`}>
+                            <ActivityIndicator size="small" color={IOSDesign.colors.systemBlue} />
+                            <Text style={[
+                                tw`ml-2`,
+                                {
+                                    fontSize: IOSDesign.typography.subheadline.fontSize,
+                                    color: IOSDesign.colors.text.secondary,
+                                }
+                            ]}>AI is thinking...</Text>
+                        </View>
+                    </View>
+                </View>
+            );
+        }
+
+        return (
+            <View key={message.id} style={[
+                tw`flex-row mb-4`,
+                message.isUser ? tw`justify-end` : tw`justify-start`
+            ]}>
+                <View style={[
+                    tw`rounded-2xl px-4 py-3 max-w-xs`,
+                    message.isUser 
+                        ? {
+                            backgroundColor: IOSDesign.colors.systemBlue,
+                            borderBottomRightRadius: 8,
+                        }
+                        : {
+                            backgroundColor: IOSDesign.colors.background.secondary,
+                            borderBottomLeftRadius: 8,
+                        }
+                ]}>
+                    <Text style={[
+                        {
+                            fontSize: IOSDesign.typography.body.fontSize,
+                            lineHeight: IOSDesign.typography.body.lineHeight,
+                            color: message.isUser 
+                                ? IOSDesign.colors.text.inverse 
+                                : IOSDesign.colors.text.primary,
+                        }
+                    ]}>
+                        {message.text}
+                    </Text>
+                    <Text style={[
+                        tw`mt-1`,
+                        {
+                            fontSize: IOSDesign.typography.caption2.fontSize,
+                            color: message.isUser 
+                                ? 'rgba(255,255,255,0.7)' 
+                                : IOSDesign.colors.text.tertiary,
+                        }
+                    ]}>
+                        {formatTimestamp(message.timestamp)}
+                    </Text>
+                </View>
+            </View>
+        );
+    };
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+        <SafeAreaView style={[tw`flex-1`, { backgroundColor: IOSDesign.colors.background.primary }]}>
+            <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
             
-            <ScrollView 
-                showsVerticalScrollIndicator={false} 
+            <KeyboardAvoidingView 
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={tw`flex-1`}
-                contentContainerStyle={tw`pb-4`}
             >
-                <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
-                    {/* Enhanced Header */}
-                    <Animated.View 
-                        style={[
-                            tw`px-4 pt-2 pb-4`,
-                            { transform: [{ translateY: headerAnim }] }
-                        ]}
-                    >
-                        <LinearGradient
-                            colors={['#06B6D4', '#0891B2']}
-                            style={tw`rounded-3xl p-8 shadow-xl`}
-                        >
+                <Animated.View style={[
+                    tw`flex-1`,
+                    {
+                        opacity: fadeAnim,
+                        transform: [{ translateY: slideAnim }],
+                    }
+                ]}>
+                    {/* iOS-style Header */}
+                    <View style={[tw`px-4 pt-4 pb-6`, { paddingTop: IOSDesign.spacing.lg }]}>
+                        <View style={[
+                            tw`rounded-3xl p-6`,
+                            {
+                                backgroundColor: IOSDesign.colors.systemTeal,
+                                minHeight: 140,
+                            },
+                            IOSDesign.shadows.medium,
+                        ]}>
                             <View style={tw`flex-row items-center justify-between mb-4`}>
                                 <View style={tw`flex-1`}>
-                                    <Text style={tw`text-white text-sm opacity-90`}>
+                                    <Text style={[
+                                        tw`mb-1`,
+                                        {
+                                            fontSize: IOSDesign.typography.subheadline.fontSize,
+                                            color: 'rgba(255,255,255,0.8)',
+                                        }
+                                    ]}>
                                         AI-Powered Assistant
                                     </Text>
-                                    <Text style={tw`text-white text-2xl font-bold`}>
+                                    <Text style={[
+                                        tw`mb-1`,
+                                        {
+                                            fontSize: IOSDesign.typography.title2.fontSize,
+                                            fontWeight: IOSDesign.typography.title2.fontWeight,
+                                            color: IOSDesign.colors.text.inverse,
+                                        }
+                                    ]}>
                                         Ask Me Anything 🤖
                                     </Text>
-                                    <Text style={tw`text-cyan-100 text-sm mt-1`}>
-                                        Get expert poultry advice instantly
+                                    <Text style={[
+                                        {
+                                            fontSize: IOSDesign.typography.caption1.fontSize,
+                                            color: 'rgba(255,255,255,0.8)',
+                                        }
+                                    ]}>
+                                        Expert poultry advice instantly
                                     </Text>
                                 </View>
-                                <TouchableOpacity
-                                    style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
-                                >
-                                    <Ionicons name="sparkles-outline" size={24} color="white" />
-                                </TouchableOpacity>
-                            </View>
-                            
-                            {/* AI Stats */}
-                            <View style={tw`bg-white bg-opacity-15 rounded-2xl p-6 mt-4`}>
-                                <Text style={tw`text-white font-bold text-lg mb-4`}>AI Capabilities</Text>
-                                <View style={tw`flex-row justify-between`}>
-                                    <View style={tw`items-center flex-1`}>
-                                        <Text style={tw`text-white text-2xl font-bold`}>24/7</Text>
-                                        <Text style={tw`text-cyan-100 text-xs font-medium`}>Available</Text>
-                                    </View>
-                                    <View style={tw`items-center flex-1`}>
-                                        <Text style={tw`text-green-200 text-2xl font-bold`}>1000+</Text>
-                                        <Text style={tw`text-cyan-100 text-xs font-medium`}>Topics</Text>
-                                    </View>
-                                    <View style={tw`items-center flex-1`}>
-                                        <Text style={tw`text-blue-200 text-2xl font-bold`}>95%</Text>
-                                        <Text style={tw`text-cyan-100 text-xs font-medium`}>Accuracy</Text>
-                                    </View>
-                                </View>
-                            </View>
-                        </LinearGradient>
-                    </Animated.View>
-
-                    {/* Chat Messages */}
-                    <Animated.View 
-                        style={[
-                            tw`px-4 mb-4`,
-                            { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
-                        ]}
-                    >
-                        <View style={tw`bg-white rounded-2xl p-5 shadow-sm mb-4`}>
-                            <Text style={tw`text-gray-800 font-bold text-lg mb-4`}>Conversation</Text>
-                            {messages.map((message) => (
-                                <View
-                                    key={message.id}
-                                    style={[
-                                        tw`max-w-[85%] rounded-2xl p-4 mb-3`,
-                                        message.isUser 
-                                            ? tw`ml-auto bg-cyan-500` 
-                                            : tw`mr-auto bg-gray-100`
-                                    ]}
-                                >
-                                    {!message.isUser && (
-                                        <View style={tw`flex-row items-center mb-2`}>
-                                            <View style={tw`bg-cyan-100 p-1 rounded-full mr-2`}>
-                                                <Ionicons
-                                                    name="sparkles"
-                                                    size={14}
-                                                    color="#06B6D4"
-                                                />
-                                            </View>
-                                            <Text style={tw`text-gray-600 text-sm font-medium`}>
-                                                AI Assistant
-                                            </Text>
-                                        </View>
-                                    )}
-                                    <Text
-                                        style={[
-                                            tw`text-base leading-6`,
-                                            message.isUser ? tw`text-white` : tw`text-gray-900`
-                                        ]}
-                                    >
-                                        {message.text}
-                                    </Text>
-                                    {!message.isUser && (
-                                        <Text style={tw`text-gray-500 text-xs mt-2`}>AI Response • ⚡</Text>
-                                    )}
-                                </View>
-                            ))}
-                        </View>
-
-                        {/* Conversation Style Selection */}
-                        <View style={tw`bg-white rounded-2xl p-5 shadow-sm mb-4`}>
-                            <Text style={tw`text-gray-800 font-bold text-lg mb-4`}>
-                                Conversation Style
-                            </Text>
-                            <View style={tw`flex-row justify-between`}>
-                                {[
-                                    { style: 'Creative', color: '#F59E0B', icon: 'bulb-outline' },
-                                    { style: 'Balanced', color: '#3B82F6', icon: 'scale-outline' },
-                                    { style: 'Precise', color: '#10B981', icon: 'checkmark-circle-outline' },
-                                ].map(({ style, color, icon }) => (
+                                <View style={tw`flex-row items-center`}>
                                     <TouchableOpacity
-                                        key={style}
-                                        onPress={() => handleStyleSelect(style)}
-                                        style={[
-                                            tw`rounded-2xl p-4 flex-1 mx-1 shadow-sm items-center`,
-                                            { backgroundColor: color }
-                                        ]}
-                                        activeOpacity={0.8}
+                                        onPress={() => router.push('/settings/ai-settings')}
+                                        style={tw`mr-3 p-2 bg-white bg-opacity-20 rounded-full`}
                                     >
-                                        <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={24} color="white" />
-                                        <Text style={tw`text-white text-sm font-semibold mt-2`}>
-                                            {style}
-                                        </Text>
+                                        <Ionicons name="settings-outline" size={20} color="white" />
                                     </TouchableOpacity>
-                                ))}
+                                    <DrawerButton />
+                                </View>
                             </View>
                         </View>
+                    </View>
 
-                        {/* Quick Questions */}
-                        <View style={tw`bg-white rounded-2xl p-5 shadow-sm mb-4`}>
-                            <Text style={tw`text-gray-800 font-bold text-lg mb-4`}>
+                    {/* Messages */}
+                    <ScrollView
+                        ref={scrollViewRef}
+                        style={tw`flex-1 px-4`}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={tw`pb-4`}
+                    >
+                        {messages.map((message, index) => renderMessage(message, index))}
+                    </ScrollView>
+
+                    {/* Quick Suggestions */}
+                    {messages.length <= 1 && (
+                        <View style={tw`px-4 py-2`}>
+                            <Text style={[
+                                tw`mb-3`,
+                                {
+                                    fontSize: IOSDesign.typography.subheadlineEmphasized.fontSize,
+                                    fontWeight: IOSDesign.typography.subheadlineEmphasized.fontWeight,
+                                    color: IOSDesign.colors.text.primary,
+                                }
+                            ]}>
                                 Quick Questions
                             </Text>
-                            <View style={tw`flex-row flex-wrap`}>
-                                {quickQuestions.map((item, index) => (
-                                    <TouchableOpacity
-                                        key={index}
-                                        style={tw`bg-gray-100 rounded-xl p-3 mr-2 mb-2 flex-row items-center`}
-                                        onPress={() => setQuestion(item.text)}
-                                    >
-                                        <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={16} color="#6B7280" />
-                                        <Text style={tw`text-gray-700 text-sm ml-2 font-medium`}>
-                                            {item.text.split('?')[0]}?
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                <View style={tw`flex-row gap-3`}>
+                                    {QUICK_SUGGESTIONS.map((suggestion, index) => (
+                                        <TouchableOpacity
+                                            key={index}
+                                            style={[
+                                                tw`bg-gray-100 rounded-2xl px-4 py-3 flex-row items-center`,
+                                                { minWidth: 200 }
+                                            ]}
+                                            onPress={() => handleQuickQuestion(suggestion.text)}
+                                            activeOpacity={0.7}
+                                        >
+                                            <Ionicons 
+                                                name={suggestion.icon as any} 
+                                                size={16} 
+                                                color={IOSDesign.colors.systemTeal} 
+                                                style={tw`mr-2`}
+                                            />
+                                            <Text style={[
+                                                tw`flex-1`,
+                                                {
+                                                    fontSize: IOSDesign.typography.subheadline.fontSize,
+                                                    color: IOSDesign.colors.text.primary,
+                                                }
+                                            ]}>
+                                                {suggestion.text}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </ScrollView>
                         </View>
-                    </Animated.View>
+                    )}
 
-                    {/* Input Area */}
-                    <Animated.View
-                        style={[
-                            tw`px-4 pb-4`,
-                            { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
-                        ]}
-                    >
-                        <View style={tw`bg-white rounded-2xl p-4 shadow-sm border border-gray-100`}>
-                            <Text style={tw`text-gray-800 font-bold text-base mb-3`}>Ask AI Assistant</Text>
-                            <View style={tw`flex-row items-center bg-gray-50 rounded-xl p-3`}>
+                    {/* Input Section */}
+                    <View style={[
+                        tw`px-4 py-4 border-t`,
+                        { 
+                            backgroundColor: IOSDesign.colors.background.primary,
+                            borderTopColor: IOSDesign.colors.gray[200],
+                        }
+                    ]}>
+                        <View style={tw`flex-row items-end`}>
+                            <View style={tw`flex-1 mr-3`}>
                                 <TextInput
-                                    style={tw`flex-1 text-gray-900 text-base`}
+                                    style={[
+                                        tw`rounded-2xl px-4 py-3 max-h-24`,
+                                        {
+                                            backgroundColor: IOSDesign.colors.background.secondary,
+                                            fontSize: IOSDesign.typography.body.fontSize,
+                                            color: IOSDesign.colors.text.primary,
+                                        }
+                                    ]}
+                                    placeholder="Ask about poultry farming..."
+                                    placeholderTextColor={IOSDesign.colors.text.tertiary}
                                     value={question}
                                     onChangeText={setQuestion}
-                                    placeholder="Ask me anything about poultry farming..."
-                                    placeholderTextColor="#6B7280"
                                     multiline
+                                    maxLength={500}
+                                    onSubmitEditing={handleAskQuestion}
+                                    blurOnSubmit={false}
                                 />
-                                <TouchableOpacity
-                                    onPress={handleAskQuestion}
-                                    style={tw`bg-cyan-500 p-3 rounded-xl ml-3`}
-                                    activeOpacity={0.8}
-                                >
-                                    <Ionicons name="send" size={20} color="white" />
-                                </TouchableOpacity>
                             </View>
+                            <TouchableOpacity
+                                style={[
+                                    tw`w-12 h-12 rounded-full items-center justify-center`,
+                                    {
+                                        backgroundColor: question.trim() && !isLoading 
+                                            ? IOSDesign.colors.systemTeal 
+                                            : IOSDesign.colors.gray[300],
+                                    }
+                                ]}
+                                onPress={handleAskQuestion}
+                                disabled={!question.trim() || isLoading}
+                                activeOpacity={0.7}
+                            >
+                                {isLoading ? (
+                                    <ActivityIndicator size="small" color="white" />
+                                ) : (
+                                    <Ionicons 
+                                        name="send" 
+                                        size={20} 
+                                        color="white" 
+                                    />
+                                )}
+                            </TouchableOpacity>
                         </View>
-                    </Animated.View>
+                    </View>
                 </Animated.View>
-            </ScrollView>
-            
-            <CustomDrawer
-                isVisible={isDrawerVisible}
-                onClose={() => setIsDrawerVisible(false)}
-            />
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }

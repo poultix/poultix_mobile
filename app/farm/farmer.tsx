@@ -22,6 +22,7 @@ import CustomDrawer from '@/components/CustomDrawer'
 import { useDrawer } from '@/contexts/DrawerContext'
 import DrawerButton from '@/components/DrawerButton';
 import VeterinaryComponent from '@/components/shared/veterinary/veterinary';
+import { MockDataService } from '@/services/mockData';
 
 export default function FarmerScreen() {
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();

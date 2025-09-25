@@ -201,9 +201,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const user = getUserById(savedUserId);
         if (user) {
           dispatch({ type: 'SET_CURRENT_USER', payload: user });
+          
+          // Ensure AsyncStorage is synced with current user
+          await AsyncStorage.setItem('role', user.role);
+          await AsyncStorage.setItem('userEmail', user.email);
         } else {
           // User not found, clear invalid session
           await AsyncStorage.removeItem('currentUserId');
+          await AsyncStorage.removeItem('role');
+          await AsyncStorage.removeItem('userEmail');
         }
       }
       
@@ -253,14 +259,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     
     dispatch({ type: 'SET_CURRENT_USER', payload: user });
+    
+    // Store user details in AsyncStorage for consistency
     await AsyncStorage.setItem('currentUserId', user.id);
+    await AsyncStorage.setItem('role', user.role);
+    await AsyncStorage.setItem('userEmail', user.email);
     
     return user;
   };
 
   const logout = async (): Promise<void> => {
     dispatch({ type: 'SET_CURRENT_USER', payload: null });
+    
+    // Clear all user-related data from AsyncStorage
     await AsyncStorage.removeItem('currentUserId');
+    await AsyncStorage.removeItem('role');
+    await AsyncStorage.removeItem('userEmail');
   };
 
   // Data fetchers with role-based filtering

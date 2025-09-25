@@ -3,7 +3,7 @@ import 'dotenv/config'
 export default {
   "expo": {
     "name": "poultix",
-    "slug": "poultix",
+    "slug": "poultixmobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
@@ -35,10 +35,7 @@ export default {
         "BLUETOOTH_ADMIN",
         "BLUETOOTH_CONNECT",
         "BLUETOOTH_SCAN",
-        "ACCESS_FINE_LOCATION",
-        "android.permission.BLUETOOTH",
-        "android.permission.BLUETOOTH_ADMIN",
-        "android.permission.BLUETOOTH_CONNECT"
+        "ACCESS_FINE_LOCATION"
       ],
       "package": "com.anonymous.poultix"
     },
@@ -76,9 +73,14 @@ export default {
     ],
     "experiments": {
       "typedRoutes": true
-    }, 
+    },
     extra: {
-      GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID, 
+      GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+      "eas": {
+        "projectId": "091e0a1c-ebdb-492c-a9e9-e13591cccfa9"
+      }
+
+
     }
   }
 }
