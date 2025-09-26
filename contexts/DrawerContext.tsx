@@ -29,7 +29,6 @@ export const DrawerProvider: React.FC<DrawerProviderProps> = ({ children }) => {
 
   return (
     <DrawerContext.Provider value={{ isDrawerVisible, setIsDrawerVisible, toggleDrawer }}>
-
       {children}
     </DrawerContext.Provider>
   );

@@ -124,7 +124,7 @@ export default function TopNavigation() {
                     style: 'destructive',
                     onPress: async () => {
                         await logout()
-                        router.replace('/(auth)/sign-in')
+                        router.replace('/auth/sign-in')
                     }
                 }
             ]

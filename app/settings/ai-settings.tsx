@@ -16,7 +16,7 @@ import tw from 'twrnc';
 import { IOSDesign } from '@/constants/iosDesign';
 
 // Import local AI services  
-import { LocalAIService, PH_DISEASE_DATABASE } from '@/services/localAIService';
+import { LocalAIService, PH_DISEASE_DATABASE } from '@/services/ai/localAIService';
 
 export default function AISettingsScreen() {
   const router = useRouter();

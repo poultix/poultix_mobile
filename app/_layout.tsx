@@ -1,13 +1,13 @@
-import { Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { AppProvider } from '@/contexts/AppContext';
+import { DrawerProvider } from '@/contexts/DrawerContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { DrawerProvider } from '@/contexts/DrawerContext';
-import { AppProvider } from '@/contexts/AppContext';
-import '../global.css'
+import { useEffect, useState } from 'react';
+import '../global.css';
 
-// Keep the splash screen visible while we fetch resources
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -16,7 +16,6 @@ export default function RootLayout() {
   useEffect(() => {
     async function checkAuthStatus() {
       try {
-        // Check if user is already logged in
         const currentUserId = await AsyncStorage.getItem('currentUserId');
         setIsAuthenticated(!!currentUserId);
       } catch (error) {
@@ -40,7 +39,6 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           {isAuthenticated ? (
             <>
-              {/* Main app */}
               <Stack.Screen name="index" options={{ headerShown: false }} />
               <Stack.Screen name="farmer" options={{ headerShown: false }} />
               <Stack.Screen name="farm" options={{ headerShown: false }} />
@@ -61,12 +59,10 @@ export default function RootLayout() {
               <Stack.Screen name="veterinary" options={{ presentation: 'modal' }} />
               <Stack.Screen name="pharmacy" options={{ presentation: 'modal' }} />
               <Stack.Screen name="tester" options={{ presentation: 'modal' }} />
-              <Stack.Screen name="auth-login" options={{ headerShown: false }} />
             </>
           ) : (
             <>
               {/* Auth screens */}
-              <Stack.Screen name="auth-login" options={{ headerShown: false }} />
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             </>
           )}

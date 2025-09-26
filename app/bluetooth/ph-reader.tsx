@@ -17,7 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LocalAIService, PH_DISEASE_DATABASE } from '@/services/localAIService';
+import { LocalAIService, PH_DISEASE_DATABASE } from '@/services/ai/localAIService';
 import { router } from 'expo-router';
 
 const { width } = Dimensions.get('window');

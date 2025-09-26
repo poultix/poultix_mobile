@@ -239,7 +239,7 @@ export default function SignInScreen() {
                         {/* Social */}
                         <View className="flex-row justify-between mb-2">
                             <TouchableOpacity
-                                onPress={() => router.push('/(auth)/google-sign-in')}
+                                onPress={() => router.push('/auth/google-sign-in')}
                                 className="h-14 border border-gray-200 rounded-xl items-center justify-center shadow-sm bg-white w-[47%]"
                                 activeOpacity={0.8}
                             >

@@ -36,77 +36,85 @@ interface UserInfo {
 }
 
 const allDrawerItems: DrawerItem[] = [
-  { 
-    label: 'Dashboard', 
-    route: '/', 
+  {
+    label: 'Dashboard',
+    route: '/',
     icon: 'home-outline',
     description: 'Overview and quick actions',
     color: '#F97316'
   },
-  { 
-    label: 'Farm Management', 
-    route: '/farm', 
+  {
+    label: 'Farm Management',
+    route: '/farm',
     icon: 'leaf-outline',
     description: 'Monitor your poultry farm',
     color: '#10B981'
   },
-  { 
-    label: 'pH Analyzer', 
-    route: '/bluetooth/ph-reader', 
+  {
+    label: 'Bluetooth Devices',
+    route: '/bluetooth/bluetooth-pairing',
+    icon: 'bluetooth-outline',
+    description: 'Connect to devices',
+    badge: 'NEW',
+    color: '#0EA5E9'
+  },
+  {
+    label: 'pH Analyzer',
+    route: '/bluetooth/ph-reader',
     icon: 'flask-outline',
     description: 'Analyze stool samples',
     badge: 'NEW',
     color: '#F59E0B'
   },
-  { 
-    label: 'Veterinary Care', 
-    route: '/farm/veterinary', 
+  {
+    label: 'Veterinary Care',
+    route: '/farm/veterinary',
     icon: 'medical-outline',
     description: 'Find expert help',
     color: '#EF4444'
   },
-  { 
-    label: 'Pharmacies', 
-    route: '/pharmacy', 
+  {
+    label: 'Pharmacies',
+    route: '/pharmacy',
     icon: 'storefront-outline',
     description: 'Locate nearby pharmacies',
     color: '#3B82F6'
   },
-  { 
-    label: 'Health News', 
-    route: '/general/news', 
+  {
+    label: 'Health News',
+    route: '/general/news',
     icon: 'newspaper-outline',
     description: 'Latest updates',
     color: '#8B5CF6'
   },
-  { 
-    label: 'AI Assistant', 
-    route: '/general/ai', 
+  {
+    label: 'AI Assistant',
+    route: '/general/ai',
     icon: 'chatbubble-ellipses-outline',
     description: 'Get AI-powered advice',
     badge: 'BETA',
     color: '#06B6D4'
   },
-  { 
-    label: 'Admin Panel', 
-    route: '/admin', 
+  {
+    label: 'Admin Panel',
+    route: '/admin',
     icon: 'shield-outline',
     description: 'System administration',
     badge: 'ADMIN',
     adminOnly: true,
     color: '#7C3AED'
   },
-  { 
-    label: 'Data Management', 
-    route: '/admin/data-management', 
+  {
+    label: 'Data Management',
+    route: '/admin/data-management',
     icon: 'server-outline',
     description: 'Edit content',
     adminOnly: true,
     color: '#10B981'
   },
-  { 
-    label: 'Settings', 
-    route: '/settings', 
+  {
+    label: 'Settings',
+    route: '/settings',
     icon: 'settings-outline',
     description: 'App preferences',
     color: '#6B7280'
@@ -156,7 +164,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
       const role = await AsyncStorage.getItem('role') || 'farmer';
       const email = await AsyncStorage.getItem('userEmail') || 'user@example.com';
       const name = email.split('@')[0];
-      
+
       setUserInfo({
         name: name.charAt(0).toUpperCase() + name.slice(1),
         email,
@@ -298,18 +306,18 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
                 <Ionicons name="close" size={18} color="#6B7280" />
               </TouchableOpacity>
             </View>
-            
+
             {/* User Profile Section */}
-            <TouchableOpacity onPress={()=>router.push('/user/profile')}
-             style={tw`flex-row items-center py-3 px-3 bg-gray-50 rounded-2xl`}>
+            <TouchableOpacity onPress={() => router.push('/user/profile')}
+              style={tw`flex-row items-center py-3 px-3 bg-gray-50 rounded-2xl`}>
               <View style={[
                 tw`w-12 h-12 rounded-full items-center justify-center mr-3`,
                 { backgroundColor: getRoleColor(userInfo.role) }
               ]}>
-                <Ionicons 
-                  name={getRoleIcon(userInfo.role) as keyof typeof Ionicons.glyphMap} 
-                  size={20} 
-                  color="white" 
+                <Ionicons
+                  name={getRoleIcon(userInfo.role) as keyof typeof Ionicons.glyphMap}
+                  size={20}
+                  color="white"
                 />
               </View>
               <View style={tw`flex-1`}>
@@ -343,10 +351,10 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
                     tw`w-8 h-8 rounded-lg items-center justify-center mr-3`,
                     { backgroundColor: (item.color || '#6B7280') + '15' }
                   ]}>
-                    <Ionicons 
-                      name={item.icon} 
-                      size={18} 
-                      color={item.color || '#6B7280'} 
+                    <Ionicons
+                      name={item.icon}
+                      size={18}
+                      color={item.color || '#6B7280'}
                     />
                   </View>
                   <View style={tw`flex-1`}>
@@ -369,23 +377,33 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
                 </TouchableOpacity>
               ))}
             </View>
-            
+
             {/* iOS-style Quick Actions */}
             <View style={tw`px-4 py-4 border-t border-gray-100 mt-2`}>
               <Text style={tw`text-gray-600 font-semibold mb-3 text-sm uppercase tracking-wide`}>Quick Actions</Text>
-              <View style={tw`flex-row justify-between`}>
+              <View style={tw`flex-row justify-between mb-3`}>
                 <TouchableOpacity
-                  style={tw`bg-blue-50 rounded-2xl p-4 flex-1 mr-2 items-center`}
+                  style={tw`bg-sky-50 rounded-2xl p-4 flex-1 mr-2 items-center`}
+                  onPress={() => handleItemPress('/bluetooth/bluetooth-pairing')}
+                  activeOpacity={0.7}
+                >
+                  <View style={tw`w-10 h-10 bg-sky-100 rounded-full items-center justify-center mb-2`}>
+                    <Ionicons name="bluetooth-outline" size={20} color="#0EA5E9" />
+                  </View>
+                  <Text style={tw`text-sky-600 text-xs font-medium text-center`}>Connect</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={tw`bg-blue-50 rounded-2xl p-4 flex-1 mx-1 items-center`}
                   onPress={() => handleItemPress('/bluetooth/ph-reader')}
                   activeOpacity={0.7}
                 >
                   <View style={tw`w-10 h-10 bg-blue-100 rounded-full items-center justify-center mb-2`}>
                     <Ionicons name="flask-outline" size={20} color="#3B82F6" />
                   </View>
-                  <Text style={tw`text-blue-600 text-xs font-medium text-center`}>Quick Scan</Text>
+                  <Text style={tw`text-blue-600 text-xs font-medium text-center`}>pH Scan</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={tw`bg-green-50 rounded-2xl p-4 flex-1 mx-1 items-center`}
+                  style={tw`bg-green-50 rounded-2xl p-4 flex-1 ml-2 items-center`}
                   onPress={() => handleItemPress('/farm')}
                   activeOpacity={0.7}
                 >
@@ -394,8 +412,10 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
                   </View>
                   <Text style={tw`text-green-600 text-xs font-medium text-center`}>Add Record</Text>
                 </TouchableOpacity>
+              </View>
+              <View style={tw`flex-row justify-center`}>
                 <TouchableOpacity
-                  style={tw`bg-red-50 rounded-2xl p-4 flex-1 ml-2 items-center`}
+                  style={tw`bg-red-50 rounded-2xl p-4 flex-1 items-center`}
                   onPress={() => handleItemPress('/farm/veterinary')}
                   activeOpacity={0.7}
                 >
@@ -421,7 +441,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
               <Text style={tw`text-red-600 font-medium text-base flex-1`}>Sign Out</Text>
               <Ionicons name="chevron-forward" size={16} color="#EF4444" />
             </TouchableOpacity>
-            
+
             {/* App Version */}
             <View style={tw`items-center`}>
               <Text style={tw`text-gray-400 text-xs`}>Poultix v2.0</Text>

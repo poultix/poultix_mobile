@@ -1,18 +1,16 @@
-// screens/NetworkErrorScreen.tsx
 import React from 'react';
 import { Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import axios from 'axios';
-import hostConfig from '@/config/hostConfig';
 import { router } from 'expo-router';
+import { apiClient } from '@/services/client';
 
 export default function NetworkErrorScreen() {
     const onRetry = async () => {
         try {
-            const response = await axios.get(hostConfig.host + '/ping')
+            const response = await apiClient.get('/ping')
             if (response.status == 200) router.push('/farm/farmer' as any)
         } catch (error) {
-            if (axios.isAxiosError(error)) if (!error.response) Alert.alert('Network Error!', 'Make sure you are connected to internet and try again.')
+            if (error instanceof Error) Alert.alert('Network Error!', 'Make sure you are connected to internet and try again.')
         }
     }
 

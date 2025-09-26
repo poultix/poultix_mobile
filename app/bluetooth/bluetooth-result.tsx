@@ -9,15 +9,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import tw from 'twrnc';
+import { useBLE } from '@/hooks/useBLE';
 
-
-import { Device } from '@/interfaces/Bluetooth';
 
 export default function BluetoothResultScreen() {
-    
-    const route = useRoute();
-    const { devices } = route.params as { devices: Device[] };
 
+    const { devices } = useBLE()
     const [fadeAnim] = useState(new Animated.Value(0));
     const [scaleAnim] = useState(new Animated.Value(0.9));
     const [progressDistance] = useState(new Animated.Value(0.5)); // 50%
@@ -42,7 +39,7 @@ export default function BluetoothResultScreen() {
 
     return (
         <SafeAreaView style={tw`flex-1 bg-white`}>
-            
+
             <ScrollView>
                 <Animated.View
                     style={[

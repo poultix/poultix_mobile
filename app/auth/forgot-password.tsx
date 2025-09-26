@@ -28,7 +28,7 @@ export default function ForgotPasswordScreen() {
   }, []);
 
   const handleSendEmail = async () => {
-    try {router.push('/(auth)/verify-code');
+    try {router.push('/auth/verify-code');
       const result = await MockAuthService.forgotPassword(email);
       Alert.alert('Success', result.message);
       

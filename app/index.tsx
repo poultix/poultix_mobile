@@ -21,10 +21,10 @@ export default function Index() {
           router.replace('/dashboard/veterinary-dashboard');
           break;
         default:
-          router.replace('/(auth)/sign-in');
+          router.replace('/auth/sign-in');
       }
     } else if (!state.isLoading) {
-      router.replace('/(auth)/sign-in');
+      router.replace('/auth/sign-in');
     }
   }, [state.currentUser, state.isLoading]);
 

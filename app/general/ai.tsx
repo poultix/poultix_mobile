@@ -20,8 +20,8 @@ import tw from 'twrnc';
 import CustomDrawer from '@/components/CustomDrawer';
 import DrawerButton from '@/components/DrawerButton';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { AIMessage, AIService, QUICK_SUGGESTIONS } from '@/services/aiService';
-import { LocalAIService } from '@/services/localAIService';
+import { AIMessage, AIService, QUICK_SUGGESTIONS } from '@/services/ai/aiService';
+import { LocalAIService } from '@/services/ai/localAIService';
 
 export default function AIScreen() {
     const router = useRouter();
