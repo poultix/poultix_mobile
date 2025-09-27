@@ -40,7 +40,7 @@ const PharmaciesScreen = () => {
         longitude: number;
     } | null>(null);
     const mapRef = useRef<MapView>(null);
-    
+
     // Use new contexts
     const { pharmacies, currentPharmacy, setCurrentPharmacy, isLoading } = usePharmacies();
     const { getPharmaciesByDistance, getNearbyPharmacies } = usePharmacyActions();
@@ -96,11 +96,11 @@ const PharmaciesScreen = () => {
                     pharmacy.location.longitude
                 )
             }));
-            
+
             // Sort by distance
             pharmaciesWithDistance.sort((a: any, b: any) => a.distance - b.distance);
             setFilteredPharmacies(pharmaciesWithDistance);
-            
+
             // Animate map to user location
             if (mapRef.current) {
                 mapRef.current.animateToRegion({
@@ -125,15 +125,15 @@ const PharmaciesScreen = () => {
     // Filter pharmacies based on search query
     useEffect(() => {
         let filtered = pharmacies;
-        
+
         // Filter by search query
         if (searchQuery.trim()) {
-            filtered = filtered.filter((pharmacy: Pharmacy) => 
+            filtered = filtered.filter((pharmacy: Pharmacy) =>
                 pharmacy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 pharmacy.address.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
-        
+
         // If we have user location, add distance and sort
         if (userLocation) {
             filtered = filtered.map((pharmacy: Pharmacy) => ({
@@ -145,7 +145,7 @@ const PharmaciesScreen = () => {
                 )
             })).sort((a: any, b: any) => a.distance - b.distance);
         }
-        
+
         setFilteredPharmacies(filtered);
     }, [pharmacies, searchQuery, userLocation]);
 
@@ -168,6 +168,10 @@ const PharmaciesScreen = () => {
         return Number((R * c).toFixed(1));
     };
 
+    const openDirections = () => {
+
+    }
+
     useEffect(() => {
         getUserLocation();
         startAnimations();
@@ -186,8 +190,8 @@ const PharmaciesScreen = () => {
 
     return (
         <SafeAreaView style={tw`flex-1 bg-gray-50`}>
-            
-            <ScrollView 
+
+            <ScrollView
                 style={tw`flex-1`}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={tw`flexGrow pb-2`}
@@ -219,7 +223,7 @@ const PharmaciesScreen = () => {
                                     <Ionicons name="location-outline" size={24} color="white" />
                                 </TouchableOpacity>
                             </View>
-                            
+
                             {/* Pharmacy Stats */}
                             <View style={tw`bg-white bg-opacity-15 rounded-2xl p-6 mt-4`}>
                                 <Text style={tw`text-white font-bold text-lg mb-4`}>Available Services</Text>
@@ -273,69 +277,69 @@ const PharmaciesScreen = () => {
 
                     <View style={tw`px-4`}>
 
-                    {/* Search Bar */}
-                    <Animated.View
-                        style={[
-                            tw`mb-6`,
-                            {
-                                opacity: searchAnim,
-                                transform: [
-                                    {
-                                        translateY: searchAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [20, 0],
-                                        }),
-                                    },
-                                ],
-                            },
-                        ]}
-                    >
-                        <View style={tw`flex-row items-center bg-gray-100 rounded-2xl p-3 border border-gray-200`}>
-                            <Ionicons name="search-outline" size={20} color="#6B7280" style={tw`mr-2`} />
-                            <TextInput
-                                style={tw`flex-1 text-gray-800 text-base`}
-                                placeholder="Search pharmacies..."
-                                placeholderTextColor="#6B7280"
-                                value={searchQuery}
-                                onChangeText={filterPharmacies}
-                                autoCapitalize="none"
-                            />
-                            {searchQuery.length > 0 && (
-                                <TouchableOpacity onPress={() => filterPharmacies('')}>
-                                    <Ionicons name="close-circle-outline" size={20} color="#6B7280" />
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    </Animated.View>
+                        {/* Search Bar */}
+                        <Animated.View
+                            style={[
+                                tw`mb-6`,
+                                {
+                                    opacity: searchAnim,
+                                    transform: [
+                                        {
+                                            translateY: searchAnim.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [20, 0],
+                                            }),
+                                        },
+                                    ],
+                                },
+                            ]}
+                        >
+                            <View style={tw`flex-row items-center bg-gray-100 rounded-2xl p-3 border border-gray-200`}>
+                                <Ionicons name="search-outline" size={20} color="#6B7280" style={tw`mr-2`} />
+                                <TextInput
+                                    style={tw`flex-1 text-gray-800 text-base`}
+                                    placeholder="Search pharmacies..."
+                                    placeholderTextColor="#6B7280"
+                                    value={searchQuery}
+                                    onChangeText={(data) => setSearchQuery(data)}
+                                    autoCapitalize="none"
+                                />
+                                {searchQuery.length > 0 && (
+                                    <TouchableOpacity onPress={() => setSearchQuery('')}>
+                                        <Ionicons name="close-circle-outline" size={20} color="#6B7280" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        </Animated.View>
 
-                    {/* Pharmacy List */}
-                    {filteredPharmacies.length === 0 ? (
-                        <View style={tw`items-center py-10`}>
-                            <Ionicons name="search-outline" size={48} color="#6B7280" />
-                            <Text style={tw`text-gray-500 text-lg mt-4`}>No pharmacies found</Text>
-                        </View>
-                    ) : (
-                        filteredPharmacies.map((pharmacy, index) => (
-                            <Animated.View
-                                key={pharmacy.id}
-                                style={[
-                                    tw`mb-4`,
-                                    {
-                                        opacity: cardAnim,
-                                        transform: [
-                                            {
-                                                translateY: cardAnim.interpolate({
-                                                    inputRange: [0, 1],
-                                                    outputRange: [10 * (index + 1), 0],
-                                                }),
-                                            },
-                                        ],
-                                    },
-                                ]}
-                            >
+                        {/* Pharmacy List */}
+                        {filteredPharmacies.length === 0 ? (
+                            <View style={tw`items-center py-10`}>
+                                <Ionicons name="search-outline" size={48} color="#6B7280" />
+                                <Text style={tw`text-gray-500 text-lg mt-4`}>No pharmacies found</Text>
+                            </View>
+                        ) : (
+                            filteredPharmacies.map((pharmacy, index) => (
+                                <Animated.View
+                                    key={pharmacy.id}
+                                    style={[
+                                        tw`mb-4`,
+                                        {
+                                            opacity: cardAnim,
+                                            transform: [
+                                                {
+                                                    translateY: cardAnim.interpolate({
+                                                        inputRange: [0, 1],
+                                                        outputRange: [10 * (index + 1), 0],
+                                                    }),
+                                                },
+                                            ],
+                                        },
+                                    ]}
+                                >
                                     <TouchableOpacity
                                         style={tw`bg-white rounded-2xl shadow-sm border border-gray-100 p-4`}
-                                        onPress={() => router.push('/pharmacy' )}
+                                        onPress={() => handlePharmacyPress(pharmacy)}
                                         activeOpacity={0.7}
                                     >
                                         <View style={tw`flex-row items-center justify-between mb-3`}>
@@ -367,20 +371,20 @@ const PharmaciesScreen = () => {
                                         <View style={tw`flex-row justify-end mt-3`}>
                                             <TouchableOpacity
                                                 style={tw`bg-orange-100 rounded-xl py-2 px-4 flex-row items-center`}
-                                                onPress={() => openDirections(pharmacy.address)}
+                                                onPress={() => openDirections()}
                                             >
                                                 <Ionicons name="navigate-circle-outline" size={18} color="#EF4444" style={tw`mr-2`} />
                                                 <Text style={tw`text-orange-600 font-semibold`}>Get Directions</Text>
                                             </TouchableOpacity>
                                         </View>
                                     </TouchableOpacity>
-                            </Animated.View>
-                        ))
-                    )}
+                                </Animated.View>
+                            ))
+                        )}
                     </View>
                 </Animated.View>
             </ScrollView>
-            
+
             <CustomDrawer
                 isVisible={isDrawerVisible}
                 onClose={() => setIsDrawerVisible(false)}

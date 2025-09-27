@@ -68,7 +68,7 @@ const allDrawerItems: DrawerItem[] = [
   },
   {
     label: 'Veterinary Care',
-    route: '/farm/veterinary',
+    route: '/farm/veterinary-care',
     icon: 'medical-outline',
     description: 'Find expert help',
     color: '#EF4444'
@@ -111,6 +111,13 @@ const allDrawerItems: DrawerItem[] = [
     description: 'Edit content',
     adminOnly: true,
     color: '#10B981'
+  },
+  {
+    label: 'Contacts',
+    route: '/user/directory',
+    icon: 'chatbubbles-outline',
+    description: 'Chat with community members',
+    color: '#3B82F6'
   },
   {
     label: 'Settings',
@@ -226,7 +233,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
     onClose();
     try {
       await logout();
-      router.replace('/(auth)/sign-in' as any);
+      router.replace('/auth/sign-in' );
     } catch (error) {
       console.error('Logout error:', error);
     }

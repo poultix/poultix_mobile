@@ -5,6 +5,7 @@ import { UserProvider } from './UserContext';
 import { FarmProvider } from './FarmContext';
 import { ScheduleProvider } from './ScheduleContext';
 import { MessageProvider } from './MessageContext';
+import { ChatProvider } from './ChatContext';
 import { NewsProvider } from './NewsContext';
 import { PharmacyProvider } from './PharmacyContext';
 
@@ -29,11 +30,13 @@ export const RootProvider: React.FC<RootProviderProps> = ({ children }) => {
           <FarmProvider>
             <ScheduleProvider>
               <MessageProvider>
-                <NewsProvider>
-                  <PharmacyProvider>
-                    {children}
-                  </PharmacyProvider>
-                </NewsProvider>
+                <ChatProvider>
+                  <NewsProvider>
+                    <PharmacyProvider>
+                      {children}
+                    </PharmacyProvider>
+                  </NewsProvider>
+                </ChatProvider>
               </MessageProvider>
             </ScheduleProvider>
           </FarmProvider>
