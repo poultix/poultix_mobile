@@ -63,10 +63,14 @@ export default function ChatScreen() {
                     
                     if (parts.length === 3) {
                         [, userId1, userId2] = parts;
+                    } else if (parts.length === 5) {
+                        // Format: chat_user_timestamp_admin_001
+                        userId1 = `${parts[1]}_${parts[2]}`; // "user_timestamp"
+                        userId2 = `${parts[3]}_${parts[4]}`; // "admin_001"
                     } else {
-                        // Handle longer format like chat_user_timestamp_admin_001
-                        userId1 = parts.slice(1, -1).join('_'); // Everything except first and last
-                        userId2 = parts[parts.length - 1]; // Last part
+                        // Fallback: assume last two parts are the user IDs
+                        userId1 = parts.slice(1, -1).join('_');
+                        userId2 = parts[parts.length - 1];
                     }
                     
                     const otherUserId = userId1 === currentUser.id ? userId2 : userId1;
@@ -121,14 +125,20 @@ export default function ChatScreen() {
         if ((chatId as string).includes('_')) {
             const parts = (chatId as string).split('_');
             if (parts.length >= 3) {
-                // Handle both formats: chat_userId1_userId2 and chat_prefix_userId1_userId2
+                // Handle format: chat_user_timestamp_admin_001
+                // Split into: ["chat", "user", "timestamp", "admin", "001"]
+                // We need to reconstruct: userId1 = "user_timestamp", userId2 = "admin_001"
                 let userId1, userId2;
                 if (parts.length === 3) {
                     [, userId1, userId2] = parts;
+                } else if (parts.length === 5) {
+                    // Format: chat_user_timestamp_admin_001
+                    userId1 = `${parts[1]}_${parts[2]}`; // "user_timestamp"
+                    userId2 = `${parts[3]}_${parts[4]}`; // "admin_001"
                 } else {
-                    // Handle longer format like chat_user_timestamp_admin_001
-                    userId1 = parts.slice(1, -1).join('_'); // Everything except first and last
-                    userId2 = parts[parts.length - 1]; // Last part
+                    // Fallback: assume last two parts are the user IDs
+                    userId1 = parts.slice(1, -1).join('_');
+                    userId2 = parts[parts.length - 1];
                 }
                 
                 const otherUserId = userId1 === currentUser.id ? userId2 : userId1;
