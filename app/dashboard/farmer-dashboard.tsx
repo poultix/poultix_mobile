@@ -11,25 +11,30 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import tw from 'twrnc';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
 import DrawerButton from '@/components/DrawerButton';
-import { useRoleBasedData, useFarms, useSchedules } from '@/hooks/useCrud';
-import { useDataRelationships } from '@/hooks/useCrud';
+
+// Context and hook imports
+import { useAuth } from '@/contexts/AuthContext';
+import { useFarms } from '@/contexts/FarmContext';
+import { useSchedules } from '@/contexts/ScheduleContext';
+import { ScheduleStatus } from '@/types/schedule';
+
 
 export default function FarmerDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
-  const { currentUser, isFarmer, getCurrentUserData } = useRoleBasedData();
-  const { getFarmsByUser } = useFarms();
-  const { getSchedulesByUser } = useSchedules();
-  const { getRelatedData } = useDataRelationships();
+  const { currentUser } = useAuth();
+  const { farms } = useFarms();
+  const { schedules } = useSchedules();
 
   const [selectedTab, setSelectedTab] = useState<'overview' | 'farms' | 'schedules'>('overview');
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (!isFarmer) {
+    if (!currentUser || currentUser.role !== 'FARMER') {
       Alert.alert('Access Denied', 'Farmer access required', [
         { text: 'OK', onPress: () => router.back() }
       ]);
@@ -41,29 +46,29 @@ export default function FarmerDashboardScreen() {
       duration: 800,
       useNativeDriver: true,
     }).start();
-  }, [isFarmer]);
+  }, [currentUser]);
 
-  if (!isFarmer || !currentUser) {
+  if (!currentUser || currentUser.role !== 'FARMER') {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
+      <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <Ionicons name="lock-closed-outline" size={64} color="#6B7280" />
-        <Text className="text-gray-600 text-lg mt-4">Access Denied</Text>
+        <Text style={tw`text-gray-600 text-lg mt-4`}>Access Denied</Text>
       </SafeAreaView>
     );
   }
 
-  const userData = getCurrentUserData();
-  const myFarms = getFarmsByUser(currentUser.id);
-  const mySchedules = getSchedulesByUser(currentUser.id);
+  // Filter data for current user
+  const myFarms = farms.filter(farm => farm.owner.id === currentUser.id);
+  const mySchedules = schedules.filter(schedule => schedule.farmer.id === currentUser.id);
 
   // Calculate statistics
-  const totalChickens = myFarms.reduce((sum, farm) => sum + farm.livestock.chickens.total, 0);
-  const healthyChickens = myFarms.reduce((sum, farm) => sum + farm.livestock.chickens.healthy, 0);
-  const sickChickens = myFarms.reduce((sum, farm) => sum + farm.livestock.chickens.sick, 0);
-  const atRiskChickens = myFarms.reduce((sum, farm) => sum + farm.livestock.chickens.atRisk, 0);
+  const totalChickens = myFarms.reduce((sum, farm) => sum + farm.livestock.total, 0);
+  const healthyChickens = myFarms.reduce((sum, farm) => sum + farm.livestock.healthy, 0);
+  const sickChickens = myFarms.reduce((sum, farm) => sum + farm.livestock.sick, 0);
+  const atRiskChickens = myFarms.reduce((sum, farm) => sum + farm.livestock.atRisk, 0);
 
   const upcomingSchedules = mySchedules.filter(s =>
-    s.status === 'scheduled' && new Date(s.scheduledDate) >= new Date()
+    s.status === ScheduleStatus.SCHEDULED && new Date(s.scheduledDate) >= new Date()
   );
 
   const getHealthStatusColor = (status: string) => {
@@ -207,7 +212,8 @@ export default function FarmerDashboardScreen() {
       <View className="bg-white rounded-2xl p-5 shadow-sm">
         <Text className="text-lg font-bold text-gray-800 mb-4">Recent Activity</Text>
         {mySchedules.slice(0, 3).map((schedule) => {
-          const farm = myFarms.find(f => f.id === schedule.farmId);
+          // For now, we'll show the first farm or a default message
+          const farm = myFarms[0];
 
           return (
             <View key={schedule.id} className="flex-row items-center py-3 border-b border-gray-100 last:border-b-0">
@@ -253,7 +259,7 @@ export default function FarmerDashboardScreen() {
           <TouchableOpacity
             key={farm.id}
             className="bg-white rounded-2xl p-5 mb-4 shadow-sm"
-            onPress={() => router.push(`/farm-detail/${farm.id}`)}
+            onPress={() => router.push(`/farm/farm-detail`)}
           >
             <View className="flex-row items-start justify-between mb-3">
               <View className="flex-1">
@@ -274,19 +280,19 @@ export default function FarmerDashboardScreen() {
               <Text className="font-semibold text-gray-800 mb-2">Livestock Overview</Text>
               <View className="flex-row justify-between">
                 <View className="items-center flex-1">
-                  <Text className="text-xl font-bold text-gray-800">{farm.livestock.chickens.total}</Text>
+                  <Text className="text-xl font-bold text-gray-800">{farm.livestock.total}</Text>
                   <Text className="text-gray-600 text-xs">Total</Text>
                 </View>
                 <View className="items-center flex-1">
-                  <Text className="text-xl font-bold text-green-600">{farm.livestock.chickens.healthy}</Text>
+                  <Text className="text-xl font-bold text-green-600">{farm.livestock.healthy}</Text>
                   <Text className="text-gray-600 text-xs">Healthy</Text>
                 </View>
                 <View className="items-center flex-1">
-                  <Text className="text-xl font-bold text-yellow-600">{farm.livestock.chickens.atRisk}</Text>
+                  <Text className="text-xl font-bold text-yellow-600">{farm.livestock.atRisk}</Text>
                   <Text className="text-gray-600 text-xs">At Risk</Text>
                 </View>
                 <View className="items-center flex-1">
-                  <Text className="text-xl font-bold text-red-600">{farm.livestock.chickens.sick}</Text>
+                  <Text className="text-xl font-bold text-red-600">{farm.livestock.sick}</Text>
                   <Text className="text-gray-600 text-xs">Sick</Text>
                 </View>
               </View>
@@ -318,8 +324,8 @@ export default function FarmerDashboardScreen() {
       </View>
 
       {mySchedules.map((schedule) => {
-        const farm = myFarms.find(f => f.id === schedule.farmId);
-        const relatedData = getRelatedData('schedule', schedule.id);
+        // For now, we'll show the first farm or a default message
+        const farm = myFarms[0];
 
         return (
           <TouchableOpacity
@@ -332,7 +338,7 @@ export default function FarmerDashboardScreen() {
                 <Text className="text-lg font-bold text-gray-800">{schedule.title}</Text>
                 <Text className="text-gray-600">{schedule.description}</Text>
                 <Text className="text-sm text-gray-500">
-                  {farm?.name} • {relatedData?.veterinary?.name}
+                  {farm?.name} • {schedule.veterinary?.name}
                 </Text>
               </View>
               <View className={`px-3 py-1 rounded-full border ${schedule.status === 'completed' ? 'bg-green-100 border-green-200' : schedule.status === 'scheduled' ? 'bg-blue-100 border-blue-200' : schedule.status === 'cancelled' ? 'bg-red-100 border-red-200' : 'bg-gray-100 border-gray-200'}`}>
@@ -380,24 +386,24 @@ export default function FarmerDashboardScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <Animated.View className="flex-1" style={{ opacity: fadeAnim }}>
+    <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+      <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
         {/* Header */}
-        <View className="  pb-4">
+        <View style={tw`pb-4`}>
           <LinearGradient
             colors={['#F97316', '#EA580C']}
-            className="rounded-3xl p-8 shadow-xl"
+            style={tw`rounded-3xl p-8 shadow-xl`}
           >
-            <View className="flex-row items-center justify-between mb-4">
+            <View style={tw`flex-row items-center justify-between mb-4`}>
               <View className="flex-1">
-                <Text className="text-white text-sm opacity-90">
+                <Text style={tw`text-white text-sm opacity-90`}>
                   Farmer Dashboard
                 </Text>
-                <Text className="text-white text-2xl font-bold">
+                <Text style={tw`text-white text-2xl font-bold`}>
                   Welcome, {currentUser.name} 🚜
                 </Text>
-                <Text className="text-orange-100 text-sm mt-1">
-                  {currentUser.farmerData?.experience} years experience • {myFarms.length} farms
+                <Text style={tw`text-orange-100 text-sm mt-1`}>
+                  Farmer • {myFarms.length} farms
                 </Text>
               </View>
               <DrawerButton />

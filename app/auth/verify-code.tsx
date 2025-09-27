@@ -15,135 +15,234 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MockAuthService } from '@/services/mockData';
 import { router } from 'expo-router';
-import { useRoute } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 
-interface RouteParams {
-    email: string;
-}
+// New context imports
+import { useAuth } from '@/contexts/AuthContext';
+import { useAuthActions } from '@/hooks/useAuthActions';
 
-export default function VerifyIdentityScreen() {
-    const route = useRoute();
-    const { email } = route.params as RouteParams;
-
+export default function VerifyCodeScreen() {
     const [code, setCode] = useState('');
-    const [isInputFocused, setIsInputFocused] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [timer, setTimer] = useState(60);
+
+    // Use new contexts
+    const { currentUser } = useAuth();
+    const { verifyCode, forgotPassword } = useAuthActions();
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
-    const slideAnim = useRef(new Animated.Value(40)).current;
+    const slideAnim = useRef(new Animated.Value(20)).current;
 
     useEffect(() => {
-        Animated.parallel([
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 800,
-                useNativeDriver: true,
-            }),
-            Animated.spring(slideAnim, {
-                toValue: 0,
-                friction: 8,
-                tension: 50,
-                useNativeDriver: true,
-            }),
-        ]).start();
-    }, []);
-
-    const handleContinue = async () => {
-        try {
-            if (!code) {
-                Alert.alert('Error', 'Please enter the security code');
-                return;
+        // Redirect if already signed in
+        if (currentUser) {
+            switch (currentUser.role) {
+                case 'ADMIN': router.replace('/dashboard/admin-dashboard'); break
+                case 'FARMER': router.replace('/dashboard/farmer-dashboard'); break
+                case 'VETERINARY': router.replace('/dashboard/veterinary-dashboard'); break
+                default: router.replace('/')
             }
-            const result = await MockAuthService.verifyCode(email, code);
-            Alert.alert('Success', result.message);
-            router.push('/auth/create-new-password' );
+        }
+
+        Animated.parallel([
+            Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+            Animated.spring(slideAnim, { toValue: 0, tension: 80, friction: 10, useNativeDriver: true }),
+        ]).start();
+
+        // Start countdown timer
+        const interval = setInterval(() => {
+            setTimer((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [currentUser]);
+
+    const handleVerifyCode = async () => {
+        if (!code.trim() || code.length !== 6) {
+            Alert.alert('Error', 'Please enter a valid 6-digit code');
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            const result = await verifyCode('demo@example.com', code.trim());
+
+            if (result) {
+                Alert.alert(
+                    'Success',
+                    'Code verified successfully!',
+                    [{ text: 'OK', onPress: () => router.push('/auth/create-new-password') }]
+                );
+            } else {
+                Alert.alert('Error', result.error || 'Invalid verification code');
+            }
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Invalid verification code';
-            Alert.alert('Error', errorMessage);
+            console.error('Verify code error:', error);
+            Alert.alert('Error', 'Failed to verify code. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
+    const handleResendCode = async () => {
+        try {
+            const result = await forgotPassword('demo@example.com');
+            if (result.success) {
+                setTimer(60);
+                Alert.alert('Success', 'Verification code sent again!');
+            } else {
+                Alert.alert('Error', 'Failed to resend code');
+            }
+        } catch (error) {
+            console.error('Resend code error:', error);
+            Alert.alert('Error', 'Failed to resend code');
+        }
+    };
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
             <StatusBar style="dark" />
             <KeyboardAvoidingView
+                style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                className="flex-1"
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : 0}
             >
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <ScrollView
-                        contentContainerClassName="flex-grow justify-center px-6"
-                        keyboardShouldPersistTaps="handled"
-                    >
-                        <Animated.View
-                            className="items-center"
-                            style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
-                        >
-                            {/* Icon */}
-                            <View className="mb-8">
-                                <LinearGradient
-                                    colors={['#FF4C00', '#FF6500']}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
-                                    className="w-20 h-20 rounded-2xl items-center justify-center shadow-lg"
-                                >
-                                    <Ionicons name="shield-checkmark" size={36} color="white" />
-                                </LinearGradient>
-                            </View>
-
+                    <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+                        <Animated.View style={[{ flex: 1, paddingHorizontal: 24 }, { opacity: fadeAnim }]}>
                             {/* Header */}
-                            <Text className="text-3xl font-bold text-gray-800 text-center mb-2">
-                                Enter Security Code
-                            </Text>
-                            <Text className="text-gray-500 text-base text-center mb-10">
-                                We sent a code to your email. Enter it to continue.
-                            </Text>
-
-                            {/* Input */}
-                            <View
-                                className={`flex-row items-center px-4 h-14 mb-6 rounded-xl border ${
-                                    isInputFocused ? 'border-amber-500' : 'border-gray-200'
-                                } bg-gray-50 shadow-sm`}
-                            >
-                                <Ionicons name="key-outline" size={22} color="#64748B" />
-                                <TextInput
-                                    className="flex-1 ml-3 text-lg text-gray-800"
-                                    placeholder="0000"
-                                    value={code}
-                                    onChangeText={setCode}
-                                    onFocus={() => setIsInputFocused(true)}
-                                    onBlur={() => setIsInputFocused(false)}
-                                    keyboardType="numeric"
-                                    placeholderTextColor="#94A3AF"
-                                />
-                            </View>
-
-                            {/* Continue Button */}
-                            <TouchableOpacity
-                                onPress={handleContinue}
-                                activeOpacity={0.9}
-                                className="w-full rounded-xl overflow-hidden shadow-lg"
-                            >
-                                <LinearGradient
-                                    colors={['#FF6500', '#FF4C00']}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
-                                    className="h-14 items-center justify-center rounded-xl"
+                            <View style={{ paddingTop: 64, paddingBottom: 32 }}>
+                                <TouchableOpacity
+                                    style={{
+                                        width: 48,
+                                        height: 48,
+                                        borderRadius: 24,
+                                        backgroundColor: '#F3F4F6',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        marginBottom: 32
+                                    }}
+                                    onPress={() => router.back()}
                                 >
-                                    <Text className="text-white font-bold text-lg">Check Code</Text>
-                                </LinearGradient>
-                            </TouchableOpacity>
+                                    <Ionicons name="arrow-back" size={24} color="#374151" />
+                                </TouchableOpacity>
 
-                            {/* Security Note */}
-                            <View className="flex-row items-center mt-8 justify-center">
-                                <Ionicons name="lock-closed" size={14} color="#9CA3AF" className="mr-2" />
-                                <Text className="text-gray-400 text-xs">
-                                    Your information is encrypted and secure
+                                <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#111827', marginBottom: 12 }}>
+                                    Verify Code
+                                </Text>
+                                <Text style={{ color: '#6B7280', fontSize: 18, lineHeight: 24 }}>
+                                    Enter the 6-digit verification code sent to your email address.
                                 </Text>
                             </View>
+
+                            {/* Code Input */}
+                            <Animated.View style={[{ flex: 1 }, { transform: [{ translateY: slideAnim }] }]}>
+                                <View style={{ marginBottom: 24 }}>
+                                    <Text style={{ color: '#374151', fontWeight: '600', marginBottom: 8 }}>
+                                        Verification Code
+                                    </Text>
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        backgroundColor: '#F9FAFB',
+                                        borderRadius: 16,
+                                        paddingHorizontal: 16,
+                                        paddingVertical: 16,
+                                        borderWidth: 1,
+                                        borderColor: '#E5E7EB'
+                                    }}>
+                                        <Ionicons name="shield-checkmark-outline" size={20} color="#9CA3AF" />
+                                        <TextInput
+                                            style={{
+                                                flex: 1,
+                                                marginLeft: 12,
+                                                color: '#111827',
+                                                fontSize: 16,
+                                                letterSpacing: 2,
+                                                textAlign: 'center'
+                                            }}
+                                            placeholder="000000"
+                                            placeholderTextColor="#9CA3AF"
+                                            value={code}
+                                            onChangeText={setCode}
+                                            keyboardType="numeric"
+                                            maxLength={6}
+                                            autoFocus
+                                        />
+                                    </View>
+                                </View>
+
+                                {/* Timer */}
+                                <View style={{ alignItems: 'center', marginBottom: 32 }}>
+                                    {timer > 0 ? (
+                                        <Text style={{ color: '#6B7280', fontSize: 16 }}>
+                                            Resend code in {formatTime(timer)}
+                                        </Text>
+                                    ) : (
+                                        <TouchableOpacity onPress={handleResendCode}>
+                                            <Text style={{ color: '#F59E0B', fontSize: 16, fontWeight: '600' }}>
+                                                Resend Code
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
+
+                                {/* Verify Button */}
+                                <TouchableOpacity
+                                    style={{
+                                        backgroundColor: '#F59E0B',
+                                        borderRadius: 16,
+                                        paddingVertical: 16,
+                                        paddingHorizontal: 24,
+                                        shadowColor: '#F59E0B',
+                                        shadowOffset: { width: 0, height: 4 },
+                                        shadowOpacity: 0.3,
+                                        shadowRadius: 8,
+                                        elevation: 8,
+                                        opacity: isLoading ? 0.5 : 1
+                                    }}
+                                    onPress={handleVerifyCode}
+                                    disabled={isLoading}
+                                >
+                                    <Text style={{
+                                        color: 'white',
+                                        fontWeight: 'bold',
+                                        fontSize: 18,
+                                        textAlign: 'center'
+                                    }}>
+                                        {isLoading ? 'Verifying...' : 'Verify Code'}
+                                    </Text>
+                                </TouchableOpacity>
+
+                                {/* Back to Sign In */}
+                                <View style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'center',
+                                    marginTop: 32,
+                                    marginBottom: 24
+                                }}>
+                                    <Text style={{ color: '#6B7280', fontSize: 16 }}>
+                                        Remember your password?
+                                    </Text>
+                                    <TouchableOpacity onPress={() => router.push('/auth/sign-in')}>
+                                        <Text style={{ color: '#F59E0B', fontWeight: '600', fontSize: 16 }}>
+                                            {' '}Sign In
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </Animated.View>
                         </Animated.View>
                     </ScrollView>
                 </TouchableWithoutFeedback>

@@ -7,7 +7,8 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useRef, useEffect } from 'react';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAuthActions } from '@/hooks/useAuthActions';
 
 const { width } = Dimensions.get('window');
 
@@ -82,7 +83,8 @@ const getScreenIcon = (pathname: string): keyof typeof Ionicons.glyphMap => {
 export default function TopNavigation() {
     const pathname = usePathname()
     const { toggleDrawer } = useDrawer()
-    const { logout, state } = useApp()
+    const { currentUser } = useAuth()
+    const { logout } = useAuthActions()
     const fadeAnim = useRef(new Animated.Value(0)).current
     const slideAnim = useRef(new Animated.Value(-20)).current
     
@@ -191,7 +193,7 @@ export default function TopNavigation() {
                     {/* Action Buttons */}
                     <View style={tw`flex-row gap-2`}>
                         {/* Logout Button - only show if user is logged in */}
-                        {state.currentUser && (
+                        {currentUser && (
                             <TouchableOpacity
                                 onPress={handleLogout}
                                 style={tw`bg-red-50 border border-red-200 rounded-full p-3 shadow-lg`}

@@ -16,7 +16,7 @@ import { router } from 'expo-router';
 import tw from 'twrnc';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useApp } from '@/contexts/AppContext';
+import { useAuth, useAuthActions } from '@/contexts/AuthContext';
 
 interface DrawerItem {
   label: string;
@@ -127,7 +127,8 @@ interface CustomDrawerProps {
 }
 
 export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) {
-  const { logout, state } = useApp();
+  const { currentUser } = useAuth();
+  const { logout } = useAuthActions();
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const drawerWidth = screenWidth * 0.85; // 85% of screen width
   const slideAnim = useRef(new Animated.Value(-drawerWidth)).current;
@@ -141,18 +142,18 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
   const [filteredItems, setFilteredItems] = useState<DrawerItem[]>([]);
 
   useEffect(() => {
-    // Update user info when currentUser changes in AppContext
-    if (state.currentUser) {
+    // Update user info when currentUser changes in AuthContext
+    if (currentUser) {
       setUserInfo({
-        name: state.currentUser.name,
-        email: state.currentUser.email,
-        role: state.currentUser.role
+        name: currentUser.name,
+        email: currentUser.email,
+        role: currentUser.role
       });
     } else {
       // Load from AsyncStorage if not in context (fallback)
       loadUserInfo();
     }
-  }, [state.currentUser]);
+  }, [currentUser]);
 
   useEffect(() => {
     filterItemsByRole();

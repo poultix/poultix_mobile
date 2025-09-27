@@ -16,18 +16,27 @@ import { LinearGradient } from 'expo-linear-gradient'
 import * as Haptics from 'expo-haptics'
 import tw from 'twrnc'
 import { router } from 'expo-router'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { News, NewsPriority, NewsCategory } from '@/types/news'
+
+// New context imports
+import { useAuth } from '@/contexts/AuthContext'
+import { useNews } from '@/contexts/NewsContext'
+import { useNewsActions } from '@/hooks/useNewsActions'
 
 
 
 export default function AddNewsScreen() {
-  const [article, setArticle] = useState<NewsArticle>({
+  // Use new contexts
+  const { currentUser } = useAuth()
+  const { isLoading } = useNews()
+  const { createNews } = useNewsActions()
+  
+  const [article, setArticle] = useState<Partial<News>>({
     title: '',
     content: '',
-    category: 'general',
-    priority: 'medium',
-    tags: [],
-    author: ''
+    category: NewsCategory.GENERAL,
+    priority: NewsPriority.MEDIUM,
+    tags: []
   })
   const [tagInput, setTagInput] = useState('')
   const [isPublishing, setIsPublishing] = useState(false)
@@ -38,8 +47,6 @@ export default function AddNewsScreen() {
   const formAnim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
-    checkAdminAccess()
-    loadUserData()
     
     Animated.sequence([
       Animated.timing(fadeAnim, {
@@ -64,27 +71,16 @@ export default function AddNewsScreen() {
     ]).start()
   }, [])
 
-  const checkAdminAccess = async () => {
-    try {
-      const role = await AsyncStorage.getItem('role')
-      if (role !== 'admin') {
-        Alert.alert('Access Denied', 'You need admin privileges to add news.', [
-          { text: 'OK', onPress: () => router.back() }
-        ])
-      }
-    } catch (error) {
-      console.error('Error checking admin access:', error)
+  // Check admin access
+  useEffect(() => {
+    if (currentUser && currentUser.role !== 'ADMIN') {
+      Alert.alert(
+        'Access Denied',
+        'Only administrators can add news articles.',
+        [{ text: 'OK', onPress: () => router.back() }]
+      )
     }
-  }
-
-  const loadUserData = async () => {
-    try {
-      const email = await AsyncStorage.getItem('userEmail')
-      setArticle(prev => ({ ...prev, author: email?.split('@')[0] || 'Admin' }))
-    } catch (error) {
-      console.error('Error loading user data:', error)
-    }
-  }
+  }, [currentUser])
 
   const addTag = () => {
     if (tagInput.trim() && !article.tags.includes(tagInput.trim())) {
@@ -96,58 +92,46 @@ export default function AddNewsScreen() {
     }
   }
 
-  const removeTag = (tagToRemove: string) => {
-    setArticle(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }))
-  }
-
-  const validateForm = (): boolean => {
-    if (!article.title.trim()) {
-      Alert.alert('Validation Error', 'Please enter a title for the article.')
-      return false
+  const handlePublish = async () => {
+    if (!article.title?.trim() || !article.content?.trim()) {
+      Alert.alert('Missing Information', 'Please fill in both title and content.')
+      return
     }
-    if (!article.content.trim()) {
-      Alert.alert('Validation Error', 'Please enter content for the article.')
-      return false
-    }
-    if (article.content.length < 50) {
-      Alert.alert('Validation Error', 'Article content should be at least 50 characters long.')
-      return false
-    }
-    return true
-  }
 
-  const publishArticle = async () => {
-    if (!validateForm()) return
-
-    setIsPublishing(true)
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+    if (!currentUser) {
+      Alert.alert('Error', 'User not authenticated')
+      return
+    }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      setIsPublishing(true)
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
       
-      // Here you would normally send to your backend
-      console.log('Publishing article:', article)
+      // Create news article using context action
+      await createNews({
+        title: article.title!,
+        content: article.content!,
+        category: article.category || NewsCategory.GENERAL,
+        priority: article.priority || NewsPriority.MEDIUM,
+        tags: article.tags || [],
+        author: currentUser,
+        publishedAt: new Date(),
+        isPublished: true
+      })
       
       Alert.alert(
         'Success!',
-        'Your news article has been published successfully.',
-        [
-          { text: 'Add Another', onPress: () => resetForm() },
-          { text: 'View News', onPress: () => router.push('/general/news' ) }
-        ]
+        'News article has been published successfully.',
+        [{ text: 'OK', onPress: () => router.back() }]
       )
+      
     } catch (error) {
-      Alert.alert('Error', 'Failed to publish article. Please try again.')
       console.error('Error publishing article:', error)
+      Alert.alert('Error', 'Failed to publish article. Please try again.')
     } finally {
       setIsPublishing(false)
     }
   }
-
   const resetForm = () => {
     setArticle({
       title: '',

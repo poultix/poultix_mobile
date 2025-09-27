@@ -1,113 +1,133 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  Animated,
-  Alert,
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    SafeAreaView,
+    ScrollView,
+    Animated,
+    Alert,
 } from 'react-native';
-import { MockAuthService } from '@/services/mockData';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
 import tw from 'twrnc';
+import { router } from 'expo-router';
+
+// New context imports
+import { useAuth } from '@/contexts/AuthContext';
+import { useAuthActions } from '@/hooks/useAuthActions';
 
 export default function ForgotPasswordScreen() {
-  const [email, setEmail] = useState('');
-  const [fadeAnim] = useState(new Animated.Value(0));
+    const [email, setEmail] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    
+    // Use new contexts
+    const { currentUser } = useAuth();
+    const { forgotPassword } = useAuthActions();
+    
+    const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: true,
-    }).start();
-  }, []);
+    useEffect(() => {
+        // Redirect if already signed in
+        if (currentUser) {
+            router.replace('/(drawer)/index');
+            return;
+        }
 
-  const handleSendEmail = async () => {
-    try {router.push('/auth/verify-code');
-      const result = await MockAuthService.forgotPassword(email);
-      Alert.alert('Success', result.message);
-      
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to send reset email';
-      Alert.alert('Error', errorMessage);
-    }
-  };
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+        }).start();
+    }, [currentUser]);
 
-  return (
-    <View className="flex-1 bg-white">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
-      >
-        <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
-          {/* Header */}
-          <View className="mb-8">
-            <LinearGradient
-              colors={['#EF4444', '#DC2626']}
-              className="rounded-b-3xl p-8 shadow-xl"
-            >
-              <View className="items-center mt-4">
-                <TouchableOpacity
-                  onPress={() => router.back()}
-                  className="absolute left-0 top-0 bg-white/20 p-3 rounded-2xl"
-                >
-                  <Ionicons name="arrow-back" size={20} color="white" />
-                </TouchableOpacity>
+    const handleForgotPassword = async () => {
+        if (!email.trim()) {
+            Alert.alert('Error', 'Please enter your email address');
+            return;
+        }
 
-                <View className="w-20 h-20 bg-white/20 rounded-full items-center justify-center mb-4">
-                  <Ionicons name="key" size={32} color="white" />
-                </View>
-                <Text className="text-white text-3xl font-bold mb-2">
-                  Reset Password 🔑
-                </Text>
-                <Text className="text-red-100 text-base text-center">
-                  Enter your email to receive reset instructions
-                </Text>
-              </View>
-            </LinearGradient>
-          </View>
+        try {
+            setIsLoading(true);
+            const result = await forgotPassword(email.trim());
+            
+            if (result.success) {
+                Alert.alert(
+                    'Success',
+                    'Password reset instructions have been sent to your email.',
+                    [{ text: 'OK', onPress: () => router.push('/auth/sign-in') }]
+                );
+            } else {
+                Alert.alert('Error', result.error || 'Failed to send reset email');
+            }
+        } catch (error) {
+            console.error('Forgot password error:', error);
+            Alert.alert('Error', 'Failed to send reset email. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-          {/* Form */}
-          <View className="px-6">
-            {/* Email Input */}
-            <View className="bg-gray-50 rounded-xl border border-gray-200 shadow-sm flex-row items-center px-4 h-14">
-              <Ionicons name="mail-outline" size={22} color="#64748B" />
-              <TextInput
-                className="flex-1 ml-3 text-lg text-gray-800"
-                placeholder="johndoe@example.com"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                placeholderTextColor="#94A3B8"
-              />
-            </View>
+    return (
+        <SafeAreaView style={tw`flex-1 bg-white`}>
+            <ScrollView contentContainerStyle={tw`flex-grow`} keyboardShouldPersistTaps="handled">
+                <Animated.View style={[tw`flex-1 px-6`, { opacity: fadeAnim }]}>
+                    {/* Header */}
+                    <View style={tw`pt-16 pb-8`}>
+                        <TouchableOpacity
+                            style={tw`w-12 h-12 rounded-full bg-gray-100 items-center justify-center mb-8`}
+                            onPress={() => router.back()}
+                        >
+                            <Ionicons name="arrow-back" size={24} color="#374151" />
+                        </TouchableOpacity>
+                        
+                        <Text style={tw`text-4xl font-bold text-gray-900 mb-3`}>
+                            Forgot Password?
+                        </Text>
+                        <Text style={tw`text-gray-600 text-lg leading-6`}>
+                            Don't worry! Enter your email address and we'll send you instructions to reset your password.
+                        </Text>
+                    </View>
 
-            {/* Send Email Button */}
-            <TouchableOpacity
-              onPress={handleSendEmail}
-              activeOpacity={0.9}
-              className="rounded-xl overflow-hidden shadow-lg mt-6"
-            >
-              <LinearGradient
-                colors={['#FF6500', '#FF4C00']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                className="p-4 items-center justify-center"
-              >
-                <Text className="text-white font-bold text-lg tracking-wide">
-                  Send Recovery Email
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
-      </KeyboardAvoidingView>
-    </View>
-  );
+                    {/* Form */}
+                    <View style={tw`flex-1`}>
+                        <View style={tw`mb-6`}>
+                            <Text style={tw`text-gray-700 font-semibold mb-2`}>Email Address</Text>
+                            <View style={tw`flex-row items-center bg-gray-50 rounded-2xl px-4 py-4 border border-gray-200`}>
+                                <Ionicons name="mail-outline" size={20} color="#9CA3AF" />
+                                <TextInput
+                                    style={tw`flex-1 ml-3 text-gray-900 text-base`}
+                                    placeholder="Enter your email"
+                                    placeholderTextColor="#9CA3AF"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                />
+                            </View>
+                        </View>
+
+                        <TouchableOpacity
+                            style={tw`bg-orange-500 rounded-2xl py-4 px-6 shadow-lg ${isLoading ? 'opacity-50' : ''}`}
+                            onPress={handleForgotPassword}
+                            disabled={isLoading}
+                        >
+                            <Text style={tw`text-white font-bold text-lg text-center`}>
+                                {isLoading ? 'Sending...' : 'Send Reset Instructions'}
+                            </Text>
+                        </TouchableOpacity>
+
+                        <View style={tw`flex-row justify-center mt-8`}>
+                            <Text style={tw`text-gray-500 text-base`}>Remember your password? </Text>
+                            <TouchableOpacity onPress={() => router.push('/auth/sign-in')}>
+                                <Text style={tw`text-orange-600 font-semibold text-base`}>Sign In</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Animated.View>
+            </ScrollView>
+        </SafeAreaView>
+    );
 }

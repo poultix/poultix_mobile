@@ -13,11 +13,13 @@ import {
 import { router } from 'expo-router'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useApp } from '@/contexts/AppContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { useAuthActions } from '@/hooks/useAuthActions'
 import { StatusBar } from 'expo-status-bar'
 
 export default function SignInScreen() {
-    const { login, state } = useApp()
+    const { currentUser, isLoading: authLoading } = useAuth()
+    const { login } = useAuthActions()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -39,11 +41,11 @@ export default function SignInScreen() {
     const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
 
     useEffect(() => {
-        if (state.currentUser) {
-            switch (state.currentUser.role) {
-                case 'admin': router.replace('/dashboard/admin-dashboard'); break
-                case 'farmer': router.replace('/dashboard/farmer-dashboard'); break
-                case 'veterinary': router.replace('/dashboard/veterinary-dashboard'); break
+        if (currentUser) {
+            switch (currentUser.role) {
+                case 'ADMIN': router.replace('/dashboard/admin-dashboard'); break
+                case 'FARMER': router.replace('/dashboard/farmer-dashboard'); break
+                case 'VETERINARY': router.replace('/dashboard/veterinary-dashboard'); break
                 default: router.replace('/')
             }
             return
@@ -53,7 +55,7 @@ export default function SignInScreen() {
             Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
             Animated.timing(slideAnim, { toValue: 0, duration: 800, useNativeDriver: true }),
         ]).start()
-    }, [state.currentUser])
+    }, [currentUser])
 
     const handleSignIn = async () => {
         setEmailError('')
@@ -73,19 +75,18 @@ export default function SignInScreen() {
                 Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
                 Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
             ]).start()
-            Vibration.vibrate([0, 30, 30, 30])
             return
         }
 
         try {
             Vibration.vibrate(20)
-            setIsLoading(true)
+            if (authLoading) return
             const user = await login(email.trim(), password.trim())
-
-            switch (user.role) {
-                case 'admin': router.replace('/dashboard/admin-dashboard'); break
-                case 'farmer': router.replace('/dashboard/farmer-dashboard'); break
-                case 'veterinary': router.replace('/dashboard/veterinary-dashboard'); break
+console.log('user result',user)
+            switch (user.user.role) {
+                case 'ADMIN': router.replace('/dashboard/admin-dashboard'); break
+                case 'FARMER': router.replace('/dashboard/farmer-dashboard'); break
+                case 'VETERINARY': router.replace('/dashboard/veterinary-dashboard'); break
                 default: router.replace('/')
             }
         } catch (error) {

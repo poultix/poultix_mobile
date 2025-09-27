@@ -62,43 +62,28 @@ export default function FarmDataScreen() {
   const notificationAnim = useRef(new Animated.Value(0)).current;
 
 
+  // Set current farm for the user
+  useEffect(() => {
+    if (currentUser && farms.length > 0 && !currentFarm) {
+      // Find user's farm
+      const userFarm = farms.find(farm => farm.owner.id === currentUser.id);
+      if (userFarm) {
+        setCurrentFarm(userFarm);
+      }
+    }
+  }, [currentUser, farms, currentFarm, setCurrentFarm]);
+
   // Card health colors based on farm status
   const healthColors = useMemo(() => {
-    const sickPercentage = farmData?.livestock ? (farmData.livestock.sick / totalChickens) * 100 : 0;
+    const sickPercentage = currentFarm?.livestock ? (currentFarm.livestock.sick / totalChickens) * 100 : 0;
     return {
       primary: sickPercentage > 20 ? '#EF4444' : sickPercentage > 10 ? '#F59E0B' : '#10B981',
       secondary: sickPercentage > 20 ? '#FF6B6B' : sickPercentage > 10 ? '#FBBF24' : '#34D399',
       background: sickPercentage > 20 ? '#FEF2F2' : sickPercentage > 10 ? '#FEF3C7' : '#ECFDF5',
     };
-  }, [farmData, totalChickens]);
-  const fetchfarmData = async (showLoader = true) => {
-    if (showLoader) setLoading(true);
-    try {
-      const token = await AsyncStorage.getItem('token')
-      if (token) {
-        const farms = await MockDataService.getFarms()
-        if (farms.length > 0) {
-          setFarmData(farms[0])
-        }
-
-        setWeatherPreview({
-          temp: Math.floor(Math.random() * 20) + 15,
-          condition: ['sunny', 'cloudy', 'rainy'][Math.floor(Math.random() * 3)],
-          humidity: Math.floor(Math.random() * 30) + 50,
-        })
-      }
-    } catch (error) {
-      console.error('Error fetching farm data:', error)
-      Alert.alert('Error', 'Failed to load farm data. Please try again.')
-    } finally {
-      if (showLoader) setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-
-  useEffect(() => {
-
+  }, [currentFarm, totalChickens]);
+  // Start animations
+  const startAnimations = () => {
     Animated.sequence([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -138,14 +123,24 @@ export default function FarmDataScreen() {
         }),
       ]),
     ]).start();
-    fetchfarmData()
+  };
+
+
+  useEffect(() => {
+    startAnimations();
+    // Update weather preview
+    setWeatherPreview({
+      temp: Math.floor(Math.random() * 20) + 15,
+      condition: ['sunny', 'cloudy', 'rainy'][Math.floor(Math.random() * 3)],
+      humidity: Math.floor(Math.random() * 30) + 50,
+    });
   }, []);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchfarmData(false);
-    }, [])
-  );
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    // Refresh will be handled by context
+    setRefreshing(false);
+  };
 
   const handleNavigation = (path: any) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
@@ -176,11 +171,18 @@ export default function FarmDataScreen() {
     }
   };
 
-  const healthyPercentage = farmData?.livestock ? (farmData.livestock.healthy / totalChickens) * 100 : 0;
-  const sickPercentage = farmData?.livestock ? (farmData.livestock.sick / totalChickens) * 100 : 0;
-  const atRiskPercentage = farmData?.livestock ? (farmData.livestock.atRisk / totalChickens) * 100 : 0;
+  const sickPercentage = currentFarm?.livestock ? (currentFarm.livestock.sick / totalChickens) * 100 : 0;
+  const atRiskPercentage = currentFarm?.livestock ? (currentFarm.livestock.atRisk / totalChickens) * 100 : 0;
 
 
+
+  if (!currentFarm) {
+    return (
+      <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+        <Text style={tw`text-gray-600 text-lg`}>No farm data available</Text>
+      </SafeAreaView>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -191,7 +193,6 @@ export default function FarmDataScreen() {
       </View>
     );
   }
-
   return (
     <SafeAreaView style={tw`flex-1 bg-gray-50`}>
       <ScrollView
@@ -211,10 +212,10 @@ export default function FarmDataScreen() {
                     Farm Management
                   </Text>
                   <Text style={tw`text-white text-2xl font-bold`}>
-                    {farmData.farmName} 🚜
+                    {currentFarm.name} 🚜
                   </Text>
                   <Text style={tw`text-green-100 text-sm mt-1`}>
-                    {farmData.locations}
+                    {currentFarm.location.address}
                   </Text>
                 </View>
                 <DrawerButton />
@@ -229,15 +230,15 @@ export default function FarmDataScreen() {
                     <Text style={tw`text-green-100 text-xs font-medium`}>Total Birds</Text>
                   </View>
                   <View style={tw`items-center flex-1`}>
-                    <Text style={tw`text-green-200 text-2xl font-bold`}>{farmData.chickens.healthyChickens}</Text>
+                    <Text style={tw`text-green-200 text-2xl font-bold`}>{currentFarm.livestock.healthy}</Text>
                     <Text style={tw`text-green-100 text-xs font-medium`}>Healthy</Text>
                   </View>
                   <View style={tw`items-center flex-1`}>
-                    <Text style={tw`text-yellow-200 text-2xl font-bold`}>{farmData.chickens.riskChickens}</Text>
+                    <Text style={tw`text-yellow-200 text-2xl font-bold`}>{currentFarm.livestock.atRisk}</Text>
                     <Text style={tw`text-green-100 text-xs font-medium`}>At Risk</Text>
                   </View>
                   <View style={tw`items-center flex-1`}>
-                    <Text style={tw`text-red-200 text-2xl font-bold`}>{farmData.chickens.sickChickens}</Text>
+                    <Text style={tw`text-red-200 text-2xl font-bold`}>{currentFarm.livestock.sick}</Text>
                     <Text style={tw`text-green-100 text-xs font-medium`}>Sick</Text>
                   </View>
                 </View>

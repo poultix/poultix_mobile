@@ -16,8 +16,13 @@ import { router } from 'expo-router';
 
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { MockDataService, mockVeterinaries } from '@/services/mockData';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ScheduleType, SchedulePriority } from '@/types/schedule';
+
+// New context imports
+import { useAuth } from '@/contexts/AuthContext';
+import { useSchedules } from '@/contexts/ScheduleContext';
+import { useScheduleActions } from '@/hooks/useScheduleActions';
+import { useUsers } from '@/contexts/UserContext';
 
 export default function ScheduleRequestScreen() {
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
@@ -25,11 +30,20 @@ export default function ScheduleRequestScreen() {
     const [requestedDate, setRequestedDate] = useState('');
     const [preferredTime, setPreferredTime] = useState('');
     const [reason, setReason] = useState('');
-    const [urgency, setUrgency] = useState('medium');
+    const [urgency, setUrgency] = useState<SchedulePriority>(SchedulePriority.MEDIUM);
     const [notes, setNotes] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    
+    // Use new contexts
+    const { currentUser } = useAuth();
+    const { isLoading } = useSchedules();
+    const { createSchedule } = useScheduleActions();
+    const { users } = useUsers();
+    
     const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    // Get veterinaries from users
+    const veterinaries = users.filter(user => user.role === 'VETERINARY');
 
     useEffect(() => {
         Animated.timing(fadeAnim, {
@@ -39,244 +53,204 @@ export default function ScheduleRequestScreen() {
         }).start();
     }, []);
 
-    const handleSubmitRequest = async () => {
-        if (!selectedVet || !requestedDate || !preferredTime || !reason) {
-            Alert.alert('Missing Information', 'Please fill in all required fields.');
+    const handleSubmit = async () => {
+        if (!selectedVet || !requestedDate || !reason.trim()) {
+            Alert.alert('Error', 'Please fill in all required fields');
             return;
         }
 
-        setIsSubmitting(true);
+        if (!currentUser) {
+            Alert.alert('Error', 'User not authenticated');
+            return;
+        }
 
         try {
-            const farmerData = await AsyncStorage.getItem('farmerData');
-            const farmer = farmerData ? JSON.parse(farmerData) : null;
+            setIsSubmitting(true);
+            
+            await createSchedule({
+                title: `Veterinary Visit - ${reason}`,
+                description: notes || reason,
+                type: ScheduleType.VETERINARY_VISIT,
+                priority: urgency,
+                scheduledDate: new Date(requestedDate),
+                scheduledTime: preferredTime,
+                farmerId: currentUser.id,
+                veterinaryId: selectedVet.id,
+                notes: notes
+            });
 
-            const request = {
-                farmerId: farmer?._id || 'farmer_001',
-                veterinaryId: selectedVet.id || 'vet_001',
-                farmerName: farmer?.names || 'John Uwimana',
-                veterinaryName: selectedVet.name,
-                farmName: 'Sunrise Poultry Farm', // This should come from farmer data
-                requestedDate: new Date(requestedDate),
-                preferredTime,
-                reason,
-                urgency,
-                notes,
-            };
-
-            const result = await MockDataService.createScheduleRequest(request);
-
-            if (result.success) {
-                Alert.alert(
-                    'Request Sent!',
-                    'Your schedule request has been sent to the veterinary. You will be notified once they respond.',
-                    [{ text: 'OK', onPress: () => router.back() }]
-                );
-            }
+            Alert.alert(
+                'Success!',
+                'Your veterinary appointment request has been submitted successfully.',
+                [{ text: 'OK', onPress: () => router.back() }]
+            );
         } catch (error) {
             console.error('Error submitting request:', error);
-            Alert.alert('Error', 'Failed to send request. Please try again.');
+            Alert.alert('Error', 'Failed to submit request. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const urgencyColors = {
-        low: { bg: '#F3F4F6', text: '#6B7280', border: '#D1D5DB' },
-        medium: { bg: '#FEF3C7', text: '#D97706', border: '#F59E0B' },
-        high: { bg: '#FEE2E2', text: '#DC2626', border: '#EF4444' },
-    };
+    if (isLoading || !currentUser) {
+        return (
+            <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+                <Text style={tw`text-gray-600 text-lg`}>Loading...</Text>
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+            <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
             
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
-                    {/* Header */}
-                    <View style={tw`px-4 pt-2 pb-4`}>
-                        <LinearGradient
-                            colors={['#3B82F6', '#2563EB']}
-                            style={tw`rounded-3xl p-8 shadow-xl`}
-                        >
-                            <View style={tw`flex-row items-center justify-between mb-4`}>
+            <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
+                {/* Header */}
+                <View style={tw`px-4 pt-2 pb-4`}>
+                    <LinearGradient
+                        colors={['#10B981', '#059669']}
+                        style={tw`rounded-3xl p-6 shadow-xl`}
+                    >
+                        <View style={tw`flex-row items-center justify-between`}>
+                            <TouchableOpacity
+                                style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
+                                onPress={() => router.back()}
+                            >
+                                <Ionicons name="arrow-back" size={24} color="white" />
+                            </TouchableOpacity>
+                            <View style={tw`flex-1 ml-4`}>
+                                <Text style={tw`text-white font-medium`}>Schedule Request</Text>
+                                <Text style={tw`text-white text-2xl font-bold`}>Book Veterinary Visit 🏥</Text>
+                                <Text style={tw`text-green-100 text-sm`}>
+                                    Request professional veterinary care
+                                </Text>
+                            </View>
+                        </View>
+                    </LinearGradient>
+                </View>
+
+                <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
+                    {/* Veterinary Selection */}
+                    <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
+                        <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
+                            Select Veterinary *
+                        </Text>
+                        {veterinaries.map((vet, index) => (
+                            <TouchableOpacity
+                                key={vet.id}
+                                style={tw`flex-row items-center p-4 rounded-xl mb-2 ${
+                                    selectedVet?.id === vet.id ? 'bg-green-50 border-2 border-green-500' : 'bg-gray-50'
+                                }`}
+                                onPress={() => setSelectedVet(vet)}
+                            >
+                                <View style={tw`w-12 h-12 rounded-full bg-green-500 items-center justify-center mr-4`}>
+                                    <Text style={tw`text-white font-bold text-lg`}>
+                                        {vet.name.charAt(0)}
+                                    </Text>
+                                </View>
                                 <View style={tw`flex-1`}>
-                                    <Text style={tw`text-white text-sm opacity-90`}>
-                                        Schedule Request
-                                    </Text>
-                                    <Text style={tw`text-white text-2xl font-bold`}>
-                                        Book Veterinary Visit 📅
-                                    </Text>
-                                    <Text style={tw`text-blue-100 text-sm mt-1`}>
-                                        Request a visit from a veterinary professional
-                                    </Text>
+                                    <Text style={tw`font-semibold text-gray-800`}>{vet.name}</Text>
+                                    <Text style={tw`text-gray-600 text-sm`}>{vet.email}</Text>
                                 </View>
-                                <TouchableOpacity
-                                    style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
-                                    onPress={() => router.back()}
-                                >
-                                    <Ionicons name="arrow-back-outline" size={24} color="white" />
-                                </TouchableOpacity>
-                            </View>
-                        </LinearGradient>
+                                {selectedVet?.id === vet.id && (
+                                    <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+                                )}
+                            </TouchableOpacity>
+                        ))}
                     </View>
 
-                    <View style={tw`px-4`}>
-                        {/* Select Veterinary */}
-                        <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-                            <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                                Select Veterinary
-                            </Text>
-                            {mockVeterinaries.map((vet, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    style={[
-                                        tw`p-4 rounded-xl mb-3 border-2`,
-                                        selectedVet?.name === vet.name
-                                            ? tw`bg-blue-50 border-blue-500`
-                                            : tw`bg-gray-50 border-gray-200`
-                                    ]}
-                                    onPress={() => setSelectedVet({ ...vet, id: `vet_00${index + 1}` })}
-                                >
-                                    <View style={tw`flex-row items-center justify-between`}>
-                                        <View style={tw`flex-1`}>
-                                            <Text style={tw`font-semibold text-gray-800`}>
-                                                {vet.name}
-                                            </Text>
-                                            <Text style={tw`text-gray-600 text-sm`}>
-                                                {vet.location} • {vet.specialization}
-                                            </Text>
-                                            <Text style={tw`text-gray-500 text-xs`}>
-                                                {vet.experience} • ⭐ {vet.rating}
-                                            </Text>
-                                        </View>
-                                        {selectedVet?.name === vet.name && (
-                                            <Ionicons name="checkmark-circle" size={24} color="#3B82F6" />
-                                        )}
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
+                    {/* Date & Time */}
+                    <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
+                        <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
+                            Preferred Date & Time *
+                        </Text>
+                        <View style={tw`mb-4`}>
+                            <Text style={tw`text-gray-700 font-medium mb-2`}>Date</Text>
+                            <TextInput
+                                style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
+                                placeholder="YYYY-MM-DD"
+                                value={requestedDate}
+                                onChangeText={setRequestedDate}
+                            />
                         </View>
-
-                        {/* Date and Time */}
-                        <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-                            <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                                Preferred Date & Time
-                            </Text>
-                            
-                            <View style={tw`mb-4`}>
-                                <Text style={tw`text-gray-700 font-medium mb-2`}>Date *</Text>
-                                <TextInput
-                                    style={tw`border border-gray-300 rounded-xl p-4 text-gray-800`}
-                                    placeholder="YYYY-MM-DD (e.g., 2024-06-28)"
-                                    value={requestedDate}
-                                    onChangeText={setRequestedDate}
-                                />
-                            </View>
-
-                            <View>
-                                <Text style={tw`text-gray-700 font-medium mb-2`}>Preferred Time *</Text>
-                                <View style={tw`flex-row flex-wrap gap-2`}>
-                                    {['08:00', '10:00', '14:00', '16:00'].map((time) => (
-                                        <TouchableOpacity
-                                            key={time}
-                                            style={[
-                                                tw`px-4 py-2 rounded-full border`,
-                                                preferredTime === time
-                                                    ? tw`bg-blue-500 border-blue-500`
-                                                    : tw`bg-gray-100 border-gray-300`
-                                            ]}
-                                            onPress={() => setPreferredTime(time)}
-                                        >
-                                            <Text style={[
-                                                tw`font-medium`,
-                                                preferredTime === time ? tw`text-white` : tw`text-gray-700`
-                                            ]}>
-                                                {time}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
+                        <View>
+                            <Text style={tw`text-gray-700 font-medium mb-2`}>Preferred Time</Text>
+                            <TextInput
+                                style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
+                                placeholder="e.g., Morning, 10:00 AM, Afternoon"
+                                value={preferredTime}
+                                onChangeText={setPreferredTime}
+                            />
                         </View>
-
-                        {/* Reason and Urgency */}
-                        <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-                            <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                                Visit Details
-                            </Text>
-                            
-                            <View style={tw`mb-4`}>
-                                <Text style={tw`text-gray-700 font-medium mb-2`}>Reason for Visit *</Text>
-                                <TextInput
-                                    style={tw`border border-gray-300 rounded-xl p-4 text-gray-800`}
-                                    placeholder="e.g., Routine health check, Vaccination, Emergency"
-                                    value={reason}
-                                    onChangeText={setReason}
-                                    multiline
-                                />
-                            </View>
-
-                            <View style={tw`mb-4`}>
-                                <Text style={tw`text-gray-700 font-medium mb-2`}>Urgency Level</Text>
-                                <View style={tw`flex-row gap-2`}>
-                                    {(['low', 'medium', 'high'] as const).map((level) => (
-                                        <TouchableOpacity
-                                            key={level}
-                                            style={[
-                                                tw`flex-1 p-3 rounded-xl border-2`,
-                                                urgency === level
-                                                    ? { backgroundColor: urgencyColors[level].bg, borderColor: urgencyColors[level].border }
-                                                    : tw`bg-gray-100 border-gray-300`
-                                            ]}
-                                            onPress={() => setUrgency(level)}
-                                        >
-                                            <Text style={[
-                                                tw`text-center font-medium capitalize`,
-                                                urgency === level
-                                                    ? { color: urgencyColors[level].text }
-                                                    : tw`text-gray-700`
-                                            ]}>
-                                                {level}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
-
-                            <View>
-                                <Text style={tw`text-gray-700 font-medium mb-2`}>Additional Notes</Text>
-                                <TextInput
-                                    style={tw`border border-gray-300 rounded-xl p-4 text-gray-800 h-20`}
-                                    placeholder="Any additional information for the veterinary..."
-                                    value={notes}
-                                    onChangeText={setNotes}
-                                    multiline
-                                    textAlignVertical="top"
-                                />
-                            </View>
-                        </View>
-
-                        {/* Submit Button */}
-                        <TouchableOpacity
-                            style={[
-                                tw`bg-blue-500 rounded-2xl p-4 mb-6`,
-                                isSubmitting && tw`opacity-50`
-                            ]}
-                            onPress={handleSubmitRequest}
-                            disabled={isSubmitting}
-                        >
-                            <Text style={tw`text-white text-center font-bold text-lg`}>
-                                {isSubmitting ? 'Sending Request...' : 'Send Schedule Request'}
-                            </Text>
-                        </TouchableOpacity>
                     </View>
-                </Animated.View>
-            </ScrollView>
 
-            <CustomDrawer
-                isVisible={isDrawerVisible}
-                onClose={() => setIsDrawerVisible(false)}
-            />
+                    {/* Reason & Priority */}
+                    <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
+                        <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
+                            Visit Details *
+                        </Text>
+                        <View style={tw`mb-4`}>
+                            <Text style={tw`text-gray-700 font-medium mb-2`}>Reason for Visit</Text>
+                            <TextInput
+                                style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
+                                placeholder="e.g., Routine checkup, Disease outbreak, Vaccination"
+                                value={reason}
+                                onChangeText={setReason}
+                                multiline
+                                numberOfLines={3}
+                            />
+                        </View>
+                        <View>
+                            <Text style={tw`text-gray-700 font-medium mb-2`}>Priority Level</Text>
+                            <View style={tw`flex-row gap-2`}>
+                                {Object.values(SchedulePriority).map((priority) => (
+                                    <TouchableOpacity
+                                        key={priority}
+                                        style={tw`flex-1 py-3 px-4 rounded-xl ${
+                                            urgency === priority ? 'bg-green-500' : 'bg-gray-100'
+                                        }`}
+                                        onPress={() => setUrgency(priority)}
+                                    >
+                                        <Text style={tw`text-center font-medium ${
+                                            urgency === priority ? 'text-white' : 'text-gray-700'
+                                        }`}>
+                                            {priority}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Additional Notes */}
+                    <View style={tw`bg-white rounded-2xl p-5 mb-6 shadow-sm`}>
+                        <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
+                            Additional Notes
+                        </Text>
+                        <TextInput
+                            style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800 h-24`}
+                            placeholder="Any additional information or special requests..."
+                            value={notes}
+                            onChangeText={setNotes}
+                            multiline
+                            textAlignVertical="top"
+                        />
+                    </View>
+
+                    {/* Submit Button */}
+                    <TouchableOpacity
+                        style={tw`bg-green-500 rounded-2xl py-4 px-6 shadow-lg mb-6 ${
+                            isSubmitting ? 'opacity-50' : ''
+                        }`}
+                        onPress={handleSubmit}
+                        disabled={isSubmitting}
+                    >
+                        <Text style={tw`text-white font-bold text-lg text-center`}>
+                            {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                        </Text>
+                    </TouchableOpacity>
+                </ScrollView>
+            </Animated.View>
         </SafeAreaView>
     );
 }

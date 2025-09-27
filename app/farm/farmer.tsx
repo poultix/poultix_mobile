@@ -63,7 +63,7 @@ export default function FarmerScreen() {
     // Navigation helpers
     const navigateToFarmDetails = () => {
         if (currentFarm) {
-            router.push('/farm/index');
+            router.push('/farm');
         }
     };
     

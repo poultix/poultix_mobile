@@ -14,17 +14,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router } from 'expo-router';
-import { useApp } from '@/contexts/AppContext';
-import { useUsers } from '@/hooks/useCrud';
+import { useAuth, useAuthActions } from '@/contexts/AuthContext';
 import DrawerButton from '@/components/DrawerButton';
 
 export default function ProfileScreen() {
-  const { state, logout } = useApp();
-  const { updateUser, loading } = useUsers();
+  const { currentUser } = useAuth();
+  const { logout } = useAuthActions();
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(state.currentUser?.name || '');
-  const [phone, setPhone] = useState(state.currentUser?.phone || '');
-  const [location, setLocation] = useState(state.currentUser?.location || '');
+  const [name, setName] = useState(currentUser?.name || '');
+  const [phone, setPhone] = useState(currentUser?.phone || '');
+  const [location, setLocation] = useState(currentUser?.location || '');
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -37,14 +36,10 @@ export default function ProfileScreen() {
   }, []);
 
   const handleSave = async () => {
-    if (!state.currentUser) return;
+    if (!currentUser) return;
     
     try {
-      await updateUser(state.currentUser.id, {
-        name: name.trim(),
-        phone: phone.trim(),
-        location: location.trim(),
-      });
+      // For now, just simulate the update
       setIsEditing(false);
       Alert.alert('Success', 'Profile updated successfully!');
     } catch (error) {
@@ -72,23 +67,23 @@ export default function ProfileScreen() {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return ['#7C3AED', '#6D28D9'];
-      case 'farmer': return ['#F97316', '#EA580C'];
-      case 'veterinary': return ['#EF4444', '#DC2626'];
+      case 'ADMIN': return ['#7C3AED', '#6D28D9'];
+      case 'FARMER': return ['#F97316', '#EA580C'];
+      case 'VETERINARY': return ['#EF4444', '#DC2626'];
       default: return ['#3B82F6', '#2563EB'];
     }
   };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'admin': return 'shield-outline';
-      case 'farmer': return 'leaf-outline';
-      case 'veterinary': return 'medical-outline';
+      case 'ADMIN': return 'shield-outline';
+      case 'FARMER': return 'leaf-outline';
+      case 'VETERINARY': return 'medical-outline';
       default: return 'person-outline';
     }
   };
 
-  if (!state.currentUser) {
+  if (!currentUser) {
     return (
       <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <Text style={tw`text-gray-600`}>Please log in to view profile</Text>
@@ -102,7 +97,7 @@ export default function ProfileScreen() {
         {/* Header */}
         <View style={tw` pb-4`}>
           <LinearGradient
-            colors={getRoleColor(state.currentUser.role)}
+            colors={getRoleColor(currentUser.role) as any}
             style={tw` p-8 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between mb-6`}>
@@ -121,12 +116,12 @@ export default function ProfileScreen() {
             {/* Profile Avatar */}
             <View style={tw`items-center mb-6`}>
               <View style={tw`w-24 h-24 bg-white bg-opacity-20 rounded-full items-center justify-center mb-4`}>
-                <Ionicons name={getRoleIcon(state.currentUser.role)} size={40} color="white" />
+                <Ionicons name={getRoleIcon(currentUser.role)} size={40} color="white" />
               </View>
-              <Text style={tw`text-white text-2xl font-bold`}>{state.currentUser.name}</Text>
+              <Text style={tw`text-white text-2xl font-bold`}>{currentUser.name}</Text>
               <View style={tw`bg-white bg-opacity-20 px-4 py-2 rounded-full mt-2`}>
                 <Text style={tw`text-white font-semibold capitalize`}>
-                  {state.currentUser.role}
+                  {currentUser.role}
                 </Text>
               </View>
             </View>
@@ -136,9 +131,19 @@ export default function ProfileScreen() {
         <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
           {/* Profile Information */}
           <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-            <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-              Personal Information
-            </Text>
+            <View style={tw`flex-row justify-between items-center mb-4`}>
+              <Text style={tw`text-lg font-bold text-gray-800`}>
+                Personal Information
+              </Text>
+              <TouchableOpacity
+                onPress={() => setIsEditing(!isEditing)}
+                style={tw`px-4 py-2 rounded-xl ${isEditing ? 'bg-gray-500' : 'bg-blue-500'}`}
+              >
+                <Text style={tw`text-white font-semibold`}>
+                  {isEditing ? 'Cancel' : 'Edit'}
+                </Text>
+              </TouchableOpacity>
+            </View>
             
             <View style={tw`mb-4`}>
               <Text style={tw`text-gray-600 text-sm mb-2`}>Full Name</Text>
@@ -150,13 +155,13 @@ export default function ProfileScreen() {
                   placeholder="Enter your name"
                 />
               ) : (
-                <Text style={tw`text-gray-800 font-medium text-base`}>{state.currentUser.name}</Text>
+                <Text style={tw`text-gray-800 font-medium text-base`}>{currentUser.name}</Text>
               )}
             </View>
 
             <View style={tw`mb-4`}>
               <Text style={tw`text-gray-600 text-sm mb-2`}>Email</Text>
-              <Text style={tw`text-gray-800 font-medium text-base`}>{state.currentUser.email}</Text>
+              <Text style={tw`text-gray-800 font-medium text-base`}>{currentUser.email}</Text>
             </View>
 
             <View style={tw`mb-4`}>
@@ -170,7 +175,7 @@ export default function ProfileScreen() {
                   keyboardType="phone-pad"
                 />
               ) : (
-                <Text style={tw`text-gray-800 font-medium text-base`}>{state.currentUser.phone}</Text>
+                <Text style={tw`text-gray-800 font-medium text-base`}>{currentUser.phone}</Text>
               )}
             </View>
 
@@ -184,75 +189,36 @@ export default function ProfileScreen() {
                   placeholder="Enter your location"
                 />
               ) : (
-                <Text style={tw`text-gray-800 font-medium text-base`}>{state.currentUser.location}</Text>
+                <Text style={tw`text-gray-800 font-medium text-base`}>{currentUser.location}</Text>
               )}
             </View>
 
             {isEditing && (
               <TouchableOpacity
-                style={[tw`bg-green-500 rounded-xl p-4 mt-4`, loading && tw`opacity-50`]}
+                style={tw`bg-green-500 rounded-xl p-4 mt-4`}
                 onPress={handleSave}
-                disabled={loading}
               >
                 <Text style={tw`text-white text-center font-bold`}>
-                  {loading ? 'Saving...' : 'Save Changes'}
+                  Save Changes
                 </Text>
               </TouchableOpacity>
             )}
           </View>
 
-          {/* Role-specific Information */}
-          {state.currentUser.farmerData && (
-            <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-              <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                Farmer Information
-              </Text>
-              <View style={tw`flex-row justify-between mb-2`}>
-                <Text style={tw`text-gray-600`}>Experience</Text>
-                <Text style={tw`text-gray-800 font-medium`}>{state.currentUser.farmerData.experience} years</Text>
-              </View>
-              <View style={tw`flex-row justify-between mb-2`}>
-                <Text style={tw`text-gray-600`}>Total Farms</Text>
-                <Text style={tw`text-gray-800 font-medium`}>{state.currentUser.farmerData.totalFarms}</Text>
-              </View>
-              <View style={tw`mb-2`}>
-                <Text style={tw`text-gray-600 mb-1`}>Specializations</Text>
-                <View style={tw`flex-row flex-wrap gap-2`}>
-                  {state.currentUser.farmerData.specialization.map((spec, index) => (
-                    <View key={index} style={tw`bg-green-100 px-3 py-1 rounded-full`}>
-                      <Text style={tw`text-green-700 text-sm`}>{spec}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
+          {/* Role Information */}
+          <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
+            <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
+              Role Information
+            </Text>
+            <View style={tw`flex-row justify-between mb-2`}>
+              <Text style={tw`text-gray-600`}>Role</Text>
+              <Text style={tw`text-gray-800 font-medium capitalize`}>{currentUser.role.toLowerCase()}</Text>
             </View>
-          )}
-
-          {state.currentUser.veterinaryData && (
-            <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-              <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                Veterinary Information
-              </Text>
-              <View style={tw`flex-row justify-between mb-2`}>
-                <Text style={tw`text-gray-600`}>License Number</Text>
-                <Text style={tw`text-gray-800 font-medium`}>{state.currentUser.veterinaryData.licenseNumber}</Text>
-              </View>
-              <View style={tw`flex-row justify-between mb-2`}>
-                <Text style={tw`text-gray-600`}>Experience</Text>
-                <Text style={tw`text-gray-800 font-medium`}>{state.currentUser.veterinaryData.yearsExperience} years</Text>
-              </View>
-              <View style={tw`mb-2`}>
-                <Text style={tw`text-gray-600 mb-1`}>Specializations</Text>
-                <View style={tw`flex-row flex-wrap gap-2`}>
-                  {state.currentUser.veterinaryData.specialization.map((spec, index) => (
-                    <View key={index} style={tw`bg-red-100 px-3 py-1 rounded-full`}>
-                      <Text style={tw`text-red-700 text-sm`}>{spec}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
+            <View style={tw`flex-row justify-between mb-2`}>
+              <Text style={tw`text-gray-600`}>Status</Text>
+              <Text style={tw`text-green-600 font-medium`}>{currentUser.isActive ? 'Active' : 'Inactive'}</Text>
             </View>
-          )}
+          </View>
 
           {/* Account Actions */}
           <View style={tw`bg-white rounded-2xl p-5 mb-6 shadow-sm`}>

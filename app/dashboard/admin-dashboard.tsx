@@ -1,11 +1,3 @@
-import CustomDrawer from '@/components/CustomDrawer';
-import DrawerButton from '@/components/DrawerButton';
-import { useDrawer } from '@/contexts/DrawerContext';
-import { useFarms, useRoleBasedData, useSchedules, useUsers, useVeterinaries } from '@/hooks/useCrud';
-import { Farm, Schedule, User } from '@/types/system';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
@@ -17,24 +9,37 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import tw from 'twrnc';
+
+import CustomDrawer from '@/components/CustomDrawer';
+import DrawerButton from '@/components/DrawerButton';
+import { useDrawer } from '@/contexts/DrawerContext';
+
+// Context imports
+import { useAuth } from '@/contexts/AuthContext';
+import { useUsers } from '@/contexts/UserContext';
+import { useFarms } from '@/contexts/FarmContext';
+import { useSchedules } from '@/contexts/ScheduleContext';
+import { Farm, Schedule, User } from '@/types';
 
 export default function AdminDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
-  const { currentUser, isAdmin } = useRoleBasedData();
-  const { users, getUsersByRole, searchUsers, filterUsers } = useUsers();
-  const { farms, searchFarms, filterFarms } = useFarms();
-  const { schedules, searchSchedules, filterSchedules } = useSchedules();
-  const { veterinaries } = useVeterinaries();
+  const { currentUser } = useAuth();
+  const { users } = useUsers();
+  const { farms } = useFarms();
+  const { schedules } = useSchedules();
   
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'users' | 'farms' | 'schedules' | 'veterinaries'>('overview');
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'users' | 'farms' | 'schedules'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (!isAdmin) {
+    if (!currentUser || currentUser.role !== 'ADMIN') {
       Alert.alert('Access Denied', 'Admin privileges required', [
         { text: 'OK', onPress: () => router.back() }
       ]);
@@ -46,9 +51,9 @@ export default function AdminDashboardScreen() {
       duration: 800,
       useNativeDriver: true,
     }).start();
-  }, [isAdmin]);
+  }, [currentUser]);
 
-  if (!isAdmin) {
+  if (!currentUser || currentUser.role !== 'ADMIN') {
     return (
       <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <Ionicons name="lock-closed-outline" size={64} color="#6B7280" />
@@ -62,31 +67,33 @@ export default function AdminDashboardScreen() {
     
     switch (selectedTab) {
       case 'users':
-        filteredData = searchQuery 
-          ? searchUsers(searchQuery)
-          : selectedFilter === 'all' 
-            ? users 
-            : getUsersByRole(selectedFilter as User['role']);
+        filteredData = users.filter(user => {
+          const matchesSearch = !searchQuery || 
+            user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchQuery.toLowerCase());
+          const matchesFilter = selectedFilter === 'all' || user.role === selectedFilter;
+          return matchesSearch && matchesFilter;
+        });
         break;
       
       case 'farms':
-        filteredData = searchQuery 
-          ? searchFarms(searchQuery)
-          : selectedFilter === 'all'
-            ? farms
-            : filterFarms({ healthStatus: selectedFilter as Farm['healthStatus'] });
+        filteredData = farms.filter(farm => {
+          const matchesSearch = !searchQuery || 
+            farm.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            farm.location.address.toLowerCase().includes(searchQuery.toLowerCase());
+          const matchesFilter = selectedFilter === 'all' || farm.healthStatus === selectedFilter;
+          return matchesSearch && matchesFilter;
+        });
         break;
       
       case 'schedules':
-        filteredData = searchQuery 
-          ? searchSchedules(searchQuery)
-          : selectedFilter === 'all'
-            ? schedules
-            : filterSchedules({ scheduleStatus: selectedFilter as Schedule['status'] });
-        break;
-      
-      case 'veterinaries':
-        filteredData = veterinaries;
+        filteredData = schedules.filter(schedule => {
+          const matchesSearch = !searchQuery || 
+            schedule.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            schedule.description.toLowerCase().includes(searchQuery.toLowerCase());
+          const matchesFilter = selectedFilter === 'all' || schedule.status === selectedFilter;
+          return matchesSearch && matchesFilter;
+        });
         break;
       
       default:
@@ -139,7 +146,7 @@ export default function AdminDashboardScreen() {
           </View>
           <Text style={tw`text-gray-600 font-medium`}>Total Users</Text>
           <Text style={tw`text-xs text-gray-500 mt-1`}>
-            {getUsersByRole('farmer').length} Farmers, {getUsersByRole('veterinary').length} Vets
+            {users.filter(u => u.role === 'FARMER').length} Farmers, {users.filter(u => u.role === 'VETERINARY').length} Vets
           </Text>
         </View>
         
@@ -150,7 +157,7 @@ export default function AdminDashboardScreen() {
           </View>
           <Text style={tw`text-gray-600 font-medium`}>Active Farms</Text>
           <Text style={tw`text-xs text-gray-500 mt-1`}>
-            {farms.reduce((sum, farm) => sum + farm.livestock.chickens.total, 0).toLocaleString()} Total Chickens
+            {farms.reduce((sum, farm) => sum + farm.livestock.total, 0).toLocaleString()} Total Chickens
           </Text>
         </View>
         
@@ -168,11 +175,11 @@ export default function AdminDashboardScreen() {
         <View style={tw`flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]`}>
           <View style={tw`flex-row items-center justify-between mb-2`}>
             <Ionicons name="medical-outline" size={24} color="#EF4444" />
-            <Text style={tw`text-2xl font-bold text-gray-800`}>{veterinaries.length}</Text>
+            <Text style={tw`text-2xl font-bold text-gray-800`}>{users.filter(u => u.role === 'VETERINARY').length}</Text>
           </View>
           <Text style={tw`text-gray-600 font-medium`}>Veterinaries</Text>
           <Text style={tw`text-xs text-gray-500 mt-1`}>
-            {veterinaries.filter(v => v.isActive).length} Active
+            {users.filter(u => u.role === 'VETERINARY' && u.isActive).length} Active
           </Text>
         </View>
       </View>
@@ -181,8 +188,9 @@ export default function AdminDashboardScreen() {
       <View style={tw`bg-white rounded-2xl p-5 shadow-sm mb-4`}>
         <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>Recent Activity</Text>
         {schedules.slice(0, 5).map((schedule) => {
-          const farm = farms.find(f => f.id === schedule.farmId);
-          const farmer = users.find(u => u.id === schedule.farmerId);
+          // For now, we'll show the first farm or a default message
+          const farm = farms[0];
+          const farmer = schedule.farmer;
           
           return (
             <View key={schedule.id} style={tw`flex-row items-center py-3 border-b border-gray-100 last:border-b-0`}>
@@ -273,11 +281,11 @@ export default function AdminDashboardScreen() {
               onPress={() => {
                 // Navigate to detail screen based on type
                 if (selectedTab === 'users') {
-                  router.push(`/user-detail/${item.id}` );
+                  router.push(`/user/user-detail` );
                 } else if (selectedTab === 'farms') {
-                  router.push(`/farm-detail/${item.id}` );
+                  router.push(`/farm/farm-detail` );
                 } else if (selectedTab === 'schedules') {
-                  router.push(`/schedule-detail/${item.id}` );
+                  router.push(`/communication/schedule-detail` );
                 }
               }}
             >
@@ -310,7 +318,7 @@ export default function AdminDashboardScreen() {
                     <Text style={tw`font-bold text-gray-800`}>{item.name}</Text>
                     <Text style={tw`text-gray-600`}>{item.location.address}</Text>
                     <Text style={tw`text-sm text-gray-500`}>
-                      {item.livestock.chickens.total} chickens • {item.size} hectares
+                      {item.livestock.total} chickens • {item.size} hectares
                     </Text>
                   </View>
                   <View style={[
@@ -398,7 +406,6 @@ export default function AdminDashboardScreen() {
                 { key: 'users', label: 'Users', icon: 'people-outline' },
                 { key: 'farms', label: 'Farms', icon: 'leaf-outline' },
                 { key: 'schedules', label: 'Schedules', icon: 'calendar-outline' },
-                { key: 'veterinaries', label: 'Veterinaries', icon: 'medical-outline' },
               ].map((tab) => (
                 <TouchableOpacity
                   key={tab.key}

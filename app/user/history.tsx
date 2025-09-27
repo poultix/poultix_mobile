@@ -11,15 +11,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router } from 'expo-router';
-import { useApp } from '@/contexts/AppContext';
-import { useSchedules } from '@/hooks/useCrud';
-import { useDataRelationships } from '@/hooks/useCrud';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSchedules } from '@/contexts/ScheduleContext';
 import DrawerButton from '@/components/DrawerButton';
 
 export default function HistoryScreen() {
-  const { state } = useApp();
-  const { getSchedulesByUser } = useSchedules();
-  const { getRelatedData } = useDataRelationships();
+  const { currentUser } = useAuth();
+  const { schedules } = useSchedules();
   const [selectedFilter, setSelectedFilter] = useState('all');
   
   const fadeAnim = useRef(new Animated.Value(0)).current;

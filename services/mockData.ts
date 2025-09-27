@@ -8,7 +8,7 @@ import { News, NewsPriority } from '@/types/news';
 export const mockUsers: User[] = [
     {
         id: 'farmer_001',
-        email: 'john.farmer@example.com',
+        email: 'farmer@example.com',
         name: 'John Uwimana',
         role: UserRole.FARMER,
         phone: '+250 788 123 456',
@@ -18,7 +18,7 @@ export const mockUsers: User[] = [
     },
     {
         id: 'vet_001',
-        email: 'dr.patricia@example.com',
+        email: 'vet@example.com',
         name: 'Dr. Patricia Uwimana',
         role: UserRole.VETERINARY,
         phone: '+250 788 234 567',
@@ -364,9 +364,9 @@ export const mockNews: News[] = [
 // Mock authentication service
 export class MockAuthService {
     private static users = [
-        { email: 'john.farmer@example.com', password: 'password123', role: 'farmer', token: 'mock_farmer_token' },
-        { email: 'dr.patricia@example.com', password: 'password123', role: 'veterinary', token: 'mock_vet_token' },
-        { email: 'admin@poultix.com', password: 'admin123', role: 'admin', token: 'mock_admin_token' }
+        { email: 'farmer@example.com', password: 'password123', role: 'FARMER', token: 'mock_farmer_token' },
+        { email: 'vet@example.com', password: 'password123', role: 'VETERINARY', token: 'mock_vet_token' },
+        { email: 'admin@poultix.com', password: 'admin123', role: 'ADMIN', token: 'mock_admin_token' }
     ];
 
     // Auto-login feature - creates a persistent session for development
@@ -380,7 +380,7 @@ export class MockAuthService {
         }
 
         // Auto-login as farmer for development convenience
-        const defaultUser = this.users[1]; // john.farmer@example.com
+        const defaultUser = this.users[0]; // john.farmer@example.com
         await AsyncStorage.setItem('token', defaultUser.token);
         await AsyncStorage.setItem('role', defaultUser.role);
         await AsyncStorage.setItem('userEmail', defaultUser.email);
@@ -424,17 +424,23 @@ export class MockAuthService {
         console.log('👋 Logged out successfully');
     }
 
-    static async signIn(email: string, password: string): Promise<{ role: string; token: string }> {
+    static async signIn(email: string, password: string): Promise<{ user: User; token: string }> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1500));
+        const authUser = this.users.find(u => u.email === email && u.password === password);
         
-        const user = this.users.find(u => u.email === email && u.password === password);
-        
-        if (!user) {
+        if (!authUser) {
             throw new Error('Invalid credentials');
         }
         
-        return { role: user.role, token: user.token };
+        // Find the corresponding User object from mockUsers
+        const userObject = mockUsers.find(u => u.email === email);
+        
+        if (!userObject) {
+            throw new Error('User data not found');
+        }
+        
+        return { user: userObject, token: authUser.token };
     }
 
     static async signUp(email: string, password: string, names: string, role: string): Promise<{ success: boolean; message: string }> {
@@ -481,6 +487,13 @@ export class MockAuthService {
         }
         
         throw new Error('Invalid verification code');
+    }
+
+    static async getCurrentUser(email: string): Promise<User | null> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        return mockUsers.find(u => u.email === email) || null;
     }
 }
 

@@ -1,4 +1,3 @@
-import { AppProvider } from '@/contexts/AppContext';
 import { DrawerProvider } from '@/contexts/DrawerContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack } from 'expo-router';
@@ -6,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import '../global.css';
+import RootProvider from '@/contexts/RootProvider';
 
 
 SplashScreen.preventAutoHideAsync();
@@ -33,7 +33,7 @@ export default function RootLayout() {
   }
 
   return (
-    <AppProvider>
+    <RootProvider>
       <DrawerProvider>
         <StatusBar style="dark"  />
         <Stack screenOptions={{ headerShown: false }}>
@@ -68,6 +68,6 @@ export default function RootLayout() {
           )}
         </Stack>
       </DrawerProvider>
-    </AppProvider>
+    </RootProvider>
   );
 }

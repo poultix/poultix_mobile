@@ -19,24 +19,14 @@ export interface AuthActionsType {
 
 export const useAuthActions = (): AuthActionsType => {
   const login = async (email: string, password: string): Promise<{ user: User; token: string }> => {
-    const { role, token } = await MockAuthService.signIn(email, password);
+    const { user, token } = await MockAuthService.signIn(email, password);
     
-    // Create user object
-    const user: User = {
-      id: `user_${Date.now()}`,
-      email,
-      name: email.split('@')[0],
-      role: role as UserRole,
-      phone: '+250 788 000 000',
-      location: 'Rwanda',
-      createdAt: new Date(),
-      isActive: true,
-    };
+   
     
     // Store in AsyncStorage
     await AsyncStorage.setItem('token', token);
     await AsyncStorage.setItem('userEmail', email);
-    await AsyncStorage.setItem('role', role);
+    await AsyncStorage.setItem('role', user.role);
     
     return { user, token };
   };
