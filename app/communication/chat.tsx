@@ -58,7 +58,17 @@ export default function ChatScreen() {
             if (!currentChat && chatId && currentUser && users.length > 0) {
                 if ((chatId as string).includes('_')) {
                     // Handle new individual chat format: chat_userId1_userId2
-                    const [, userId1, userId2] = (chatId as string).split('_');
+                    const parts = (chatId as string).split('_');
+                    let userId1, userId2;
+                    
+                    if (parts.length === 3) {
+                        [, userId1, userId2] = parts;
+                    } else {
+                        // Handle longer format like chat_user_timestamp_admin_001
+                        userId1 = parts.slice(1, -1).join('_'); // Everything except first and last
+                        userId2 = parts[parts.length - 1]; // Last part
+                    }
+                    
                     const otherUserId = userId1 === currentUser.id ? userId2 : userId1;
                     const otherUser = users.find(u => u.id === otherUserId);
                     
@@ -111,10 +121,24 @@ export default function ChatScreen() {
         if ((chatId as string).includes('_')) {
             const parts = (chatId as string).split('_');
             if (parts.length >= 3) {
-                const userId1 = parts[1];
-                const userId2 = parts[2];
+                // Handle both formats: chat_userId1_userId2 and chat_prefix_userId1_userId2
+                let userId1, userId2;
+                if (parts.length === 3) {
+                    [, userId1, userId2] = parts;
+                } else {
+                    // Handle longer format like chat_user_timestamp_admin_001
+                    userId1 = parts.slice(1, -1).join('_'); // Everything except first and last
+                    userId2 = parts[parts.length - 1]; // Last part
+                }
+                
                 const otherUserId = userId1 === currentUser.id ? userId2 : userId1;
-                return users.some(u => u.id === otherUserId);
+                console.log('Validation check:', { userId1, userId2, currentUserId: currentUser.id, otherUserId });
+                
+                // Check if other user exists in users list
+                const otherUserExists = users.some(u => u.id === otherUserId);
+                console.log('Other user exists:', otherUserExists, 'Available users:', users.map(u => u.id));
+                
+                return otherUserExists;
             }
         }
         
