@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { User, Farm, Schedule, Veterinary, FilterOptions } from '@/types/entities';
+import { Farm, FilterOptions, Schedule, User, Veterinary } from '@/types/system';
+import { useCallback, useState } from 'react';
 
 // Generic CRUD hook
 export const useCrud = () => {

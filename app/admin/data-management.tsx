@@ -340,7 +340,7 @@ export default function DataManagementScreen() {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  onPress={() => router.push('/admin/add-news' as any)}
+                  onPress={() => router.push('/admin/add-news')}
                   style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
                 >
                   <Ionicons name="add" size={24} color="white" />

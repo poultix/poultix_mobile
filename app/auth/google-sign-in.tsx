@@ -1,11 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as AuthSession from 'expo-auth-session';
 import * as Google from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
-import tw from 'twrnc';
+import { ActivityIndicator, Alert, Image, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { IOSDesign } from '../../constants/iosDesign';
+import { GoogleAuthConfig, getConfigurationStatus } from './googleAuthConfig';
+
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -23,11 +26,22 @@ export default function SignInWithGoogleScreen() {
     const [user, setUser] = useState<GoogleUser | null>(null);
     const [loading, setLoading] = useState(false);
 
+    // Create redirect URI for the current platform
+    const redirectUri = AuthSession.makeRedirectUri({
+        scheme: GoogleAuthConfig.redirectScheme, // This should match your app.json scheme
+        path: GoogleAuthConfig.redirectPath,
+    });
+
     const [request, response, promptAsync] = Google.useAuthRequest({
-        androidClientId: 'YOUR_ANDROID_CLIENT_ID',
-        iosClientId: 'YOUR_IOS_CLIENT_ID',
-        webClientId: 'YOUR_WEB_CLIENT_ID',
-        scopes: ['profile', 'email'],
+        androidClientId: GoogleAuthConfig.androidClientId,
+        iosClientId: GoogleAuthConfig.iosClientId,
+        webClientId: GoogleAuthConfig.webClientId,
+        scopes: GoogleAuthConfig.scopes,
+        redirectUri,
+        responseType: AuthSession.ResponseType.Code,
+        extraParams: {
+            // Add any extra parameters if needed
+        },
     });
 
     useEffect(() => {
@@ -40,9 +54,22 @@ export default function SignInWithGoogleScreen() {
             const { authentication } = response;
             if (authentication?.accessToken) {
                 getUserInfo(authentication.accessToken);
+            } else {
+                Alert.alert(
+                    'Authentication Error',
+                    'No access token received. Please try again.',
+                    [{ text: 'OK' }]
+                );
             }
         } else if (response?.type === 'error') {
-            Alert.alert('Authentication Error', 'Failed to sign in with Google');
+            console.error('Auth error:', response.error);
+            Alert.alert(
+                'Authentication Failed',
+                response.error?.message || 'Failed to sign in with Google. Please try again.',
+                [{ text: 'OK' }]
+            );
+        } else if (response?.type === 'cancel') {
+            console.log('User cancelled authentication');
         }
     }, [response]);
 
@@ -57,27 +84,46 @@ export default function SignInWithGoogleScreen() {
         }
     };
 
-    const getUserInfo = async (token: string) => {
+    const getUserInfo = async (accessToken: string) => {
         try {
             setLoading(true);
-            const response = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-                headers: { Authorization: `bearer ${token}` },
+            
+            // Use Google's userinfo endpoint
+            const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                headers: { 
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
             });
 
-            if (response.ok) {
-                const userInfo: GoogleUser = await response.json();
+            if (userInfoResponse.ok) {
+                const userInfo: GoogleUser = await userInfoResponse.json();
                 setUser(userInfo);
                 
-                // Save user data to AsyncStorage
-                await AsyncStorage.setItem('googleUser', JSON.stringify(userInfo));
+                // Save user data to AsyncStorage with expiration
+                const userData = {
+                    ...userInfo,
+                    accessToken,
+                    timestamp: Date.now(),
+                };
+                await AsyncStorage.setItem('googleUser', JSON.stringify(userData));
                 
-                Alert.alert('Success', `Welcome, ${userInfo.name}!`);
+                Alert.alert(
+                    'Welcome! 🎉', 
+                    `Successfully signed in as ${userInfo.name}`,
+                    [{ text: 'Continue', onPress: () => router.replace('/') }]
+                );
             } else {
-                throw new Error('Failed to fetch user info');
+                const errorData = await userInfoResponse.json();
+                throw new Error(errorData.error_description || 'Failed to fetch user info');
             }
         } catch (error) {
             console.error('Error fetching user info:', error);
-            Alert.alert('Error', 'Failed to get user information');
+            Alert.alert(
+                'Authentication Error',
+                error instanceof Error ? error.message : 'Failed to get user information. Please try again.',
+                [{ text: 'OK' }]
+            );
         } finally {
             setLoading(false);
         }
@@ -85,11 +131,28 @@ export default function SignInWithGoogleScreen() {
 
     const handleSignIn = async () => {
         try {
+            if (!request) {
+                Alert.alert(
+                    'Not Ready',
+                    'Google Sign-In is still loading. Please wait a moment and try again.',
+                    [{ text: 'OK' }]
+                );
+                return;
+            }
+
             setLoading(true);
-            await promptAsync();
+            const result = await promptAsync();
+            
+            // The result will be handled in the useEffect above
+            console.log('Auth result:', result.type);
+            
         } catch (error) {
             console.error('Sign in error:', error);
-            Alert.alert('Error', 'Failed to initiate sign in');
+            Alert.alert(
+                'Sign In Error',
+                'Failed to initiate Google Sign-In. Please check your internet connection and try again.',
+                [{ text: 'OK' }]
+            );
         } finally {
             setLoading(false);
         }
@@ -97,23 +160,52 @@ export default function SignInWithGoogleScreen() {
 
     const handleSignOut = async () => {
         try {
+            // Clear local storage
             await AsyncStorage.removeItem('googleUser');
             setUser(null);
-            Alert.alert('Success', 'Signed out successfully');
+            
+            Alert.alert(
+                'Signed Out',
+                'You have been successfully signed out.',
+                [{ text: 'OK', onPress: () => router.replace('/auth/sign-in') }]
+            );
         } catch (error) {
             console.error('Sign out error:', error);
-            Alert.alert('Error', 'Failed to sign out');
+            Alert.alert(
+                'Sign Out Error',
+                'Failed to sign out completely. Please try again.',
+                [{ text: 'OK' }]
+            );
         }
     };
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-white`}>
-            <View style={tw`flex-1 px-6 pt-10`}>
-                <TouchableOpacity onPress={() => router.back()} style={tw`mb-6`}>
-                    <Ionicons name="chevron-back" size={24} color="#6B7280" />
+        <SafeAreaView style={{
+            flex: 1,
+            backgroundColor: IOSDesign.colors.background.primary,
+        }}>
+            <View style={{
+                flex: 1,
+                paddingHorizontal: IOSDesign.layout.screenPadding,
+                paddingTop: IOSDesign.spacing.xl,
+            }}>
+                <TouchableOpacity 
+                    onPress={() => router.back()} 
+                    style={{
+                        marginBottom: IOSDesign.spacing.lg,
+                        padding: IOSDesign.spacing.sm,
+                        marginLeft: -IOSDesign.spacing.sm,
+                    }}
+                >
+                    <Ionicons name="chevron-back" size={24} color={IOSDesign.colors.text.secondary} />
                 </TouchableOpacity>
 
-                <Text style={tw`text-2xl font-semibold text-red-700 mb-6 text-center`}>
+                <Text style={{
+                    ...IOSDesign.typography.title1,
+                    color: IOSDesign.colors.systemBlue,
+                    marginBottom: IOSDesign.spacing.lg,
+                    textAlign: 'center',
+                }}>
                     Sign in with Google
                 </Text>
 
@@ -121,42 +213,156 @@ export default function SignInWithGoogleScreen() {
                     <TouchableOpacity
                         onPress={handleSignIn}
                         disabled={!request || loading}
-                        style={tw`flex-row items-center justify-center h-14 bg-white rounded-lg border border-gray-300 shadow-md ${
-                            (!request || loading) ? 'opacity-50' : ''
-                        }`}
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: 56,
+                            backgroundColor: IOSDesign.colors.background.primary,
+                            borderRadius: IOSDesign.borderRadius.lg,
+                            borderWidth: 1,
+                            borderColor: IOSDesign.colors.gray[300],
+                            ...IOSDesign.shadows.medium,
+                            opacity: (!request || loading) ? 0.6 : 1,
+                            marginBottom: IOSDesign.spacing.lg,
+                        }}
                     >
-                        <Ionicons name="logo-google" size={24} color="#EA4335" style={tw`mr-3`} />
-                        <Text style={tw`text-gray-700 font-semibold text-lg`}>
+                        {loading ? (
+                            <ActivityIndicator 
+                                size="small" 
+                                color={IOSDesign.colors.systemBlue} 
+                                style={{ marginRight: IOSDesign.spacing.sm }}
+                            />
+                        ) : (
+                            <Ionicons 
+                                name="logo-google" 
+                                size={24} 
+                                color="#EA4335" 
+                                style={{ marginRight: IOSDesign.spacing.sm }}
+                            />
+                        )}
+                        <Text style={{
+                            ...IOSDesign.typography.bodyEmphasized,
+                            color: IOSDesign.colors.text.primary,
+                        }}>
                             {loading ? 'Signing in...' : 'Sign in with Google'}
                         </Text>
                     </TouchableOpacity>
                 ) : (
-                    <View style={tw`mt-6 items-center`}>
+                    <View style={{
+                        marginTop: IOSDesign.spacing.lg,
+                        alignItems: 'center',
+                        ...IOSDesign.components.card,
+                        marginBottom: IOSDesign.spacing.lg,
+                    }}>
                         <Image 
                             source={{ uri: user.picture }} 
-                            style={tw`w-20 h-20 rounded-full mb-3`} 
+                            style={{
+                                width: 80,
+                                height: 80,
+                                borderRadius: IOSDesign.borderRadius.full,
+                                marginBottom: IOSDesign.spacing.md,
+                            }}
                         />
-                        <Text style={tw`text-gray-900 text-lg font-medium`}>{user.name}</Text>
-                        <Text style={tw`text-gray-500 text-sm mb-4`}>{user.email}</Text>
+                        <Text style={{
+                            ...IOSDesign.typography.title3,
+                            color: IOSDesign.colors.text.primary,
+                            marginBottom: IOSDesign.spacing.xs,
+                        }}>
+                            {user.name}
+                        </Text>
+                        <Text style={{
+                            ...IOSDesign.typography.callout,
+                            color: IOSDesign.colors.text.secondary,
+                            marginBottom: IOSDesign.spacing.lg,
+                        }}>
+                            {user.email}
+                        </Text>
                         <TouchableOpacity
                             onPress={handleSignOut}
-                            style={tw`flex-row items-center justify-center h-12 bg-red-600 rounded-lg px-4`}
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: 48,
+                                backgroundColor: IOSDesign.colors.systemRed,
+                                borderRadius: IOSDesign.borderRadius.lg,
+                                paddingHorizontal: IOSDesign.spacing.lg,
+                                ...IOSDesign.shadows.small,
+                            }}
                         >
-                            <Ionicons name="exit-outline" size={20} color="#fff" style={tw`mr-2`} />
-                            <Text style={tw`text-white font-semibold text-base`}>Sign Out</Text>
+                            <Ionicons 
+                                name="exit-outline" 
+                                size={20} 
+                                color={IOSDesign.colors.text.inverse} 
+                                style={{ marginRight: IOSDesign.spacing.sm }}
+                            />
+                            <Text style={{
+                                ...IOSDesign.typography.bodyEmphasized,
+                                color: IOSDesign.colors.text.inverse,
+                            }}>
+                                Sign Out
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 )}
 
-                {/* Instructions */}
-                <View style={tw`mt-8 p-4 bg-blue-50 rounded-lg`}>
-                    <Text style={tw`text-blue-800 text-sm font-medium mb-2`}>Setup Instructions:</Text>
-                    <Text style={tw`text-blue-700 text-xs leading-4`}>
-                        1. Replace YOUR_ANDROID_CLIENT_ID, YOUR_IOS_CLIENT_ID, and YOUR_WEB_CLIENT_ID with your actual Google OAuth client IDs{'\n'}
-                        2. Configure your Google Cloud Console project{'\n'}
-                        3. Add your app's bundle ID to the OAuth configuration
+                {/* Setup Instructions */}
+                <View style={{
+                    marginTop: IOSDesign.spacing.xl,
+                    padding: IOSDesign.spacing.md,
+                    backgroundColor: IOSDesign.colors.systemBlue + '10',
+                    borderRadius: IOSDesign.borderRadius.lg,
+                    borderLeftWidth: 4,
+                    borderLeftColor: IOSDesign.colors.systemBlue,
+                }}>
+                    <Text style={{
+                        ...IOSDesign.typography.calloutEmphasized,
+                        color: IOSDesign.colors.systemBlue,
+                        marginBottom: IOSDesign.spacing.sm,
+                    }}>
+                        🔧 Setup Instructions:
+                    </Text>
+                    <Text style={{
+                        ...IOSDesign.typography.footnote,
+                        color: IOSDesign.colors.text.secondary,
+                        lineHeight: 18,
+                    }}>
+                        1. Get your Google OAuth client IDs from Google Cloud Console{'\n'}
+                        2. Replace YOUR_*_CLIENT_ID with actual client IDs{'\n'}
+                        3. Add bundle ID: com.wigothehacker.poultix{'\n'}
+                        4. Add redirect URI: myapp://auth/google{'\n'}
+                        5. Enable Google+ API in your project
                     </Text>
                 </View>
+
+                {/* Debug Info */}
+                {__DEV__ && (
+                    <View style={{
+                        marginTop: IOSDesign.spacing.md,
+                        padding: IOSDesign.spacing.sm,
+                        backgroundColor: IOSDesign.colors.gray[100],
+                        borderRadius: IOSDesign.borderRadius.sm,
+                    }}>
+                        <Text style={{
+                            ...IOSDesign.typography.caption1Emphasized,
+                            color: IOSDesign.colors.text.secondary,
+                            marginBottom: IOSDesign.spacing.xs,
+                        }}>
+                            🔧 Development Info:
+                        </Text>
+                        <Text style={{
+                            ...IOSDesign.typography.caption1,
+                            color: IOSDesign.colors.text.tertiary,
+                            lineHeight: 14,
+                        }}>
+                            Redirect URI: {redirectUri}{"\n"}
+                            Android: {getConfigurationStatus().config.androidClientId}{"\n"}
+                            iOS: {getConfigurationStatus().config.iosClientId}{"\n"}
+                            Web: {getConfigurationStatus().config.webClientId}
+                        </Text>
+                    </View>
+                )}
             </View>
         </SafeAreaView>
     );

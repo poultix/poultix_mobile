@@ -8,7 +8,7 @@ export default function NetworkErrorScreen() {
     const onRetry = async () => {
         try {
             const response = await apiClient.get('/ping')
-            if (response.status == 200) router.push('/farm/farmer' as any)
+            if (response.status == 200) router.push('/' )
         } catch (error) {
             if (error instanceof Error) Alert.alert('Network Error!', 'Make sure you are connected to internet and try again.')
         }

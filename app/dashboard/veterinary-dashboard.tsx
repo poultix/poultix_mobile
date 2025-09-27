@@ -158,7 +158,7 @@ export default function VeterinaryDashboardScreen() {
               <TouchableOpacity
                 key={schedule.id}
                 style={tw`bg-red-50 border border-red-100 rounded-xl p-4 mb-3 last:mb-0`}
-                onPress={() => router.push(`/schedule-detail/${schedule.id}` as any)}
+                onPress={() => router.push(`/schedule-detail/${schedule.id}` )}
               >
                 <View style={tw`flex-row items-start justify-between mb-2`}>
                   <View style={tw`flex-1`}>
@@ -202,7 +202,7 @@ export default function VeterinaryDashboardScreen() {
         <View style={tw`flex-row flex-wrap gap-3`}>
           <TouchableOpacity
             style={tw`flex-1 bg-red-50 border border-red-200 rounded-xl p-4 min-w-[45%]`}
-            onPress={() => router.push('/communication/schedule-management' as any)}
+            onPress={() => router.push('/communication/schedule-management')}
           >
             <Ionicons name="calendar-outline" size={24} color="#EF4444" />
             <Text style={tw`text-red-600 font-semibold mt-2`}>Manage Schedules</Text>
@@ -210,7 +210,7 @@ export default function VeterinaryDashboardScreen() {
           
           <TouchableOpacity
             style={tw`flex-1 bg-green-50 border border-green-200 rounded-xl p-4 min-w-[45%]`}
-            onPress={() => router.push('/farm/nearby' as any)}
+            onPress={() => router.push('/farm/nearby')}
           >
             <Ionicons name="leaf-outline" size={24} color="#10B981" />
             <Text style={tw`text-green-600 font-semibold mt-2`}>View Farms</Text>
@@ -218,7 +218,7 @@ export default function VeterinaryDashboardScreen() {
           
           <TouchableOpacity
             style={tw`flex-1 bg-blue-50 border border-blue-200 rounded-xl p-4 min-w-[45%]`}
-            onPress={() => router.push('/communication/messages' as any)}
+            onPress={() => router.push('/communication/messages')}
           >
             <Ionicons name="chatbubble-outline" size={24} color="#3B82F6" />
             <Text style={tw`text-blue-600 font-semibold mt-2`}>Messages</Text>
@@ -226,7 +226,7 @@ export default function VeterinaryDashboardScreen() {
           
           <TouchableOpacity
             style={tw`flex-1 bg-purple-50 border border-purple-200 rounded-xl p-4 min-w-[45%]`}
-            onPress={() => router.push('/vet-reports' as any)}
+            onPress={() => router.push('/vet-reports' )}
           >
             <Ionicons name="document-text-outline" size={24} color="#8B5CF6" />
             <Text style={tw`text-purple-600 font-semibold mt-2`}>Reports</Text>
@@ -286,7 +286,7 @@ export default function VeterinaryDashboardScreen() {
         <Text style={tw`text-xl font-bold text-gray-800`}>Assigned Farms</Text>
         <TouchableOpacity
           style={tw`bg-green-500 px-4 py-2 rounded-xl flex-row items-center`}
-          onPress={() => router.push('/farm/nearby' as any)}
+          onPress={() => router.push('/farm/nearby')}
         >
           <Ionicons name="map-outline" size={16} color="white" />
           <Text style={tw`text-white font-semibold ml-1`}>View Map</Text>
@@ -301,7 +301,7 @@ export default function VeterinaryDashboardScreen() {
           <TouchableOpacity
             key={farm.id}
             style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}
-            onPress={() => router.push(`/farm-detail/${farm.id}` as any)}
+            onPress={() => router.push(`/farm-detail/${farm.id}` )}
           >
             <View style={tw`flex-row items-start justify-between mb-3`}>
               <View style={tw`flex-1`}>
@@ -361,7 +361,7 @@ export default function VeterinaryDashboardScreen() {
         <Text style={tw`text-xl font-bold text-gray-800`}>My Schedule</Text>
         <TouchableOpacity
           style={tw`bg-red-500 px-4 py-2 rounded-xl flex-row items-center`}
-          onPress={() => router.push('/communication/schedule-management' as any)}
+          onPress={() => router.push('/communication/schedule-management' )}
         >
           <Ionicons name="settings-outline" size={16} color="white" />
           <Text style={tw`text-white font-semibold ml-1`}>Manage</Text>
@@ -376,7 +376,7 @@ export default function VeterinaryDashboardScreen() {
           <TouchableOpacity
             key={schedule.id}
             style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}
-            onPress={() => router.push(`/schedule-detail/${schedule.id}` as any)}
+            onPress={() => router.push(`/schedule-detail/${schedule.id}`)}
           >
             <View style={tw`flex-row items-start justify-between mb-3`}>
               <View style={tw`flex-1`}>

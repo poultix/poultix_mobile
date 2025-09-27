@@ -1,121 +1,128 @@
-import { FarmerData } from '@/interfaces/Farmer';
-import { FarmData } from '@/interfaces/Farm';
-import { VeterinaryData } from '@/interfaces/Veterinary';
-import { Schedule } from '@/interfaces/Schedule';
-import { Pharmacy } from '@/interfaces/Pharmacy';
+import { User, Farmer, Veterinary, UserRole } from '@/types/user';
+import { Farm, Location, LiveStock, Facility, FarmStatus } from '@/types/farm';
+import { Schedule, ScheduleType, ScheduleStatus, SchedulePriority } from '@/types/schedule';
+import { Pharmacy, Vaccine } from '@/types/pharmacy';
+import { News, NewsPriority } from '@/types/news';
 
 // Mock user data
-export const mockFarmerData: FarmerData = {
-    _id: 'farmer_001',
-    email: 'john.farmer@example.com',
-    names: 'John Uwimana'
-};
-
-export const mockVeterinaryData: VeterinaryData = {
-    _id: 'vet_001',
-    email: 'dr.patricia@example.com',
-    names: 'Dr. Patricia Uwimana',
-    farmManaged: 5
-};
-
-export const mockFarmData: FarmData = {
-    _id: 'farm_001',
-    farmName: 'Sunrise Poultry Farm',
-    chickens: {
-        healthyChickens: 450,
-        sickChickens: 12,
-        riskChickens: 38
+export const mockUsers: User[] = [
+    {
+        id: 'farmer_001',
+        email: 'john.farmer@example.com',
+        name: 'John Uwimana',
+        role: UserRole.FARMER,
+        phone: '+250 788 123 456',
+        location: 'Byose, Muhanga District',
+        createdAt: new Date('2023-01-10'),
+        isActive: true
     },
-    locations: 'Byose, Muhanga District'
-};
+    {
+        id: 'vet_001',
+        email: 'dr.patricia@example.com',
+        name: 'Dr. Patricia Uwimana',
+        role: UserRole.VETERINARY,
+        phone: '+250 788 234 567',
+        location: 'Muhanga District',
+        createdAt: new Date('2023-01-15'),
+        isActive: true
+    },
+    {
+        id: 'admin_001',
+        email: 'admin@poultix.com',
+        name: 'Admin User',
+        role: UserRole.ADMIN,
+        phone: '+250 788 345 678',
+        location: 'Kigali',
+        createdAt: new Date('2023-01-01'),
+        isActive: true
+    }
+];
+
+export const mockFarms: Farm[] = [
+    {
+        id: 'farm_001',
+        name: 'Sunrise Poultry Farm',
+        owner: mockUsers[0],
+        location: {
+            address: 'Byose, Muhanga District',
+            coordinates: {
+                latitude: -2.0853,
+                longitude: 29.7564
+            },
+            district: 'Muhanga',
+            sector: 'Byose'
+        },
+        size: 2.5,
+        establishedDate: new Date('2020-03-15'),
+        livestock: {
+            total: 500,
+            healthy: 450,
+            sick: 12,
+            atRisk: 38,
+            breeds: ['Rhode Island Red', 'Leghorn']
+        },
+        facilities: {
+            coops: 4,
+            feedStorage: true,
+            waterSystem: 'Automatic',
+            electricityAccess: true
+        },
+        assignedVeterinary: mockUsers[1],
+        healthStatus: FarmStatus.GOOD,
+        lastInspection: new Date('2024-06-20'),
+        certifications: ['Organic Certification', 'Animal Welfare Approved'],
+        isActive: true,
+        createdAt: new Date('2020-03-15'),
+        updatedAt: new Date('2024-06-25')
+    }
+];
 
 // Mock schedules
 export const mockSchedules: Schedule[] = [
     {
-        veterinary: {
-            details: {
-                names: 'Dr. Patricia Uwimana',
-                email: 'dr.patricia@example.com',
-                picture: 'https://via.placeholder.com/150',
-                createdAt: new Date('2023-01-15')
-            },
-            farmManaged: {
-                farmer: {
-                    names: 'John Uwimana',
-                    email: 'john.farmer@example.com',
-                    picture: 'https://via.placeholder.com/150',
-                    createdAt: new Date('2023-01-10')
-                },
-                farmName: 'Sunrise Poultry Farm',
-                location: 'Byose, Muhanga District',
-                chickens: {
-                    healthyChickens: 450,
-                    sickChickens: 12,
-                    riskChickens: 38
-                }
-            },
-            vaccinesAvailable: {
-                name: 'Newcastle Disease Vaccine',
-                description: 'Live attenuated vaccine for Newcastle disease prevention',
-                price: 2500,
-                createdAt: new Date('2024-01-15')
-            }
-        },
-        farmer: {
-            names: 'John Uwimana',
-            email: 'john.farmer@example.com',
-            picture: 'https://via.placeholder.com/150',
-            createdAt: new Date('2023-01-10')
-        },
-        time: {
-            startDate: new Date('2024-06-27'),
-            startHour: new Date('2024-06-27T08:00:00'),
-            endDate: new Date('2024-06-27'),
-            endHour: new Date('2024-06-27T10:00:00')
-        }
+        id: 'schedule_001',
+        title: 'Routine Health Check',
+        description: 'Regular health inspection and vaccination',
+        type: ScheduleType.INSPECTION,
+        farmer: mockUsers[0],
+        veterinary: mockUsers[1],
+        scheduledDate: new Date('2024-06-27'),
+        startTime: '08:00',
+        endTime: '10:00',
+        status: ScheduleStatus.SCHEDULED,
+        priority: SchedulePriority.MEDIUM,
+        notes: 'Newcastle disease vaccination required',
+        createdAt: new Date('2024-06-25'),
+        updatedAt: new Date('2024-06-25'),
+        createdBy: mockUsers[0]
     },
     {
-        veterinary: {
-            details: {
-                names: 'Dr. Mutesi Hadidja',
-                email: 'dr.mutesi@example.com',
-                picture: 'https://via.placeholder.com/150',
-                createdAt: new Date('2023-02-20')
-            },
-            farmManaged: {
-                farmer: {
-                    names: 'John Uwimana',
-                    email: 'john.farmer@example.com',
-                    picture: 'https://via.placeholder.com/150',
-                    createdAt: new Date('2023-01-10')
-                },
-                farmName: 'Green Valley Farm',
-                location: 'Muhanga District',
-                chickens: {
-                    healthyChickens: 320,
-                    sickChickens: 8,
-                    riskChickens: 22
-                }
-            },
-            vaccinesAvailable: {
-                name: 'Infectious Bronchitis Vaccine',
-                description: 'Inactivated vaccine for infectious bronchitis prevention',
-                price: 3000,
-                createdAt: new Date('2024-02-20')
-            }
+        id: 'schedule_002',
+        title: 'Emergency Treatment',
+        description: 'Emergency visit for sick chickens',
+        type: ScheduleType.EMERGENCY,
+        farmer: mockUsers[0],
+        veterinary: mockUsers[1],
+        scheduledDate: new Date('2024-06-30'),
+        startTime: '14:00',
+        endTime: '16:00',
+        status: ScheduleStatus.COMPLETED,
+        priority: SchedulePriority.URGENT,
+        notes: 'Respiratory symptoms in multiple birds',
+        results: {
+            findings: 'Mild respiratory infection detected',
+            recommendations: ['Improve ventilation', 'Administer antibiotics', 'Monitor closely'],
+            followUpRequired: true,
+            followUpDate: new Date('2024-07-07'),
+            medications: [{
+                name: 'Enrofloxacin',
+                dosage: '10mg/kg',
+                duration: '5 days'
+            }]
         },
-        farmer: {
-            names: 'John Uwimana',
-            email: 'john.farmer@example.com',
-            picture: 'https://via.placeholder.com/150',
-            createdAt: new Date('2023-01-10')
-        },
-        time: {
-            startDate: new Date('2024-06-30'),
-            startHour: new Date('2024-06-30T14:00:00'),
-            endDate: new Date('2024-06-30'),
-            endHour: new Date('2024-06-30T16:00:00')
-        }
+        createdAt: new Date('2024-06-29'),
+        updatedAt: new Date('2024-06-30'),
+        createdBy: mockUsers[0]
     }
 ];
 
@@ -291,78 +298,66 @@ export const mockNearbyFarms = [
 ];
 
 // Mock news data
-export const mockNews = [
+export const mockNews: News[] = [
     {
-        id: 'news_001',
         title: 'New Vaccination Program Launched for Poultry Farmers',
-        summary: 'Government announces free vaccination program to combat Newcastle disease outbreak.',
         content: 'The Ministry of Agriculture has launched a comprehensive vaccination program targeting poultry farmers across all districts. This initiative aims to prevent the spread of Newcastle disease and improve overall poultry health.',
-        imageUrl: 'https://via.placeholder.com/300x200',
-        publishedAt: '2 days ago',
         category: 'Health',
-        author: 'Ministry of Agriculture',
-        priority: 'urgent',
-        tags: ['vaccination', 'newcastle', 'government']
+        priority: NewsPriority.URGENT,
+        tags: ['vaccination', 'newcastle', 'government'],
+        author: mockUsers[2],
+        createdAt: new Date('2024-06-23'),
+        updatedAt: new Date('2024-06-23')
     },
     {
-        id: 'news_002',
         title: 'Best Practices for Chicken Coop Hygiene',
-        summary: 'Expert tips on maintaining clean and healthy environments for your poultry.',
         content: 'Proper hygiene in chicken coops is essential for preventing disease outbreaks. Regular cleaning, proper ventilation, and waste management are key factors in maintaining healthy chickens.',
-        imageUrl: 'https://via.placeholder.com/300x200',
-        publishedAt: '4 days ago',
         category: 'Health',
-        author: 'Dr. Jean Baptiste',
-        priority: 'high',
-        tags: ['hygiene', 'prevention', 'tips']
+        priority: NewsPriority.HIGH,
+        tags: ['hygiene', 'prevention', 'tips'],
+        author: mockUsers[1],
+        createdAt: new Date('2024-06-21'),
+        updatedAt: new Date('2024-06-21')
     },
     {
-        id: 'news_003',
         title: 'Market Prices for Poultry Products Rise',
-        summary: 'Increased demand leads to higher prices for eggs and chicken meat.',
         content: 'Local markets report a 15% increase in poultry product prices due to increased demand and reduced supply from recent disease outbreaks. Farmers are advised to maintain healthy flocks to capitalize on favorable market conditions.',
-        imageUrl: 'https://via.placeholder.com/300x200',
-        publishedAt: '1 week ago',
         category: 'Market',
-        author: 'Rwanda Agriculture Board',
-        priority: 'medium',
-        tags: ['prices', 'market', 'demand']
+        priority: NewsPriority.MEDIUM,
+        tags: ['prices', 'market', 'demand'],
+        author: mockUsers[2],
+        createdAt: new Date('2024-06-18'),
+        updatedAt: new Date('2024-06-18')
     },
     {
-        id: 'news_004',
         title: 'Advanced Nutrition Guidelines for Layer Hens',
-        summary: 'New research reveals optimal feeding strategies for maximum egg production.',
         content: 'Recent studies show that specific nutritional combinations can increase egg production by up to 20%. The guidelines include proper calcium ratios and protein timing.',
-        imageUrl: 'https://via.placeholder.com/300x200',
-        publishedAt: '3 days ago',
         category: 'Nutrition',
-        author: 'Poultry Research Institute',
-        priority: 'high',
-        tags: ['nutrition', 'layers', 'production']
+        priority: NewsPriority.HIGH,
+        tags: ['nutrition', 'layers', 'production'],
+        author: mockUsers[1],
+        createdAt: new Date('2024-06-22'),
+        updatedAt: new Date('2024-06-22')
     },
     {
-        id: 'news_005',
         title: 'Smart Farming Technology for Poultry Management',
-        summary: 'IoT sensors and AI monitoring systems revolutionize chicken farming.',
         content: 'New technology solutions help farmers monitor temperature, humidity, and bird behavior in real-time, leading to better health outcomes and increased productivity.',
-        imageUrl: 'https://via.placeholder.com/300x200',
-        publishedAt: '5 days ago',
         category: 'Technology',
-        author: 'AgriTech Solutions',
-        priority: 'medium',
-        tags: ['technology', 'iot', 'monitoring']
+        priority: NewsPriority.MEDIUM,
+        tags: ['technology', 'iot', 'monitoring'],
+        author: mockUsers[2],
+        createdAt: new Date('2024-06-20'),
+        updatedAt: new Date('2024-06-20')
     },
     {
-        id: 'news_006',
         title: 'Breeding Program Success: New Disease-Resistant Chickens',
-        summary: 'Local breeding program develops chickens with natural immunity to common diseases.',
         content: 'After 5 years of selective breeding, researchers have developed chicken breeds with enhanced resistance to Newcastle disease and fowl pox, reducing medication needs.',
-        imageUrl: 'https://via.placeholder.com/300x200',
-        publishedAt: '6 days ago',
         category: 'Breeding',
-        author: 'National Livestock Institute',
-        priority: 'high',
-        tags: ['breeding', 'resistance', 'genetics']
+        priority: NewsPriority.HIGH,
+        tags: ['breeding', 'resistance', 'genetics'],
+        author: mockUsers[1],
+        createdAt: new Date('2024-06-19'),
+        updatedAt: new Date('2024-06-19')
     }
 ];
 
@@ -491,22 +486,22 @@ export class MockAuthService {
 
 // Mock data service
 export class MockDataService {
-    static async getFarmerData(token: string): Promise<FarmerData> {
+    static async getUsers(): Promise<User[]> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 800));
-        return mockFarmerData;
+        return mockUsers;
     }
 
-    static async getVeterinaryData(token: string): Promise<VeterinaryData> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        return mockVeterinaryData;
-    }
-
-    static async getFarmData(token: string): Promise<FarmData> {
+    static async getUserById(id: string): Promise<User | null> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 600));
-        return mockFarmData;
+        return mockUsers.find(user => user.id === id) || null;
+    }
+
+    static async getFarms(): Promise<Farm[]> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 600));
+        return mockFarms;
     }
 
     static async getSchedules(token: string): Promise<Schedule[]> {
@@ -534,13 +529,13 @@ export class MockDataService {
         return mockPharmacies;
     }
 
-    static async getNews(): Promise<typeof mockNews> {
+    static async getNews(): Promise<News[]> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 600));
         return mockNews;
     }
 
-    static async getNewsArticles(): Promise<typeof mockNews> {
+    static async getNewsArticles(): Promise<News[]> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 600));
         return mockNews;

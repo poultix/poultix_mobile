@@ -147,7 +147,7 @@ export default function ScheduleDetailScreen() {
           {farm && (
             <TouchableOpacity 
               className="bg-white rounded-2xl p-5 shadow-sm mb-6"
-              onPress={() => router.push(`/farm-detail/${farm.id}` as any)}
+              onPress={() => router.push(`/farm/farm-detail`)}
             >
               <Text className="text-lg font-bold text-gray-800 mb-4">Farm Information</Text>
               <View className="flex-row items-start justify-between mb-3">
@@ -178,7 +178,7 @@ export default function ScheduleDetailScreen() {
               </View>
               <TouchableOpacity
                 className="flex-row items-center border border-blue-200 bg-blue-50 rounded-xl px-4 py-3 mt-3"
-                onPress={() => router.push(`/communication/messages?recipientId=${relatedData.veterinary.id}` as any)}
+                onPress={() => router.push(`/communication/messages?recipientId=${relatedData.veterinary.id}` )}
               >
                 <Ionicons name="chatbubble-outline" size={18} color="#3B82F6" />
                 <Text className="text-blue-600 font-medium ml-2">Message Veterinary</Text>

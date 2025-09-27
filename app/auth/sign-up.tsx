@@ -29,7 +29,7 @@ export default function SignUpScreen() {
             try {
                 const token = await AsyncStorage.getItem('token')
                 if (token && token !== null) {
-                    router.push('/farm' as any)
+                    router.push('/farm')
                 }
             } catch (error) {
                 console.error('Error checking token:', error)
@@ -54,7 +54,7 @@ export default function SignUpScreen() {
             )
             if (result.success) {
                 Alert.alert('Success', result.message, [
-                    { text: 'OK', onPress: () => router.push('/(auth)/sign-in' as any) },
+                    { text: 'OK', onPress: () => router.push('/auth/sign-in') },
                 ])
             }
         } catch (error) {
@@ -207,7 +207,7 @@ export default function SignUpScreen() {
                     {/* Sign In Link */}
                     <View className="flex-row justify-center mt-auto mb-6 pt-8">
                         <Text className="text-gray-500 text-base">Already have an account? </Text>
-                        <TouchableOpacity onPress={() => router.push('/(auth)/sign-in' as any)} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={() => router.push('/auth/sign-in')} activeOpacity={0.7}>
                             <Text className="text-orange-600 font-semibold text-base">Sign In</Text>
                         </TouchableOpacity>
                     </View>

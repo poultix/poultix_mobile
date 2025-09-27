@@ -6,8 +6,8 @@ import { useDrawer } from '@/contexts/DrawerContext'
 import DrawerButton from '@/components/DrawerButton'
 import { LinearGradient } from "expo-linear-gradient"
 import { useEffect, useState, useRef } from "react"
-import { VeterinaryData } from "@/interfaces/Veterinary"
-import { Schedule } from "@/interfaces/Schedule"
+import { User, Veterinary, UserRole } from "@/types/user"
+import { Schedule, ScheduleStatus } from "@/types/schedule"
 import { Ionicons } from '@expo/vector-icons'
 import { MockDataService, mockVeterinaries } from "@/services/mockData"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -19,29 +19,27 @@ const { width } = Dimensions.get('window');
 export default function VeterinaryHome() {
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer()
     const [schedules, setSchedules] = useState<Schedule[]>()
-    const [veterinaryData, setVeterinaryData] = useState<VeterinaryData>({
-        names: 'Loading...',
-        email: 'Loading...',
-        _id: 'loading...',
-        farmManaged: 0
-    })
+    const [veterinaryData, setVeterinaryData] = useState<User | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     
     const fadeAnim = useRef(new Animated.Value(0)).current
     const headerAnim = useRef(new Animated.Value(-50)).current
     const contentAnim = useRef(new Animated.Value(0)).current
 
-    useEffect(() => {
         const fetchVeterinaryData = async () => {
             try {
                 setIsLoading(true)
                 const token = await AsyncStorage.getItem('token')
                 if (token) {
-                    const [vetData, schedulesData] = await Promise.all([
-                        MockDataService.getVeterinaryData(token),
+                    const [users, schedulesData] = await Promise.all([
+                        MockDataService.getUsers(),
                         MockDataService.getSchedules(token)
                     ])
-                    setVeterinaryData(vetData)
+                    
+                    // Find current veterinary user
+                    const currentVet = users.find(user => user.role === UserRole.VETERINARY)
+                    if (currentVet) setVeterinaryData(currentVet)
+                    
                     setSchedules(schedulesData)
                 }
             } catch (error) {
@@ -145,7 +143,7 @@ export default function VeterinaryHome() {
                             <Text style={tw`text-xl font-bold text-gray-800`}>
                                 Upcoming Visit
                             </Text>
-                            <TouchableOpacity onPress={() => router.push('/communication/schedule-management' as any)}>
+                            <TouchableOpacity onPress={() => router.push('/communication/schedule-management')}>
                                 <Text style={tw`text-orange-600 text-sm font-semibold`}>View All</Text>
                             </TouchableOpacity>
                         </View>
@@ -183,7 +181,7 @@ export default function VeterinaryHome() {
                         <View style={tw`flex-row flex-wrap gap-3`}>
                             <TouchableOpacity
                                 style={tw`flex-1 bg-red-50 border border-red-200 rounded-xl p-4 min-w-[45%]`}
-                                onPress={() => router.push('/communication/schedule-management' as any)}
+                                onPress={() => router.push('/communication/schedule-management' )}
                             >
                                 <View style={tw`items-center`}>
                                     <Ionicons name="calendar-outline" size={24} color="#EF4444" />
@@ -195,7 +193,7 @@ export default function VeterinaryHome() {
                             
                             <TouchableOpacity
                                 style={tw`flex-1 bg-green-50 border border-green-200 rounded-xl p-4 min-w-[45%]`}
-                                onPress={() => router.push('/farm/nearby' as any)}
+                                onPress={() => router.push('/farm/nearby')}
                             >
                                 <View style={tw`items-center`}>
                                     <Ionicons name="leaf-outline" size={24} color="#10B981" />
@@ -207,7 +205,7 @@ export default function VeterinaryHome() {
                             
                             <TouchableOpacity
                                 style={tw`flex-1 bg-blue-50 border border-blue-200 rounded-xl p-4 min-w-[45%]`}
-                                onPress={() => router.push('/communication/messages' as any)}
+                                onPress={() => router.push('/communication/messages')}
                             >
                                 <View style={tw`items-center`}>
                                     <Ionicons name="chatbubble-outline" size={24} color="#3B82F6" />
@@ -232,7 +230,7 @@ export default function VeterinaryHome() {
                                 <TouchableOpacity
                                     key={location}
                                     style={[tw`flex-1 bg-white p-4 rounded-xl shadow-sm border border-orange-100 active:bg-orange-50`]}
-                                    onPress={() => router.push('/farm/veterinary' as any)}
+                                    onPress={() => router.push('/farm/veterinary' )}
                                 >
                                     <Text style={tw`text-gray-800 text-sm font-semibold text-center`}>
                                         {location}

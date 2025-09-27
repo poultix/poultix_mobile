@@ -1,23 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  ScrollView,
-  Animated,
-  Alert,
-  TextInput,
-} from 'react-native';
+import CustomDrawer from '@/components/CustomDrawer';
+import DrawerButton from '@/components/DrawerButton';
+import { useDrawer } from '@/contexts/DrawerContext';
+import { useFarms, useRoleBasedData, useSchedules, useUsers, useVeterinaries } from '@/hooks/useCrud';
+import { Farm, Schedule, User } from '@/types/system';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import tw from 'twrnc';
 import { router } from 'expo-router';
-import CustomDrawer from '@/components/CustomDrawer';
-import { useDrawer } from '@/contexts/DrawerContext';
-import DrawerButton from '@/components/DrawerButton';
-import { useRoleBasedData, useUsers, useFarms, useSchedules, useVeterinaries } from '@/hooks/useCrud';
-import { User, Farm, Schedule } from '@/types/entities';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Alert,
+  Animated,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import tw from 'twrnc';
 
 export default function AdminDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
@@ -273,11 +273,11 @@ export default function AdminDashboardScreen() {
               onPress={() => {
                 // Navigate to detail screen based on type
                 if (selectedTab === 'users') {
-                  router.push(`/user-detail/${item.id}` as any);
+                  router.push(`/user-detail/${item.id}` );
                 } else if (selectedTab === 'farms') {
-                  router.push(`/farm-detail/${item.id}` as any);
+                  router.push(`/farm-detail/${item.id}` );
                 } else if (selectedTab === 'schedules') {
-                  router.push(`/schedule-detail/${item.id}` as any);
+                  router.push(`/schedule-detail/${item.id}` );
                 }
               }}
             >

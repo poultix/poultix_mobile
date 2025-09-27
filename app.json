@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
-    "scheme": "myapp",
+    "scheme": "poultix",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -66,7 +66,10 @@
       "typedRoutes": true
     },
     "extra": {
-      "GOOGLE_CLIENT_ID": "",
+      "GOOGLE_CLIENT_ID": "480918748504-lh71qqa9t1hnf1pkdcc5ps2mtsscmsnr.apps.googleusercontent.com",
+      "GOOGLE_ANDROID_CLIENT_ID": "480918748504-vnpqk4m9p38ak0du8l4pc1np3soifqiv.apps.googleusercontent.com",
+      "GOOGLE_IOS_CLIENT_ID": "480918748504-96eo9ab0g4uac9p4r7kshh2fep039k9g.apps.googleusercontent.com",
+      "GOOGLE_WEB_CLIENT_ID": "480918748504-lh71qqa9t1hnf1pkdcc5ps2mtsscmsnr.apps.googleusercontent.com",
       "eas": {
         "projectId": "091e0a1c-ebdb-492c-a9e9-e13591cccfa9"
       }

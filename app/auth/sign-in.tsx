@@ -199,7 +199,7 @@ export default function SignInScreen() {
                         </View>
 
                         {/* Forgot Password */}
-                        <TouchableOpacity onPress={() => router.push('/(auth)/forgot-password' as any)} className="items-end mb-7 mt-1" activeOpacity={0.7}>
+                        <TouchableOpacity onPress={() => router.push('/auth/forgot-password')} className="items-end mb-7 mt-1" activeOpacity={0.7}>
                             <Text className="text-orange-600 font-medium">Forgot Password?</Text>
                         </TouchableOpacity>
 
@@ -271,7 +271,7 @@ export default function SignInScreen() {
                     {/* Sign Up */}
                     <View className="flex-row justify-center mt-auto mb-6 pt-8">
                         <Text className="text-gray-500 text-base">Don't have an account? </Text>
-                        <TouchableOpacity onPress={() => router.push('/(auth)/sign-up' as any)} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={() => router.push('/auth/sign-up')} activeOpacity={0.7}>
                             <Text className="text-orange-600 font-semibold text-base">Sign Up</Text>
                         </TouchableOpacity>
                     </View>

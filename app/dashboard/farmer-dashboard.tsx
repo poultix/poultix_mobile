@@ -171,7 +171,7 @@ export default function FarmerDashboardScreen() {
         <View className="flex-row flex-wrap gap-3">
           <TouchableOpacity
             className="flex-1 bg-blue-50 border border-blue-200 rounded-xl p-4 min-w-[45%]"
-            onPress={() => router.push('/farm/create' as any)}
+            onPress={() => router.push('/farm/create' )}
           >
             <Ionicons name="add-circle-outline" size={24} color="#3B82F6" />
             <Text className="text-blue-600 font-semibold mt-2">Add Farm</Text>
@@ -179,7 +179,7 @@ export default function FarmerDashboardScreen() {
 
           <TouchableOpacity
             className="flex-1 bg-green-50 border border-green-200 rounded-xl p-4 min-w-[45%]"
-            onPress={() => router.push('/communication/schedule-request' as any)}
+            onPress={() => router.push('/communication/schedule-request')}
           >
             <Ionicons name="calendar-outline" size={24} color="#10B981" />
             <Text className="text-green-600 font-semibold mt-2">Request Visit</Text>
@@ -187,7 +187,7 @@ export default function FarmerDashboardScreen() {
 
           <TouchableOpacity
             className="flex-1 bg-purple-50 border border-purple-200 rounded-xl p-4 min-w-[45%]"
-            onPress={() => router.push('/communication/messages' as any)}
+            onPress={() => router.push('/communication/messages' )}
           >
             <Ionicons name="chatbubble-outline" size={24} color="#8B5CF6" />
             <Text className="text-purple-600 font-semibold mt-2">Messages</Text>
@@ -195,7 +195,7 @@ export default function FarmerDashboardScreen() {
 
           <TouchableOpacity
             className="flex-1 bg-orange-50 border border-orange-200 rounded-xl p-4 min-w-[45%]"
-            onPress={() => router.push('/farm-reports' as any)}
+            onPress={() => router.push('/farm/farm-reports')}
           >
             <Ionicons name="document-text-outline" size={24} color="#F59E0B" />
             <Text className="text-orange-600 font-semibold mt-2">Reports</Text>
@@ -239,7 +239,7 @@ export default function FarmerDashboardScreen() {
         <Text className="text-xl font-bold text-gray-800">My Farms</Text>
         <TouchableOpacity
           className="bg-green-500 px-4 py-2 rounded-xl flex-row items-center"
-          onPress={() => router.push('/farm/create' as any)}
+          onPress={() => router.push('/farm/create')}
         >
           <Ionicons name="add-outline" size={16} color="white" />
           <Text className="text-white font-semibold ml-1">Add Farm</Text>
@@ -253,7 +253,7 @@ export default function FarmerDashboardScreen() {
           <TouchableOpacity
             key={farm.id}
             className="bg-white rounded-2xl p-5 mb-4 shadow-sm"
-            onPress={() => router.push(`/farm-detail/${farm.id}` as any)}
+            onPress={() => router.push(`/farm-detail/${farm.id}`)}
           >
             <View className="flex-row items-start justify-between mb-3">
               <View className="flex-1">
@@ -310,7 +310,7 @@ export default function FarmerDashboardScreen() {
         <Text className="text-xl font-bold text-gray-800">My Schedules</Text>
         <TouchableOpacity
           className="bg-blue-500 px-4 py-2 rounded-xl flex-row items-center"
-          onPress={() => router.push('/communication/schedule-request' as any)}
+          onPress={() => router.push('/communication/schedule-request')}
         >
           <Ionicons name="add-outline" size={16} color="white" />
           <Text className="text-white font-semibold ml-1">Request Visit</Text>

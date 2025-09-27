@@ -17,28 +17,33 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as Linking from 'expo-linking';
 import * as Location from 'expo-location';
-import { MockDataService } from '@/services/mockData';
 import tw from 'twrnc';
 import { router } from 'expo-router';
 
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { Pharmacy } from '@/interfaces/Pharmacy';
+import { Pharmacy } from '@/types/pharmacy';
+
+// New context imports
+import { usePharmacies } from '@/contexts/PharmacyContext';
+import { usePharmacyActions } from '@/hooks/usePharmacyActions';
 
 
 const GOOGLE_API_KEY = 'YOUR_GOOGLE_API_KEY'; // Replace with your API key
 
 const PharmaciesScreen = () => {
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
-    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
     const [filteredPharmacies, setFilteredPharmacies] = useState<Pharmacy[]>([]);
     const [userLocation, setUserLocation] = useState<{
         latitude: number;
         longitude: number;
     } | null>(null);
     const mapRef = useRef<MapView>(null);
+    
+    // Use new contexts
+    const { pharmacies, currentPharmacy, setCurrentPharmacy, isLoading } = usePharmacies();
+    const { getPharmaciesByDistance, getNearbyPharmacies } = usePharmacyActions();
 
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -59,51 +64,90 @@ const PharmaciesScreen = () => {
         });
     };
 
-    // Fetch pharmacies using mock data
-    const fetchPharmacies = async () => {
-        setLoading(true);
-        try {
-            const mockPharmacies = await MockDataService.getPharmacies();
-            
-            // Transform mock data to match the expected format
-            const places = mockPharmacies.map((pharmacy) => ({
-                id: pharmacy.id,
-                name: pharmacy.name,
-                address: pharmacy.address,
-                distance: userLocation ? calculateDistance(
+    // Start animations
+    const startAnimations = () => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+            Animated.timing(cardAnim, {
+                toValue: 1,
+                duration: 1000,
+                useNativeDriver: true,
+            }),
+            Animated.timing(searchAnim, {
+                toValue: 1,
+                duration: 600,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
+
+    // Calculate distance for pharmacies when user location changes
+    useEffect(() => {
+        if (userLocation && pharmacies.length > 0) {
+            const pharmaciesWithDistance = pharmacies.map((pharmacy: Pharmacy) => ({
+                ...pharmacy,
+                distance: calculateDistance(
                     userLocation,
                     pharmacy.location.latitude,
                     pharmacy.location.longitude
-                ) : pharmacy.distance, // Use default distance if no location
-                phone: pharmacy.phone,
-                isOpen: pharmacy.isOpen,
-                location: {
-                    latitude: pharmacy.location.latitude,
-                    longitude: pharmacy.location.longitude,
-                },
+                )
             }));
-
-            setPharmacies(places);
-            setFilteredPharmacies(places);
-
-            // Fit map to show all markers
-            if (places.length > 0 && mapRef.current) {
-                const coordinates = places.map((p: Pharmacy) => p.location);
-                if (userLocation) {
-                    coordinates.push(userLocation);
-                }
-                mapRef.current.fitToCoordinates(coordinates, {
-                    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                    animated: true,
-                });
+            
+            // Sort by distance
+            pharmaciesWithDistance.sort((a: any, b: any) => a.distance - b.distance);
+            setFilteredPharmacies(pharmaciesWithDistance);
+            
+            // Animate map to user location
+            if (mapRef.current) {
+                mapRef.current.animateToRegion({
+                    latitude: userLocation.latitude,
+                    longitude: userLocation.longitude,
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                }, 1000);
             }
-        } catch (error) {
-            console.error(error);
-            Alert.alert('Error', 'Failed to fetch pharmacies. Please try again.');
-        } finally {
-            setLoading(false);
+        } else {
+            setFilteredPharmacies(pharmacies);
         }
+    }, [userLocation, pharmacies]);
+
+    // Handle pharmacy selection
+    const handlePharmacyPress = (pharmacy: Pharmacy) => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setCurrentPharmacy(pharmacy); // Set current pharmacy in context
+        router.push('/pharmacy/detail'); // Navigate to detail screen
     };
+
+    // Filter pharmacies based on search query
+    useEffect(() => {
+        let filtered = pharmacies;
+        
+        // Filter by search query
+        if (searchQuery.trim()) {
+            filtered = filtered.filter((pharmacy: Pharmacy) => 
+                pharmacy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                pharmacy.address.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+        
+        // If we have user location, add distance and sort
+        if (userLocation) {
+            filtered = filtered.map((pharmacy: Pharmacy) => ({
+                ...pharmacy,
+                distance: calculateDistance(
+                    userLocation,
+                    pharmacy.location.latitude,
+                    pharmacy.location.longitude
+                )
+            })).sort((a: any, b: any) => a.distance - b.distance);
+        }
+        
+        setFilteredPharmacies(filtered);
+    }, [pharmacies, searchQuery, userLocation]);
 
     // Calculate distance between two points (in km)
     const calculateDistance = (
@@ -124,67 +168,12 @@ const PharmaciesScreen = () => {
         return Number((R * c).toFixed(1));
     };
 
-    // Filter pharmacies based on search query
-    const filterPharmacies = (query: string) => {
-        setSearchQuery(query);
-        if (query.trim() === '') {
-            setFilteredPharmacies(pharmacies);
-        } else {
-            const lowerQuery = query.toLowerCase();
-            setFilteredPharmacies(
-                pharmacies.filter(
-                    (pharmacy) =>
-                        pharmacy.name.toLowerCase().includes(lowerQuery) ||
-                        pharmacy.address.toLowerCase().includes(lowerQuery)
-                )
-            );
-        }
-    };
-
-    // Open Google Maps for directions
-    const openDirections = (address: string) => {
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
-        Linking.openURL(url).catch(() =>
-            Alert.alert('Error', 'Unable to open Google Maps.')
-        );
-    };
-
-    // Animation setup and data fetching
     useEffect(() => {
-        const initialize = async () => {
-            // Load pharmacies immediately with default distances
-            await fetchPharmacies();
-            
-            // Get location in background and update distances later
-            getUserLocation().then(() => {
-                if (userLocation) {
-                    fetchPharmacies(); // Refresh with calculated distances
-                }
-            }).catch(console.error);
-            
-            Animated.parallel([
-                Animated.timing(fadeAnim, {
-                    toValue: 1,
-                    duration: 600,
-                    useNativeDriver: true,
-                }),
-                Animated.spring(cardAnim, {
-                    toValue: 1,
-                    tension: 50,
-                    friction: 7,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(searchAnim, {
-                    toValue: 1,
-                    duration: 400,
-                    useNativeDriver: true,
-                }),
-            ]).start();
-        };
-        initialize();
+        getUserLocation();
+        startAnimations();
     }, []);
 
-    if (loading) {
+    if (isLoading) {
         return (
             <View style={tw`flex-1 justify-center items-center bg-white`}>
                 <View style={tw`w-20 h-20 rounded-full justify-center items-center mb-4 bg-orange-500`}>
@@ -236,7 +225,7 @@ const PharmaciesScreen = () => {
                                 <Text style={tw`text-white font-bold text-lg mb-4`}>Available Services</Text>
                                 <View style={tw`flex-row justify-between`}>
                                     <View style={tw`items-center flex-1`}>
-                                        <Text style={tw`text-white text-2xl font-bold`}>{pharmacies.length}</Text>
+                                        <Text style={tw`text-white text-2xl font-bold`}>{pharmacies?.length || 0}</Text>
                                         <Text style={tw`text-red-100 text-xs font-medium`}>Pharmacies</Text>
                                     </View>
                                     <View style={tw`items-center flex-1`}>
@@ -346,7 +335,7 @@ const PharmaciesScreen = () => {
                             >
                                     <TouchableOpacity
                                         style={tw`bg-white rounded-2xl shadow-sm border border-gray-100 p-4`}
-                                        onPress={() => router.push('/pharmacy' as any)}
+                                        onPress={() => router.push('/pharmacy' )}
                                         activeOpacity={0.7}
                                     >
                                         <View style={tw`flex-row items-center justify-between mb-3`}>

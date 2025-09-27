@@ -1,4 +1,4 @@
-import { User, Farm, Schedule, Veterinary } from '@/types/entities';
+import { Farm, Schedule, User, Veterinary } from '@/types/system';
 
 // Realistic mock users
 export const mockUsers: User[] = [

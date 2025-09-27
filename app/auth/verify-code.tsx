@@ -58,7 +58,7 @@ export default function VerifyIdentityScreen() {
             }
             const result = await MockAuthService.verifyCode(email, code);
             Alert.alert('Success', result.message);
-            router.push('/(auth)/create-new-password' as any);
+            router.push('/auth/create-new-password' );
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Invalid verification code';
             Alert.alert('Error', errorMessage);

@@ -160,7 +160,7 @@ export default function HistoryScreen() {
                 <View key={schedule.id} style={tw`mb-4`}>
                   <TouchableOpacity
                     style={tw`bg-white rounded-2xl p-5 shadow-sm`}
-                    onPress={() => router.push(`/schedule-detail/${schedule.id}` as any)}
+                    onPress={() => router.push(`/schedule-detail/${schedule.id}` )}
                   >
                     <View style={tw`flex-row items-start justify-between mb-3`}>
                       <View style={tw`flex-1`}>

@@ -18,14 +18,7 @@ import tw from 'twrnc'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-interface NewsArticle {
-  title: string;
-  content: string;
-  category: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  tags: string[];
-  author: string;
-}
+
 
 export default function AddNewsScreen() {
   const [article, setArticle] = useState<NewsArticle>({
@@ -144,7 +137,7 @@ export default function AddNewsScreen() {
         'Your news article has been published successfully.',
         [
           { text: 'Add Another', onPress: () => resetForm() },
-          { text: 'View News', onPress: () => router.push('/general/news' as any) }
+          { text: 'View News', onPress: () => router.push('/general/news' ) }
         ]
       )
     } catch (error) {

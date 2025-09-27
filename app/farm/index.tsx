@@ -11,18 +11,22 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { MockDataService } from '@/services/mockData';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import tw from 'twrnc';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FarmData } from '@/interfaces/Farm';
+import { Farm, FarmStatus } from '@/types/farm';
+import { User } from '@/types/user';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
 import DrawerButton from '@/components/DrawerButton';
 import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+
+// New context imports
+import { useAuth } from '@/contexts/AuthContext';
+import { useFarms } from '@/contexts/FarmContext';
+import { useSchedules } from '@/contexts/ScheduleContext';
 
 const { width } = Dimensions.get('window');
 const isPad = width >= 768;
@@ -30,19 +34,14 @@ const isLargePhone = width >= 428;
 
 export default function FarmDataScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [farmData, setFarmData] = useState<FarmData>({
-    _id: '0',
-    farmName: 'loading...',
-    chickens: {
-      healthyChickens: 0,
-      sickChickens: 0,
-      riskChickens: 0
-    },
-    locations: 'loading...'
-  })
-  const totalChickens = farmData.chickens.healthyChickens + farmData.chickens.sickChickens + farmData.chickens.riskChickens
+  
+  // Use new contexts
+  const { currentUser } = useAuth();
+  const { farms, currentFarm, setCurrentFarm, isLoading } = useFarms();
+  const { schedules } = useSchedules();
+  
+  const totalChickens = currentFarm?.livestock ? currentFarm.livestock.total : 0
   const [weatherPreview, setWeatherPreview] = useState({
     temp: 24,
     condition: 'sunny',
@@ -65,21 +64,22 @@ export default function FarmDataScreen() {
 
   // Card health colors based on farm status
   const healthColors = useMemo(() => {
-    const sickPercentage = farmData.chickens ? (farmData.chickens.sickChickens / totalChickens) * 100 : 0;
+    const sickPercentage = farmData?.livestock ? (farmData.livestock.sick / totalChickens) * 100 : 0;
     return {
       primary: sickPercentage > 20 ? '#EF4444' : sickPercentage > 10 ? '#F59E0B' : '#10B981',
       secondary: sickPercentage > 20 ? '#FF6B6B' : sickPercentage > 10 ? '#FBBF24' : '#34D399',
       background: sickPercentage > 20 ? '#FEF2F2' : sickPercentage > 10 ? '#FEF3C7' : '#ECFDF5',
     };
-  }, [farmData]);
-
+  }, [farmData, totalChickens]);
   const fetchfarmData = async (showLoader = true) => {
     if (showLoader) setLoading(true);
     try {
       const token = await AsyncStorage.getItem('token')
       if (token) {
-        const farmData = await MockDataService.getFarmData(token)
-        setFarmData(farmData)
+        const farms = await MockDataService.getFarms()
+        if (farms.length > 0) {
+          setFarmData(farms[0])
+        }
 
         setWeatherPreview({
           temp: Math.floor(Math.random() * 20) + 15,
@@ -176,13 +176,13 @@ export default function FarmDataScreen() {
     }
   };
 
-  const healthyPercentage = farmData.chickens ? (farmData.chickens.healthyChickens / totalChickens) * 100 : 0;
-  const sickPercentage = farmData.chickens ? (farmData.chickens.sickChickens / totalChickens) * 100 : 0;
-  const atRiskPercentage = farmData.chickens ? (farmData.chickens.riskChickens / totalChickens) * 100 : 0;
+  const healthyPercentage = farmData?.livestock ? (farmData.livestock.healthy / totalChickens) * 100 : 0;
+  const sickPercentage = farmData?.livestock ? (farmData.livestock.sick / totalChickens) * 100 : 0;
+  const atRiskPercentage = farmData?.livestock ? (farmData.livestock.atRisk / totalChickens) * 100 : 0;
 
 
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={tw`flex-1 justify-center items-center bg-white`}>
         <View style={tw`w-20 h-20 rounded-full justify-center items-center mb-4 bg-orange-500`}>

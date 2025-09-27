@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -6,154 +6,29 @@ import {
     SafeAreaView,
     ScrollView,
     Animated,
-    TextInput,
-    Platform,
-    ActivityIndicator,
     Alert,
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import * as Linking from 'expo-linking';
-import * as Location from 'expo-location';
-import axios from 'axios';
 import tw from 'twrnc';
 import { router } from 'expo-router';
-import { BlurView } from 'expo-blur';
-import { SharedElement } from 'react-navigation-shared-element';
+import { usePharmacies } from '@/contexts/PharmacyContext';
+import { LinearGradient } from 'expo-linear-gradient';
 
-import { Pharmacy } from '@/interfaces/Pharmacy';
-
-
-const GOOGLE_API_KEY = 'YOUR_GOOGLE_API_KEY'; // Replace with your API key
-
-const PharmaciesScreen = () => {
-    
-    const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
-    const [filteredPharmacies, setFilteredPharmacies] = useState<Pharmacy[]>([]);
-    const [userLocation, setUserLocation] = useState<{
-        latitude: number;
-        longitude: number;
-    } | null>(null);
+export default function PharmacyDetailScreen() {
+    const { currentPharmacy, isLoading } = usePharmacies();
+    const fadeAnim = useRef(new Animated.Value(0)).current;
     const mapRef = useRef<MapView>(null);
 
-    // Animations
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-    const cardAnim = useRef(new Animated.Value(0)).current;
-    const searchAnim = useRef(new Animated.Value(0)).current;
-
-    // Request location permissions and get user location
-    const getUserLocation = async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert('Permission Denied', 'Location permission is required to find nearby pharmacies.');
-            return;
-        }
-        let location = await Location.getCurrentPositionAsync({});
-        setUserLocation({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-        });
-    };
-
-    // Fetch pharmacies using Google Places API
-    const fetchPharmacies = async () => {
-        setLoading(true);
-        try {
-            if (!userLocation) {
-                Alert.alert('Location Unavailable', 'Please enable location services.');
-                setLoading(false);
-                return;
-            }
-
-            const response = await axios.get(
-                'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
-                {
-                    params: {
-                        location: `${userLocation.latitude},${userLocation.longitude}`,
-                        radius: 5000, // 5km radius
-                        type: 'pharmacy',
-                        keyword: 'veterinary',
-                        key: GOOGLE_API_KEY,
-                    },
-                }
-            );
-
-            const places = response.data.results.map((place: any) => ({
-                id: place.place_id,
-                name: place.name,
-                address: place.vicinity,
-                distance: calculateDistance(
-                    userLocation,
-                    place.geometry.location.lat,
-                    place.geometry.location.lng
-                ),
-                phone: place.phone_number || 'N/A',
-                isOpen: place.opening_hours?.open_now || false,
-                location: {
-                    latitude: place.geometry.location.lat,
-                    longitude: place.geometry.location.lng,
-                },
-            }));
-
-            setPharmacies(places);
-            setFilteredPharmacies(places);
-
-            // Fit map to show all markers
-            if (places.length > 0 && mapRef.current) {
-                mapRef.current.fitToCoordinates(
-                    places.map((p: Pharmacy) => p.location).concat([userLocation]),
-                    {
-                        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                        animated: true,
-                    }
-                );
-            }
-        } catch (error) {
-            console.error(error);
-            Alert.alert('Error', 'Failed to fetch pharmacies. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Calculate distance between two points (in km)
-    const calculateDistance = (
-        origin: { latitude: number; longitude: number },
-        lat: number,
-        lng: number
-    ) => {
-        const R = 6371; // Earth's radius in km
-        const dLat = ((lat - origin.latitude) * Math.PI) / 180;
-        const dLon = ((lng - origin.longitude) * Math.PI) / 180;
-        const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos((origin.latitude * Math.PI) / 180) *
-            Math.cos((lat * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return Number((R * c).toFixed(1));
-    };
-
-    // Filter pharmacies based on search query
-    const filterPharmacies = (query: string) => {
-        setSearchQuery(query);
-        if (query.trim() === '') {
-            setFilteredPharmacies(pharmacies);
-        } else {
-            const lowerQuery = query.toLowerCase();
-            setFilteredPharmacies(
-                pharmacies.filter(
-                    (pharmacy) =>
-                        pharmacy.name.toLowerCase().includes(lowerQuery) ||
-                        pharmacy.address.toLowerCase().includes(lowerQuery)
-                )
-            );
-        }
-    };
+    useEffect(() => {
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+        }).start();
+    }, []);
 
     // Open Google Maps for directions
     const openDirections = (address: string) => {
@@ -163,216 +38,184 @@ const PharmaciesScreen = () => {
         );
     };
 
-    // Animation setup and data fetching
-    useEffect(() => {
-        const initialize = async () => {
-            await getUserLocation();
-            if (userLocation) {
-                await fetchPharmacies();
-            }
-            Animated.parallel([
-                Animated.timing(fadeAnim, {
-                    toValue: 1,
-                    duration: 600,
-                    useNativeDriver: true,
-                }),
-                Animated.spring(cardAnim, {
-                    toValue: 1,
-                    tension: 50,
-                    friction: 7,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(searchAnim, {
-                    toValue: 1,
-                    duration: 400,
-                    useNativeDriver: true,
-                }),
-            ]).start();
-        };
-        initialize();
-    }, []);
+    // Make phone call
+    const makePhoneCall = (phone: string) => {
+        const url = `tel:${phone}`;
+        Linking.openURL(url).catch(() =>
+            Alert.alert('Error', 'Unable to make phone call.')
+        );
+    };
 
-    if (loading || !userLocation) {
+    if (isLoading || !currentPharmacy) {
         return (
-            <View style={tw`flex-1 justify-center items-center bg-white`}>
-                <View style={tw`w-20 h-20 rounded-full justify-center items-center mb-4 bg-orange-500`}>
-                    <ActivityIndicator color="white" size="large" />
-                </View>
-                <Text style={tw`text-lg font-medium text-gray-700`}>Loading pharmacies...</Text>
-            </View>
+            <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+                <Text style={tw`text-gray-600 text-lg`}>Loading pharmacy details...</Text>
+            </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-white`}>
-            
+        <SafeAreaView style={tw`flex-1 bg-gray-50`}>
             <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
-                {/* Map View */}
-                <View style={tw`h-80 mb-6`}>
-                    <MapView
-                        ref={mapRef}
-                        style={tw`flex-1 rounded-2xl`}
-                        initialRegion={{
-                            latitude: userLocation.latitude,
-                            longitude: userLocation.longitude,
-                            latitudeDelta: 0.05,
-                            longitudeDelta: 0.05,
-                        }}
-                        showsUserLocation={true}
+                {/* Header */}
+                <View style={tw`px-4 pt-2 pb-4`}>
+                    <LinearGradient
+                        colors={['#EF4444', '#DC2626']}
+                        style={tw`rounded-3xl p-8 shadow-xl`}
                     >
-                        {filteredPharmacies.map((pharmacy) => (
-                            <Marker
-                                key={pharmacy.id}
-                                coordinate={pharmacy.location}
-                                title={pharmacy.name}
-                                description={pharmacy.address}
+                        <View style={tw`flex-row items-center justify-between mb-4`}>
+                            <TouchableOpacity
+                                style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
+                                onPress={() => router.back()}
                             >
-                                <View style={tw`bg-orange-500 p-2 rounded-full`}>
-                                    <Ionicons name="medkit-outline" size={20} color="white" />
-                                </View>
-                            </Marker>
-                        ))}
-                    </MapView>
+                                <Ionicons name="arrow-back" size={24} color="white" />
+                            </TouchableOpacity>
+                            <View style={tw`flex-1 ml-4`}>
+                                <Text style={tw`text-white text-sm opacity-90`}>
+                                    Pharmacy Details
+                                </Text>
+                                <Text style={tw`text-white text-2xl font-bold`}>
+                                    {currentPharmacy.name}
+                                </Text>
+                            </View>
+                        </View>
+                    </LinearGradient>
                 </View>
 
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={tw`pb-20 px-5`}
-                >
-                    {/* Header */}
-                    <Text style={tw`text-4xl font-extrabold tracking-tight mb-2 text-orange-600`}>
-                        Find Pharmacies
-                    </Text>
-                    <Text style={tw`text-gray-500 text-lg mb-8`}>Locate nearby veterinary pharmacies</Text>
-
-                    {/* Search Bar */}
-                    <Animated.View
-                        style={[
-                            tw`mb-6`,
-                            {
-                                opacity: searchAnim,
-                                transform: [
-                                    {
-                                        translateY: searchAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [20, 0],
-                                        }),
-                                    },
-                                ],
-                            },
-                        ]}
-                    >
-                        <View style={tw`flex-row items-center bg-gray-100 rounded-2xl p-3 border border-gray-200`}>
-                            <Ionicons name="search-outline" size={20} color="#6B7280" style={tw`mr-2`} />
-                            <TextInput
-                                style={tw`flex-1 text-gray-800 text-base`}
-                                placeholder="Search pharmacies..."
-                                placeholderTextColor="#6B7280"
-                                value={searchQuery}
-                                onChangeText={filterPharmacies}
-                                autoCapitalize="none"
-                            />
-                            {searchQuery.length > 0 && (
-                                <TouchableOpacity onPress={() => filterPharmacies('')}>
-                                    <Ionicons name="close-circle-outline" size={20} color="#6B7280" />
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    </Animated.View>
-
-                    {/* Pharmacy List */}
-                    {filteredPharmacies.length === 0 ? (
-                        <View style={tw`items-center py-10`}>
-                            <Ionicons name="search-outline" size={48} color="#6B7280" />
-                            <Text style={tw`text-gray-500 text-lg mt-4`}>No pharmacies found</Text>
-                        </View>
-                    ) : (
-                        filteredPharmacies.map((pharmacy, index) => (
-                            <Animated.View
-                                key={pharmacy.id}
-                                style={[
-                                    tw`mb-4`,
-                                    {
-                                        opacity: cardAnim,
-                                        transform: [
-                                            {
-                                                translateY: cardAnim.interpolate({
-                                                    inputRange: [0, 1],
-                                                    outputRange: [10 * (index + 1), 0],
-                                                }),
-                                            },
-                                        ],
-                                    },
-                                ]}
+                <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
+                    {/* Map View */}
+                    <View style={tw`h-64 mb-6 rounded-2xl overflow-hidden shadow-lg`}>
+                        <MapView
+                            ref={mapRef}
+                            style={tw`flex-1`}
+                            initialRegion={{
+                                latitude: currentPharmacy.location.latitude,
+                                longitude: currentPharmacy.location.longitude,
+                                latitudeDelta: 0.01,
+                                longitudeDelta: 0.01,
+                            }}
+                        >
+                            <Marker
+                                coordinate={currentPharmacy.location}
+                                title={currentPharmacy.name}
+                                description={currentPharmacy.address}
                             >
-                                <SharedElement id={`pharmacy-${pharmacy.id}`}>
-                                    <TouchableOpacity
-                                        style={tw`bg-white rounded-2xl shadow-sm border border-gray-100 p-4`}
-                                        onPress={() => router.push('PharmacyDetails', { pharmacy })}
-                                        activeOpacity={0.7}
-                                    >
-                                        <View style={tw`flex-row items-center justify-between mb-3`}>
-                                            <Text style={tw`text-gray-900 font-semibold text-lg`}>{pharmacy.name}</Text>
-                                            <View
-                                                style={tw`px-2 py-1 rounded-full ${pharmacy.isOpen ? 'bg-green-100' : 'bg-red-100'
-                                                    }`}
-                                            >
-                                                <Text
-                                                    style={tw`text-xs font-medium ${pharmacy.isOpen ? 'text-green-600' : 'text-red-600'
-                                                        }`}
-                                                >
-                                                    {pharmacy.isOpen ? 'Open' : 'Closed'}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                        <View style={tw`flex-row items-center mb-2`}>
-                                            <Ionicons name="location-outline" size={18} color="#6B7280" style={tw`mr-2`} />
-                                            <Text style={tw`text-gray-600 text-sm flex-1`}>{pharmacy.address}</Text>
-                                        </View>
-                                        <View style={tw`flex-row items-center mb-2`}>
-                                            <Ionicons name="navigate-outline" size={18} color="#6B7280" style={tw`mr-2`} />
-                                            <Text style={tw`text-gray-600 text-sm`}>{pharmacy.distance} km away</Text>
-                                        </View>
-                                        <View style={tw`flex-row items-center`}>
-                                            <Ionicons name="call-outline" size={18} color="#6B7280" style={tw`mr-2`} />
-                                            <Text style={tw`text-gray-600 text-sm`}>{pharmacy.phone}</Text>
-                                        </View>
-                                        <View style={tw`flex-row justify-end mt-3`}>
-                                            <TouchableOpacity
-                                                style={tw`bg-orange-100 rounded-xl py-2 px-4 flex-row items-center`}
-                                                onPress={() => openDirections(pharmacy.address)}
-                                            >
-                                                <Ionicons name="navigate-circle-outline" size={18} color="#EF4444" style={tw`mr-2`} />
-                                                <Text style={tw`text-orange-600 font-semibold`}>Get Directions</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </TouchableOpacity>
-                                </SharedElement>
-                            </Animated.View>
-                        ))
+                                <View style={tw`bg-red-500 p-3 rounded-full shadow-lg`}>
+                                    <Ionicons name="medkit" size={24} color="white" />
+                                </View>
+                            </Marker>
+                        </MapView>
+                    </View>
+
+                    {/* Pharmacy Info */}
+                    <View style={tw`bg-white rounded-2xl p-6 mb-6 shadow-md`}>
+                        <Text style={tw`text-2xl font-bold text-gray-800 mb-2`}>
+                            {currentPharmacy.name}
+                        </Text>
+                        <View style={tw`flex-row items-center mb-3`}>
+                            <Ionicons name="location-outline" size={20} color="#6B7280" />
+                            <Text style={tw`text-gray-600 ml-2 flex-1`}>
+                                {currentPharmacy.address}
+                            </Text>
+                        </View>
+                        
+                        {currentPharmacy.phone && (
+                            <View style={tw`flex-row items-center mb-3`}>
+                                <Ionicons name="call-outline" size={20} color="#6B7280" />
+                                <Text style={tw`text-gray-600 ml-2`}>
+                                    {currentPharmacy.phone}
+                                </Text>
+                            </View>
+                        )}
+
+                        <View style={tw`flex-row items-center mb-4`}>
+                            <Ionicons 
+                                name={currentPharmacy.isOpen ? "checkmark-circle" : "close-circle"} 
+                                size={20} 
+                                color={currentPharmacy.isOpen ? "#10B981" : "#EF4444"} 
+                            />
+                            <Text style={tw`ml-2 font-medium ${currentPharmacy.isOpen ? 'text-green-600' : 'text-red-600'}`}>
+                                {currentPharmacy.isOpen ? 'Open Now' : 'Closed'}
+                            </Text>
+                        </View>
+
+                        {currentPharmacy.rating && (
+                            <View style={tw`flex-row items-center`}>
+                                <Ionicons name="star" size={20} color="#F59E0B" />
+                                <Text style={tw`text-gray-600 ml-2`}>
+                                    {currentPharmacy.rating} / 5.0
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+
+                    {/* Services */}
+                    {currentPharmacy.services && currentPharmacy.services.length > 0 && (
+                        <View style={tw`bg-white rounded-2xl p-6 mb-6 shadow-md`}>
+                            <Text style={tw`text-xl font-bold text-gray-800 mb-4`}>
+                                Services Available
+                            </Text>
+                            {currentPharmacy.services.map((service, index) => (
+                                <View key={index} style={tw`flex-row items-center mb-2`}>
+                                    <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                                    <Text style={tw`text-gray-600 ml-2`}>{service}</Text>
+                                </View>
+                            ))}
+                        </View>
                     )}
+
+                    {/* Vaccines */}
+                    {currentPharmacy.vaccines && currentPharmacy.vaccines.length > 0 && (
+                        <View style={tw`bg-white rounded-2xl p-6 mb-6 shadow-md`}>
+                            <Text style={tw`text-xl font-bold text-gray-800 mb-4`}>
+                                Vaccines Available
+                            </Text>
+                            {currentPharmacy.vaccines.map((vaccine, index) => (
+                                <View key={index} style={tw`bg-blue-50 rounded-xl p-4 mb-3`}>
+                                    <Text style={tw`font-semibold text-blue-800 mb-1`}>
+                                        {vaccine.name}
+                                    </Text>
+                                    <Text style={tw`text-blue-600 text-sm mb-2`}>
+                                        {vaccine.description}
+                                    </Text>
+                                    <Text style={tw`text-blue-700 font-medium`}>
+                                        ${vaccine.price}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
+
+                    {/* Action Buttons */}
+                    <View style={tw`flex-row justify-between mb-8`}>
+                        <TouchableOpacity
+                            style={tw`bg-blue-500 rounded-2xl p-4 flex-1 mr-3 shadow-md`}
+                            onPress={() => openDirections(currentPharmacy.address)}
+                        >
+                            <View style={tw`items-center`}>
+                                <Ionicons name="navigate-outline" size={24} color="white" />
+                                <Text style={tw`text-white font-semibold mt-2`}>
+                                    Directions
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+
+                        {currentPharmacy.phone && (
+                            <TouchableOpacity
+                                style={tw`bg-green-500 rounded-2xl p-4 flex-1 shadow-md`}
+                                onPress={() => makePhoneCall(currentPharmacy.phone)}
+                            >
+                                <View style={tw`items-center`}>
+                                    <Ionicons name="call-outline" size={24} color="white" />
+                                    <Text style={tw`text-white font-semibold mt-2`}>
+                                        Call Now
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </ScrollView>
             </Animated.View>
-
-
         </SafeAreaView>
     );
-};
-
-// Shared element transition configuration
-PharmaciesScreen.sharedElements = (route: any, otherRoute: any, showing: boolean) => {
-    const { pharmacy } = route.params || {};
-    if (pharmacy) {
-        return [
-            {
-                id: `pharmacy-${pharmacy.id}`,
-                animation: 'move',
-                resize: 'auto',
-                align: 'auto',
-            },
-        ];
-    }
-    return [];
-};
-
-export default PharmaciesScreen;
+}

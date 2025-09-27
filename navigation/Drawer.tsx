@@ -76,7 +76,7 @@ const CustomDrawerContent = () => {
             style={tw`flex-row items-center p-4`}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
-              router.push('/bluetooth/ph-reader' as any);
+              router.push('/bluetooth/ph-reader' );
             }}
           >
             <Ionicons name="analytics-outline" size={24} color="#6B7280" style={tw`mr-4`} />
@@ -87,7 +87,7 @@ const CustomDrawerContent = () => {
             style={tw`flex-row items-center p-4`}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
-              router.push('/bluetooth/bluetooth-pairing' as any);
+              router.push('/bluetooth/bluetooth-pairing' );
             }}
           >
             <Ionicons name="bluetooth-outline" size={24} color="#6B7280" style={tw`mr-4`} />
