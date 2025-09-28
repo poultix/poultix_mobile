@@ -74,3 +74,6 @@ export const getConfigurationStatus = () => {
         }
     };
 };
+
+// Default export for Expo Router
+export default GoogleAuthConfig;

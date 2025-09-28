@@ -1,22 +1,22 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
   Animated,
   Dimensions,
   Modal,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
-  Platform,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import tw from 'twrnc';
-import * as Haptics from 'expo-haptics';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth} from '@/contexts/AuthContext';
 
 interface DrawerItem {
   label: string;
@@ -36,42 +36,39 @@ interface UserInfo {
 }
 
 const allDrawerItems: DrawerItem[] = [
+  // Role-specific features
   {
-    label: 'Dashboard',
-    route: '/',
-    icon: 'home-outline',
-    description: 'Overview and quick actions',
-    color: '#F97316'
+    label: 'Admin Panel',
+    route: '/admin',
+    icon: 'shield-outline',
+    description: 'System administration',
+    badge: 'ADMIN',
+    adminOnly: true,
+    color: '#7C3AED'
   },
   {
-    label: 'Farm Management',
-    route: '/farm',
-    icon: 'leaf-outline',
-    description: 'Monitor your poultry farm',
+    label: 'Data Management',
+    route: '/admin/data-management',
+    icon: 'server-outline',
+    description: 'Edit content',
+    adminOnly: true,
     color: '#10B981'
   },
-  {
-    label: 'Bluetooth Devices',
-    route: '/bluetooth/bluetooth-pairing',
-    icon: 'bluetooth-outline',
-    description: 'Connect to devices',
-    badge: 'NEW',
-    color: '#0EA5E9'
-  },
-  {
-    label: 'pH Analyzer',
-    route: '/bluetooth/ph-reader',
-    icon: 'flask-outline',
-    description: 'Analyze stool samples',
-    badge: 'NEW',
-    color: '#F59E0B'
-  },
+  
+  // Secondary features
   {
     label: 'Veterinary Care',
     route: '/farm/veterinary-care',
     icon: 'medical-outline',
     description: 'Find expert help',
     color: '#EF4444'
+  },
+  {
+    label: 'Contacts',
+    route: '/user/directory',
+    icon: 'people-outline',
+    description: 'User directory',
+    color: '#6B7280'
   },
   {
     label: 'Pharmacies',
@@ -95,29 +92,23 @@ const allDrawerItems: DrawerItem[] = [
     badge: 'BETA',
     color: '#06B6D4'
   },
+  
+  // Device features
   {
-    label: 'Admin Panel',
-    route: '/admin',
-    icon: 'shield-outline',
-    description: 'System administration',
-    badge: 'ADMIN',
-    adminOnly: true,
-    color: '#7C3AED'
+    label: 'Bluetooth Devices',
+    route: '/bluetooth/bluetooth-pairing',
+    icon: 'bluetooth-outline',
+    description: 'Connect to devices',
+    badge: 'NEW',
+    color: '#0EA5E9'
   },
   {
-    label: 'Data Management',
-    route: '/admin/data-management',
-    icon: 'server-outline',
-    description: 'Edit content',
-    adminOnly: true,
-    color: '#10B981'
-  },
-  {
-    label: 'Contacts',
-    route: '/user/directory',
-    icon: 'chatbubbles-outline',
-    description: 'Chat with community members',
-    color: '#3B82F6'
+    label: 'pH Analyzer',
+    route: '/bluetooth/ph-reader',
+    icon: 'flask-outline',
+    description: 'Analyze stool samples',
+    badge: 'NEW',
+    color: '#F59E0B'
   },
   {
     label: 'Settings',

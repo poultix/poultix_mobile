@@ -14,12 +14,10 @@ import { router } from 'expo-router'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useAuth } from '@/contexts/AuthContext'
-import { useAuthActions } from '@/hooks/useAuthActions'
 import { StatusBar } from 'expo-status-bar'
 
 export default function SignInScreen() {
-    const { currentUser, loading: authLoading } = useAuth()
-    const { login } = useAuthActions()
+    const { currentUser, loading: authLoading ,login} = useAuth()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -81,9 +79,9 @@ export default function SignInScreen() {
         try {
             Vibration.vibrate(20)
             if (authLoading) return
-            const user = await login(email.trim(), password.trim())
-console.log('user result',user)
-            switch (user.user.role) {
+            await login(email.trim(), password.trim())
+
+            switch (currentUser?.role) {
                 case 'ADMIN': router.replace('/dashboard/admin-dashboard'); break
                 case 'FARMER': router.replace('/dashboard/farmer-dashboard'); break
                 case 'VETERINARY': router.replace('/dashboard/veterinary-dashboard'); break
@@ -114,14 +112,14 @@ console.log('user result',user)
                     {/* Header */}
                     <View className="mb-8 -mx-7">
                         <LinearGradient
-                            colors={['#F97316', '#EA580C']}
-                            className="rounded-b-3xl p-8 shadow-xl"
+                            colors={['#3B82F6', '#3B82F6']}
+                            className="rounded-b-1xl p-8 shadow-xl"
                         >
                             <View className="items-center mt-4">
                                 <View className="w-20 h-20 bg-white/20 rounded-full items-center justify-center mb-4">
                                     <Ionicons name="leaf" size={32} color="white" />
                                 </View>
-                                <Text className="text-white text-3xl font-bold mb-2">Welcome Back! 🌱</Text>
+                                <Text className="text-white text-3xl font-bold mb-2">Welcome Back! </Text>
                                 <Text className="text-orange-100 text-base text-center">
                                     Sign in to continue managing your poultry farm
                                 </Text>
@@ -134,13 +132,13 @@ console.log('user result',user)
                         <View className="mb-6">
                             <Text className="text-gray-700 font-medium mb-2 ml-1">Email</Text>
                             <View
-                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isEmailFocused ? 'border-orange-300' : 'border-gray-200'} ${emailError ? 'border-red-500' : ''}`}
+                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isEmailFocused ? 'border-blue-300' : 'border-gray-200'} ${emailError ? 'border-red-500' : ''}`}
                             >
                                 <View className="pl-4 pr-2">
                                     <Ionicons
                                         name="mail-outline"
                                         size={22}
-                                        color={emailError ? '#EF4444' : isEmailFocused ? 'orange' : '#9CA3AF'}
+                                        color={emailError ? '#EF4444' : isEmailFocused ? '#3B82F6' : '#9CA3AF'}
                                     />
                                 </View>
                                 <TextInput
@@ -165,13 +163,13 @@ console.log('user result',user)
                         <View className="mb-4">
                             <Text className="text-gray-700 font-medium mb-2 ml-1">Password</Text>
                             <View
-                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isPasswordFocused ? 'border-orange-300' : 'border-gray-200'} ${passwordError ? 'border-red-500' : ''}`}
+                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isPasswordFocused ? 'border-blue-300' : 'border-gray-200'} ${passwordError ? 'border-red-500' : ''}`}
                             >
                                 <View className="pl-4 pr-2">
                                     <Ionicons
                                         name="lock-closed-outline"
                                         size={22}
-                                        color={passwordError ? '#EF4444' : isPasswordFocused ? 'orange' : '#9CA3AF'}
+                                        color={passwordError ? '#EF4444' : isPasswordFocused ? '#3B82F6' : '#9CA3AF'}
                                     />
                                 </View>
                                 <TextInput
@@ -193,7 +191,7 @@ console.log('user result',user)
                                     className="px-4"
                                     activeOpacity={0.7}
                                 >
-                                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={isPasswordFocused ? 'orange' : '#9CA3AF'} />
+                                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={isPasswordFocused ? '#3B82F6' : '#9CA3AF'} />
                                 </TouchableOpacity>
                             </View>
                             {passwordError && <Text className="text-orange-600 ml-1 mt-1 text-xs">{passwordError}</Text>}
@@ -201,7 +199,7 @@ console.log('user result',user)
 
                         {/* Forgot Password */}
                         <TouchableOpacity onPress={() => router.push('/auth/forgot-password')} className="items-end mb-7 mt-1" activeOpacity={0.7}>
-                            <Text className="text-orange-600 font-medium">Forgot Password?</Text>
+                            <Text className="text-blue-400 font-medium">Forgot Password?</Text>
                         </TouchableOpacity>
 
                         {/* Sign In */}
@@ -213,12 +211,12 @@ console.log('user result',user)
                                 disabled={isLoading}
                             >
                                 <LinearGradient
-                                    colors={['#FF6500', '#FF4C00']}
+                                    colors={['#3B82F6', '#3B82F6']}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 0 }}
                                     className="w-full h-full items-center justify-center"
                                 >
-                                    {isLoading ? (
+                                    {authLoading? (
                                         <View className="flex-row items-center">
                                             <ActivityIndicator size="small" color="white" />
                                             <Text className="text-white font-semibold text-lg ml-2">Signing In...</Text>
@@ -245,7 +243,7 @@ console.log('user result',user)
                                 activeOpacity={0.8}
                             >
                                 <View className="flex-row items-center">
-                                    <FontAwesome name="google" size={20} color="#DB4437" />
+                                    <FontAwesome name="google" size={20} color="#3B82F6" />
                                     <Text className="ml-2 font-medium text-gray-700">Google</Text>
                                 </View>
                             </TouchableOpacity>
@@ -273,7 +271,7 @@ console.log('user result',user)
                     <View className="flex-row justify-center mt-auto mb-6 pt-8">
                         <Text className="text-gray-500 text-base">Don't have an account? </Text>
                         <TouchableOpacity onPress={() => router.push('/auth/register')} activeOpacity={0.7}>
-                            <Text className="text-orange-600 font-semibold text-base">Sign Up</Text>
+                            <Text className="text-blue-500 font-semibold text-base">Sign Up</Text>
                         </TouchableOpacity>
                     </View>
                 </Animated.View>

@@ -17,21 +17,30 @@ import { router } from 'expo-router';
 
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
+import BottomTabs from '@/components/BottomTabs';
+import { useBottomTabsContext } from '@/contexts/BottomTabsContext';
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';
-import { useMessages } from '@/contexts/MessageContext';
-import { useMessageActions } from '@/hooks/useMessageActions';
+import { useChat } from '@/contexts/ChatContext';
+import { useChatActions } from '@/hooks/useChatActions';
+import { MessageType } from '@/types';
 
 export default function MessagesScreen() {
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
+    const { setCurrentRoute } = useBottomTabsContext();
     const [newMessage, setNewMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
-    
+
+    // Set current route for bottom tabs
+    useEffect(() => {
+        setCurrentRoute('/communication/messages');
+    }, []);
+
     // Use new contexts
     const { currentUser } = useAuth();
-    const { messages, isLoading } = useMessages();
-    const { sendMessage, markAsRead } = useMessageActions();
+    const { messages, loading, currentChat } = useChat();
+    const { sendMessage, markMessagesAsRead } = useChatActions();
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const scrollViewRef = useRef<ScrollView>(null);
@@ -48,34 +57,34 @@ export default function MessagesScreen() {
     useEffect(() => {
         if (messages && messages.length > 0 && currentUser) {
             messages.forEach(message => {
-                if (!message.isRead && message.recipientId === currentUser.id) {
-                    markAsRead(message.senderId, message.recipientId, message.id, true);
+                if (!message.status && message.sender.id === currentUser.id) {
+                    markMessagesAsRead(message.id);
                 }
             });
         }
-    }, [messages, currentUser, markAsRead]);
+    }, [messages, currentUser, markMessagesAsRead]);
 
     const handleSendMessage = async () => {
         if (!newMessage.trim() || !currentUser) return;
-        
+
         try {
             setIsSending(true);
-            
+
             // Send message using context action
             await sendMessage(
-                currentUser.id,
-                currentUser.role === 'FARMER' ? 'vet-001' : 'farmer-001', // Default recipient for demo
-                newMessage.trim(),
-                currentUser.role === 'FARMER'
+                newMessage,
+                currentChat!,
+                currentUser!,
+                MessageType.TEXT
             );
-            
+
             setNewMessage('');
-            
+
             // Scroll to bottom
             setTimeout(() => {
                 scrollViewRef.current?.scrollToEnd({ animated: true });
             }, 100);
-            
+
         } catch (error) {
             console.error('Error sending message:', error);
         } finally {
@@ -85,7 +94,7 @@ export default function MessagesScreen() {
 
     const renderMessage = (message: any, index: number) => {
         const isFromCurrentUser = message.senderId === currentUser?.id;
-        
+
         return (
             <View
                 key={message.id || index}
@@ -112,7 +121,7 @@ export default function MessagesScreen() {
         );
     };
 
-    if (isLoading || !currentUser) {
+    if (loading || !currentUser||!currentChat) {
         return (
             <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Loading messages...</Text>
@@ -122,10 +131,8 @@ export default function MessagesScreen() {
 
     return (
         <SafeAreaView style={tw`flex-1 bg-gray-50`}>
-            <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
-            
-            <KeyboardAvoidingView 
-                style={tw`flex-1`} 
+            <KeyboardAvoidingView
+                style={tw`flex-1`}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
@@ -153,10 +160,10 @@ export default function MessagesScreen() {
                         </LinearGradient>
                     </View>
 
-                    {/* Messages */}
+                    {/* Messages List */}
                     <ScrollView
                         ref={scrollViewRef}
-                        style={tw`flex-1 px-4`}
+                        style={tw`flex-1 px-4 pb-20`} // Add padding for bottom tabs
                         showsVerticalScrollIndicator={false}
                         onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
                     >
@@ -194,16 +201,24 @@ export default function MessagesScreen() {
                                 onPress={handleSendMessage}
                                 disabled={!newMessage.trim() || isSending}
                             >
-                                <Ionicons 
-                                    name={isSending ? "hourglass-outline" : "send"} 
-                                    size={20} 
-                                    color="white" 
+                                <Ionicons
+                                    name={isSending ? "hourglass-outline" : "send"}
+                                    size={20}
+                                    color="white"
                                 />
                             </TouchableOpacity>
                         </View>
                     </View>
                 </Animated.View>
             </KeyboardAvoidingView>
+
+            {/* Bottom Tabs */}
+            <BottomTabs currentRoute="/communication/messages" />
+
+            <CustomDrawer
+                isVisible={isDrawerVisible}
+                onClose={() => setIsDrawerVisible(false)}
+            />
         </SafeAreaView>
     );
 }

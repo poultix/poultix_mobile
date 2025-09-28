@@ -16,155 +16,60 @@ import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { useChat} from '@/contexts/ChatContext';
+import { useChat } from '@/contexts/ChatContext';
 import { useUsers } from '@/contexts/UserContext';
+import { useChatActions } from '@/hooks/useChatActions';
 import DrawerButton from '@/components/DrawerButton';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { Message } from '@/types';
+import { Message, MessageType, MessageStatus } from '@/types';
 
 export default function ChatScreen() {
     const { chatId } = useLocalSearchParams();
     const { currentUser } = useAuth();
     const { users } = useUsers();
-    const { chats, messages, typingStatuses, onlineUsers } = useChat();
-    const { sendMessage, markMessagesAsRead, setTyping, addReaction, editMessage, deleteMessage, createIndividualChat } = useChatActions();
+    const { messages, typingStatuses, onlineUsers } = useChat();
+    const { sendMessage, markMessagesAsRead, setTyping, addReaction, editMessage, removeMessage } = useChatActions();
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
-    
+
     const [messageText, setMessageText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [replyToMessage, setReplyToMessage] = useState<Message | null>(null);
     const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
     const [showReactions, setShowReactions] = useState<string | null>(null);
-    
+
     const scrollViewRef = useRef<ScrollView>(null);
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(0);
 
-    // Always get the latest chat state
-    const currentChat = chats.find(chat => chat.id === chatId);
-    const chatMessages = messages[chatId as string] || [];
+    // Get current chat info from context
+    const { currentChat } = useChat();
+    const chatMessages = messages.filter(msg =>
+        (msg.sender.id === currentUser?.id && msg.receiver.id === chatId) ||
+        (msg.sender.id === chatId && msg.receiver.id === currentUser?.id)
+    );
     const chatTyping = typingStatuses.filter(t => t.chatId === chatId && t.userId !== currentUser?.id);
 
-    // Create chat if it doesn't exist and we have the necessary info
+    // Find the other user based on chatId
+    const otherUser = users.find(u => u.id === chatId);
+
     useEffect(() => {
-        const createChatIfNeeded = () => {
-            console.log('createChatIfNeeded called:', {
-                currentChat: !!currentChat,
-                chatId,
-                currentUser: !!currentUser,
-                usersLength: users.length
-            });
+        // Set the current chat user in context if needed
+        // This is a simplified approach since the current ChatContext structure is limited
+        console.log('Chat initialized with user:', otherUser?.name);
+    }, [chatId, otherUser]);
 
-            if (!currentChat && chatId && currentUser && users.length > 0) {
-                if ((chatId as string).includes('_')) {
-                    // Handle new individual chat format: chat_userId1_userId2
-                    const parts = (chatId as string).split('_');
-                    let userId1, userId2;
-                    
-                    if (parts.length === 3) {
-                        [, userId1, userId2] = parts;
-                    } else if (parts.length === 5) {
-                        // Format: chat_user_timestamp_admin_001
-                        userId1 = `${parts[1]}_${parts[2]}`; // "user_timestamp"
-                        userId2 = `${parts[3]}_${parts[4]}`; // "admin_001"
-                    } else {
-                        // Fallback: assume last two parts are the user IDs
-                        userId1 = parts.slice(1, -1).join('_');
-                        userId2 = parts[parts.length - 1];
-                    }
-                    
-                    const otherUserId = userId1 === currentUser.id ? userId2 : userId1;
-                    const otherUser = users.find(u => u.id === otherUserId);
-                    
-                    console.log('Chat creation details:', {
-                        userId1,
-                        userId2,
-                        otherUserId,
-                        otherUser: !!otherUser,
-                        currentUserId: currentUser.id
-                    });
-                    
-                    if (otherUser) {
-                        const participantNames = {
-                            [currentUser.id]: currentUser.name,
-                            [otherUser.id]: otherUser.name
-                        };
-                        
-                        console.log('Creating chat with:', { chatId, participantNames });
-                        
-                        // Create chat immediately
-                        createIndividualChat(chatId as string, [currentUser.id, otherUser.id], participantNames);
-                    } else {
-                        console.log('Other user not found!');
-                    }
-                } else {
-                    console.log('ChatId does not include underscore');
-                }
-            } else {
-                console.log('Conditions not met for chat creation');
-            }
-        };
-
-        // Small delay to ensure all contexts are loaded
-        const timer = setTimeout(createChatIfNeeded, 100);
-        return () => clearTimeout(timer);
-    }, [chatId, currentUser?.id, users.length]);
-
-    // Check if we're still loading or if this is a valid chat scenario
+    // Check if we have a valid chat scenario
     const isValidChatScenario = () => {
-        // If chat exists, it's valid
-        if (currentChat) return true;
-        
-        // If missing basic requirements, invalid
-        if (!chatId || !currentUser) return false;
-        
-        // If users are still loading, assume valid (show loading)
-        if (users.length === 0) return true;
-        
-        // For new chat format, check if other user exists
-        if ((chatId as string).includes('_')) {
-            const parts = (chatId as string).split('_');
-            if (parts.length >= 3) {
-                // Handle format: chat_user_timestamp_admin_001
-                // Split into: ["chat", "user", "timestamp", "admin", "001"]
-                // We need to reconstruct: userId1 = "user_timestamp", userId2 = "admin_001"
-                let userId1, userId2;
-                if (parts.length === 3) {
-                    [, userId1, userId2] = parts;
-                } else if (parts.length === 5) {
-                    // Format: chat_user_timestamp_admin_001
-                    userId1 = `${parts[1]}_${parts[2]}`; // "user_timestamp"
-                    userId2 = `${parts[3]}_${parts[4]}`; // "admin_001"
-                } else {
-                    // Fallback: assume last two parts are the user IDs
-                    userId1 = parts.slice(1, -1).join('_');
-                    userId2 = parts[parts.length - 1];
-                }
-                
-                const otherUserId = userId1 === currentUser.id ? userId2 : userId1;
-                console.log('Validation check:', { userId1, userId2, currentUserId: currentUser.id, otherUserId });
-                
-                // Check if other user exists in users list
-                const otherUserExists = users.some(u => u.id === otherUserId);
-                console.log('Other user exists:', otherUserExists, 'Available users:', users.map(u => u.id));
-                
-                return otherUserExists;
-            }
-        }
-        
-        // Default to valid to show loading instead of error
-        return true;
+        return !!(chatId && currentUser && otherUser);
     };
 
-    // Debug info - temporary to fix issue
+    // Debug info
     console.log('Chat Screen Debug:', {
         chatId,
         currentUserId: currentUser?.id,
-        currentChat: !!currentChat,
-        totalChats: chats.length,
-        chatIds: chats.map(c => c.id),
-        usersLength: users.length,
+        otherUserId: otherUser?.id,
+        messagesCount: chatMessages.length,
         isValidScenario: isValidChatScenario()
     });
 
@@ -176,8 +81,12 @@ export default function ChatScreen() {
         }).start();
 
         // Mark messages as read when entering chat
-        if (currentUser && chatId) {
-            markMessagesAsRead(chatId as string, currentUser.id);
+        if (currentUser && chatMessages.length > 0) {
+            chatMessages.forEach(msg => {
+                if (msg.sender.id !== currentUser.id) {
+                    markMessagesAsRead(msg.id);
+                }
+            });
         }
     }, [chatId, currentUser]);
 
@@ -187,20 +96,19 @@ export default function ChatScreen() {
     }, [chatMessages.length]);
 
     const handleSendMessage = async () => {
-        if (!messageText.trim() || !chatId) return;
+        if (!messageText.trim() || !otherUser || !currentUser) return;
 
         await sendMessage(
-            chatId as string,
             messageText.trim(),
-            'text',
-            replyToMessage?.id,
-            currentUser
+            otherUser,
+            currentUser,
+            MessageType.TEXT
         );
 
         setMessageText('');
         setReplyToMessage(null);
         setIsTyping(false);
-        
+
         if (currentUser) {
             setTyping(chatId as string, currentUser.id, currentUser.name, false);
         }
@@ -208,7 +116,7 @@ export default function ChatScreen() {
 
     const handleTyping = (text: string) => {
         setMessageText(text);
-        
+
         if (!isTyping && text.length > 0 && currentUser && chatId) {
             setIsTyping(true);
             setTyping(chatId as string, currentUser.id, currentUser.name, true);
@@ -229,15 +137,15 @@ export default function ChatScreen() {
     };
 
     const handleMessageLongPress = (message: Message) => {
-        setSelectedMessage(message.id);
-        
+        setSelectedMessage(message.id.toString());
+
         Alert.alert(
             'Message Options',
             '',
             [
                 { text: 'Reply', onPress: () => setReplyToMessage(message) },
-                { text: 'React', onPress: () => setShowReactions(message.id) },
-                ...(message.senderId === currentUser?.id ? [
+                { text: 'React', onPress: () => setShowReactions(message.id.toString()) },
+                ...(message.sender.id === currentUser?.id ? [
                     { text: 'Edit', onPress: () => handleEditMessage(message) },
                     { text: 'Delete', onPress: () => handleDeleteMessage(message), style: 'destructive' as const }
                 ] : []),
@@ -248,7 +156,7 @@ export default function ChatScreen() {
 
     const handleEditMessage = (message: Message) => {
         setMessageText(message.content);
-        setSelectedMessage(message.id);
+        setSelectedMessage(message.id.toString());
     };
 
     const handleDeleteMessage = (message: Message) => {
@@ -257,10 +165,10 @@ export default function ChatScreen() {
             'Are you sure you want to delete this message?',
             [
                 { text: 'Cancel', style: 'cancel' },
-                { 
-                    text: 'Delete', 
+                {
+                    text: 'Delete',
                     style: 'destructive',
-                    onPress: () => deleteMessage(chatId as string, message.id)
+                    onPress: () => removeMessage(message.id)
                 }
             ]
         );
@@ -268,22 +176,23 @@ export default function ChatScreen() {
 
     const handleReaction = (messageId: string, reaction: string) => {
         if (currentUser) {
-            addReaction(messageId, currentUser.id, reaction);
+            addReaction(Number(messageId), Number(currentUser.id), reaction);
         }
         setShowReactions(null);
     };
 
     const getMessageStatus = (message: Message) => {
         switch (message.status) {
-            case 'sending': return '⏳';
-            case 'sent': return '✓';
-            case 'delivered': return '✓✓';
-            case 'read': return '✓✓';
-            default: return '';
+            case MessageStatus.SENDING: return '⏳';
+            case MessageStatus.DELIVERED: return '✓✓';
+            case MessageStatus.READ: return '✓✓';
+            case MessageStatus.FAILED: return '❌';
+            default: return '✓';
         }
     };
 
-    const formatTime = (date: Date) => {
+    const formatTime = (timestamp: string) => {
+        const date = new Date(timestamp);
         return new Intl.DateTimeFormat('en-US', {
             hour: '2-digit',
             minute: '2-digit',
@@ -301,20 +210,12 @@ export default function ChatScreen() {
         );
     }
 
-    if (!currentChat) {
-        return (
-            <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
-                <Text style={tw`text-gray-600 text-lg`}>Loading chat...</Text>
-            </SafeAreaView>
-        );
-    }
-
     return (
-        <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+        <SafeAreaView style={tw`flex-1 bg-gray-50 pb-5`}>
             <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
-            
-            <KeyboardAvoidingView 
-                style={tw`flex-1`} 
+
+            <KeyboardAvoidingView
+                style={tw`flex-1`}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 {/* Header */}
@@ -330,34 +231,23 @@ export default function ChatScreen() {
                             >
                                 <Ionicons name="arrow-back-outline" size={24} color="white" />
                             </TouchableOpacity>
-                            
+
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-white text-lg font-bold`}>
-                                    {currentChat.type === 'group' ? currentChat.name : 
-                                     Object.values(currentChat.participantNames).find(name => name !== currentUser?.name)}
+                                    {otherUser?.name || 'Chat'}
                                 </Text>
                                 <View style={tw`flex-row items-center`}>
-                                    {currentChat.type === 'individual' && (
-                                        <>
-                                            <View style={tw`w-2 h-2 rounded-full mr-2 ${
-                                                isOnline(currentChat.participants.find(p => p !== currentUser?.id) || '') 
-                                                    ? 'bg-green-400' : 'bg-gray-400'
-                                            }`} />
-                                            <Text style={tw`text-blue-100 text-sm`}>
-                                                {isOnline(currentChat.participants.find(p => p !== currentUser?.id) || '') 
-                                                    ? 'Online' : 'Last seen recently'}
-                                            </Text>
-                                        </>
-                                    )}
-                                    {currentChat.type === 'group' && (
-                                        <Text style={tw`text-blue-100 text-sm`}>
-                                            {currentChat.participants.length} members
-                                        </Text>
-                                    )}
+                                    <View style={tw`w-2 h-2 rounded-full mr-2 ${isOnline(otherUser?.id || '')
+                                        ? 'bg-green-400' : 'bg-gray-400'
+                                        }`} />
+                                    <Text style={tw`text-blue-100 text-sm`}>
+                                        {isOnline(otherUser?.id || '')
+                                            ? 'Online' : 'Last seen recently'}
+                                    </Text>
                                 </View>
                             </View>
                         </View>
-                        
+
                         <View style={tw`flex-row items-center`}>
                             <TouchableOpacity style={tw`bg-white bg-opacity-20 p-2 rounded-xl mr-2`}>
                                 <Ionicons name="call-outline" size={20} color="white" />
@@ -380,10 +270,10 @@ export default function ChatScreen() {
                     >
                         <View style={tw`py-4`}>
                             {chatMessages.map((message, index) => {
-                                const isOwnMessage = message.senderId === currentUser?.id;
+                                const isOwnMessage = message.sender.id === currentUser?.id;
                                 const showAvatar = !isOwnMessage && (
-                                    index === 0 || 
-                                    chatMessages[index - 1].senderId !== message.senderId
+                                    index === 0 ||
+                                    chatMessages[index - 1].sender.id !== message.sender.id
                                 );
 
                                 return (
@@ -392,72 +282,54 @@ export default function ChatScreen() {
                                         {message.replyTo && (
                                             <View style={tw`${isOwnMessage ? 'items-end' : 'items-start'} mb-1`}>
                                                 <View style={tw`bg-gray-200 rounded-lg p-2 max-w-xs`}>
-                                                    <Text style={tw`text-gray-600 text-xs`}>
-                                                        Replying to: {chatMessages.find(m => m.id === message.replyTo)?.content.substring(0, 30)}...
-                                                    </Text>
+                                                    {message.replyTo &&
+                                                        <Text style={tw`text-gray-600 text-xs`}>
+                                                            Replying to: {chatMessages.find(m => m.id === message?.replyTo?.id)?.content.substring(0, 30)}...
+                                                        </Text>}
                                                 </View>
                                             </View>
                                         )}
 
                                         <View style={tw`flex-row ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-                                            {/* Avatar for group chats */}
-                                            {showAvatar && currentChat.type === 'group' && (
-                                                <View style={tw`w-8 h-8 bg-blue-500 rounded-full items-center justify-center mr-2`}>
-                                                    <Text style={tw`text-white text-xs font-bold`}>
-                                                        {message.senderName.charAt(0)}
-                                                    </Text>
-                                                </View>
-                                            )}
 
                                             <TouchableOpacity
                                                 onLongPress={() => handleMessageLongPress(message)}
                                                 style={tw`max-w-xs`}
                                             >
-                                                <View style={tw`${
-                                                    isOwnMessage 
-                                                        ? 'bg-blue-500 rounded-l-2xl rounded-tr-2xl' 
-                                                        : 'bg-white rounded-r-2xl rounded-tl-2xl'
-                                                } p-3 shadow-sm ${message.isDeleted ? 'opacity-50' : ''}`}>
-                                                    
-                                                    {/* Sender name for group chats */}
-                                                    {!isOwnMessage && currentChat.type === 'group' && showAvatar && (
-                                                        <Text style={tw`text-blue-600 text-xs font-semibold mb-1`}>
-                                                            {message.senderName}
-                                                        </Text>
-                                                    )}
+                                                <View style={tw`${isOwnMessage
+                                                    ? 'bg-blue-500 rounded-l-2xl rounded-tr-2xl'
+                                                    : 'bg-white rounded-r-2xl rounded-tl-2xl'
+                                                    } p-3 shadow-sm`}>
 
-                                                    <Text style={tw`${
-                                                        isOwnMessage ? 'text-white' : 'text-gray-800'
-                                                    } text-base ${message.isDeleted ? 'italic' : ''}`}>
+                                                    <Text style={tw`${isOwnMessage ? 'text-white' : 'text-gray-800'
+                                                        } text-base`}>
                                                         {message.content}
                                                     </Text>
 
-                                                    {message.isEdited && (
-                                                        <Text style={tw`${
-                                                            isOwnMessage ? 'text-blue-200' : 'text-gray-500'
-                                                        } text-xs mt-1`}>
+                                                    {message.edited && (
+                                                        <Text style={tw`${isOwnMessage ? 'text-blue-200' : 'text-gray-500'
+                                                            } text-xs mt-1`}>
                                                             edited
                                                         </Text>
                                                     )}
 
                                                     {/* Reactions */}
-                                                    {message.reactions && Object.keys(message.reactions).length > 0 && (
+                                                    {message.reactions && message.reactions.length > 0 && (
                                                         <View style={tw`flex-row flex-wrap mt-2`}>
-                                                            {Object.entries(message.reactions).map(([userId, reaction]) => (
-                                                                <View key={userId} style={tw`bg-gray-100 rounded-full px-2 py-1 mr-1 mb-1`}>
-                                                                    <Text style={tw`text-sm`}>{reaction}</Text>
+                                                            {message.reactions.map((reaction, idx) => (
+                                                                <View key={idx} style={tw`bg-gray-100 rounded-full px-2 py-1 mr-1 mb-1`}>
+                                                                    <Text style={tw`text-sm`}>{reaction.emoji}</Text>
                                                                 </View>
                                                             ))}
                                                         </View>
                                                     )}
 
                                                     <View style={tw`flex-row items-center justify-between mt-1`}>
-                                                        <Text style={tw`${
-                                                            isOwnMessage ? 'text-blue-200' : 'text-gray-500'
-                                                        } text-xs`}>
+                                                        <Text style={tw`${isOwnMessage ? 'text-blue-200' : 'text-gray-500'
+                                                            } text-xs`}>
                                                             {formatTime(message.timestamp)}
                                                         </Text>
-                                                        
+
                                                         {isOwnMessage && (
                                                             <Text style={tw`text-blue-200 text-xs ml-2`}>
                                                                 {getMessageStatus(message)}
@@ -491,7 +363,7 @@ export default function ChatScreen() {
                         <View style={tw`flex-row justify-between items-center`}>
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-blue-600 text-sm font-semibold`}>
-                                    Replying to {replyToMessage.senderName}
+                                    Replying to {replyToMessage.sender.name}
                                 </Text>
                                 <Text style={tw`text-gray-600 text-sm`} numberOfLines={1}>
                                     {replyToMessage.content}
@@ -510,7 +382,7 @@ export default function ChatScreen() {
                         <TouchableOpacity style={tw`bg-blue-100 p-3 rounded-full mr-3`}>
                             <Ionicons name="add-outline" size={20} color="#3B82F6" />
                         </TouchableOpacity>
-                        
+
                         <View style={tw`flex-1 bg-gray-100 rounded-2xl px-4 py-2 mr-3`}>
                             <TextInput
                                 style={tw`text-gray-800 text-base max-h-24`}
@@ -522,7 +394,7 @@ export default function ChatScreen() {
                                 maxLength={1000}
                             />
                         </View>
-                        
+
                         <TouchableOpacity
                             style={tw`bg-blue-500 p-3 rounded-full ${!messageText.trim() ? 'opacity-50' : ''}`}
                             onPress={handleSendMessage}

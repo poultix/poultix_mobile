@@ -1,45 +1,64 @@
-
-export interface Message {
-    id: string;
-    chatId: string;
-    senderId: string;
-    senderName: string;
-    content: string;
-    type: 'text' | 'image' | 'voice' | 'file';
-    timestamp: Date;
-    status: 'sending' | 'sent' | 'delivered' | 'read';
-    replyTo?: string;
-    reactions?: { [userId: string]: string };
-    isEdited?: boolean;
-    isDeleted?: boolean;
-    fileUrl?: string;
-    fileName?: string;
-    fileSize?: number;
-    voiceDuration?: number;
-}
-
-
-
-export interface Chat {
-    id: string;
-    type: 'individual' | 'group';
-    name?: string;
-    participants: string[];
-    participantNames: { [userId: string]: string };
-    lastMessage?: Message;
-    lastActivity: Date;
-    unreadCount: number;
-    isTyping: { [userId: string]: boolean };
-    isOnline: { [userId: string]: boolean };
-    avatar?: string;
-    description?: string;
-    createdBy?: string;
-    createdAt: Date;
-}
+import { User } from "./user";
 
 export interface TypingStatus {
     chatId: string;
     userId: string;
     userName: string;
     isTyping: boolean;
+}
+
+
+export enum MessageType {
+    TEXT = "TEXT",
+    IMAGE = "IMAGE",
+    AUDIO = "AUDIO",
+    FILE = "FILE",
+    VIDEO = "VIDEO"
+}
+export enum MessageStatus{
+    SENDING="SENDING",
+    DELIVERED="DELIVERED",
+    READ="READ",
+    FAILED="FAILED"
+}
+
+/**
+ * Represents a direct message between users.
+ */
+export interface Message {
+    id: number
+    sender: User
+    receiver: User
+    content: string
+    timestamp: string
+    edited?: boolean
+    type: MessageType
+    reactions?: Reaction[]
+    replyTo?: Message
+    fileName?: string
+    status:MessageStatus
+}
+
+
+export interface Reaction {
+    userId: number
+    emoji: string
+}
+
+export interface ChatReaction {
+    messageId: number,
+    reactions: Reaction[]
+}
+
+
+/**
+ * Request payload for sending a direct message.
+ */
+export interface SendMessageRequest {
+    content: string
+    receiverId: number
+    senderId: number
+    type: MessageType
+    fileName?: string
+    replyToId?: number
 }

@@ -19,12 +19,12 @@ import { useChat } from '@/contexts/ChatContext';
 import DrawerButton from '@/components/DrawerButton';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { UserRole } from '@/types/user';
+import { User, UserRole } from '@/types';
 
 export default function UserDirectoryScreen() {
     const { currentUser } = useAuth();
-    const { users, isLoading } = useUsers();
-    const { chats, messages, onlineUsers } = useChat();
+    const { users, loading } = useUsers();
+    const { messages, onlineUsers, setCurrentChat } = useChat();
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
     
     const [searchQuery, setSearchQuery] = useState('');
@@ -103,36 +103,23 @@ export default function UserDirectoryScreen() {
         }
     };
 
-    const handleUserPress = (user: any) => {
-        // Find or create chat with this user
-        const existingChat = chats.find(chat => 
-            chat.type === 'individual' && 
-            chat.participants.includes(user.id) && 
-            chat.participants.includes(currentUser?.id || '')
-        );
+    const handleUserPress = (user: User) => {
+        // Set the current chat user in context
+        setCurrentChat(user);
         
-        if (existingChat) {
-            router.push(`/communication/chat?chatId=${existingChat.id}`);
-        } else {
-            // Create new chat ID and navigate
-            const newChatId = `chat_${currentUser?.id}_${user.id}`;
-            router.push(`/communication/chat?chatId=${newChatId}`);
-        }
+        // Navigate to chat with the user's ID as chatId
+        router.push(`/communication/chat?chatId=${user.id}`);
     };
 
     const getLastMessage = (userId: string) => {
-        // Find chat with this user
-        const userChat = chats.find(chat => 
-            chat.type === 'individual' && 
-            chat.participants.includes(userId) && 
-            chat.participants.includes(currentUser?.id || '')
+        // Filter messages between current user and this user
+        const userMessages = messages.filter(msg => 
+            (msg.sender.id === currentUser?.id && msg.receiver.id === userId) ||
+            (msg.sender.id === userId && msg.receiver.id === currentUser?.id)
         );
         
-        if (userChat && messages[userChat.id]) {
-            const chatMessages = messages[userChat.id];
-            return chatMessages.length > 0 ? chatMessages[chatMessages.length - 1] : null;
-        }
-        return null;
+        // Return the most recent message
+        return userMessages.length > 0 ? userMessages[userMessages.length - 1] : null;
     };
 
     const getOnlineStatus = (userId: string) => {
@@ -154,7 +141,7 @@ export default function UserDirectoryScreen() {
         return users.filter(user => user.role === tabKey).length;
     };
 
-    if (isLoading) {
+    if (loading) {
         return (
             <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Loading users...</Text>
@@ -198,7 +185,7 @@ export default function UserDirectoryScreen() {
                                 </View>
                                 <View style={tw`items-center flex-1`}>
                                     <Text style={tw`text-white text-3xl font-bold`}>
-                                        {Object.values(messages).flat().length}
+                                        {messages.length}
                                     </Text>
                                     <Text style={tw`text-blue-100 text-xs font-medium`}>Messages</Text>
                                 </View>
@@ -332,7 +319,7 @@ export default function UserDirectoryScreen() {
                                             const lastMsg = getLastMessage(user.id);
                                             return lastMsg ? (
                                                 <Text style={tw`text-gray-600 text-sm mb-1`} numberOfLines={1}>
-                                                    {lastMsg.senderId === currentUser?.id ? '📤 ' : '📥 '}{lastMsg.content}
+                                                    {lastMsg.sender.id === currentUser?.id ? '📤 ' : '📥 '}{lastMsg.content}
                                                 </Text>
                                             ) : (
                                                 <Text style={tw`text-gray-500 text-sm mb-1 italic`}>

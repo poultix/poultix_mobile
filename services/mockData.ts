@@ -529,7 +529,7 @@ export class MockDataService {
         return mockFarms;
     }
 
-    static async getSchedules(token: string): Promise<Schedule[]> {
+    static async getSchedules(): Promise<Schedule[]> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
         return mockSchedules;

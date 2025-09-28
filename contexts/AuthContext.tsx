@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { User, UserRole } from '@/types/user';
 import { MockAuthService } from '@/services/mockData';
+import { User, UserRole } from '@/types/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 
 // Context types
@@ -13,6 +13,10 @@ interface AuthContextType {
     error: string;
     logout: () => Promise<void>
     login: (email: string, password: string) => Promise<void>
+    signUp: (email: string, password: string, name: string, role: string) => Promise<void>
+    forgotPassword: (email: string) => Promise<void>
+    verifyCode: (email: string, code: string) => Promise<void>
+
 }
 
 
@@ -65,9 +69,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             setLoading(true)
             const { user, token } = await MockAuthService.signIn(email, password);
-
-            console.log(user)
-
             // Store in AsyncStorage
             await AsyncStorage.setItem('token', token);
             await AsyncStorage.setItem('userEmail', email);
@@ -83,21 +84,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const logout = async (): Promise<void> => {
         try {
+
             await MockAuthService.logout();
+            setCurrentUser(null)
             router.push('/auth/login')
         } catch (error) {
             setError('Logout failed')
-
         }
     };
 
     const signUp = async (email: string, password: string, name: string, role: string): Promise<void> => {
         try {
-
-            const result = await MockAuthService.signUp(email, password, name, role);
+            setLoading(true)
+            await MockAuthService.signUp(email, password, name, role);
 
         } catch (error) {
             setError("Signup")
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -105,8 +109,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             setLoading(true);
             await MockAuthService.forgotPassword(email);
-            setLoading(false)
+           
         } catch (error) {
+            setLoading(false)
+        }finally {
             setLoading(false)
         }
     };
@@ -123,13 +129,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 
 
+
     const isUserRole = (role: UserRole): boolean => {
         return currentUser?.role === role;
     };
 
-    const clearError = (): void => {
-        setError('')
-    };
 
     // Quick dev methods
     const loginAsFarmer = async (): Promise<void> => {
@@ -154,6 +158,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         error,
         login,
         logout,
+        signUp,
+        forgotPassword,
+        verifyCode,
     };
 
 
@@ -165,7 +172,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 };
 
-// Hooks
+
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {

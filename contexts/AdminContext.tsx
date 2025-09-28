@@ -1,29 +1,18 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '@/types/user';
 import { Farm } from '@/types/farm';
-import { Schedule } from '@/types/schedule';
+import { Schedule, ScheduleStatus } from '@/types/schedule';
 import { News } from '@/types/news';
 import { Pharmacy } from '@/types/pharmacy';
 import { FilterOptions, SearchOptions } from '@/types/filter';
-import { AdminState } from '@/types'
-
-// Admin state interface
-
-
-// Admin actions
-type AdminAction =
-    | { type: 'SET_LOADING'; payload: boolean }
-    | { type: 'SET_ERROR'; payload: string | null }
-    | { type: 'SET_DASHBOARD_STATS'; payload: AdminState['dashboardStats'] }
-    | { type: 'SET_SYSTEM_HEALTH'; payload: AdminState['systemHealth'] }
-    | { type: 'CLEAR_ERROR' };
+import { AdminState } from '@/types';
+import { MockDataService } from '@/services/mockData';
 
 // Context types
 interface AdminContextType {
-    state: AdminState;
     dashboardStats: AdminState['dashboardStats'];
     systemHealth: AdminState['systemHealth'];
-    isLoading: boolean;
+    loading: boolean;
     error: string | null;
 }
 
@@ -61,49 +50,27 @@ interface AdminActionsType {
     refreshDashboard: () => Promise<void>;
 }
 
-// Initial state
-const initialState: AdminState = {
-    dashboardStats: {
+// Create contexts
+const AdminContext = createContext<AdminContextType | undefined>(undefined);
+const AdminActionsContext = createContext<AdminActionsType | undefined>(undefined);
+
+// Provider component
+export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
+    const [dashboardStats, setDashboardStats] = useState<AdminState['dashboardStats']>({
         totalUsers: 0,
         totalFarms: 0,
         totalSchedules: 0,
         totalNews: 0,
         activeUsers: 0,
         pendingSchedules: 0,
-    },
-    systemHealth: {
+    });
+    const [systemHealth, setSystemHealth] = useState<AdminState['systemHealth']>({
         status: 'healthy',
         uptime: 0,
         lastBackup: new Date(),
-    },
-    isLoading: false,
-    error: null,
-};
-
-// Reducer
-const adminReducer = (state: AdminState, action: AdminAction): AdminState => {
-    switch (action.type) {
-        case 'SET_LOADING':
-            return { ...state, isLoading: action.payload };
-        case 'SET_ERROR':
-            return { ...state, error: action.payload, isLoading: false };
-        case 'SET_DASHBOARD_STATS':
-            return { ...state, dashboardStats: action.payload, isLoading: false, error: null };
-        case 'SET_SYSTEM_HEALTH':
-            return { ...state, systemHealth: action.payload };
-        case 'CLEAR_ERROR':
-            return { ...state, error: null };
-        default:
-            return state;
-    }
-};
-
-// Create context
-const AdminContext = createContext<AdminContextType | undefined>(undefined);
-
-// Provider component
-export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
-    const [state, dispatch] = useReducer(adminReducer, initialState);
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     // Load dashboard data on mount
     useEffect(() => {
@@ -113,23 +80,29 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
     const loadDashboardStats = async () => {
         try {
-            dispatch({ type: 'SET_LOADING', payload: true });
+            setLoading(true);
+            setError(null);
 
-            // Simulate loading dashboard stats
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Get real data from MockDataService
+            const users = await MockDataService.getUsers();
+            const farms = await MockDataService.getFarms();
+            const schedules = await MockDataService.getSchedules();
+            const news = await MockDataService.getNews();
 
             const stats = {
-                totalUsers: 150,
-                totalFarms: 45,
-                totalSchedules: 89,
-                totalNews: 12,
-                activeUsers: 142,
-                pendingSchedules: 8,
+                totalUsers: users.length,
+                totalFarms: farms.length,
+                totalSchedules: schedules.length,
+                totalNews: news.length,
+                activeUsers: users.filter(u => u.isActive).length,
+                pendingSchedules: schedules.filter(s => s.status === ScheduleStatus.IN_PROGRESS).length,
             };
 
-            dispatch({ type: 'SET_DASHBOARD_STATS', payload: stats });
+            setDashboardStats(stats);
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: 'Failed to load dashboard stats' });
+            setError('Failed to load dashboard stats');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -142,112 +115,152 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
                 lastBackup: new Date(Date.now() - Math.random() * 86400000), // Random time in last 24h
             };
 
-            dispatch({ type: 'SET_SYSTEM_HEALTH', payload: health });
+            setSystemHealth(health);
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: 'Failed to load system health' });
+            setError('Failed to load system health');
         }
     };
 
     // User management functions
     const getAllUsers = async (): Promise<User[]> => {
-        // This would typically call an admin-specific API endpoint
-        return [];
+        return await MockDataService.getUsers();
     };
 
     const activateUser = async (userId: string): Promise<void> => {
         // Implementation for activating user
+        console.log('Activating user:', userId);
     };
 
     const deactivateUser = async (userId: string): Promise<void> => {
         // Implementation for deactivating user
+        console.log('Deactivating user:', userId);
     };
 
     const deleteUser = async (userId: string): Promise<void> => {
         // Implementation for deleting user
+        console.log('Deleting user:', userId);
     };
 
     // Farm management functions
     const getAllFarms = async (): Promise<Farm[]> => {
-        return [];
+        return await MockDataService.getFarms();
     };
 
     const approveFarm = async (farmId: string): Promise<void> => {
         // Implementation for approving farm
+        console.log('Approving farm:', farmId);
     };
 
     const suspendFarm = async (farmId: string): Promise<void> => {
         // Implementation for suspending farm
+        console.log('Suspending farm:', farmId);
     };
 
     // Schedule oversight functions
     const getAllSchedules = async (): Promise<Schedule[]> => {
-        return [];
+        return await MockDataService.getSchedules();
     };
 
     const approveSchedule = async (scheduleId: string): Promise<void> => {
         // Implementation for approving schedule
+        console.log('Approving schedule:', scheduleId);
     };
 
     const cancelSchedule = async (scheduleId: string): Promise<void> => {
         // Implementation for canceling schedule
+        console.log('Canceling schedule:', scheduleId);
     };
 
     // News management functions
     const publishNews = async (newsData: Omit<News, 'createdAt' | 'updatedAt'>): Promise<void> => {
         // Implementation for publishing news
+        console.log('Publishing news:', newsData.title);
     };
 
     const unpublishNews = async (newsTitle: string): Promise<void> => {
         // Implementation for unpublishing news
+        console.log('Unpublishing news:', newsTitle);
     };
 
     // System management functions
     const performBackup = async (): Promise<void> => {
         try {
-            dispatch({ type: 'SET_LOADING', payload: true });
+            setLoading(true);
             // Simulate backup process
             await new Promise(resolve => setTimeout(resolve, 3000));
 
             const newHealth = {
-                ...state.systemHealth,
+                ...systemHealth,
                 lastBackup: new Date(),
             };
-            dispatch({ type: 'SET_SYSTEM_HEALTH', payload: newHealth });
+            setSystemHealth(newHealth);
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: 'Backup failed' });
+            setError('Backup failed');
         } finally {
-            dispatch({ type: 'SET_LOADING', payload: false });
+            setLoading(false);
         }
     };
 
     const clearSystemLogs = async (): Promise<void> => {
         // Implementation for clearing system logs
+        console.log('Clearing system logs');
     };
 
     // Analytics functions
     const getUserAnalytics = async (dateRange?: { start: Date; end: Date }): Promise<any> => {
-        return {};
+        const users = await MockDataService.getUsers();
+        return {
+            totalUsers: users.length,
+            activeUsers: users.filter(u => u.isActive).length,
+            usersByRole: {
+                farmers: users.filter(u => u.role === 'FARMER').length,
+                veterinarians: users.filter(u => u.role === 'VETERINARY').length,
+                admins: users.filter(u => u.role === 'ADMIN').length,
+            }
+        };
     };
 
     const getFarmAnalytics = async (dateRange?: { start: Date; end: Date }): Promise<any> => {
-        return {};
+        const farms = await MockDataService.getFarms();
+        return {
+            totalFarms: farms.length,
+            totalLivestock: farms.reduce((sum, farm) => sum + farm.livestock.total, 0),
+            healthyLivestock: farms.reduce((sum, farm) => sum + farm.livestock.healthy, 0),
+        };
     };
 
     const getScheduleAnalytics = async (dateRange?: { start: Date; end: Date }): Promise<any> => {
-        return {};
+        const schedules = await MockDataService.getSchedules();
+        return {
+            totalSchedules: schedules.length,
+            pendingSchedules: schedules.filter(s => s.status === ScheduleStatus.IN_PROGRESS).length,
+            completedSchedules: schedules.filter(s => s.status === ScheduleStatus.COMPLETED).length,
+        };
     };
 
     // Search functions
     const searchUsers = async (query: string, filters?: FilterOptions): Promise<User[]> => {
-        return [];
+        const users = await MockDataService.getUsers();
+        return users.filter(user => 
+            user.name.toLowerCase().includes(query.toLowerCase()) ||
+            user.email.toLowerCase().includes(query.toLowerCase())
+        );
     };
 
     const searchFarms = async (query: string, filters?: FilterOptions): Promise<Farm[]> => {
-        return [];
+        const farms = await MockDataService.getFarms();
+        return farms.filter(farm => 
+            farm.name.toLowerCase().includes(query.toLowerCase()) ||
+            farm.location.address.toLowerCase().includes(query.toLowerCase())
+        );
     };
 
     const searchSchedules = async (query: string, filters?: FilterOptions): Promise<Schedule[]> => {
-        return [];
+        const schedules = await MockDataService.getSchedules();
+        return schedules.filter(schedule => 
+            schedule.title.toLowerCase().includes(query.toLowerCase()) ||
+            schedule.description.toLowerCase().includes(query.toLowerCase())
+        );
     };
 
     const refreshDashboard = async (): Promise<void> => {
@@ -255,29 +268,65 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const clearError = (): void => {
-        dispatch({ type: 'CLEAR_ERROR' });
+        setError(null);
     };
 
     const contextValue: AdminContextType = {
-        state,
-        dashboardStats: state.dashboardStats,
-        systemHealth: state.systemHealth,
-        isLoading: state.isLoading,
-        error: state.error,
+        dashboardStats,
+        systemHealth,
+        loading,
+        error,
+    };
+
+    const actionsValue: AdminActionsType = {
+        loadDashboardStats,
+        loadSystemHealth,
+        getAllUsers,
+        activateUser,
+        deactivateUser,
+        deleteUser,
+        getAllFarms,
+        approveFarm,
+        suspendFarm,
+        getAllSchedules,
+        approveSchedule,
+        cancelSchedule,
+        publishNews,
+        unpublishNews,
+        performBackup,
+        clearSystemLogs,
+        getUserAnalytics,
+        getFarmAnalytics,
+        getScheduleAnalytics,
+        searchUsers,
+        searchFarms,
+        searchSchedules,
+        clearError,
+        refreshDashboard,
     };
 
     return (
         <AdminContext.Provider value={contextValue}>
-            {children}
+            <AdminActionsContext.Provider value={actionsValue}>
+                {children}
+            </AdminActionsContext.Provider>
         </AdminContext.Provider>
     );
 };
 
-// Hook
+// Hooks
 export const useAdmin = () => {
     const context = useContext(AdminContext);
     if (!context) {
         throw new Error('useAdmin must be used within an AdminProvider');
+    }
+    return context;
+};
+
+export const useAdminActions = () => {
+    const context = useContext(AdminActionsContext);
+    if (!context) {
+        throw new Error('useAdminActions must be used within an AdminProvider');
     }
     return context;
 };

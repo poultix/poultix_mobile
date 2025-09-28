@@ -20,7 +20,6 @@ import { StatusBar } from 'expo-status-bar';
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';
-import { useAuthActions } from '@/hooks/useAuthActions';
 
 export default function VerifyCodeScreen() {
     const [code, setCode] = useState('');
@@ -28,8 +27,7 @@ export default function VerifyCodeScreen() {
     const [timer, setTimer] = useState(60);
 
     // Use new contexts
-    const { currentUser } = useAuth();
-    const { verifyCode, forgotPassword } = useAuthActions();
+    const { currentUser,verifyCode, forgotPassword } = useAuth();
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(20)).current;

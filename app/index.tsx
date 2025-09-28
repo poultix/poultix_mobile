@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
-import { router } from 'expo-router';
+import { router, useRootNavigationState } from 'expo-router';
 import tw from 'twrnc';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Index() {
   const { currentUser, loading } = useAuth();
-
+  const rootNavigationState = useRootNavigationState();
   useEffect(() => {
-    // Redirect based on authentication status and user role
+    if (!rootNavigationState?.key) return; // wait until navigation is ready
+
     if (currentUser) {
       switch (currentUser.role) {
         case 'ADMIN':
@@ -26,7 +27,7 @@ export default function Index() {
     } else if (!loading) {
       router.replace('/auth/login');
     }
-  }, [currentUser, loading]);
+  }, [currentUser, loading, rootNavigationState?.key]);
 
   // Show loading screen while checking authentication
   return (

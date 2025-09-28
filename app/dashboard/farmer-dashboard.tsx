@@ -15,6 +15,8 @@ import tw from 'twrnc';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
 import DrawerButton from '@/components/DrawerButton';
+import BottomTabs from '@/components/BottomTabs';
+import { useBottomTabsContext } from '@/contexts/BottomTabsContext';
 
 // Context and hook imports
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,9 +27,15 @@ import { ScheduleStatus } from '@/types/schedule';
 
 export default function FarmerDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
+  const { setCurrentRoute } = useBottomTabsContext();
   const { currentUser } = useAuth();
-  const { farms } = useFarms();
+  const { farms  , loading, error} = useFarms();
   const { schedules } = useSchedules();
+
+  // Set current route for bottom tabs
+  useEffect(() => {
+    setCurrentRoute('/dashboard/farmer-dashboard');
+  }, []);
 
   const [selectedTab, setSelectedTab] = useState<'overview' | 'farms' | 'schedules'>('overview');
 
@@ -58,7 +66,7 @@ export default function FarmerDashboardScreen() {
   }
 
   // Filter data for current user
-  const myFarms = farms.filter(farm => farm.owner.id === currentUser.id);
+  const myFarms = farms
   const mySchedules = schedules.filter(schedule => schedule.farmer.id === currentUser.id);
 
   // Calculate statistics
@@ -82,7 +90,7 @@ export default function FarmerDashboardScreen() {
   };
 
   const renderOverview = () => (
-    <View className="px-4">
+    <View className="px-4 pb-40">
       {/* Statistics Cards */}
       <View className="flex-row flex-wrap gap-3 mb-6">
         <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]">
@@ -131,7 +139,7 @@ export default function FarmerDashboardScreen() {
       </View>
 
       {/* Health Overview Chart */}
-      <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+      <View className="bg-white rounded-2xl p-5 shadow-sm mb-6 ">
         <Text className="text-lg font-bold text-gray-800 mb-4">Flock Health Overview</Text>
 
         <View className="flex-row items-center justify-center mb-4">
@@ -175,41 +183,41 @@ export default function FarmerDashboardScreen() {
         <Text className="text-lg font-bold text-gray-800 mb-4">Quick Actions</Text>
         <View className="flex-row flex-wrap gap-3">
           <TouchableOpacity
-            className="flex-1 bg-blue-50 border border-blue-200 rounded-xl p-4 min-w-[45%]"
-            onPress={() => router.push('/farm/create' )}
+            className="flex-1 bg-blue-50 border border-blue-200 rounded-xl p-4 min-w-[45%] items-center"
+            onPress={() => router.push('/farm/create')}
           >
             <Ionicons name="add-circle-outline" size={24} color="#3B82F6" />
-            <Text className="text-blue-600 font-semibold mt-2">Add Farm</Text>
+            <Text className="text-blue-500 font-semibold mt-2">Add Farm</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="flex-1 bg-green-50 border border-green-200 rounded-xl p-4 min-w-[45%]"
+            className="flex-1 bg-green-50 border border-green-200 rounded-xl p-4 min-w-[45%] items-center"
             onPress={() => router.push('/communication/schedule-request')}
           >
             <Ionicons name="calendar-outline" size={24} color="#10B981" />
-            <Text className="text-green-600 font-semibold mt-2">Request Visit</Text>
+            <Text className="text-green-500 font-semibold mt-2">Request Visit</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="flex-1 bg-purple-50 border border-purple-200 rounded-xl p-4 min-w-[45%]"
-            onPress={() => router.push('/communication/messages' )}
+            className="flex-1 bg-purple-50 border border-purple-200 rounded-xl p-4 min-w-[45%] items-center"
+            onPress={() => router.push('/communication/messages')}
           >
             <Ionicons name="chatbubble-outline" size={24} color="#8B5CF6" />
-            <Text className="text-purple-600 font-semibold mt-2">Messages</Text>
+            <Text className="text-purple-500 font-semibold mt-2">Messages</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="flex-1 bg-orange-50 border border-orange-200 rounded-xl p-4 min-w-[45%]"
+            className="flex-1 bg-orange-50 border border-orange-200 rounded-xl p-4 min-w-[45%] items-center"
             onPress={() => router.push('/farm/farm-reports')}
           >
             <Ionicons name="document-text-outline" size={24} color="#F59E0B" />
-            <Text className="text-orange-600 font-semibold mt-2">Reports</Text>
+            <Text className="text-orange-500 font-semibold mt-2">Reports</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Recent Activity */}
-      <View className="bg-white rounded-2xl p-5 shadow-sm">
+      <View className="bg-white rounded-2xl p-5 shadow-sm mb-">
         <Text className="text-lg font-bold text-gray-800 mb-4">Recent Activity</Text>
         {mySchedules.slice(0, 3).map((schedule) => {
           // For now, we'll show the first farm or a default message
@@ -391,7 +399,7 @@ export default function FarmerDashboardScreen() {
         {/* Header */}
         <View style={tw`pb-4`}>
           <LinearGradient
-            colors={['#F97316', '#EA580C']}
+            colors={['#F59E0B', '#F59E0B']}
             style={tw`p-8 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between mb-4`}>
@@ -407,7 +415,7 @@ export default function FarmerDashboardScreen() {
                 </Text>
               </View>
               <DrawerButton />
-            </View>
+            </View> 
           </LinearGradient>
         </View>
 
@@ -421,7 +429,7 @@ export default function FarmerDashboardScreen() {
             ].map((tab) => (
               <TouchableOpacity
                 key={tab.key}
-                className={`flex-1 py-3 rounded-xl flex-row items-center justify-center ${selectedTab === tab.key ? 'bg-orange-500' : 'bg-transparent'}`}
+                className={`flex-1 py-3 rounded-xl flex-row items-center justify-center ${selectedTab === tab.key ? 'bg-orange-400' : 'bg-transparent'}`}
                 onPress={() => setSelectedTab(tab.key as any)}
               >
                 <Ionicons
@@ -438,12 +446,19 @@ export default function FarmerDashboardScreen() {
         </View>
 
         {/* Content */}
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          className="flex-1" 
+          showsVerticalScrollIndicator={false}
+          style={tw`pb-20`} // Add padding for bottom tabs
+        >
           {selectedTab === 'overview' && renderOverview()}
           {selectedTab === 'farms' && renderFarms()}
           {selectedTab === 'schedules' && renderSchedules()}
         </ScrollView>
       </Animated.View>
+
+      {/* Bottom Tabs */}
+      <BottomTabs currentRoute="/dashboard/farmer-dashboard" />
 
       <CustomDrawer
         isVisible={isDrawerVisible}
