@@ -72,17 +72,8 @@ export default function VerifyCodeScreen() {
 
         try {
             setIsLoading(true);
-            const result = await verifyCode('demo@example.com', code.trim());
+             await verifyCode('demo@example.com', code.trim());
 
-            if (result) {
-                Alert.alert(
-                    'Success',
-                    'Code verified successfully!',
-                    [{ text: 'OK', onPress: () => router.push('/auth/create-new-password') }]
-                );
-            } else {
-                Alert.alert('Error', result.error || 'Invalid verification code');
-            }
         } catch (error) {
             console.error('Verify code error:', error);
             Alert.alert('Error', 'Failed to verify code. Please try again.');
@@ -94,12 +85,10 @@ export default function VerifyCodeScreen() {
     const handleResendCode = async () => {
         try {
             const result = await forgotPassword('demo@example.com');
-            if (result.success) {
+           
                 setTimer(60);
                 Alert.alert('Success', 'Verification code sent again!');
-            } else {
-                Alert.alert('Error', 'Failed to resend code');
-            }
+         
         } catch (error) {
             console.error('Resend code error:', error);
             Alert.alert('Error', 'Failed to resend code');
@@ -236,7 +225,7 @@ export default function VerifyCodeScreen() {
                                     <Text style={{ color: '#6B7280', fontSize: 16 }}>
                                         Remember your password?
                                     </Text>
-                                    <TouchableOpacity onPress={() => router.push('/auth/sign-in')}>
+                                    <TouchableOpacity onPress={() => router.push('/auth/login')}>
                                         <Text style={{ color: '#F59E0B', fontWeight: '600', fontSize: 16 }}>
                                             {' '}Sign In
                                         </Text>

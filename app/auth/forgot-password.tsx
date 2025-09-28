@@ -21,17 +21,17 @@ import { useAuthActions } from '@/hooks/useAuthActions';
 export default function ForgotPasswordScreen() {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    
+
     // Use new contexts
     const { currentUser } = useAuth();
     const { forgotPassword } = useAuthActions();
-    
+
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         // Redirect if already signed in
         if (currentUser) {
-            router.replace('/(drawer)/index');
+            router.replace('/');
             return;
         }
 
@@ -50,17 +50,7 @@ export default function ForgotPasswordScreen() {
 
         try {
             setIsLoading(true);
-            const result = await forgotPassword(email.trim());
-            
-            if (result.success) {
-                Alert.alert(
-                    'Success',
-                    'Password reset instructions have been sent to your email.',
-                    [{ text: 'OK', onPress: () => router.push('/auth/sign-in') }]
-                );
-            } else {
-                Alert.alert('Error', result.error || 'Failed to send reset email');
-            }
+            await forgotPassword(email.trim());
         } catch (error) {
             console.error('Forgot password error:', error);
             Alert.alert('Error', 'Failed to send reset email. Please try again.');
@@ -81,7 +71,7 @@ export default function ForgotPasswordScreen() {
                         >
                             <Ionicons name="arrow-back" size={24} color="#374151" />
                         </TouchableOpacity>
-                        
+
                         <Text style={tw`text-4xl font-bold text-gray-900 mb-3`}>
                             Forgot Password?
                         </Text>
@@ -121,7 +111,7 @@ export default function ForgotPasswordScreen() {
 
                         <View style={tw`flex-row justify-center mt-8`}>
                             <Text style={tw`text-gray-500 text-base`}>Remember your password? </Text>
-                            <TouchableOpacity onPress={() => router.push('/auth/sign-in')}>
+                            <TouchableOpacity onPress={() => router.push('/auth/login')}>
                                 <Text style={tw`text-orange-600 font-semibold text-base`}>Sign In</Text>
                             </TouchableOpacity>
                         </View>

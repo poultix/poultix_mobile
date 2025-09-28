@@ -14,12 +14,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router } from 'expo-router';
-import { useAuth, useAuthActions } from '@/contexts/AuthContext';
+import { useAuth} from '@/contexts/AuthContext';
 import DrawerButton from '@/components/DrawerButton';
 
 export default function ProfileScreen() {
-  const { currentUser } = useAuth();
-  const { logout } = useAuthActions();
+  const { currentUser,logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(currentUser?.name || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
@@ -58,7 +57,7 @@ export default function ProfileScreen() {
           style: 'destructive',
           onPress: async () => {
             await logout();
-            router.replace('/auth/sign-in');
+            router.replace('/auth/login');
           }
         }
       ]

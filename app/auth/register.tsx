@@ -60,7 +60,7 @@ export default function SignUpScreen() {
             );
             
             Alert.alert('Success', 'Account created successfully!');
-            router.push('/auth/sign-in');
+            router.push('/auth/login');
         } catch (error) {
             console.error('Sign up error:', error);
             Alert.alert('Error', 'Sign up failed. Please try again.');
@@ -204,7 +204,7 @@ export default function SignUpScreen() {
                         {/* Sign In Link */}
                         <View style={tw`flex-row justify-center mt-8`}>
                             <Text style={tw`text-gray-500 text-base`}>Already have an account? </Text>
-                            <TouchableOpacity onPress={() => router.push('/auth/sign-in')}>
+                            <TouchableOpacity onPress={() => router.push('/auth/login')}>
                                 <Text style={tw`text-orange-600 font-semibold text-base`}>Sign In</Text>
                             </TouchableOpacity>
                         </View>

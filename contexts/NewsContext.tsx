@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { News, NewsPriority } from '@/types/news';
 import { User } from '@/types/user';
 import { MockDataService } from '@/services/mockData';
@@ -23,13 +23,10 @@ type NewsAction =
 
 // Context types
 interface NewsContextType {
-  state: NewsState;
   news: News[];
   currentNews: News | null;
-  isLoading: boolean;
+  loading: boolean;
   error: string | null;
-  // CRUD functions for hooks to call
-  setNews: (news: News[] | ((prev: News[]) => News[])) => void;
   addNews: (news: News) => void;
   editNews: (news: News) => void;
   deleteNews: (title: string) => void;
@@ -37,124 +34,75 @@ interface NewsContextType {
   refreshNews: () => Promise<void>;
 }
 
-// Initial state
-const initialState: NewsState = {
-  news: [],
-  currentNews: null,
-  isLoading: false,
-  error: null,
-};
-
-// Reducer
-const newsReducer = (state: NewsState, action: NewsAction): NewsState => {
-  switch (action.type) {
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload, isLoading: false };
-    case 'SET_NEWS':
-      return { ...state, news: action.payload, isLoading: false, error: null };
-    case 'ADD_NEWS':
-      return { ...state, news: [...state.news, action.payload] };
-    case 'UPDATE_NEWS':
-      return {
-        ...state,
-        news: state.news.map(newsItem =>
-          newsItem.title === action.payload.title ? action.payload : newsItem
-        )
-      };
-    case 'DELETE_NEWS':
-      return {
-        ...state,
-        news: state.news.filter(newsItem => newsItem.title !== action.payload)
-      };
-    case 'SET_CURRENT_NEWS':
-      return {
-        ...state,
-        currentNews: action.payload
-      };
-    default:
-      return state;
-  }
-};
-
 // Create context
 const NewsContext = createContext<NewsContextType | undefined>(undefined);
 
 // Provider component
 export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
-    const [state, dispatch] = useReducer(newsReducer, initialState);
+  const [news, setNews] = useState<News[]>([])
+  const [currentNews, setCurrentNews] = useState<News | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-    // Load news on mount
-    useEffect(() => {
-        loadNews();
-    }, []);
+  // Load news on mount
+  useEffect(() => {
+    loadNews();
+  }, []);
 
-    const loadNews = async () => {
-        try {
-            dispatch({ type: 'SET_LOADING', payload: true });
-            const news = await MockDataService.getNews();
-            dispatch({ type: 'SET_NEWS', payload: news });
-        } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: 'Failed to load news' });
-        }
-    };
+  const loadNews = async () => {
+    try {
 
-    // CRUD functions for hooks to call
-    const setNews = (news: News[] | ((prev: News[]) => News[])) => {
-        if (typeof news === 'function') {
-            dispatch({ type: 'SET_NEWS', payload: news(state.news) });
-        } else {
-            dispatch({ type: 'SET_NEWS', payload: news });
-        }
-    };
+      const news = await MockDataService.getNews();
+      setNews(news)
+    } catch (error) {
+    }
+  };
 
-    const addNews = (news: News) => {
-        dispatch({ type: 'ADD_NEWS', payload: news });
-    };
 
-    const editNews = (news: News) => {
-        dispatch({ type: 'UPDATE_NEWS', payload: news });
-    };
+  const addNews = (news: News) => {
+    setNews((prev) => [...prev, news])
+  };
 
-    const deleteNews = (title: string) => {
-        dispatch({ type: 'DELETE_NEWS', payload: title });
-    };
+  const editNews = (news: News) => {
+    setNews((prev) => prev.map(newsItem =>
+      newsItem.title === news.title ? news : newsItem
+    ))
+  };
 
-    const setCurrentNews = (news: News | null) => {
-        dispatch({ type: 'SET_CURRENT_NEWS', payload: news });
-    };
+  const deleteNews = (title: string) => {
+    setNews((prev) => prev.filter(newsItem => newsItem.title !== title))
+  };
 
-    const refreshNews = async (): Promise<void> => {
-        await loadNews();
-    };
 
-    const contextValue: NewsContextType = {
-        state,
-        news: state.news,
-        currentNews: state.currentNews,
-        isLoading: state.isLoading,
-        error: state.error,
-        setNews,
-        addNews,
-        editNews,
-        deleteNews,
-        setCurrentNews,
-        refreshNews,
-    };
 
-    return (
-        <NewsContext.Provider value={contextValue}>
-            {children}
-        </NewsContext.Provider>
-    );
+  const refreshNews = async (): Promise<void> => {
+    await loadNews();
+  };
+
+  const contextValue: NewsContextType = {
+    news,
+    currentNews,
+    loading,
+    error,
+    addNews,
+    editNews,
+    deleteNews,
+    setCurrentNews,
+    refreshNews,
+  };
+
+  return (
+    <NewsContext.Provider value={contextValue}>
+      {children}
+    </NewsContext.Provider>
+  );
 };
 
 // Hook
 export const useNews = () => {
-    const context = useContext(NewsContext);
-    if (!context) {
-        throw new Error('useNews must be used within a NewsProvider');
-    }
-    return context;
+  const context = useContext(NewsContext);
+  if (!context) {
+    throw new Error('useNews must be used within a NewsProvider');
+  }
+  return context;
 };

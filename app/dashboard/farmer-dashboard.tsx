@@ -36,7 +36,7 @@ export default function FarmerDashboardScreen() {
   useEffect(() => {
     if (!currentUser || currentUser.role !== 'FARMER') {
       Alert.alert('Access Denied', 'Farmer access required', [
-        { text: 'OK', onPress: () => router.back() }
+        { text: 'OK' }
       ]);
       return;
     }
@@ -392,7 +392,7 @@ export default function FarmerDashboardScreen() {
         <View style={tw`pb-4`}>
           <LinearGradient
             colors={['#F97316', '#EA580C']}
-            style={tw`rounded-3xl p-8 shadow-xl`}
+            style={tw`p-8 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between mb-4`}>
               <View className="flex-1">

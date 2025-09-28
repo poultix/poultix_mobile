@@ -1,106 +1,31 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { User, UserRole } from '@/types/user';
 import { MockAuthService } from '@/services/mockData';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
-// Auth state interface
-interface AuthState {
-    currentUser: User | null;
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    error: string | null;
-    token: string | null;
-}
-
-// Auth actions
-type AuthAction =
-    | { type: 'SET_LOADING'; payload: boolean }
-    | { type: 'SET_ERROR'; payload: string | null }
-    | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string } }
-    | { type: 'LOGOUT' }
-    | { type: 'SET_CURRENT_USER'; payload: User | null }
-    | { type: 'CLEAR_ERROR' };
 
 // Context types
 interface AuthContextType {
-    state: AuthState;
     currentUser: User | null;
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    error: string | null;
-    token: string | null;
+    authenticated: boolean;
+    loading: boolean;
+    error: string;
+    logout: () => Promise<void>
+    login: (email: string, password: string) => Promise<void>
 }
 
-interface AuthActionsType {
-    login: (email: string, password: string) => Promise<void>;
-    logout: () => Promise<void>;
-    signUp: (email: string, password: string, name: string, role: string) => Promise<void>;
-    forgotPassword: (email: string) => Promise<void>;
-    verifyCode: (email: string, code: string) => Promise<void>;
-    getCurrentUser: () => User | null;
-    isUserRole: (role: UserRole) => boolean;
-    checkAuthStatus: () => Promise<void>;
-    clearError: () => void;
-    // Quick dev methods
-    loginAsFarmer: () => Promise<void>;
-    loginAsVeterinary: () => Promise<void>;
-    loginAsAdmin: () => Promise<void>;
-}
 
-// Initial state
-const initialState: AuthState = {
-    currentUser: null,
-    isAuthenticated: false,
-    isLoading: false,
-    error: null,
-    token: null,
-};
-
-// Reducer
-const authReducer = (state: AuthState, action: AuthAction): AuthState => {
-    switch (action.type) {
-        case 'SET_LOADING':
-            return { ...state, isLoading: action.payload };
-        case 'SET_ERROR':
-            return { ...state, error: action.payload, isLoading: false };
-        case 'LOGIN_SUCCESS':
-            return {
-                ...state,
-                currentUser: action.payload.user,
-                token: action.payload.token,
-                isAuthenticated: true,
-                isLoading: false,
-                error: null,
-            };
-        case 'LOGOUT':
-            return {
-                ...state,
-                currentUser: null,
-                token: null,
-                isAuthenticated: false,
-                isLoading: false,
-                error: null,
-            };
-        case 'SET_CURRENT_USER':
-            return {
-                ...state,
-                currentUser: action.payload,
-                isAuthenticated: !!action.payload,
-            };
-        case 'CLEAR_ERROR':
-            return { ...state, error: null };
-        default:
-            return state;
-    }
-};
 
 // Create contexts
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const AuthActionsContext = createContext<AuthActionsType | undefined>(undefined);
 
 // Provider component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [state, dispatch] = useReducer(authReducer, initialState);
+    const [currentUser, setCurrentUser] = useState<User | null>(null)
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState('')
+    const [authenticated, setAuthenticated] = useState(false)
 
     // Check auth status on mount
     useEffect(() => {
@@ -109,7 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const checkAuthStatus = async () => {
         try {
-            dispatch({ type: 'SET_LOADING', payload: true });
+            setLoading(true)
             const token = await AsyncStorage.getItem('token');
             const userEmail = await AsyncStorage.getItem('userEmail');
             const role = await AsyncStorage.getItem('role');
@@ -126,88 +51,84 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     createdAt: new Date(),
                     isActive: true,
                 };
-
-                dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
+                setAuthenticated(true)
+                setCurrentUser(user)
             }
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: 'Failed to check auth status' });
+            setError('Failed to check auth status');
         } finally {
-            dispatch({ type: 'SET_LOADING', payload: false });
+            setLoading(false)
         }
     };
 
     const login = async (email: string, password: string): Promise<void> => {
         try {
-            dispatch({ type: 'SET_LOADING', payload: true });
+            setLoading(true)
             const { user, token } = await MockAuthService.signIn(email, password);
 
-console.log(user)
+            console.log(user)
 
             // Store in AsyncStorage
             await AsyncStorage.setItem('token', token);
             await AsyncStorage.setItem('userEmail', email);
             await AsyncStorage.setItem('role', user.role);
-
-            dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
+            setAuthenticated(true)
+            setCurrentUser(user)
+            setLoading(false)
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Login failed' });
-            throw error;
+            setError('Login failed' + error)
+            setLoading(false)
         }
     };
 
     const logout = async (): Promise<void> => {
         try {
             await MockAuthService.logout();
-            dispatch({ type: 'LOGOUT' });
+            router.push('/auth/login')
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: 'Logout failed' });
-            throw error;
+            setError('Logout failed')
+
         }
     };
 
     const signUp = async (email: string, password: string, name: string, role: string): Promise<void> => {
         try {
-            dispatch({ type: 'SET_LOADING', payload: true });
-            await MockAuthService.signUp(email, password, name, role);
-            dispatch({ type: 'SET_LOADING', payload: false });
+
+            const result = await MockAuthService.signUp(email, password, name, role);
+
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Sign up failed' });
-            throw error;
+            setError("Signup")
         }
     };
 
     const forgotPassword = async (email: string): Promise<void> => {
         try {
-            dispatch({ type: 'SET_LOADING', payload: true });
+            setLoading(true);
             await MockAuthService.forgotPassword(email);
-            dispatch({ type: 'SET_LOADING', payload: false });
+            setLoading(false)
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Password reset failed' });
-            throw error;
+            setLoading(false)
         }
     };
 
     const verifyCode = async (email: string, code: string): Promise<void> => {
         try {
-            dispatch({ type: 'SET_LOADING', payload: true });
+            setLoading(true)
             await MockAuthService.verifyCode(email, code);
-            dispatch({ type: 'SET_LOADING', payload: false });
+            setLoading(false)
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Code verification failed' });
-            throw error;
+            setLoading(false)
         }
     };
 
-    const getCurrentUser = (): User | null => {
-        return state.currentUser;
-    };
+
 
     const isUserRole = (role: UserRole): boolean => {
-        return state.currentUser?.role === role;
+        return currentUser?.role === role;
     };
 
     const clearError = (): void => {
-        dispatch({ type: 'CLEAR_ERROR' });
+        setError('')
     };
 
     // Quick dev methods
@@ -227,34 +148,19 @@ console.log(user)
     };
 
     const contextValue: AuthContextType = {
-        state,
-        currentUser: state.currentUser,
-        isAuthenticated: state.isAuthenticated,
-        isLoading: state.isLoading,
-        error: state.error,
-        token: state.token,
-    };
-
-    const actionsValue: AuthActionsType = {
+        currentUser,
+        authenticated,
+        loading,
+        error,
         login,
         logout,
-        signUp,
-        forgotPassword,
-        verifyCode,
-        getCurrentUser,
-        isUserRole,
-        checkAuthStatus,
-        clearError,
-        loginAsFarmer,
-        loginAsVeterinary,
-        loginAsAdmin,
     };
+
+
 
     return (
         <AuthContext.Provider value={contextValue}>
-            <AuthActionsContext.Provider value={actionsValue}>
-                {children}
-            </AuthActionsContext.Provider>
+            {children}
         </AuthContext.Provider>
     );
 };
@@ -268,10 +174,3 @@ export const useAuth = () => {
     return context;
 };
 
-export const useAuthActions = () => {
-    const context = useContext(AuthActionsContext);
-    if (!context) {
-        throw new Error('useAuthActions must be used within an AuthProvider');
-    }
-    return context;
-};

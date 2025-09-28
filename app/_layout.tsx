@@ -29,7 +29,7 @@ export default function RootLayout() {
   }, []);
 
   if (isAuthenticated === null) {
-    return null; // Loading state
+    return null; 
   }
 
   return (

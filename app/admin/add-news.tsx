@@ -16,7 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import * as Haptics from 'expo-haptics'
 import tw from 'twrnc'
 import { router } from 'expo-router'
-import { News, NewsPriority, NewsCategory } from '@/types/news'
+import { News, NewsPriority } from '@/types'
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext'
@@ -34,7 +34,7 @@ export default function AddNewsScreen() {
   const [article, setArticle] = useState<Partial<News>>({
     title: '',
     content: '',
-    category: NewsCategory.GENERAL,
+    category:'General',
     priority: NewsPriority.MEDIUM,
     tags: []
   })

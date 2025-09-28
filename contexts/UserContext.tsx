@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { User, UserRole } from '@/types/user';
 import { MockDataService } from '@/services/mockData';
 
@@ -22,13 +22,11 @@ type UserAction =
 
 // Context types
 interface UserContextType {
-  state: UserState;
   users: User[];
   currentUser: User | null;
-  isLoading: boolean;
+  loading: boolean;
   error: string | null;
   // CRUD functions for hooks to call
-  setUsers: (users: User[] | ((prev: User[]) => User[])) => void;
   addUser: (user: User) => void;
   editUser: (user: User) => void;
   deleteUser: (id: string) => void;
@@ -58,7 +56,7 @@ const userReducer = (state: UserState, action: UserAction): UserState => {
     case 'UPDATE_USER':
       return {
         ...state,
-        users: state.users.map(user => 
+        users: state.users.map(user =>
           user.id === action.payload.id ? action.payload : user
         )
       };
@@ -82,8 +80,10 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 // Provider component
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [state, dispatch] = useReducer(userReducer, initialState);
-
+  const [users, setUsers] = useState<User[]>([])
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   // Load users on mount
   useEffect(() => {
     loadUsers();
@@ -91,50 +91,41 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
   const loadUsers = async () => {
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
+
       const users = await MockDataService.getUsers();
-      dispatch({ type: 'SET_USERS', payload: users });
+      setUsers(users)
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load users' });
+    
     }
   };
 
-  // CRUD functions for hooks to call
-  const setUsers = (users: User[] | ((prev: User[]) => User[])) => {
-    if (typeof users === 'function') {
-      dispatch({ type: 'SET_USERS', payload: users(state.users) });
-    } else {
-      dispatch({ type: 'SET_USERS', payload: users });
-    }
+
+
+  const addUser = (data: User) => {
+    setUsers((prev) => [...prev, data])
   };
 
-  const addUser = (user: User) => {
-    dispatch({ type: 'ADD_USER', payload: user });
-  };
-
-  const editUser = (user: User) => {
-    dispatch({ type: 'UPDATE_USER', payload: user });
+  const editUser = (data: User) => {
+    setUsers((prev) => prev.map(user =>
+      user.id === data.id ? data : user
+    ))
   };
 
   const deleteUser = (id: string) => {
-    dispatch({ type: 'DELETE_USER', payload: id });
+    setUsers((prev) => prev.filter(user => user.id !== id))
   };
 
-  const setCurrentUser = (user: User | null) => {
-    dispatch({ type: 'SET_CURRENT_USER', payload: user });
-  };
+
 
   const refreshUsers = async (): Promise<void> => {
     await loadUsers();
   };
 
   const contextValue: UserContextType = {
-    state,
-    users: state.users,
-    currentUser: state.currentUser,
-    isLoading: state.isLoading,
-    error: state.error,
-    setUsers,
+    users,
+    currentUser,
+    loading,
+    error,
     addUser,
     editUser,
     deleteUser,

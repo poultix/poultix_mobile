@@ -16,11 +16,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { useChat, useChatActions, Message } from '@/contexts/ChatContext';
+import { useChat} from '@/contexts/ChatContext';
 import { useUsers } from '@/contexts/UserContext';
 import DrawerButton from '@/components/DrawerButton';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
+import { Message } from '@/types';
 
 export default function ChatScreen() {
     const { chatId } = useLocalSearchParams();
@@ -38,7 +39,7 @@ export default function ChatScreen() {
     
     const scrollViewRef = useRef<ScrollView>(null);
     const fadeAnim = useRef(new Animated.Value(0)).current;
-    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(0);
 
     // Always get the latest chat state
     const currentChat = chats.find(chat => chat.id === chatId);

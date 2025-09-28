@@ -30,7 +30,7 @@ export default function HistoryScreen() {
     }).start();
   }, []);
 
-  if (!state.currentUser) {
+  if (!currentUser) {
     return (
       <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <Text style={tw`text-gray-600`}>Please log in to view history</Text>
@@ -38,7 +38,7 @@ export default function HistoryScreen() {
     );
   }
 
-  const userSchedules = getSchedulesByUser(state.currentUser.id);
+  const userSchedules = getSchedulesByUser(currentUser.id);
   
   const filteredSchedules = selectedFilter === 'all' 
     ? userSchedules 

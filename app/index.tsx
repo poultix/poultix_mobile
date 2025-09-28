@@ -5,7 +5,7 @@ import tw from 'twrnc';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Index() {
-  const { currentUser, isLoading } = useAuth();
+  const { currentUser, loading } = useAuth();
 
   useEffect(() => {
     // Redirect based on authentication status and user role
@@ -21,12 +21,12 @@ export default function Index() {
           router.replace('/dashboard/veterinary-dashboard');
           break;
         default:
-          router.replace('/auth/sign-in');
+          router.replace('/auth/login');
       }
-    } else if (!isLoading) {
-      router.replace('/auth/sign-in');
+    } else if (!loading) {
+      router.replace('/auth/login');
     }
-  }, [currentUser, isLoading]);
+  }, [currentUser, loading]);
 
   // Show loading screen while checking authentication
   return (

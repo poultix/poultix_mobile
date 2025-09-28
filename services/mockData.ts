@@ -3,6 +3,7 @@ import { Farm, Location, LiveStock, Facility, FarmStatus } from '@/types/farm';
 import { Schedule, ScheduleType, ScheduleStatus, SchedulePriority } from '@/types/schedule';
 import { Pharmacy, Vaccine } from '@/types/pharmacy';
 import { News, NewsPriority } from '@/types/news';
+import { Message } from '@/types';
 
 // Mock user data
 export const mockUsers: User[] = [
@@ -37,6 +38,41 @@ export const mockUsers: User[] = [
         isActive: true
     }
 ];
+
+export const mockMessages: Message[] = [
+    {
+        id: 'msg_001',
+        chatId: 'vet_001',
+        senderId: 'farmer_001',
+        senderName: 'John Uwimana',
+        content: 'Hello Dr. Patricia, I have some chickens showing respiratory symptoms.',
+        type: 'text',
+        timestamp: new Date('2024-06-27T10:00:00'),
+        status: 'read'
+    },
+    {
+        id: 'msg_002',
+        chatId: 'farmer_001',
+        senderId: 'vet_001',
+        senderName: 'Dr. Patricia Uwimana',
+        content: 'Hi John! Can you describe the symptoms in more detail?',
+        type: 'text',
+        timestamp: new Date('2024-06-27T10:05:00'),
+        status: 'read'
+    },
+    {
+        id: 'msg_003',
+        chatId: 'admin_001',
+        senderId: 'farmer_001',
+        senderName: 'John Uwimana',
+        content: 'They have difficulty breathing and some nasal discharge.',
+        type: 'text',
+        timestamp: new Date('2024-06-27T10:10:00'),
+        status: 'delivered'
+    }
+];
+
+
 
 export const mockFarms: Farm[] = [
     {
@@ -197,31 +233,7 @@ export const mockPharmacies: Pharmacy[] = [
     },
 ];
 
-// Mock messages data
-export const mockMessages = [
-    {
-        id: 'msg_001',
-        farmerId: 'farmer_001',
-        veterinaryId: 'vet_001',
-        farmerName: 'John Uwimana',
-        veterinaryName: 'Dr. Patricia Uwimana',
-        message: 'Hello Dr. Patricia, I have some chickens showing signs of respiratory issues. Could we schedule a visit?',
-        timestamp: new Date('2024-06-25T10:30:00'),
-        isFromFarmer: true,
-        isRead: false
-    },
-    {
-        id: 'msg_002',
-        farmerId: 'farmer_001',
-        veterinaryId: 'vet_001',
-        farmerName: 'John Uwimana',
-        veterinaryName: 'Dr. Patricia Uwimana',
-        message: 'I can visit your farm tomorrow at 2 PM. Please prepare the affected chickens for examination.',
-        timestamp: new Date('2024-06-25T11:15:00'),
-        isFromFarmer: false,
-        isRead: true
-    }
-];
+
 
 // Mock schedule requests
 export const mockScheduleRequests = [
@@ -372,7 +384,7 @@ export class MockAuthService {
     // Auto-login feature - creates a persistent session for development
     static async createDevelopmentSession(): Promise<void> {
         const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-        
+
         // Check if we already have a session
         const existingToken = await AsyncStorage.getItem('token');
         if (existingToken) {
@@ -384,7 +396,7 @@ export class MockAuthService {
         await AsyncStorage.setItem('token', defaultUser.token);
         await AsyncStorage.setItem('role', defaultUser.role);
         await AsyncStorage.setItem('userEmail', defaultUser.email);
-        
+
         console.log('🚀 Development session created - Auto-logged in as:', defaultUser.email);
     }
 
@@ -428,31 +440,31 @@ export class MockAuthService {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1500));
         const authUser = this.users.find(u => u.email === email && u.password === password);
-        
+
         if (!authUser) {
             throw new Error('Invalid credentials');
         }
-        
+
         // Find the corresponding User object from mockUsers
         const userObject = mockUsers.find(u => u.email === email);
-        
+
         if (!userObject) {
             throw new Error('User data not found');
         }
-        
+
         return { user: userObject, token: authUser.token };
     }
 
     static async signUp(email: string, password: string, names: string, role: string): Promise<{ success: boolean; message: string }> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
+
         const existingUser = this.users.find(u => u.email === email);
-        
+
         if (existingUser) {
             throw new Error('User already exists');
         }
-        
+
         // Add new user to mock database
         this.users.push({
             email,
@@ -460,39 +472,39 @@ export class MockAuthService {
             role,
             token: `mock_${role}_${Date.now()}`
         });
-        
+
         return { success: true, message: 'Account created successfully' };
     }
 
     static async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         const user = this.users.find(u => u.email === email);
-        
+
         if (!user) {
             throw new Error('Email not found');
         }
-        
+
         return { success: true, message: 'Password reset code sent to your email' };
     }
 
     static async verifyCode(email: string, code: string): Promise<{ success: boolean; message: string }> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         // Mock verification - accept any 6-digit code
         if (code.length === 6 && /^\d+$/.test(code)) {
             return { success: true, message: 'Code verified successfully' };
         }
-        
+
         throw new Error('Invalid verification code');
     }
 
     static async getCurrentUser(email: string): Promise<User | null> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 300));
-        
+
         return mockUsers.find(u => u.email === email) || null;
     }
 }
@@ -526,13 +538,13 @@ export class MockDataService {
     static async getVeterinaries(location?: string): Promise<typeof mockVeterinaries> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 700));
-        
+
         if (location) {
-            return mockVeterinaries.filter(vet => 
+            return mockVeterinaries.filter(vet =>
                 vet.location.toLowerCase().includes(location.toLowerCase())
             );
         }
-        
+
         return mockVeterinaries;
     }
 
@@ -557,58 +569,39 @@ export class MockDataService {
     static async getMessages(userId: string, userRole: string): Promise<typeof mockMessages> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         if (userRole === 'farmer') {
-            return mockMessages.filter(msg => msg.farmerId === userId);
+            return mockMessages.filter(msg => msg.senderId === userId);
         } else if (userRole === 'veterinary') {
-            return mockMessages.filter(msg => msg.veterinaryId === userId);
+            return mockMessages.filter(msg => msg.senderId === userId);
         }
-        
+
         return mockMessages;
     }
 
-    static async sendMessage(fromId: string, toId: string, message: string, isFromFarmer: boolean): Promise<{ success: boolean }> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        const newMessage = {
-            id: `msg_${Date.now()}`,
-            farmerId: isFromFarmer ? fromId : toId,
-            veterinaryId: isFromFarmer ? toId : fromId,
-            farmerName: isFromFarmer ? 'John Uwimana' : 'Current Farmer',
-            veterinaryName: isFromFarmer ? 'Dr. Patricia Uwimana' : 'Current Vet',
-            message,
-            timestamp: new Date(),
-            isFromFarmer,
-            isRead: false
-        };
-        
-        mockMessages.push(newMessage);
-        return { success: true };
-    }
 
     static async getScheduleRequests(veterinaryId?: string): Promise<typeof mockScheduleRequests> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 400));
-        
+
         if (veterinaryId) {
             return mockScheduleRequests.filter(req => req.veterinaryId === veterinaryId);
         }
-        
+
         return mockScheduleRequests;
     }
 
     static async createScheduleRequest(request: any): Promise<{ success: boolean; message: string }> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 800));
-        
+
         const newRequest = {
             id: `req_${Date.now()}`,
             ...request,
             status: 'pending',
             createdAt: new Date()
         };
-        
+
         mockScheduleRequests.push(newRequest);
         return { success: true, message: 'Schedule request sent successfully' };
     }
@@ -616,26 +609,26 @@ export class MockDataService {
     static async updateScheduleRequest(requestId: string, status: string): Promise<{ success: boolean }> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         const request = mockScheduleRequests.find(req => req.id === requestId);
         if (request) {
             request.status = status;
             return { success: true };
         }
-        
+
         return { success: false };
     }
 
     static async getNearbyFarms(veterinaryLocation?: string): Promise<typeof mockNearbyFarms> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 600));
-        
+
         if (veterinaryLocation) {
-            return mockNearbyFarms.filter(farm => 
+            return mockNearbyFarms.filter(farm =>
                 farm.location.toLowerCase().includes(veterinaryLocation.toLowerCase())
             );
         }
-        
+
         return mockNearbyFarms;
     }
 }

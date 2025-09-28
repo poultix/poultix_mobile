@@ -167,7 +167,7 @@ export default function SignInWithGoogleScreen() {
             Alert.alert(
                 'Signed Out',
                 'You have been successfully signed out.',
-                [{ text: 'OK', onPress: () => router.replace('/auth/sign-in') }]
+                [{ text: 'OK' }]
             );
         } catch (error) {
             console.error('Sign out error:', error);

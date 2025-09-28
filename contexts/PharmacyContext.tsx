@@ -1,34 +1,14 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { Pharmacy, Vaccine } from '@/types/pharmacy';
 import { MockDataService } from '@/services/mockData';
 
-// Pharmacy state interface
-interface PharmacyState {
-  pharmacies: Pharmacy[];
-  currentPharmacy: Pharmacy | null;
-  isLoading: boolean;
-  error: string | null;
-}
 
-// Pharmacy actions
-type PharmacyAction =
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SET_PHARMACIES'; payload: Pharmacy[] }
-  | { type: 'ADD_PHARMACY'; payload: Pharmacy }
-  | { type: 'UPDATE_PHARMACY'; payload: Pharmacy }
-  | { type: 'DELETE_PHARMACY'; payload: string }
-  | { type: 'SET_CURRENT_PHARMACY'; payload: Pharmacy | null };
-
-// Context types
 interface PharmacyContextType {
-  state: PharmacyState;
   pharmacies: Pharmacy[];
   currentPharmacy: Pharmacy | null;
-  isLoading: boolean;
+  loading: boolean;
   error: string | null;
-  // CRUD functions for hooks to call
-  setPharmacies: (pharmacies: Pharmacy[] | ((prev: Pharmacy[]) => Pharmacy[])) => void;
+
   addPharmacy: (pharmacy: Pharmacy) => void;
   editPharmacy: (pharmacy: Pharmacy) => void;
   deletePharmacy: (id: string) => void;
@@ -36,54 +16,15 @@ interface PharmacyContextType {
   refreshPharmacies: () => Promise<void>;
 }
 
-// Initial state
-const initialState: PharmacyState = {
-  pharmacies: [],
-  currentPharmacy: null,
-  isLoading: false,
-  error: null,
-};
-
-// Reducer
-const pharmacyReducer = (state: PharmacyState, action: PharmacyAction): PharmacyState => {
-  switch (action.type) {
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload, isLoading: false };
-    case 'SET_PHARMACIES':
-      return { ...state, pharmacies: action.payload, isLoading: false, error: null };
-    case 'ADD_PHARMACY':
-      return { ...state, pharmacies: [...state.pharmacies, action.payload] };
-    case 'UPDATE_PHARMACY':
-      return {
-        ...state,
-        pharmacies: state.pharmacies.map(pharmacy => 
-          pharmacy.id === action.payload.id ? action.payload : pharmacy
-        )
-      };
-    case 'DELETE_PHARMACY':
-      return {
-        ...state,
-        pharmacies: state.pharmacies.filter(pharmacy => pharmacy.id !== action.payload)
-      };
-    case 'SET_CURRENT_PHARMACY':
-      return {
-        ...state,
-        currentPharmacy: action.payload
-      };
-    default:
-      return state;
-  }
-};
-
 // Create context
 const PharmacyContext = createContext<PharmacyContextType | undefined>(undefined);
 
 // Provider component
 export const PharmacyProvider = ({ children }: { children: React.ReactNode }) => {
-  const [state, dispatch] = useReducer(pharmacyReducer, initialState);
-
+  const [currentPharmacy, setCurrentPharmacy] = useState<Pharmacy | null>(null)
+  const [pharmacies, setPharmacies] = useState<Pharmacy[]>([])
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   // Load pharmacies on mount
   useEffect(() => {
     loadPharmacies();
@@ -91,50 +32,39 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
 
   const loadPharmacies = async () => {
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      const pharmacies = await MockDataService.getPharmacies();
-      dispatch({ type: 'SET_PHARMACIES', payload: pharmacies });
-    } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load pharmacies' });
-    }
-  };
 
-  // CRUD functions for hooks to call
-  const setPharmacies = (pharmacies: Pharmacy[] | ((prev: Pharmacy[]) => Pharmacy[])) => {
-    if (typeof pharmacies === 'function') {
-      dispatch({ type: 'SET_PHARMACIES', payload: pharmacies(state.pharmacies) });
-    } else {
-      dispatch({ type: 'SET_PHARMACIES', payload: pharmacies });
+      const pharmacies = await MockDataService.getPharmacies();
+      setPharmacies(pharmacies)
+    } catch (error) {
+
     }
   };
 
   const addPharmacy = (pharmacy: Pharmacy) => {
-    dispatch({ type: 'ADD_PHARMACY', payload: pharmacy });
+    setPharmacies((prev) => [...prev, pharmacy])
   };
 
-  const editPharmacy = (pharmacy: Pharmacy) => {
-    dispatch({ type: 'UPDATE_PHARMACY', payload: pharmacy });
+  const editPharmacy = (data: Pharmacy) => {
+    setPharmacies((prev) => prev.map(pharmacy =>
+      pharmacy.id === data.id ? data : pharmacy
+    ))
   };
 
   const deletePharmacy = (id: string) => {
-    dispatch({ type: 'DELETE_PHARMACY', payload: id });
+    setPharmacies((prev) => prev.filter(pharmacy => pharmacy.id !== id))
   };
 
-  const setCurrentPharmacy = (pharmacy: Pharmacy | null) => {
-    dispatch({ type: 'SET_CURRENT_PHARMACY', payload: pharmacy });
-  };
+
 
   const refreshPharmacies = async (): Promise<void> => {
     await loadPharmacies();
   };
 
   const contextValue: PharmacyContextType = {
-    state,
-    pharmacies: state.pharmacies,
-    currentPharmacy: state.currentPharmacy,
-    isLoading: state.isLoading,
-    error: state.error,
-    setPharmacies,
+    pharmacies,
+    currentPharmacy,
+    loading,
+    error,
     addPharmacy,
     editPharmacy,
     deletePharmacy,

@@ -4,10 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router } from 'expo-router';
-import { useAuthActions } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AccountSettingsScreen() {
-  const { logout } = useAuthActions();
+  const { logout } = useAuth();
 
   const handleDeleteAccount = () => {
     Alert.alert(

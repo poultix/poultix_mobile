@@ -18,7 +18,7 @@ import { useAuthActions } from '@/hooks/useAuthActions'
 import { StatusBar } from 'expo-status-bar'
 
 export default function SignInScreen() {
-    const { currentUser, isLoading: authLoading } = useAuth()
+    const { currentUser, loading: authLoading } = useAuth()
     const { login } = useAuthActions()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -272,7 +272,7 @@ console.log('user result',user)
                     {/* Sign Up */}
                     <View className="flex-row justify-center mt-auto mb-6 pt-8">
                         <Text className="text-gray-500 text-base">Don't have an account? </Text>
-                        <TouchableOpacity onPress={() => router.push('/auth/sign-up')} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={() => router.push('/auth/register')} activeOpacity={0.7}>
                             <Text className="text-orange-600 font-semibold text-base">Sign Up</Text>
                         </TouchableOpacity>
                     </View>

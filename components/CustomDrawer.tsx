@@ -16,7 +16,7 @@ import { router } from 'expo-router';
 import tw from 'twrnc';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth, useAuthActions } from '@/contexts/AuthContext';
+import { useAuth} from '@/contexts/AuthContext';
 
 interface DrawerItem {
   label: string;
@@ -134,8 +134,7 @@ interface CustomDrawerProps {
 }
 
 export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) {
-  const { currentUser } = useAuth();
-  const { logout } = useAuthActions();
+  const { currentUser,logout } = useAuth();
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const drawerWidth = screenWidth * 0.85; // 85% of screen width
   const slideAnim = useRef(new Animated.Value(-drawerWidth)).current;
@@ -233,7 +232,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
     onClose();
     try {
       await logout();
-      router.replace('/auth/sign-in' );
+     
     } catch (error) {
       console.error('Logout error:', error);
     }
