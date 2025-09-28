@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
-    SafeAreaView,
+
     Animated,
     Easing,
     ScrollView,
@@ -10,7 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import tw from 'twrnc';
 import { useBLE } from '@/hooks/useBLE';
-
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BluetoothResultScreen() {
 

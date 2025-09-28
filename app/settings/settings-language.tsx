@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router } from 'expo-router';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LanguageSettingsScreen() {
   const [selectedLanguage, setSelectedLanguage] = useState('English');

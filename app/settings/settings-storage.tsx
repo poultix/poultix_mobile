@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router } from 'expo-router';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function StorageSettingsScreen() {
   const storageOptions = [

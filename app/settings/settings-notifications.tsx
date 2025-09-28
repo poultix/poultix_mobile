@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Switch } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router } from 'expo-router';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NotificationSettingsScreen() {
   const [pushEnabled, setPushEnabled] = useState(true);

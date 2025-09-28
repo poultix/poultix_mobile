@@ -3,7 +3,6 @@ import {
     View,
     Text,
     TouchableOpacity,
-    SafeAreaView,
     ScrollView,
     TextInput,
     Alert,
@@ -16,7 +15,7 @@ import tw from 'twrnc';
 import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSchedules } from '@/contexts/ScheduleContext';
-import { mockVeterinaries } from '@/services/mockData';
+import { SafeAreaView } from "react-native-safe-area-context";
 import DrawerButton from '@/components/DrawerButton';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';

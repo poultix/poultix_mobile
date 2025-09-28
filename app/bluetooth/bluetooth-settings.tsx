@@ -3,13 +3,13 @@ import {
     View,
     Text,
     TouchableOpacity,
-    SafeAreaView,
     Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import tw from 'twrnc';
 import { router } from 'expo-router';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BluetoothSettingsScreen() {
     

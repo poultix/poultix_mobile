@@ -1,10 +1,10 @@
 // screens/NetworkErrorScreen.tsx
 import React from 'react';
-import { Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import axios from 'axios';
 import { router } from 'expo-router';
 import { apiClient } from '@/services/client';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NetworkErrorScreen() {
     

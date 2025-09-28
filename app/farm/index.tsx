@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Animated,
   Dimensions,
@@ -21,7 +20,7 @@ import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
 import DrawerButton from '@/components/DrawerButton';
 import { router } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';

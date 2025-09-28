@@ -3,7 +3,6 @@ import {
     View,
     Text,
     TouchableOpacity,
-    SafeAreaView,
     ScrollView,
     Image,
     Animated,
@@ -16,6 +15,7 @@ import { router } from 'expo-router';
 import { User, UserRole } from '@/types/user';
 import { Farm, FarmStatus } from '@/types/farm';
 import { Schedule, ScheduleStatus } from '@/types/schedule';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import CustomDrawer from '@/components/CustomDrawer'
 import { useDrawer } from '@/contexts/DrawerContext'

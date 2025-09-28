@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  SafeAreaView,
   Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -14,7 +13,7 @@ import * as Haptics from 'expo-haptics';
 import tw from 'twrnc';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
-
+import { SafeAreaView } from "react-native-safe-area-context";
 // New context imports
 import { useNews } from '@/contexts/NewsContext';
 import { useAuth } from '@/contexts/AuthContext';

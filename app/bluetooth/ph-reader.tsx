@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Animated,
   Alert,
@@ -14,8 +13,7 @@ import {
 import tw from 'twrnc';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LocalAIService, PH_DISEASE_DATABASE } from '@/services/ai/localAIService';
 import { router } from 'expo-router';

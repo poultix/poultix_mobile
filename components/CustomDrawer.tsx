@@ -9,7 +9,6 @@ import {
   Dimensions,
   Modal,
   Platform,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   Text,
@@ -17,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import tw from 'twrnc';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface DrawerItem {
   label: string;

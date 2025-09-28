@@ -4,7 +4,6 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    SafeAreaView,
     ScrollView,
     Alert,
     Animated,
@@ -13,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router } from 'expo-router';
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
 import { ScheduleType, SchedulePriority } from '@/types/schedule';
@@ -36,7 +35,7 @@ export default function ScheduleRequestScreen() {
     
     // Use new contexts
     const { currentUser } = useAuth();
-    const { isLoading } = useSchedules();
+    const { loading } = useSchedules();
     const { createSchedule } = useScheduleActions();
     const { users } = useUsers();
     

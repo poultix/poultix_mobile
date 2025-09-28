@@ -8,7 +8,6 @@ import {
     Animated,
     KeyboardAvoidingView,
     Platform,
-    SafeAreaView,
     ScrollView,
     Text,
     TextInput,
@@ -16,7 +15,7 @@ import {
     View,
 } from 'react-native';
 import tw from 'twrnc';
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import CustomDrawer from '@/components/CustomDrawer';
 import DrawerButton from '@/components/DrawerButton';
 import { useDrawer } from '@/contexts/DrawerContext';
