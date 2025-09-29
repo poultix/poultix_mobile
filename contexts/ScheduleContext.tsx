@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { Schedule, ScheduleType, ScheduleStatus, SchedulePriority } from '@/types/schedule';
-import { User } from '@/types/user';
 import { MockDataService } from '@/services/mockData';
 
 interface ScheduleContextType {
@@ -34,7 +33,8 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
   const loadSchedules = async () => {
     try {
 
-      const data = await MockDataService.getSchedules('');
+      const data = await MockDataService.getSchedules();
+    
       setSchedules(data)
     } catch (error) {
 

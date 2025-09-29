@@ -1,9 +1,9 @@
-import { User, Farmer, Veterinary, UserRole } from '@/types/user';
-import { Farm, Location, LiveStock, Facility, FarmStatus } from '@/types/farm';
+import { User,  UserRole } from '@/types/user';
+import { Farm,  FarmStatus } from '@/types/farm';
 import { Schedule, ScheduleType, ScheduleStatus, SchedulePriority } from '@/types/schedule';
-import { Pharmacy, Vaccine } from '@/types/pharmacy';
+import { Pharmacy} from '@/types/pharmacy';
 import { News, NewsPriority } from '@/types/news';
-import { Message } from '@/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Mock user data
 export const mockUsers: User[] = [
@@ -39,38 +39,6 @@ export const mockUsers: User[] = [
     }
 ];
 
-export const mockMessages: Message[] = [
-    {
-        id: 'msg_001',
-        chatId: 'vet_001',
-        senderId: 'farmer_001',
-        senderName: 'John Uwimana',
-        content: 'Hello Dr. Patricia, I have some chickens showing respiratory symptoms.',
-        type: 'text',
-        timestamp: new Date('2024-06-27T10:00:00'),
-        status: 'read'
-    },
-    {
-        id: 'msg_002',
-        chatId: 'farmer_001',
-        senderId: 'vet_001',
-        senderName: 'Dr. Patricia Uwimana',
-        content: 'Hi John! Can you describe the symptoms in more detail?',
-        type: 'text',
-        timestamp: new Date('2024-06-27T10:05:00'),
-        status: 'read'
-    },
-    {
-        id: 'msg_003',
-        chatId: 'admin_001',
-        senderId: 'farmer_001',
-        senderName: 'John Uwimana',
-        content: 'They have difficulty breathing and some nasal discharge.',
-        type: 'text',
-        timestamp: new Date('2024-06-27T10:10:00'),
-        status: 'delivered'
-    }
-];
 
 
 
@@ -383,7 +351,6 @@ export class MockAuthService {
 
     // Auto-login feature - creates a persistent session for development
     static async createDevelopmentSession(): Promise<void> {
-        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
 
         // Check if we already have a session
         const existingToken = await AsyncStorage.getItem('token');
@@ -402,7 +369,6 @@ export class MockAuthService {
 
     // Quick login methods for development - switch between users easily
     static async loginAsFarmer(): Promise<void> {
-        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
         const user = this.users[0]; // john.farmer@example.com
         await AsyncStorage.setItem('token', user.token);
         await AsyncStorage.setItem('role', user.role);
@@ -411,7 +377,6 @@ export class MockAuthService {
     }
 
     static async loginAsVeterinary(): Promise<void> {
-        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
         const user = this.users[1]; // dr.patricia@example.com
         await AsyncStorage.setItem('token', user.token);
         await AsyncStorage.setItem('role', user.role);
@@ -420,7 +385,6 @@ export class MockAuthService {
     }
 
     static async loginAsAdmin(): Promise<void> {
-        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
         const user = this.users[2]; // admin@poultix.com
         await AsyncStorage.setItem('token', user.token);
         await AsyncStorage.setItem('role', user.role);
@@ -429,7 +393,6 @@ export class MockAuthService {
     }
 
     static async logout(): Promise<void> {
-        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('role');
         await AsyncStorage.removeItem('userEmail');
@@ -539,11 +502,7 @@ export class MockDataService {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 700));
 
-        if (location) {
-            return mockVeterinaries.filter(vet =>
-                vet.location.toLowerCase().includes(location.toLowerCase())
-            );
-        }
+ 
 
         return mockVeterinaries;
     }
@@ -566,28 +525,12 @@ export class MockDataService {
         return mockNews;
     }
 
-    static async getMessages(userId: string, userRole: string): Promise<typeof mockMessages> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        if (userRole === 'farmer') {
-            return mockMessages.filter(msg => msg.senderId === userId);
-        } else if (userRole === 'veterinary') {
-            return mockMessages.filter(msg => msg.senderId === userId);
-        }
-
-        return mockMessages;
-    }
-
 
     static async getScheduleRequests(veterinaryId?: string): Promise<typeof mockScheduleRequests> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 400));
 
-        if (veterinaryId) {
-            return mockScheduleRequests.filter(req => req.veterinaryId === veterinaryId);
-        }
-
+    
         return mockScheduleRequests;
     }
 

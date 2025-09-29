@@ -57,13 +57,13 @@ export default function FarmDetailScreen() {
     return (
         <View className="flex-1 bg-gray-50">
             {/* Header */}
-            <View className="flex-row items-center px-4 py-3 bg-white shadow-sm">
+            <View className="flex-row items-center px-4 py-10 bg-amber-500 shadow-sm">
                 <TouchableOpacity onPress={() => router.back()} className="mr-3">
-                    <Ionicons name="chevron-back" size={24} color="#111827" />
+                    <Ionicons name="chevron-back" size={24} color="white" />
                 </TouchableOpacity>
-                <Text className="text-lg font-semibold text-gray-900 flex-1">Farm Details</Text>
+                <Text className="text-xl font-semibold text-white flex-1">Farm Details</Text>
                 <TouchableOpacity onPress={() => router.push('/communication/messages')}>
-                    <Ionicons name="chatbubble-outline" size={24} color="#3B82F6" />
+                    <Ionicons name="chatbubble-outline" size={24} color="white" />
                 </TouchableOpacity>
             </View>
 
