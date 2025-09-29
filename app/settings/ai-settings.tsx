@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import tw from 'twrnc';
 import { IOSDesign } from '@/constants/iosDesign';
@@ -19,7 +19,6 @@ import { IOSDesign } from '@/constants/iosDesign';
 import { LocalAIService, PH_DISEASE_DATABASE } from '@/services/ai/localAIService';
 
 export default function AISettingsScreen() {
-  const router = useRouter();
   const [showStats, setShowStats] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedDisease, setExpandedDisease] = useState<string | null>(null);

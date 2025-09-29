@@ -1,7 +1,7 @@
 import { IOSDesign } from '@/constants/iosDesign';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
@@ -23,7 +23,7 @@ import { AIMessage, AIService, QUICK_SUGGESTIONS } from '@/services/ai/aiService
 import { LocalAIService } from '@/services/ai/localAIService';
 
 export default function AIScreen() {
-    const router = useRouter();
+    
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
     const [question, setQuestion] = useState('');
     const [messages, setMessages] = useState<AIMessage[]>([AIService.getWelcomeMessage()]);

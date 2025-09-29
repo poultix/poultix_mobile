@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { IOSDesign } from '../../constants/iosDesign';
@@ -20,7 +20,6 @@ interface VetReport {
 }
 
 export default function VetReportsScreen() {
-    const router = useRouter();
     const [selectedFilter, setSelectedFilter] = useState<'all' | 'diagnosis' | 'treatment' | 'vaccination' | 'inspection' | 'consultation'>('all');
 
     // Mock veterinary reports data

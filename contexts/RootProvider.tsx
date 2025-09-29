@@ -37,5 +37,3 @@ export const RootProvider: React.FC<RootProviderProps> = ({ children }) => {
     </AuthProvider>
   );
 };
-
-export default RootProvider;

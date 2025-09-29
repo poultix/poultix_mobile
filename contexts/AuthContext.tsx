@@ -57,6 +57,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 };
                 setAuthenticated(true)
                 setCurrentUser(user)
+
+                if (role === 'ADMIN') {
+                    router.replace('/dashboard/admin-dashboard');
+                } else if (role === 'FARMER') {
+                    router.replace('/dashboard/farmer-dashboard');
+                } else if (role === 'VETERINARY') {
+                    router.replace('/dashboard/veterinary-dashboard');
+                }
             }
         } catch (error) {
             setError('Failed to check auth status');
@@ -109,10 +117,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             setLoading(true);
             await MockAuthService.forgotPassword(email);
-           
+
         } catch (error) {
             setLoading(false)
-        }finally {
+        } finally {
             setLoading(false)
         }
     };

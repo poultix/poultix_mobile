@@ -3,8 +3,6 @@ import {
     View,
     Text,
     TouchableOpacity,
-    Animated,
-    Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -86,13 +84,13 @@ export default function BottomTabs({ currentRoute, style }: BottomTabsProps) {
                 router.push('/communication/messages');
                 break;
             case 'farms':
-                router.push('/farm/index');
+                router.push('/farm');
                 break;
             case 'more':
                 router.push('/user/profile');
                 break;
             default:
-                router.push(tab.route);
+                break
         }
     };
 

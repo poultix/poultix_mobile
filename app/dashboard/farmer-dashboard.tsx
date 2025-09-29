@@ -29,7 +29,7 @@ export default function FarmerDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const { setCurrentRoute } = useBottomTabsContext();
   const { currentUser } = useAuth();
-  const { farms  , loading, error} = useFarms();
+  const { farms,setCurrentFarm, loading, error } = useFarms();
   const { schedules } = useSchedules();
 
   // Set current route for bottom tabs
@@ -267,7 +267,7 @@ export default function FarmerDashboardScreen() {
           <TouchableOpacity
             key={farm.id}
             className="bg-white rounded-2xl p-5 mb-4 shadow-sm"
-            onPress={() => router.push(`/farm/farm-detail`)}
+            onPress={() => { setCurrentFarm(farm); router.push('/farm/farm-detail') }}
           >
             <View className="flex-row items-start justify-between mb-3">
               <View className="flex-1">
@@ -394,7 +394,7 @@ export default function FarmerDashboardScreen() {
   );
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+    <View style={tw`flex-1 bg-transparent`}>
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
         {/* Header */}
         <View style={tw`pb-4`}>
@@ -415,7 +415,7 @@ export default function FarmerDashboardScreen() {
                 </Text>
               </View>
               <DrawerButton />
-            </View> 
+            </View>
           </LinearGradient>
         </View>
 
@@ -446,8 +446,8 @@ export default function FarmerDashboardScreen() {
         </View>
 
         {/* Content */}
-        <ScrollView 
-          className="flex-1" 
+        <ScrollView
+          className="flex-1"
           showsVerticalScrollIndicator={false}
           style={tw`pb-20`} // Add padding for bottom tabs
         >
@@ -464,6 +464,6 @@ export default function FarmerDashboardScreen() {
         isVisible={isDrawerVisible}
         onClose={() => setIsDrawerVisible(false)}
       />
-    </SafeAreaView>
+    </View>
   );
 }

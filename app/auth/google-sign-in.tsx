@@ -2,13 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
 import * as Google from 'expo-auth-session/providers/google';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image,  Text, TouchableOpacity, View } from 'react-native';
 import { IOSDesign } from '../../constants/iosDesign';
 import { GoogleAuthConfig, getConfigurationStatus } from './googleAuthConfig';
-
+import { SafeAreaView } from "react-native-safe-area-context";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -22,7 +22,6 @@ interface GoogleUser {
 }
 
 export default function SignInWithGoogleScreen() {
-    const router = useRouter();
     const [user, setUser] = useState<GoogleUser | null>(null);
     const [loading, setLoading] = useState(false);
 

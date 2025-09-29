@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Animated } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import tw from 'twrnc';

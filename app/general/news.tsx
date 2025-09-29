@@ -6,7 +6,7 @@ import {
   View,
   Animated,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -19,7 +19,6 @@ import { useNews } from '@/contexts/NewsContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function NewsScreen() {
-  const router = useRouter();
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const [selectedCategory, setSelectedCategory] = useState('All');
   

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { IOSDesign, getRoleColor } from '../../constants/iosDesign';
@@ -24,7 +24,6 @@ interface User {
 }
 
 export default function UserDetailScreen() {
-    const router = useRouter();
     const { id } = useLocalSearchParams();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);

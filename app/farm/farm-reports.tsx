@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import {router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { IOSDesign } from '../../constants/iosDesign';
@@ -17,7 +17,7 @@ interface Report {
 }
 
 export default function FarmReportsScreen() {
-    const router = useRouter();
+   
     const [selectedFilter, setSelectedFilter] = useState<'all' | 'health' | 'production' | 'financial' | 'maintenance'>('all');
 
     // Mock reports data
