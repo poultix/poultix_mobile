@@ -5,8 +5,8 @@ import { router } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export default function FarmerSchedulesDashboard() {
-    const { schedules } = useSchedules()
-    const {farms}=useFarms()
+    const { schedules, setCurrentSchedule } = useSchedules()
+    const { farms } = useFarms()
     return (
         <View className="px-4">
             <View className="flex-row justify-between items-center mb-4">
@@ -28,7 +28,7 @@ export default function FarmerSchedulesDashboard() {
                     <TouchableOpacity
                         key={schedule.id}
                         className="bg-white rounded-2xl p-5 mb-4 shadow-sm"
-                        onPress={() => router.push(`/communication/schedule-detail`)}
+                        onPress={() => {setCurrentSchedule(schedule);router.push(`/communication/schedule-detail`)}}
                     >
                         <View className="flex-row items-start justify-between mb-3">
                             <View className="flex-1">

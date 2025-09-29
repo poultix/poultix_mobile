@@ -123,7 +123,7 @@ export default function FarmerDashboardScreen() {
         <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
-          contentContainerClassName={`pb-10`}
+          contentContainerClassName={`pb-40`}
         >
           {selectedTab === 'overview' && <FarmerOverview />}
           {selectedTab === 'farms' && <FarmsDashboard />}

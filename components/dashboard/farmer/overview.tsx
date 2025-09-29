@@ -18,7 +18,7 @@ export default function FarmerOverview() {
     );
 
     return (
-        <View className="px-4 pb-40">
+        <View className="px-4 ">
             {/* Statistics Cards */}
             <View className="flex-row flex-wrap gap-3 mb-6">
                 <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]">

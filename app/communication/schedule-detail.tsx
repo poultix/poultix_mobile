@@ -17,13 +17,13 @@ import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSchedules } from '@/contexts/ScheduleContext';
 import { useScheduleActions } from '@/hooks/useScheduleActions';
-import { ScheduleStatus } from '@/types/schedule';
+import { ScheduleStatus, SchedulePriority, ScheduleType } from '@/types/schedule';
 
 export default function ScheduleDetailScreen() {
     const { currentUser } = useAuth();
-    const { currentSchedule, isLoading } = useSchedules();
+    const { currentSchedule, loading } = useSchedules();
     const { updateSchedule } = useScheduleActions();
-    
+
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -36,12 +36,9 @@ export default function ScheduleDetailScreen() {
 
     const handleStatusUpdate = async (status: ScheduleStatus) => {
         if (!currentSchedule) return;
-        
+
         try {
-            await updateSchedule({
-                ...currentSchedule,
-                status
-            });
+            await updateSchedule(currentSchedule.id, { ...currentSchedule, status });
             Alert.alert('Success', `Schedule ${status.toLowerCase()} successfully!`);
         } catch (error) {
             console.error('Error updating schedule:', error);
@@ -49,7 +46,7 @@ export default function ScheduleDetailScreen() {
         }
     };
 
-    if (isLoading || !currentSchedule || !currentUser) {
+    if (loading || !currentSchedule || !currentUser) {
         return (
             <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Loading schedule details...</Text>
@@ -58,13 +55,13 @@ export default function ScheduleDetailScreen() {
     }
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+        <View style={tw`flex-1 bg-gray-50`}>
             <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
                 {/* Header */}
-                <View style={tw`px-4 pt-2 pb-4`}>
+                <View style={tw`pb-4`}>
                     <LinearGradient
                         colors={['#3B82F6', '#2563EB']}
-                        style={tw`rounded-3xl p-6 shadow-xl`}
+                        style={tw` p-6 shadow-xl`}
                     >
                         <View style={tw`flex-row items-center justify-between`}>
                             <TouchableOpacity
@@ -77,7 +74,7 @@ export default function ScheduleDetailScreen() {
                                 <Text style={tw`text-white font-medium`}>Schedule Details</Text>
                                 <Text style={tw`text-white text-2xl font-bold`}>{currentSchedule.title}</Text>
                                 <Text style={tw`text-blue-100 text-sm`}>
-                                    {currentSchedule.type}
+                                    {currentSchedule.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                 </Text>
                             </View>
                         </View>
@@ -90,7 +87,7 @@ export default function ScheduleDetailScreen() {
                         <Text style={tw`text-xl font-bold text-gray-800 mb-4`}>
                             Appointment Information
                         </Text>
-                        
+
                         <View style={tw`space-y-4`}>
                             <View>
                                 <Text style={tw`text-gray-500 text-sm font-medium`}>Date & Time</Text>
@@ -98,7 +95,7 @@ export default function ScheduleDetailScreen() {
                                     {new Date(currentSchedule.scheduledDate).toLocaleDateString()}
                                 </Text>
                                 <Text style={tw`text-gray-600`}>
-                                    {currentSchedule.scheduledTime || 'Time to be determined'}
+                                    {currentSchedule.startTime} - {currentSchedule.endTime}
                                 </Text>
                             </View>
 
@@ -106,11 +103,13 @@ export default function ScheduleDetailScreen() {
                                 <Text style={tw`text-gray-500 text-sm font-medium`}>Status</Text>
                                 <View style={tw`flex-row items-center mt-1`}>
                                     <View style={tw`w-3 h-3 rounded-full ${
-                                        currentSchedule.status === ScheduleStatus.CONFIRMED ? 'bg-green-500' :
-                                        currentSchedule.status === ScheduleStatus.PENDING ? 'bg-yellow-500' :
+                                        currentSchedule.status === ScheduleStatus.COMPLETED ? 'bg-green-500' :
+                                        currentSchedule.status === ScheduleStatus.SCHEDULED ? 'bg-blue-500' :
+                                        currentSchedule.status === ScheduleStatus.IN_PROGRESS ? 'bg-yellow-500' :
                                         currentSchedule.status === ScheduleStatus.CANCELLED ? 'bg-red-500' :
+                                        currentSchedule.status === ScheduleStatus.RESCHEDULED ? 'bg-purple-500' :
                                         'bg-gray-500'
-                                    } mr-2`} />
+                                        } mr-2`} />
                                     <Text style={tw`text-gray-800 font-medium`}>
                                         {currentSchedule.status}
                                     </Text>
@@ -119,9 +118,21 @@ export default function ScheduleDetailScreen() {
 
                             <View>
                                 <Text style={tw`text-gray-500 text-sm font-medium`}>Priority</Text>
-                                <Text style={tw`text-gray-800 font-medium`}>
-                                    {currentSchedule.priority}
-                                </Text>
+                                <View style={tw`px-3 py-1 rounded-full ${
+                                    currentSchedule.priority === SchedulePriority.URGENT ? 'bg-red-100' :
+                                    currentSchedule.priority === SchedulePriority.HIGH ? 'bg-orange-100' :
+                                    currentSchedule.priority === SchedulePriority.MEDIUM ? 'bg-yellow-100' :
+                                    'bg-gray-100'
+                                    }`}>
+                                    <Text style={tw`text-xs font-bold capitalize ${
+                                        currentSchedule.priority === SchedulePriority.URGENT ? 'text-red-600' :
+                                        currentSchedule.priority === SchedulePriority.HIGH ? 'text-orange-600' :
+                                        currentSchedule.priority === SchedulePriority.MEDIUM ? 'text-yellow-600' :
+                                        'text-gray-600'
+                                        }`}>
+                                        {currentSchedule.priority}
+                                    </Text>
+                                </View>
                             </View>
 
                             <View>
@@ -134,22 +145,22 @@ export default function ScheduleDetailScreen() {
                     </View>
 
                     {/* Actions */}
-                    {currentUser.role === 'VETERINARY' && currentSchedule.status === ScheduleStatus.PENDING && (
+                    {currentUser.role === 'VETERINARY' && currentSchedule.status === ScheduleStatus.SCHEDULED && (
                         <View style={tw`bg-white rounded-2xl p-6 mb-6 shadow-md`}>
                             <Text style={tw`text-xl font-bold text-gray-800 mb-4`}>
                                 Actions
                             </Text>
-                            
+
                             <View style={tw`flex-row gap-3`}>
                                 <TouchableOpacity
                                     style={tw`flex-1 bg-green-500 py-4 px-6 rounded-xl`}
-                                    onPress={() => handleStatusUpdate(ScheduleStatus.CONFIRMED)}
+                                    onPress={() => handleStatusUpdate(ScheduleStatus.IN_PROGRESS)}
                                 >
                                     <Text style={tw`text-white font-bold text-center text-lg`}>
                                         Approve
                                     </Text>
                                 </TouchableOpacity>
-                                
+
                                 <TouchableOpacity
                                     style={tw`flex-1 bg-red-500 py-4 px-6 rounded-xl`}
                                     onPress={() => handleStatusUpdate(ScheduleStatus.CANCELLED)}
@@ -167,7 +178,7 @@ export default function ScheduleDetailScreen() {
                         <Text style={tw`text-xl font-bold text-gray-800 mb-4`}>
                             Additional Information
                         </Text>
-                        
+
                         <View style={tw`space-y-3`}>
                             <View style={tw`flex-row items-center`}>
                                 <Ionicons name="calendar-outline" size={20} color="#6B7280" />
@@ -175,7 +186,7 @@ export default function ScheduleDetailScreen() {
                                     Created: {new Date(currentSchedule.createdAt).toLocaleDateString()}
                                 </Text>
                             </View>
-                            
+
                             <View style={tw`flex-row items-center`}>
                                 <Ionicons name="time-outline" size={20} color="#6B7280" />
                                 <Text style={tw`text-gray-600 ml-3`}>
@@ -186,6 +197,6 @@ export default function ScheduleDetailScreen() {
                     </View>
                 </ScrollView>
             </Animated.View>
-        </SafeAreaView>
+        </View>
     );
 }

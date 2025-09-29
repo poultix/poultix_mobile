@@ -4,7 +4,7 @@ import { StatusBar } from "expo-status-bar";
 export default function DashboardLayout() {
     return (
     <>
-        <StatusBar style="dark" />
+        <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false }} />
     </>)
 }
