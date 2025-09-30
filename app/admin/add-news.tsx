@@ -28,7 +28,7 @@ import { useNewsActions } from '@/hooks/useNewsActions'
 export default function AddNewsScreen() {
   // Use new contexts
   const { currentUser } = useAuth()
-  const { isLoading } = useNews()
+  const { loading } = useNews()
   const { createNews } = useNewsActions()
   
   const [article, setArticle] = useState<Partial<News>>({

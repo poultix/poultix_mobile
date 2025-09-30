@@ -24,7 +24,7 @@ export default function NearbyFarmsScreen() {
     
     // Use new contexts
     const { currentUser } = useAuth();
-    const { farms, isLoading } = useFarms();
+    const { farms, loading } = useFarms();
     
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -75,7 +75,7 @@ export default function NearbyFarmsScreen() {
         Linking.openURL(url);
     };
 
-    if (isLoading || !currentUser) {
+    if (loading || !currentUser) {
         return (
             <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Loading nearby farms...</Text>

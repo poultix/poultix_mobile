@@ -9,7 +9,7 @@ interface ChatContextTye {
     messages: Message[]
     currentChat: User | null
     typingStatuses: TypingStatus[]
-    onlineUsers: string[]
+    onlineUsers: Set<string>
     loading: boolean
     error: string | null
     unreadTotal: number
@@ -31,7 +31,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const [messages, setMessages] = useState<Message[]>([])
     const [currentChat, setCurrentChat] = useState<User | null>(null)
     const [typingStatuses, setTypingStatuses] = useState<TypingStatus[]>([])
-    const [onlineUsers, setOnlineUsers] = useState<string[]>([])
+    const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [unreadTotal, setUnreadTotal] = useState(0)
@@ -60,7 +60,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
     const loadOnlineUsers = async () => {
         // Mock online users
-        const onlineUsers = ['farmer_001', 'vet_001']
+        const onlineUsers: Set<string> = new Set(['farmer_001', 'vet_001'])
         setOnlineUsers(onlineUsers)
     }
 
@@ -68,7 +68,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         // Simulate online status changes
         const allUsers = ['farmer_001', 'vet_001', 'admin_001']
         const onlineUsers = allUsers.filter(() => Math.random() > 0.3)
-        setOnlineUsers(onlineUsers)
+        setOnlineUsers(new Set(onlineUsers))
     }
 
     const simulateTypingIndicators = () => {
@@ -148,7 +148,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
 
     const returnValues: ChatContextTye = {
-       
+
         currentChat,
         messages,
         typingStatuses,

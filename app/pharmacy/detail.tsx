@@ -18,7 +18,7 @@ import { usePharmacies } from '@/contexts/PharmacyContext';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function PharmacyDetailScreen() {
-    const { currentPharmacy, isLoading } = usePharmacies();
+    const { currentPharmacy, loading } = usePharmacies();
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const mapRef = useRef<MapView>(null);
 

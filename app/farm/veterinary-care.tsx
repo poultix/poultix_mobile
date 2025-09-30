@@ -14,7 +14,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSchedules } from '@/contexts/ScheduleContext';
 import { SafeAreaView } from "react-native-safe-area-context";
 import DrawerButton from '@/components/DrawerButton';
 import CustomDrawer from '@/components/CustomDrawer';
@@ -212,7 +211,7 @@ export default function VeterinaryCareScreen() {
     };
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+        <View style={tw`flex-1 bg-gray-50`}>
             <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
 
             <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
@@ -389,6 +388,6 @@ export default function VeterinaryCareScreen() {
                     )}
                 </ScrollView>
             </Animated.View>
-        </SafeAreaView>
+        </View>
     );
 }

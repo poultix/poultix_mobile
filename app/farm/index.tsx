@@ -9,6 +9,7 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  FlatList,
 } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,65 +23,65 @@ import DrawerButton from '@/components/DrawerButton';
 import { router } from 'expo-router';
 import { SafeAreaView } from "react-native-safe-area-context";
 
+
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import { useSchedules } from '@/contexts/ScheduleContext';
-
 const { width } = Dimensions.get('window');
-const isPad = width >= 768;
 const isLargePhone = width >= 428;
 
 export default function FarmDataScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR'>('ALL');
   
   // Use new contexts
   const { currentUser } = useAuth();
-  const { farms, currentFarm, setCurrentFarm, isLoading } = useFarms();
+  const { farms, loading } = useFarms();
   const { schedules } = useSchedules();
-  
-  const totalChickens = currentFarm?.livestock ? currentFarm.livestock.total : 0
-  const [weatherPreview, setWeatherPreview] = useState({
-    temp: 24,
-    condition: 'sunny',
-    humidity: 65,
-  });
-
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: 'alert', message: 'Increased risk of heat stress today' },
-    { id: 2, type: 'info', message: 'Feeding schedule updated' },
-  ]);
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const cardAnim = useRef(new Animated.Value(0)).current;
-  const navAnim = useRef(new Animated.Value(0)).current;
-  const chartAnim = useRef(new Animated.Value(0)).current;
-  const buttonAnim = useRef(new Animated.Value(0)).current;
-  const notificationAnim = useRef(new Animated.Value(0)).current;
 
-
-  // Set current farm for the user
-  useEffect(() => {
-    if (currentUser && farms.length > 0 && !currentFarm) {
-      // Find user's farm
-      const userFarm = farms.find(farm => farm.owner.id === currentUser.id);
-      if (userFarm) {
-        setCurrentFarm(userFarm);
-      }
+  // Filter farms based on search and status
+  const filteredFarms = useMemo(() => {
+    let filtered = farms;
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(farm => 
+        farm.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        farm.owner.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        farm.location.address.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
-  }, [currentUser, farms, currentFarm, setCurrentFarm]);
+    
+    // Apply status filter
+    if (selectedFilter !== 'ALL') {
+      filtered = filtered.filter(farm => farm.healthStatus === selectedFilter);
+    }
+    
+    return filtered;
+  }, [farms, searchQuery, selectedFilter]);
 
-  // Card health colors based on farm status
-  const healthColors = useMemo(() => {
-    const sickPercentage = currentFarm?.livestock ? (currentFarm.livestock.sick / totalChickens) * 100 : 0;
+  // Calculate overall stats
+  const stats = useMemo(() => {
+    const totalFarms = farms.length;
+    const totalLivestock = farms.reduce((sum, farm) => sum + farm.livestock.total, 0);
+    const totalHealthy = farms.reduce((sum, farm) => sum + farm.livestock.healthy, 0);
+    const totalSick = farms.reduce((sum, farm) => sum + farm.livestock.sick, 0);
+    
     return {
-      primary: sickPercentage > 20 ? '#EF4444' : sickPercentage > 10 ? '#F59E0B' : '#10B981',
-      secondary: sickPercentage > 20 ? '#FF6B6B' : sickPercentage > 10 ? '#FBBF24' : '#34D399',
-      background: sickPercentage > 20 ? '#FEF2F2' : sickPercentage > 10 ? '#FEF3C7' : '#ECFDF5',
+      totalFarms,
+      totalLivestock,
+      totalHealthy,
+      totalSick,
+      healthPercentage: totalLivestock > 0 ? Math.round((totalHealthy / totalLivestock) * 100) : 0
     };
-  }, [currentFarm, totalChickens]);
+  }, [farms]);
   // Start animations
   const startAnimations = () => {
     Animated.sequence([
@@ -89,50 +90,18 @@ export default function FarmDataScreen() {
         duration: 600,
         useNativeDriver: true,
       }),
-      Animated.parallel([
-        Animated.spring(cardAnim, {
-          toValue: 1,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-        Animated.timing(navAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.parallel([
-        Animated.spring(chartAnim, {
-          toValue: 1,
-          tension: 40,
-          friction: 6,
-          useNativeDriver: true,
-        }),
-        Animated.spring(buttonAnim, {
-          toValue: 1,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-        Animated.timing(notificationAnim, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
+      Animated.spring(cardAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
     ]).start();
   };
 
 
   useEffect(() => {
     startAnimations();
-    // Update weather preview
-    setWeatherPreview({
-      temp: Math.floor(Math.random() * 20) + 15,
-      condition: ['sunny', 'cloudy', 'rainy'][Math.floor(Math.random() * 3)],
-      humidity: Math.floor(Math.random() * 30) + 50,
-    });
   }, []);
 
   const handleRefresh = async () => {
@@ -141,237 +110,109 @@ export default function FarmDataScreen() {
     setRefreshing(false);
   };
 
-  const handleNavigation = (path: any) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
-    Animated.timing(fadeAnim, {
-      toValue: 0.5,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => router.push(path));
+  const handleFarmPress = (farm: Farm) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    router.push(`/farm/farm-detail?farmId=${farm.id}`);
   };
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'k';
-    }
-    return num.toString();
-  };
-
-  const getWeatherIcon = (condition: string) => {
-    switch (condition) {
-      case 'sunny':
-        return 'sunny-outline';
-      case 'cloudy':
-        return 'cloudy-outline';
-      case 'rainy':
-        return 'rainy-outline';
+  const getHealthStatusColor = (status: FarmStatus) => {
+    switch (status) {
+      case 'EXCELLENT':
+        return { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200' };
+      case 'GOOD':
+        return { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200' };
+      case 'FAIR':
+        return { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-200' };
+      case 'POOR':
+        return { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200' };
       default:
-        return 'partly-sunny-outline';
+        return { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' };
     }
   };
 
-  const sickPercentage = currentFarm?.livestock ? (currentFarm.livestock.sick / totalChickens) * 100 : 0;
-  const atRiskPercentage = currentFarm?.livestock ? (currentFarm.livestock.atRisk / totalChickens) * 100 : 0;
 
 
-
-  if (!currentFarm) {
+  if (loading) {
     return (
       <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
-        <Text style={tw`text-gray-600 text-lg`}>No farm data available</Text>
+        <View style={tw`items-center`}>
+          <ActivityIndicator size="large" color="#10B981" />
+          <Text style={tw`text-gray-600 text-lg mt-4`}>Loading farms...</Text>
+        </View>
       </SafeAreaView>
     );
   }
 
-  if (isLoading) {
+  if (!farms || farms.length === 0) {
     return (
-      <View style={tw`flex-1 justify-center items-center bg-white`}>
-        <View style={tw`w-20 h-20 rounded-full justify-center items-center mb-4 bg-orange-500`}>
-          <ActivityIndicator color="white" size="large" />
+      <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+        <View style={tw`items-center p-8`}>
+          <Ionicons name="home-outline" size={64} color="#9CA3AF" />
+          <Text style={tw`text-gray-600 text-lg mt-4`}>No farms available</Text>
+          <Text style={tw`text-gray-500 text-sm text-center mt-2`}>
+            Farms will appear here once they are registered in the system
+          </Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
+
   return (
-    <SafeAreaView style={tw`flex-1 bg-gray-50`}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={tw`pb-10`}
-      >
-        <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
-          {/* Enhanced Header */}
-          <View style={tw`pb-4`}>
-            <LinearGradient
-              colors={['#10B981', '#059669']}
-              style={tw` p-8 shadow-xl`}
-            >
-              <View style={tw`flex-row items-center justify-between mb-4`}>
-                <View style={tw`flex-1`}>
-                  <Text style={tw`text-white text-sm opacity-90`}>
-                    Farm Management
-                  </Text>
-                  <Text style={tw`text-white text-2xl font-bold`}>
-                    {currentFarm.name} 🚜
-                  </Text>
-                  <Text style={tw`text-green-100 text-sm mt-1`}>
-                    {currentFarm.location.address}
-                  </Text>
-                </View>
-                <DrawerButton />
-              </View>
-              
-              {/* Farm Stats */}
-              <View style={tw`bg-white bg-opacity-15 rounded-2xl p-6 mt-4`}>
-                <Text style={tw`text-white font-bold text-lg mb-4`}>Farm Overview</Text>
-                <View style={tw`flex-row justify-between`}>
-                  <View style={tw`items-center flex-1`}>
-                    <Text style={tw`text-white text-2xl font-bold`}>{totalChickens}</Text>
-                    <Text style={tw`text-green-100 text-xs font-medium`}>Total Birds</Text>
-                  </View>
-                  <View style={tw`items-center flex-1`}>
-                    <Text style={tw`text-green-200 text-2xl font-bold`}>{currentFarm.livestock.healthy}</Text>
-                    <Text style={tw`text-green-100 text-xs font-medium`}>Healthy</Text>
-                  </View>
-                  <View style={tw`items-center flex-1`}>
-                    <Text style={tw`text-yellow-200 text-2xl font-bold`}>{currentFarm.livestock.atRisk}</Text>
-                    <Text style={tw`text-green-100 text-xs font-medium`}>At Risk</Text>
-                  </View>
-                  <View style={tw`items-center flex-1`}>
-                    <Text style={tw`text-red-200 text-2xl font-bold`}>{currentFarm.livestock.sick}</Text>
-                    <Text style={tw`text-green-100 text-xs font-medium`}>Sick</Text>
-                  </View>
-                </View>
-              </View>
-            </LinearGradient>
-          </View>
-
-          <View style={tw`px-5`}>
-
-          {/* Notifications */}
-          {/* {notifications.length > 0 && (
-            <Animated.View
-              style={{
-                opacity: notificationAnim,
-                transform: [
-                  {
-                    translateY: notificationAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [10, 0],
-                    }),
-                  },
-                ],
-              }}
-            >
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={tw`p-2`}
-              >
-                {notifications.map((notification) => (
-                  <TouchableOpacity
-                    key={notification.id}
-                    style={tw`mr-3 p-3 w-96 bg-white rounded-xl border border-gray-100 shadow-sm flex-row items-center max-w-[${isPad ? '300px' : '260px'}]`}
-
-                  >
-                    <View
-                      style={tw`mr-3 p-2 rounded-full bg-${notification.type === 'alert' ? 'red-100' : 'blue-100'}`}
-                    >
-                      <Ionicons
-                        name={notification.type === 'alert' ? 'warning-outline' : 'information-circle-outline'}
-                        size={20}
-                        color={notification.type === 'alert' ? '#EF4444' : '#3B82F6'}
-                      />
-                    </View>
-                    <Text style={tw`flex-1 text-gray-800 font-medium text-sm`} numberOfLines={2}>
-                      {notification.message}
-                    </Text>
-                    <Ionicons name="chevron-forward" size={18} color="#6B7280" style={tw`ml-1`} />
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </Animated.View>
-          )} */}
-
-        
-          {/* Weather & Tools Row */}
-          <View style={tw`flex-row justify-between flex-1 py-2`}>
-            {/* Weather Preview */}
-            <View
-              style={[tw`flex mr-3  border border-gray-400 `]}
-            >
-              <TouchableOpacity
-                style={tw`bg-white p-4 h-full`}
-                onPress={() => handleNavigation('/weather-check' as any)}
-                activeOpacity={0.9}
-              >
-                <View style={tw`flex-row items-center justify-between mb-3`}>
-                  <Text style={tw`text-gray-800 font-semibold`}>Weather</Text>
-                  <Ionicons name={getWeatherIcon(weatherPreview.condition)} size={24} color="#EF4444" />
-                </View>
-                <View style={tw`items-center`}>
-                  <Text style={tw`text-3xl font-bold text-gray-800`}>{weatherPreview.temp}°</Text>
-                  <Text style={tw`text-gray-500 text-sm`}>{weatherPreview.humidity}% humidity</Text>
-                </View>
-              </TouchableOpacity>
+    <View style={tw`flex-1 bg-gray-50`}>
+      <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
+        {/* Header */}
+        <LinearGradient
+          colors={['#10B981', '#059669']}
+          style={tw`p-6 shadow-xl`}
+        >
+          <View style={tw`flex-row items-center justify-between mb-4`}>
+            <View style={tw`flex-1`}>
+              <Text style={tw`text-white text-sm opacity-90`}>
+                Farm Directory
+              </Text>
+              <Text style={tw`text-white text-2xl font-bold`}>
+                All Farms 🏡
+              </Text>
             </View>
-
-            {/* Stool Analysis Quick Access */}
-            <View
-              style={[tw`flex-1 border border-gray-400`]}
-            >
-              <TouchableOpacity
-                style={tw`bg-white p-4 h-full justify-between`}
-                onPress={() => handleNavigation('/bluetooth/ph-reader' as any)}
-                activeOpacity={0.9}
-              >
-                <View style={tw`flex-row items-center justify-between`}>
-                  <Text style={tw`text-gray-800 font-semibold`}>Quick Scan</Text>
-                  <Ionicons name="scan-outline" size={24} color="#EF4444" />
-                </View>
-                <View style={tw`bg-gray-500 rounded-xl p-3 mt-2 border border-gray-100`}>
-                  <Text style={tw`text-gray-800 text-xs text-center`}>Tap to analyze stool samples</Text>
-                </View>
-              </TouchableOpacity>
+            <DrawerButton />
+          </View>
+          
+          {/* Overall Stats */}
+          <View style={tw`bg-white bg-opacity-15 rounded-2xl p-4`}>
+            <View style={tw`flex-row justify-between`}>
+              <View style={tw`items-center flex-1`}>
+                <Text style={tw`text-white text-2xl font-bold`}>{stats.totalFarms}</Text>
+                <Text style={tw`text-green-100 text-xs font-medium`}>Total Farms</Text>
+              </View>
+              <View style={tw`items-center flex-1`}>
+                <Text style={tw`text-green-200 text-2xl font-bold`}>{stats.totalLivestock}</Text>
+                <Text style={tw`text-green-100 text-xs font-medium`}>Total Birds</Text>
+              </View>
+              <View style={tw`items-center flex-1`}>
+                <Text style={tw`text-green-200 text-2xl font-bold`}>{stats.healthPercentage}%</Text>
+                <Text style={tw`text-green-100 text-xs font-medium`}>Healthy</Text>
+              </View>
             </View>
           </View>
+        </LinearGradient>
 
-          {/* Health Monitoring Section */}
-          <View style={tw`mb-6 p-3`}>
-            <Text style={tw`text-2xl font-bold text-gray-900 mb-4`}>Health Tools</Text>
+        {/* Farm List */}
+        <FlatList
+          data={filteredFarms}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={tw`pb-6 pt-4`}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          renderItem={({ item: farm, index }) => {
+            const healthColor = getHealthStatusColor(farm.healthStatus);
+            const totalLivestock = farm.livestock.total;
+            const healthPercentage = totalLivestock > 0 ? Math.round((farm.livestock.healthy / totalLivestock) * 100) : 0;
 
-            {[
-              {
-                title: 'Stool Analysis',
-                description: 'Scan and analyze chicken stool samples',
-                icon: 'mic-circle-outline',
-                path: '/bluetooth/ph-reader',
-                bgColor: 'bg-purple-50',
-                iconColor: 'text-purple-600',
-                borderColor: 'border-purple-100',
-              },
-              {
-                title: 'Chat with AI',
-                description: 'Get smart recommendations from our AI assistant',
-                icon: 'chatbox-ellipses-outline',
-                path: '/general/ai',
-                bgColor: 'bg-blue-50',
-                iconColor: 'text-blue-600',
-                borderColor: 'border-blue-100',
-              },
-              {
-                title: 'Find Pharmacies',
-                description: 'Locate veterinary pharmacies nearby',
-                icon: 'location-outline',
-                path: '/pharmacy',
-                bgColor: 'bg-green-50',
-                iconColor: 'text-green-600',
-                borderColor: 'border-green-100',
-              },
-            ].map((item, index) => (
+            return (
               <Animated.View
-                key={item.title}
                 style={[
-                  tw`mb-3`,
+                  tw`mb-4 mx-4`,
                   {
                     opacity: cardAnim,
                     transform: [
@@ -386,79 +227,103 @@ export default function FarmDataScreen() {
                 ]}
               >
                 <TouchableOpacity
-                  style={tw`flex-row items-center p-4 bg-white rounded-2xl shadow-sm border border-gray-100`}
-                  onPress={() => handleNavigation(item.path)}
+                  style={tw`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden`}
+                  onPress={() => handleFarmPress(farm)}
                   activeOpacity={0.7}
                 >
-                  <View style={tw`${item.bgColor} p-3 rounded-xl mr-4 ${item.borderColor} border`}>
-                    <Ionicons name={item.icon as any} size={24} color={item.iconColor.replace('text-', '#').replace('purple-600', '#9333EA').replace('blue-600', '#2563EB').replace('green-600', '#059669')} />
+                  {/* Farm Header */}
+                  <View style={tw`p-4 border-b border-gray-100`}>
+                    <View style={tw`flex-row justify-between items-start mb-2`}>
+                      <View style={tw`flex-1`}>
+                        <Text style={tw`text-xl font-bold text-gray-900`}>{farm.name}</Text>
+                        <Text style={tw`text-gray-600 text-sm mt-1`}>{farm.location.address}</Text>
+                      </View>
+                      <View style={tw`${healthColor.bg} ${healthColor.border} border px-3 py-1 rounded-full`}>
+                        <Text style={tw`${healthColor.text} text-xs font-medium`}>{farm.healthStatus}</Text>
+                      </View>
+                    </View>
+                    <View style={tw`flex-row items-center`}>
+                      <Ionicons name="person-outline" size={16} color="#6B7280" />
+                      <Text style={tw`text-gray-600 text-sm ml-1`}>Owner: {farm.owner.name}</Text>
+                    </View>
                   </View>
-                  <View style={tw`flex-1`}>
-                    <Text style={tw`text-gray-900 font-semibold text-lg`}>{item.title}</Text>
-                    <Text style={tw`text-gray-500 text-sm`}>{item.description}</Text>
+
+                  {/* Farm Stats */}
+                  <View style={tw`p-4`}>
+                    <View style={tw`flex-row justify-between mb-3`}>
+                      <View style={tw`items-center flex-1`}>
+                        <Text style={tw`text-2xl font-bold text-gray-900`}>{totalLivestock}</Text>
+                        <Text style={tw`text-gray-500 text-xs`}>Total Birds</Text>
+                      </View>
+                      <View style={tw`items-center flex-1`}>
+                        <Text style={tw`text-2xl font-bold text-green-600`}>{farm.livestock.healthy}</Text>
+                        <Text style={tw`text-gray-500 text-xs`}>Healthy</Text>
+                      </View>
+                      <View style={tw`items-center flex-1`}>
+                        <Text style={tw`text-2xl font-bold text-yellow-600`}>{farm.livestock.atRisk}</Text>
+                        <Text style={tw`text-gray-500 text-xs`}>At Risk</Text>
+                      </View>
+                      <View style={tw`items-center flex-1`}>
+                        <Text style={tw`text-2xl font-bold text-red-600`}>{farm.livestock.sick}</Text>
+                        <Text style={tw`text-gray-500 text-xs`}>Sick</Text>
+                      </View>
+                    </View>
+
+                    {/* Health Progress Bar */}
+                    <View style={tw`mt-3`}>
+                      <View style={tw`flex-row justify-between items-center mb-2`}>
+                        <Text style={tw`text-gray-700 font-medium text-sm`}>Overall Health</Text>
+                        <Text style={tw`text-gray-600 text-sm`}>{healthPercentage}%</Text>
+                      </View>
+                      <View style={tw`h-2 bg-gray-200 rounded-full overflow-hidden`}>
+                        <View 
+                          style={[
+                            tw`h-full rounded-full`,
+                            { 
+                              width: `${healthPercentage}%`,
+                              backgroundColor: healthPercentage >= 80 ? '#10B981' : healthPercentage >= 60 ? '#F59E0B' : '#EF4444'
+                            }
+                          ]} 
+                        />
+                      </View>
+                    </View>
                   </View>
-                  <Ionicons name="chevron-forward" size={22} color="#6B7280" />
+
+                  {/* Action Row */}
+                  <View style={tw`flex-row border-t border-gray-100`}>
+                    <TouchableOpacity 
+                      style={tw`flex-1 p-3 items-center border-r border-gray-100`}
+                      onPress={() => router.push('/communication/messages')}
+                    >
+                      <Ionicons name="chatbubble-outline" size={20} color="#3B82F6" />
+                      <Text style={tw`text-blue-600 text-xs mt-1`}>Message</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={tw`flex-1 p-3 items-center border-r border-gray-100`}
+                      onPress={() => router.push('/communication/schedule-request')}
+                    >
+                      <Ionicons name="calendar-outline" size={20} color="#059669" />
+                      <Text style={tw`text-green-600 text-xs mt-1`}>Schedule</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={tw`flex-1 p-3 items-center`}
+                      onPress={() => handleFarmPress(farm)}
+                    >
+                      <Ionicons name="eye-outline" size={20} color="#6B7280" />
+                      <Text style={tw`text-gray-600 text-xs mt-1`}>View</Text>
+                    </TouchableOpacity>
+                  </View>
                 </TouchableOpacity>
               </Animated.View>
-            ))}
-          </View>
-
-          {/* Recent Activity Section */}
-          <View style={tw`mb-6`}>
-            <View style={tw`flex-row justify-between items-center mb-4`}>
-              <Text style={tw`text-2xl font-bold text-gray-900`}>Recent Activity</Text>
-              <TouchableOpacity>
-                <Text style={tw`font-medium text-[#EF4444]`}>See all</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={tw`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden`}>
-              {[
-                {
-                  title: 'Added new chicken',
-                  time: '2 hours ago',
-                  icon: 'add-circle-outline',
-                  iconBg: 'bg-green-100',
-                  iconColor: '#10B981',
-                },
-                {
-                  title: 'Updated feeding schedule',
-                  time: 'Yesterday',
-                  icon: 'calendar-outline',
-                  iconBg: 'bg-blue-100',
-                  iconColor: '#3B82F6',
-                },
-                {
-                  title: 'Detected sick chicken',
-                  time: '2 days ago',
-                  icon: 'medkit-outline',
-                  iconBg: 'bg-red-100',
-                  iconColor: '#EF4444',
-                },
-              ].map((activity, index, array) => (
-                <View key={activity.title}>
-                  <View style={tw`flex-row items-center p-4`}>
-                    <View style={tw`${activity.iconBg} p-2 rounded-full mr-3`}>
-                      <Ionicons name={activity.icon as any} size={18} color={activity.iconColor} />
-                    </View>
-                    <View style={tw`flex-1`}>
-                      <Text style={tw`text-gray-900 font-medium`}>{activity.title}</Text>
-                      <Text style={tw`text-gray-500 text-xs`}>{activity.time}</Text>
-                    </View>
-                  </View>
-                  {index < array.length - 1 && <View style={tw`h-px bg-gray-100 ml-12`} />}
-                </View>
-              ))}
-            </View>
-          </View>
-          </View>
-        </Animated.View>
-      </ScrollView>
+            );
+          }}
+        />
+      </Animated.View>
       
       <CustomDrawer
         isVisible={isDrawerVisible}
         onClose={() => setIsDrawerVisible(false)}
       />
-    </SafeAreaView>
+    </View>
   );
 }

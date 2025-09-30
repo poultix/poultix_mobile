@@ -7,7 +7,6 @@ import {
   TextInput,
   Alert,
   Animated,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
@@ -91,7 +90,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+    <View style={tw`flex-1 bg-gray-50`}>
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
         {/* Header */}
         <View style={tw` pb-4`}>
@@ -254,6 +253,6 @@ export default function ProfileScreen() {
           </View>
         </ScrollView>
       </Animated.View>
-    </SafeAreaView>
+    </View>
   );
 }

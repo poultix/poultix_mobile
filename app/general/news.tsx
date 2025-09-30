@@ -23,7 +23,7 @@ export default function NewsScreen() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   
   // Use new contexts
-  const { news, currentNews, setCurrentNews, isLoading } = useNews();
+  const { news, currentNews, setCurrentNews, loading } = useNews();
   const { currentUser } = useAuth();
   
   const fadeAnim = useRef(new Animated.Value(0)).current;

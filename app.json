@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "poultix_dev",
-    "slug": "poultix_dev",
+    "name": "poultix_mobile",
+    "slug": "poultix_mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
-    "scheme": "poultixdev",
+    "scheme": "poultixmobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -15,7 +15,7 @@
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/logo.png",
-        "backgroundImage": "./assets/logo.png",
+        "backgroundImage": "./assets/logo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -38,7 +38,7 @@
           }
         }
       ],
-       [
+      [
         "react-native-ble-plx",
         {
           "isBackgroundEnabled": true,

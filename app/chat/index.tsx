@@ -6,7 +6,6 @@ import {
     ScrollView,
     TextInput,
     Animated,
-    Image,
 } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -22,16 +21,16 @@ import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
 import { User, UserRole } from '@/types';
 
-export default function UserDirectoryScreen() {
+export default function ChatScreen() {
     const { currentUser } = useAuth();
     const { users, loading } = useUsers();
     const { messages, onlineUsers, setCurrentChat } = useChat();
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
-    
+
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTab, setSelectedTab] = useState('ALL');
     const [filteredUsers, setFilteredUsers] = useState(users);
-    
+
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const headerAnim = useRef(new Animated.Value(-50)).current;
 
@@ -105,33 +104,30 @@ export default function UserDirectoryScreen() {
     };
 
     const handleUserPress = (user: User) => {
-        // Set the current chat user in context
         setCurrentChat(user);
-        
-        // Navigate to chat with the user's ID as chatId
-        router.push(`/communication/chat?chatId=${user.id}`);
+        router.push(`/chat/currentChat`);
     };
 
     const getLastMessage = (userId: string) => {
         // Filter messages between current user and this user
-        const userMessages = messages.filter(msg => 
+        const userMessages = messages.filter(msg =>
             (msg.sender.id === currentUser?.id && msg.receiver.id === userId) ||
             (msg.sender.id === userId && msg.receiver.id === currentUser?.id)
         );
-        
+
         // Return the most recent message
         return userMessages.length > 0 ? userMessages[userMessages.length - 1] : null;
     };
 
     const getOnlineStatus = (userId: string) => {
-        return onlineUsers.includes(userId);
+        return onlineUsers.has(userId);
     };
 
     const getLastSeen = (userId: string) => {
         // Simulate last seen - in real app this would come from server
         const lastSeenTimes: { [key: string]: string } = {
             'farmer_001': 'Online',
-            'vet_001': 'Online', 
+            'vet_001': 'Online',
             'admin_001': 'Last seen 2 hours ago'
         };
         return lastSeenTimes[userId] || 'Last seen recently';
@@ -151,9 +147,9 @@ export default function UserDirectoryScreen() {
     }
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+        <View style={tw`flex-1 bg-gray-50`}>
             <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
-            
+
             <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
                 {/* Header */}
                 <Animated.View style={[tw`pb-4`, { transform: [{ translateY: headerAnim }] }]}>
@@ -168,9 +164,9 @@ export default function UserDirectoryScreen() {
                             >
                                 <Ionicons name="arrow-back-outline" size={24} color="white" />
                             </TouchableOpacity>
-                            
+
                             <Text style={tw`text-white text-xl font-bold`}>Contacts</Text>
-                            
+
                             <DrawerButton />
                         </View>
 
@@ -225,44 +221,40 @@ export default function UserDirectoryScreen() {
                     </View>
 
                     {/* Filter Tabs */}
-                    <ScrollView 
-                        horizontal 
+                    <ScrollView
+                        horizontal
                         showsHorizontalScrollIndicator={false}
                         style={tw`mb-6`}
                     >
                         {tabs.map((tab) => (
                             <TouchableOpacity
                                 key={tab.key}
-                                style={tw`mr-3 px-4 py-3 rounded-2xl flex-row items-center ${
-                                    selectedTab === tab.key 
-                                        ? 'bg-blue-500' 
-                                        : 'bg-white border border-gray-200'
-                                }`}
+                                style={tw`mr-3 px-4 py-3 rounded-2xl flex-row items-center ${selectedTab === tab.key
+                                    ? 'bg-blue-500'
+                                    : 'bg-white border border-gray-200'
+                                    }`}
                                 onPress={() => setSelectedTab(tab.key)}
                             >
-                                <Ionicons 
-                                    name={tab.icon as any} 
-                                    size={18} 
-                                    color={selectedTab === tab.key ? 'white' : tab.color} 
+                                <Ionicons
+                                    name={tab.icon as any}
+                                    size={18}
+                                    color={selectedTab === tab.key ? 'white' : tab.color}
                                     style={tw`mr-2`}
                                 />
-                                <Text style={tw`${
-                                    selectedTab === tab.key 
-                                        ? 'text-white' 
-                                        : 'text-gray-600'
-                                } font-medium mr-1`}>
+                                <Text style={tw`${selectedTab === tab.key
+                                    ? 'text-white'
+                                    : 'text-gray-600'
+                                    } font-medium mr-1`}>
                                     {tab.label}
                                 </Text>
-                                <View style={tw`${
-                                    selectedTab === tab.key 
-                                        ? 'bg-white bg-opacity-20' 
-                                        : 'bg-gray-100'
-                                } px-2 py-1 rounded-full`}>
-                                    <Text style={tw`${
-                                        selectedTab === tab.key 
-                                            ? 'text-white' 
-                                            : 'text-gray-600'
-                                    } text-xs font-bold`}>
+                                <View style={tw`${selectedTab === tab.key
+                                    ? 'bg-white bg-opacity-20'
+                                    : 'bg-gray-100'
+                                    } px-2 py-1 rounded-full`}>
+                                    <Text style={tw`${selectedTab === tab.key
+                                        ? 'text-white'
+                                        : 'text-gray-600'
+                                        } text-xs font-bold`}>
                                         {getTabCount(tab.key)}
                                     </Text>
                                 </View>
@@ -280,41 +272,40 @@ export default function UserDirectoryScreen() {
                         filteredUsers.map((user, index) => (
                             <TouchableOpacity
                                 key={user.id}
-                                style={tw`bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4`}
+                                style={tw`bg-white rounded-2xl shadow-sm border border-gray-100 p-3 mb-4`}
                                 onPress={() => handleUserPress(user)}
                                 activeOpacity={0.7}
                             >
-                                <View style={tw`flex-row items-center`}>
+                                <View style={tw`flex-row items-center overflow-hidden relative`}>
                                     {/* Avatar */}
-                                    <View style={[tw`w-16 h-16 rounded-full items-center justify-center mr-4`, 
-                                                  { backgroundColor: getRoleColor(user.role) + '20' }]}>
-                                        <Ionicons 
-                                            name={getRoleIcon(user.role)} 
-                                            size={24} 
-                                            color={getRoleColor(user.role)} 
+                                    <View style={[tw`w-16 h-16 rounded-full items-center justify-center mr-4`,
+                                    { backgroundColor: getRoleColor(user.role) + '20' }]}>
+                                        <Ionicons
+                                            name={getRoleIcon(user.role)}
+                                            size={24}
+                                            color={getRoleColor(user.role)}
                                         />
+                                        {getOnlineStatus(user.id) && <View className='absolute bottom-4 -right-0 w-3 h-3 rounded-full bg-green-400' />}
                                     </View>
 
                                     {/* User Info */}
-                                    <View style={tw`flex-1`}>
+                                    <View style={tw`flex-1 `}>
                                         <View style={tw`flex-row items-center justify-between mb-1`}>
-                                            <View style={tw`flex-row items-center flex-1`}>
-                                                <Text style={tw`text-lg font-bold text-gray-800 mr-2`}>
+                                            <View style={tw`flex-row items-center `}>
+                                                <Text style={tw` font-bold text-gray-800 m-2`}>
                                                     {user.name}
                                                 </Text>
-                                                <View style={[tw`px-2 py-1 rounded-full`, 
-                                                              { backgroundColor: getRoleColor(user.role) + '20' }]}>
-                                                    <Text style={[tw`text-xs font-semibold capitalize`, 
-                                                                  { color: getRoleColor(user.role) }]}>
+                                                <View style={[tw`px-2 py-1 rounded-full`,
+                                                { backgroundColor: getRoleColor(user.role) + '20' }]}>
+                                                    <Text style={[tw`text-xs font-semibold capitalize`,
+                                                    { color: getRoleColor(user.role) }]}>
                                                         {user.role.toLowerCase()}
                                                     </Text>
                                                 </View>
                                             </View>
-                                            <Text style={tw`text-gray-400 text-xs`}>
-                                                {getLastSeen(user.id)}
-                                            </Text>
+
                                         </View>
-                                        
+
                                         {/* Last Message Preview */}
                                         {(() => {
                                             const lastMsg = getLastMessage(user.id);
@@ -328,27 +319,10 @@ export default function UserDirectoryScreen() {
                                                 </Text>
                                             );
                                         })()}
-                                        
+
                                         <View style={tw`flex-row items-center`}>
                                             <Ionicons name="location-outline" size={14} color="#6B7280" style={tw`mr-1`} />
                                             <Text style={tw`text-gray-500 text-sm`}>{user.location}</Text>
-                                        </View>
-                                    </View>
-
-                                    {/* Online Status & Chat Icon */}
-                                    <View style={tw`items-end justify-center`}>
-                                        <View style={tw`flex-row items-center mb-3`}>
-                                            <View style={tw`w-3 h-3 rounded-full mr-2 ${
-                                                getOnlineStatus(user.id) ? 'bg-green-400' : 'bg-gray-400'
-                                            }`} />
-                                            <Text style={tw`text-xs ${
-                                                getOnlineStatus(user.id) ? 'text-green-600' : 'text-gray-500'
-                                            } font-medium`}>
-                                                {getOnlineStatus(user.id) ? 'Online' : 'Offline'}
-                                            </Text>
-                                        </View>
-                                        <View style={tw`bg-blue-100 p-2 rounded-full`}>
-                                            <Ionicons name="chatbubble-outline" size={18} color="#3B82F6" />
                                         </View>
                                     </View>
                                 </View>
@@ -357,6 +331,6 @@ export default function UserDirectoryScreen() {
                     )}
                 </ScrollView>
             </Animated.View>
-        </SafeAreaView>
+        </View>
     );
 }

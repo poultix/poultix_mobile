@@ -28,7 +28,7 @@ export default function ScheduleManagementScreen() {
     
     // Use new contexts
     const { currentUser } = useAuth();
-    const { schedules, currentSchedule, setCurrentSchedule, isLoading } = useSchedules();
+    const { schedules, currentSchedule, setCurrentSchedule, loading } = useSchedules();
     const { updateSchedule } = useScheduleActions();
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -45,9 +45,9 @@ export default function ScheduleManagementScreen() {
     const filteredSchedules = schedules.filter(schedule => {
         switch (selectedTab) {
             case 'pending':
-                return schedule.status === ScheduleStatus.PENDING;
+                return schedule.status === ScheduleStatus.IN_PROGRESS;
             case 'approved':
-                return schedule.status === ScheduleStatus.CONFIRMED;
+                return schedule.status === ScheduleStatus.COMPLETED;
             case 'completed':
                 return schedule.status === ScheduleStatus.COMPLETED;
             default:
@@ -57,9 +57,8 @@ export default function ScheduleManagementScreen() {
 
     const handleApprove = async (schedule: Schedule) => {
         try {
-            await updateSchedule({
-                ...schedule,
-                status: ScheduleStatus.CONFIRMED
+            await updateSchedule(schedule.id, {
+                status: ScheduleStatus.COMPLETED
             });
             Alert.alert('Success', 'Schedule request approved!');
         } catch (error) {
@@ -70,8 +69,7 @@ export default function ScheduleManagementScreen() {
 
     const handleReject = async (schedule: Schedule) => {
         try {
-            await updateSchedule({
-                ...schedule,
+            await updateSchedule(schedule.id, {
                 status: ScheduleStatus.CANCELLED
             });
             Alert.alert('Success', 'Schedule request rejected!');
@@ -95,7 +93,7 @@ export default function ScheduleManagementScreen() {
         }
     };
 
-    if (isLoading || !currentUser) {
+    if (loading || !currentUser) {
         return (
             <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600`}>Loading schedule requests...</Text>
@@ -195,7 +193,7 @@ export default function ScheduleManagementScreen() {
                                 <View style={tw`flex-row items-center justify-between pt-3 border-t border-gray-100`}>
                                     <View>
                                         <Text style={tw`text-blue-600 font-medium`}>{new Date(schedule.scheduledDate).toLocaleDateString()}</Text>
-                                        <Text style={tw`text-gray-500 text-sm`}>{schedule.scheduledTime || 'TBD'}</Text>
+                                        <Text style={tw`text-gray-500 text-sm`}>{schedule.scheduledDate.toLocaleDateString()|| 'TBD'}</Text>
                                     </View>
                                     
                                     {selectedTab === 'pending' && (

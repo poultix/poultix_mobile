@@ -26,7 +26,7 @@ import { usePharmacies } from '@/contexts/PharmacyContext';
 
 export default function DataManagementScreen() {
   const { currentUser } = useAuth();
-  const { isLoading: adminLoading } = useAdmin();
+  const { loading: adminLoading } = useAdmin();
   const { news } = useNews();
   const { farms } = useFarms();
   const { users } = useUsers();

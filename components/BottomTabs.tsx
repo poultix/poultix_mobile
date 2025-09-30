@@ -34,7 +34,7 @@ const tabItems: TabItem[] = [
         label: 'Chat',
         icon: 'chatbubbles-outline',
         activeIcon: 'chatbubbles',
-        route: '/user/directory',
+        route: '/chat',
         color: '#10B981'
     },
     {
@@ -71,7 +71,7 @@ export default function BottomTabs({ currentRoute, style }: BottomTabsProps) {
         // Handle different routing based on tab
         switch (tab.key) {
             case 'home':
-                // Route to appropriate dashboard based on user role
+                
                 if (currentUser?.role === UserRole.ADMIN) {
                     router.push('/dashboard/admin-dashboard');
                 } else if (currentUser?.role === UserRole.VETERINARY) {
@@ -81,7 +81,7 @@ export default function BottomTabs({ currentRoute, style }: BottomTabsProps) {
                 }
                 break;
             case 'chat':
-                router.push('/communication/messages');
+                router.push('/chat');
                 break;
             case 'farms':
                 router.push('/farm');

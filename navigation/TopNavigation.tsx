@@ -1,16 +1,12 @@
-import { Alert, Text, TouchableOpacity, View, Animated, Dimensions } from "react-native";
+import { Alert, Text, TouchableOpacity, View, Animated } from "react-native";
 import tw from 'twrnc'
 import { Ionicons } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useRef, useEffect } from 'react';
 import { useDrawer } from '@/contexts/DrawerContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAuthActions } from '@/hooks/useAuthActions';
-
-const { width } = Dimensions.get('window');
 
 const getScreenTitle = (pathname: string): string => {
     switch (pathname) {
@@ -41,7 +37,6 @@ const getScreenTitle = (pathname: string): string => {
         case '/admin/data-management':
             return 'Data Management';
         default:
-            // Extract screen name from path
             const screenName = pathname.split('/').pop() || 'Screen';
             return screenName.charAt(0).toUpperCase() + screenName.slice(1).replace('-', ' ');
     }
@@ -83,8 +78,7 @@ const getScreenIcon = (pathname: string): keyof typeof Ionicons.glyphMap => {
 export default function TopNavigation() {
     const pathname = usePathname()
     const { toggleDrawer } = useDrawer()
-    const { currentUser } = useAuth()
-    const { logout } = useAuthActions()
+    const { currentUser,logout } = useAuth()
     const fadeAnim = useRef(new Animated.Value(0)).current
     const slideAnim = useRef(new Animated.Value(-20)).current
     

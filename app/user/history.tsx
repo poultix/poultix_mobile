@@ -32,13 +32,16 @@ export default function HistoryScreen() {
 
   if (!currentUser) {
     return (
-      <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+      <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <Text style={tw`text-gray-600`}>Please log in to view history</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
-  const userSchedules = getSchedulesByUser(currentUser.id);
+  // Filter schedules for current user
+  const userSchedules = schedules.filter(schedule => 
+    schedule.farmer.id === currentUser.id || schedule.veterinary.id === currentUser.id
+  );
   
   const filteredSchedules = selectedFilter === 'all' 
     ? userSchedules 
@@ -74,11 +77,12 @@ export default function HistoryScreen() {
     { key: 'all', label: 'All' },
     { key: 'completed', label: 'Completed' },
     { key: 'scheduled', label: 'Scheduled' },
+    { key: 'in_progress', label: 'In Progress' },
     { key: 'cancelled', label: 'Cancelled' },
   ];
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+    <View style={tw`flex-1 bg-gray-50`}>
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
         {/* Header */}
         <View style={tw` pb-4`}>
@@ -151,14 +155,13 @@ export default function HistoryScreen() {
             </View>
           ) : (
             sortedSchedules.map((schedule, index) => {
-              const relatedData = getRelatedData('schedule', schedule.id);
               const statusColors = getStatusColor(schedule.status);
               
               return (
                 <View key={schedule.id} style={tw`mb-4`}>
                   <TouchableOpacity
                     style={tw`bg-white rounded-2xl p-5 shadow-sm`}
-                    onPress={() => router.push(`/schedule-detail/${schedule.id}` )}
+                    onPress={() => router.push(`/communication/schedule-detail`)}
                   >
                     <View style={tw`flex-row items-start justify-between mb-3`}>
                       <View style={tw`flex-1`}>
@@ -177,21 +180,15 @@ export default function HistoryScreen() {
                             📅 {schedule.scheduledDate.toLocaleDateString()} • {schedule.startTime}-{schedule.endTime}
                           </Text>
                           
-                          {relatedData?.farm && (
+                          {currentUser.role === 'FARMER' && (
                             <Text style={tw`text-gray-500 text-sm mb-1`}>
-                              🏡 {relatedData.farm.name}
+                              👨‍⚕️ {schedule.veterinary.name}
                             </Text>
                           )}
                           
-                          {state.currentUser.role === 'farmer' && relatedData?.veterinary && (
+                          {currentUser.role === 'VETERINARY' && (
                             <Text style={tw`text-gray-500 text-sm mb-1`}>
-                              👨‍⚕️ {relatedData.veterinary.name}
-                            </Text>
-                          )}
-                          
-                          {state.currentUser.role === 'veterinary' && relatedData?.farmer && (
-                            <Text style={tw`text-gray-500 text-sm mb-1`}>
-                              👨‍🌾 {relatedData.farmer.name}
+                              👨‍🌾 {schedule.farmer.name}
                             </Text>
                           )}
                         </View>
@@ -260,6 +257,6 @@ export default function HistoryScreen() {
           <View style={tw`h-6`} />
         </ScrollView>
       </Animated.View>
-    </SafeAreaView>
+    </View>
   );
 }

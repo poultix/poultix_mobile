@@ -17,7 +17,7 @@ export interface ScheduleActionsType {
 
 export const useScheduleActions = (): ScheduleActionsType => {
   const loadSchedules = async (): Promise<Schedule[]> => {
-    return await MockDataService.getSchedules('');
+    return await MockDataService.getSchedules();
   };
 
   const createSchedule = async (scheduleData: Omit<Schedule, 'id' | 'createdAt' | 'updatedAt'>): Promise<Schedule> => {

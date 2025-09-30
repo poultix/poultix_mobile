@@ -34,8 +34,8 @@ export default function FarmerScreen() {
     
     // Use new contexts
     const { currentUser } = useAuth();
-    const { farms, currentFarm, setCurrentFarm, isLoading: farmsLoading } = useFarms();
-    const { schedules, isLoading: schedulesLoading } = useSchedules();
+    const { farms, currentFarm, setCurrentFarm, loading: farmsLoading } = useFarms();
+    const { schedules, loading: schedulesLoading } = useSchedules();
     const { getUsersByRole } = useUserActions();
     
     const [isLoading, setIsLoading] = useState(true);

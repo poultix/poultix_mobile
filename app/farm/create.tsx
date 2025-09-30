@@ -11,22 +11,23 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
 import { router } from 'expo-router';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
+import { FarmStatus } from '@/types/farm';
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import { useFarmActions } from '@/hooks/useFarmActions';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function CreateFarmScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const { currentUser } = useAuth();
-  const { isLoading } = useFarms();
+  const { loading } = useFarms();
   const { createFarm } = useFarmActions();
   
   // Form state
@@ -78,26 +79,30 @@ export default function CreateFarmScreen() {
       
       await createFarm({
         name: farmName.trim(),
-        description: description.trim(),
+        owner: currentUser,
         location: {
           address: address.trim(),
-          city: city.trim(),
-          state: state.trim(),
-          zipCode: zipCode.trim(),
-          coordinates: { latitude: 0, longitude: 0 }
+          coordinates: { latitude: 0, longitude: 0 },
+          district: city.trim() || 'Unknown District',
+          sector: state.trim() || 'Unknown Sector'
         },
+        size: total, // Using total chickens as farm size
+        establishedDate: new Date(),
         livestock: {
           total,
           healthy,
           sick,
-          atRisk
+          atRisk,
+          breeds: ['Local Breed'] // Default breed
         },
         facilities: {
           coops: 1,
-          feedStorage: 1,
-          waterSystems: 1
+          feedStorage: true,
+          waterSystem: 'Manual',
+          electricityAccess: false
         },
-        owner: currentUser,
+        healthStatus: FarmStatus.GOOD, // Default status
+        certifications: [],
         isActive: true
       });
 
@@ -114,7 +119,7 @@ export default function CreateFarmScreen() {
     }
   };
 
-  if (isLoading || !currentUser) {
+  if (loading || !currentUser) {
     return (
       <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <Text style={tw`text-gray-600 text-lg`}>Loading...</Text>
@@ -123,7 +128,7 @@ export default function CreateFarmScreen() {
   }
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+    <View style={tw`flex-1 bg-gray-50`}>
       <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
       
       <KeyboardAvoidingView 
@@ -132,10 +137,10 @@ export default function CreateFarmScreen() {
       >
         <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
           {/* Header */}
-          <View style={tw`px-4 pt-2 pb-4`}>
+          <View style={tw` pb-4`}>
             <LinearGradient
               colors={['#10B981', '#059669']}
-              style={tw`rounded-3xl p-6 shadow-xl`}
+              style={tw`p-6 shadow-xl`}
             >
               <View style={tw`flex-row items-center justify-between`}>
                 <TouchableOpacity
@@ -293,6 +298,6 @@ export default function CreateFarmScreen() {
           </ScrollView>
         </Animated.View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }

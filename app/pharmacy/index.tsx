@@ -42,7 +42,7 @@ const PharmaciesScreen = () => {
     const mapRef = useRef<MapView>(null);
 
     // Use new contexts
-    const { pharmacies, currentPharmacy, setCurrentPharmacy, isLoading } = usePharmacies();
+    const { pharmacies, currentPharmacy, setCurrentPharmacy, loading } = usePharmacies();
     const { getPharmaciesByDistance, getNearbyPharmacies } = usePharmacyActions();
 
     // Animations

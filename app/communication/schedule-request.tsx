@@ -69,13 +69,16 @@ export default function ScheduleRequestScreen() {
             await createSchedule({
                 title: `Veterinary Visit - ${reason}`,
                 description: notes || reason,
-                type: ScheduleType.VETERINARY_VISIT,
+                type: ScheduleType.CONSULTATION,
                 priority: urgency,
                 scheduledDate: new Date(requestedDate),
-                scheduledTime: preferredTime,
-                farmerId: currentUser.id,
-                veterinaryId: selectedVet.id,
-                notes: notes
+                startTime: preferredTime || '09:00',
+                endTime: preferredTime || '10:00',
+                farmer: currentUser,
+                veterinary: selectedVet,
+                status: ScheduleStatus.SCHEDULED,
+                notes: notes,
+                createdBy: currentUser
             });
 
             Alert.alert(
@@ -91,7 +94,7 @@ export default function ScheduleRequestScreen() {
         }
     };
 
-    if (isLoading || !currentUser) {
+    if (loading || !currentUser) {
         return (
             <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Loading...</Text>

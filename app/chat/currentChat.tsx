@@ -6,7 +6,6 @@ import {
     ScrollView,
     TextInput,
     KeyboardAvoidingView,
-    Platform,
     Alert,
     Animated,
 } from 'react-native';
@@ -14,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router} from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
 import { useUsers } from '@/contexts/UserContext';
@@ -25,9 +24,9 @@ import { useDrawer } from '@/contexts/DrawerContext';
 import { Message, MessageType, MessageStatus } from '@/types';
 
 export default function ChatScreen() {
-    const { chatId } = useLocalSearchParams();
     const { currentUser } = useAuth();
     const { users } = useUsers();
+    const { currentChat } = useChat();
     const { messages, typingStatuses, onlineUsers } = useChat();
     const { sendMessage, markMessagesAsRead, setTyping, addReaction, editMessage, removeMessage } = useChatActions();
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
@@ -43,35 +42,24 @@ export default function ChatScreen() {
     const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(0);
 
     // Get current chat info from context
-    const { currentChat } = useChat();
+
     const chatMessages = messages.filter(msg =>
-        (msg.sender.id === currentUser?.id && msg.receiver.id === chatId) ||
-        (msg.sender.id === chatId && msg.receiver.id === currentUser?.id)
+        (msg.sender.id === currentUser?.id && msg.receiver.id === currentChat?.id) ||
+        (msg.sender.id === currentChat?.id && msg.receiver.id === currentUser?.id)
     );
-    const chatTyping = typingStatuses.filter(t => t.chatId === chatId && t.userId !== currentUser?.id);
+    const chatTyping = typingStatuses.filter(t => t.chatId === currentChat?.id && t.userId !== currentUser?.id);
 
     // Find the other user based on chatId
-    const otherUser = users.find(u => u.id === chatId);
+    const otherUser = users.find(u => u.id === currentChat?.id);
 
     useEffect(() => {
-        // Set the current chat user in context if needed
-        // This is a simplified approach since the current ChatContext structure is limited
-        console.log('Chat initialized with user:', otherUser?.name);
-    }, [chatId, otherUser]);
 
-    // Check if we have a valid chat scenario
+    }, [currentChat, otherUser]);
+
+
     const isValidChatScenario = () => {
-        return !!(chatId && currentUser && otherUser);
+        return !!(currentChat?.id && currentUser && otherUser);
     };
-
-    // Debug info
-    console.log('Chat Screen Debug:', {
-        chatId,
-        currentUserId: currentUser?.id,
-        otherUserId: otherUser?.id,
-        messagesCount: chatMessages.length,
-        isValidScenario: isValidChatScenario()
-    });
 
     useEffect(() => {
         Animated.timing(fadeAnim, {
@@ -88,10 +76,10 @@ export default function ChatScreen() {
                 }
             });
         }
-    }, [chatId, currentUser]);
+    }, [currentChat, currentUser]);
 
     useEffect(() => {
-        // Auto-scroll to bottom when new messages arrive
+
         scrollViewRef.current?.scrollToEnd({ animated: true });
     }, [chatMessages.length]);
 
@@ -110,16 +98,16 @@ export default function ChatScreen() {
         setIsTyping(false);
 
         if (currentUser) {
-            setTyping(chatId as string, currentUser.id, currentUser.name, false);
+            setTyping(currentChat?.id as string, currentUser.id, currentUser.name, false);
         }
     };
 
     const handleTyping = (text: string) => {
         setMessageText(text);
 
-        if (!isTyping && text.length > 0 && currentUser && chatId) {
+        if (!isTyping && text.length > 0 && currentUser && currentChat?.id) {
             setIsTyping(true);
-            setTyping(chatId as string, currentUser.id, currentUser.name, true);
+            setTyping(currentChat?.id as string, currentUser.id, currentUser.name, true);
         }
 
         // Clear previous timeout
@@ -130,8 +118,8 @@ export default function ChatScreen() {
         // Set new timeout to stop typing indicator
         typingTimeoutRef.current = setTimeout(() => {
             setIsTyping(false);
-            if (currentUser && chatId) {
-                setTyping(chatId as string, currentUser.id, currentUser.name, false);
+            if (currentUser && currentChat?.id) {
+                setTyping(currentChat?.id as string, currentUser.id, currentUser.name, false);
             }
         }, 2000);
     };
@@ -200,7 +188,7 @@ export default function ChatScreen() {
         }).format(date);
     };
 
-    const isOnline = (userId: string) => onlineUsers.includes(userId);
+    const isOnline = (userId: string) => onlineUsers.has(userId);
 
     if (!isValidChatScenario()) {
         return (
@@ -211,17 +199,17 @@ export default function ChatScreen() {
     }
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-gray-50 pb-5`}>
+        <View style={tw`flex-1 bg-gray-50 pb-5`}>
             <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
 
             <KeyboardAvoidingView
                 style={tw`flex-1`}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                behavior={'padding'}
             >
                 {/* Header */}
                 <LinearGradient
                     colors={['#3B82F6', '#2563EB']}
-                    style={tw`p-4 shadow-xl`}
+                    style={tw`px-4 shadow-xl py-10`}
                 >
                     <View style={tw`flex-row items-center justify-between`}>
                         <View style={tw`flex-row items-center flex-1`}>
@@ -428,6 +416,6 @@ export default function ChatScreen() {
                     </View>
                 )}
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 }

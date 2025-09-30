@@ -16,10 +16,7 @@ interface AuthContextType {
     signUp: (email: string, password: string, name: string, role: string) => Promise<void>
     forgotPassword: (email: string) => Promise<void>
     verifyCode: (email: string, code: string) => Promise<void>
-
 }
-
-
 
 // Create contexts
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,6 +62,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 } else if (role === 'VETERINARY') {
                     router.replace('/dashboard/veterinary-dashboard');
                 }
+            }else{
+                router.push('/auth/login')
             }
         } catch (error) {
             setError('Failed to check auth status');
