@@ -7,6 +7,7 @@ import { Message, TypingStatus, User } from '@/types'
 interface ChatContextTye {
     messages: Message[]
     currentChat: User | null
+    editMessage: Message | null
     currentMessage: Message | null
     typingStatuses: TypingStatus[]
     onlineUsers: Set<string>
@@ -18,6 +19,7 @@ interface ChatContextTye {
     deleteMessage: (data: number) => void
     setCurrentChat: (user: User | null) => void
     setCurrentMessage: (message: Message | null) => void
+    setEditMessage: (message: Message | null) => void
 }
 
 
@@ -37,6 +39,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const [error, setError] = useState<string | null>(null)
     const [unreadTotal, setUnreadTotal] = useState(0)
     const [currentMessage, setCurrentMessage] = useState<Message | null>(null)
+    const [editMessage, setEditMessage] = useState<Message | null>(null)
     // Load initial data
     useEffect(() => {
         loadOnlineUsers()
@@ -141,6 +144,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
 
     const returnValues: ChatContextTye = {
+        editMessage,
         currentMessage,
         currentChat,
         messages,
@@ -153,6 +157,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         updateMessage,
         deleteMessage,
         setCurrentChat,
+        setEditMessage,
         setCurrentMessage
     }
 

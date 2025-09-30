@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import tw from 'twrnc';
 import { useState } from "react";
 import { useChatActions } from "@/hooks/useChatActions";
+import { useChat } from "@/contexts/ChatContext";
 
 interface ChatMProp {
     message: Message,
@@ -13,6 +14,7 @@ interface ChatMProp {
 export default function ChatMessage({ message, chatMessages }: ChatMProp) {
     const { currentUser } = useAuth();
     const isOwnMessage = message.sender.id === currentUser?.id;
+    const { setCurrentMessage, currentMessage, setEditMessage } = useChat()
     const { removeMessage } = useChatActions()
     const [replyToMessage, setReplyToMessage] = useState<Message | null>(null);
     const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
@@ -20,6 +22,7 @@ export default function ChatMessage({ message, chatMessages }: ChatMProp) {
     const [messageText, setMessageText] = useState('');
     const handleMessageLongPress = (message: Message) => {
         setSelectedMessage(message.id.toString());
+        setCurrentMessage(message)
 
         Alert.alert(
             'Message Options',
@@ -39,6 +42,7 @@ export default function ChatMessage({ message, chatMessages }: ChatMProp) {
     const handleEditMessage = (message: Message) => {
         setMessageText(message.content);
         setSelectedMessage(message.id.toString());
+        setEditMessage(message)
     };
 
     const handleDeleteMessage = (message: Message) => {

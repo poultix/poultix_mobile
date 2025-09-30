@@ -1,8 +1,46 @@
 import { TouchableOpacity, View, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import tw from "twrnc";
+import { useChat } from "@/contexts/ChatContext";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { MessageType } from "@/types";
+import { useChatActions } from "@/hooks/useChatActions";
 
 export default function ChatSender() {
+    const { currentUser } = useAuth()
+    const { editMessage, currentChat, setEditMessage } = useChat()
+    const { sendMessage } = useChatActions()
+    const [messageText, setMessageText] = useState('');
+    useEffect(() => {
+        if (editMessage) {
+            setMessageText(editMessage.content)
+        }
+    }, [editMessage])
+    const handleSendMessage = async () => {
+        if (!messageText.trim() || !currentChat || !currentUser) return;
+
+        await sendMessage(
+            messageText.trim(),
+            currentChat,
+            currentUser,
+            MessageType.TEXT
+        );
+
+        setMessageText('');
+        setEditMessage(null);
+    };
+    const handleEditMessage = async () => {
+        if (!messageText.trim() || !currentChat || !currentUser) return;
+
+        const newMessage = { ...editMessage, content: messageText.trim() }
+
+        // await editMessage(newMessage)
+
+        setMessageText('');
+        setEditMessage(null);
+
+    };
     return (
         <View style={tw`bg-white p-4 border-t border-gray-200`}>
             <View style={tw`flex-row items-end`}>
@@ -16,7 +54,7 @@ export default function ChatSender() {
                         placeholder="Type a message..."
                         placeholderTextColor="#6B7280"
                         value={messageText}
-                        onChangeText={handleTyping}
+                        onChangeText={setMessageText}
                         multiline
                         maxLength={1000}
                     />
@@ -24,7 +62,7 @@ export default function ChatSender() {
 
                 <TouchableOpacity
                     style={tw`bg-blue-500 p-3 rounded-full ${!messageText.trim() ? 'opacity-50' : ''}`}
-                    onPress={handleSendMessage}
+                    onPress={editMessage ? handleEditMessage : handleSendMessage}
                     disabled={!messageText.trim()}
                 >
                     <Ionicons name="send-outline" size={20} color="white" />
