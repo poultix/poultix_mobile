@@ -69,7 +69,7 @@ export default function NewsScreen() {
     console.log('Article pressed:', article.title);
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <Text style={tw`text-gray-600 text-lg`}>Loading news...</Text>
@@ -142,7 +142,7 @@ export default function NewsScreen() {
             ) : (
               filteredNews.map((article, index) => (
                 <TouchableOpacity
-                  key={article.id || index}
+                  key={ index}
                   style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm border border-gray-100`}
                   onPress={() => handleArticlePress(article)}
                 >

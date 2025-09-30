@@ -9,6 +9,9 @@ export interface Pharmacy {
         latitude: number;
         longitude: number;
     };
+    rating?: number;
+    services?: string[];
+    vaccines?: Vaccine[];
 }
 
 export interface Vaccine {

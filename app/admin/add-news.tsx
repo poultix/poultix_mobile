@@ -20,7 +20,6 @@ import { News, NewsPriority } from '@/types'
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext'
-import { useNews } from '@/contexts/NewsContext'
 import { useNewsActions } from '@/hooks/useNewsActions'
 
 
@@ -28,7 +27,6 @@ import { useNewsActions } from '@/hooks/useNewsActions'
 export default function AddNewsScreen() {
   // Use new contexts
   const { currentUser } = useAuth()
-  const { loading } = useNews()
   const { createNews } = useNewsActions()
   
   const [article, setArticle] = useState<Partial<News>>({
@@ -69,7 +67,7 @@ export default function AddNewsScreen() {
         }),
       ]),
     ]).start()
-  }, [])
+  }, [fadeAnim, headerAnim, formAnim])
 
   // Check admin access
   useEffect(() => {
@@ -83,13 +81,20 @@ export default function AddNewsScreen() {
   }, [currentUser])
 
   const addTag = () => {
-    if (tagInput.trim() && !article.tags.includes(tagInput.trim())) {
+    if (tagInput.trim() && !article.tags?.includes(tagInput.trim())) {
       setArticle(prev => ({
         ...prev,
-        tags: [...prev.tags, tagInput.trim()]
+        tags: [...(prev.tags || []), tagInput.trim()]
       }))
       setTagInput('')
     }
+  }
+
+  const removeTag = (tagToRemove: string) => {
+    setArticle(prev => ({
+      ...prev,
+      tags: prev.tags?.filter(tag => tag !== tagToRemove) || []
+    }))
   }
 
   const handlePublish = async () => {
@@ -111,12 +116,10 @@ export default function AddNewsScreen() {
       await createNews({
         title: article.title!,
         content: article.content!,
-        category: article.category || NewsCategory.GENERAL,
+        category: article.category || 'General',
         priority: article.priority || NewsPriority.MEDIUM,
         tags: article.tags || [],
-        author: currentUser,
-        publishedAt: new Date(),
-        isPublished: true
+        author: currentUser
       })
       
       Alert.alert(
@@ -136,28 +139,27 @@ export default function AddNewsScreen() {
     setArticle({
       title: '',
       content: '',
-      category: 'general',
-      priority: 'medium',
-      tags: [],
-      author: article.author
+      category: 'General',
+      priority: NewsPriority.MEDIUM,
+      tags: []
     })
     setTagInput('')
   }
 
   const categories = [
-    { value: 'general', label: 'General', color: '#6B7280' },
-    { value: 'health', label: 'Health & Disease', color: '#EF4444' },
-    { value: 'nutrition', label: 'Nutrition', color: '#10B981' },
-    { value: 'breeding', label: 'Breeding', color: '#F59E0B' },
-    { value: 'market', label: 'Market News', color: '#3B82F6' },
-    { value: 'technology', label: 'Technology', color: '#8B5CF6' },
+    { value: 'General', label: 'General', color: '#6B7280' },
+    { value: 'Health', label: 'Health & Disease', color: '#EF4444' },
+    { value: 'Nutrition', label: 'Nutrition', color: '#10B981' },
+    { value: 'Breeding', label: 'Breeding', color: '#F59E0B' },
+    { value: 'Market', label: 'Market News', color: '#3B82F6' },
+    { value: 'Technology', label: 'Technology', color: '#8B5CF6' },
   ]
 
   const priorities = [
-    { value: 'low', label: 'Low', color: '#6B7280' },
-    { value: 'medium', label: 'Medium', color: '#F59E0B' },
-    { value: 'high', label: 'High', color: '#EF4444' },
-    { value: 'urgent', label: 'Urgent', color: '#DC2626' },
+    { value: NewsPriority.LOW, label: 'Low', color: '#6B7280' },
+    { value: NewsPriority.MEDIUM, label: 'Medium', color: '#F59E0B' },
+    { value: NewsPriority.HIGH, label: 'High', color: '#EF4444' },
+    { value: NewsPriority.URGENT, label: 'Urgent', color: '#DC2626' },
   ]
 
   return (
@@ -225,7 +227,7 @@ export default function AddNewsScreen() {
                   maxLength={100}
                 />
                 <Text style={tw`text-gray-400 text-xs mt-2`}>
-                  {article.title.length}/100 characters
+                  {article?.title?.length}/100 characters
                 </Text>
               </View>
 
@@ -294,7 +296,7 @@ export default function AddNewsScreen() {
                   textAlignVertical="top"
                 />
                 <Text style={tw`text-gray-400 text-xs mt-2`}>
-                  {article.content.length} characters (minimum 50)
+                  {article?.content?.length} characters (minimum 50)
                 </Text>
               </View>
 
@@ -317,7 +319,7 @@ export default function AddNewsScreen() {
                   </TouchableOpacity>
                 </View>
                 <View style={tw`flex-row flex-wrap`}>
-                  {article.tags.map((tag, index) => (
+                  {article?.tags?.map((tag, index) => (
                     <View key={index} style={tw`bg-blue-100 rounded-full px-3 py-1 mr-2 mb-2 flex-row items-center`}>
                       <Text style={tw`text-blue-800 text-sm mr-1`}>{tag}</Text>
                       <TouchableOpacity onPress={() => removeTag(tag)}>
@@ -338,7 +340,7 @@ export default function AddNewsScreen() {
                 </TouchableOpacity>
                 
                 <TouchableOpacity
-                  onPress={publishArticle}
+                  onPress={handlePublish}
                   disabled={isPublishing}
                   style={tw`flex-1 bg-blue-500 rounded-2xl p-4 ml-2 items-center ${isPublishing ? 'opacity-50' : ''}`}
                 >

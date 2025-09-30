@@ -36,7 +36,7 @@ export default function AdminDashboard() {
         }).start();
     }, []);
 
-    if (isLoading || !currentUser) {
+    if (loading || !currentUser) {
         return (
             <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Loading dashboard...</Text>

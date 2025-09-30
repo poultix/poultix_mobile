@@ -43,7 +43,7 @@ const PharmaciesScreen = () => {
 
     // Use new contexts
     const { pharmacies, currentPharmacy, setCurrentPharmacy, loading } = usePharmacies();
-    const { getPharmaciesByDistance, getNearbyPharmacies } = usePharmacyActions();
+    const { getPharmaciesByDistance, getNearbyPharmacies, calculateDistance } = usePharmacyActions();
 
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -91,7 +91,8 @@ const PharmaciesScreen = () => {
             const pharmaciesWithDistance = pharmacies.map((pharmacy: Pharmacy) => ({
                 ...pharmacy,
                 distance: calculateDistance(
-                    userLocation,
+                    userLocation.latitude,
+                    userLocation.longitude,
                     pharmacy.location.latitude,
                     pharmacy.location.longitude
                 )
@@ -113,7 +114,7 @@ const PharmaciesScreen = () => {
         } else {
             setFilteredPharmacies(pharmacies);
         }
-    }, [userLocation, pharmacies]);
+    }, [userLocation, pharmacies, calculateDistance]);
 
     // Handle pharmacy selection
     const handlePharmacyPress = (pharmacy: Pharmacy) => {
@@ -139,7 +140,8 @@ const PharmaciesScreen = () => {
             filtered = filtered.map((pharmacy: Pharmacy) => ({
                 ...pharmacy,
                 distance: calculateDistance(
-                    userLocation,
+                    userLocation.latitude,
+                    userLocation.longitude,
                     pharmacy.location.latitude,
                     pharmacy.location.longitude
                 )
@@ -147,37 +149,25 @@ const PharmaciesScreen = () => {
         }
 
         setFilteredPharmacies(filtered);
-    }, [pharmacies, searchQuery, userLocation]);
+    }, [pharmacies, searchQuery, userLocation, calculateDistance]);
 
-    // Calculate distance between two points (in km)
-    const calculateDistance = (
-        origin: { latitude: number; longitude: number },
-        lat: number,
-        lng: number
-    ) => {
-        const R = 6371; // Earth's radius in km
-        const dLat = ((lat - origin.latitude) * Math.PI) / 180;
-        const dLon = ((lng - origin.longitude) * Math.PI) / 180;
-        const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos((origin.latitude * Math.PI) / 180) *
-            Math.cos((lat * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return Number((R * c).toFixed(1));
+    const openDirections = (pharmacy: Pharmacy) => {
+        const url = Platform.select({
+            ios: `maps:0,0?q=${pharmacy.location.latitude},${pharmacy.location.longitude}`,
+            android: `geo:0,0?q=${pharmacy.location.latitude},${pharmacy.location.longitude}(${pharmacy.name})`,
+        });
+
+        if (url) {
+            Linking.openURL(url);
+        }
     };
-
-    const openDirections = () => {
-
-    }
 
     useEffect(() => {
         getUserLocation();
         startAnimations();
     }, []);
 
-    if (isLoading) {
+    if (loading) {
         return (
             <View style={tw`flex-1 justify-center items-center bg-white`}>
                 <View style={tw`w-20 h-20 rounded-full justify-center items-center mb-4 bg-orange-500`}>
@@ -371,7 +361,7 @@ const PharmaciesScreen = () => {
                                         <View style={tw`flex-row justify-end mt-3`}>
                                             <TouchableOpacity
                                                 style={tw`bg-orange-100 rounded-xl py-2 px-4 flex-row items-center`}
-                                                onPress={() => openDirections()}
+                                                onPress={() => openDirections(pharmacy)}
                                             >
                                                 <Ionicons name="navigate-circle-outline" size={18} color="#EF4444" style={tw`mr-2`} />
                                                 <Text style={tw`text-orange-600 font-semibold`}>Get Directions</Text>

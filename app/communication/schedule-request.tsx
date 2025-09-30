@@ -15,7 +15,7 @@ import { router } from 'expo-router';
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { ScheduleType, SchedulePriority } from '@/types/schedule';
+import { ScheduleType, SchedulePriority, ScheduleStatus } from '@/types/schedule';
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';

@@ -75,7 +75,7 @@ export default function SettingsScreen() {
                   tw`flex-row items-center p-5`,
                   index < settingsOptions.length - 1 && tw`border-b border-gray-100`
                 ]}
-                onPress={() => router.push(option.screen)}
+                onPress={() => router.push(option.screen as any)}
               >
                 <View style={tw`w-10 h-10 bg-gray-100 rounded-full items-center justify-center mr-4`}>
                   <Ionicons name={option.icon as any} size={20} color="#6B7280" />

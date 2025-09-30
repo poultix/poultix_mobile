@@ -173,7 +173,23 @@ export const mockPharmacies: Pharmacy[] = [
         location: {
             latitude: -1.9441,
             longitude: 30.0619
-        }
+        },
+        rating: 4.8,
+        services: ['Poultry Medications', 'Vaccination Services', 'Emergency Care', 'Feed Supplements'],
+        vaccines: [
+            {
+                name: 'Newcastle Disease Vaccine',
+                description: 'Protection against Newcastle Disease (NDV)',
+                price: 25000,
+                createdAt: new Date('2024-01-15')
+            },
+            {
+                name: 'Infectious Bronchitis Vaccine',
+                description: 'Prevents respiratory infections in poultry',
+                price: 30000,
+                createdAt: new Date('2024-01-20')
+            }
+        ]
     },
     {
         id: 'pharmacy_002',
@@ -185,7 +201,17 @@ export const mockPharmacies: Pharmacy[] = [
         location: {
             latitude: -2.0853,
             longitude: 29.7564
-        }
+        },
+        rating: 4.6,
+        services: ['General Veterinary Care', 'Laboratory Services', 'Health Consultations'],
+        vaccines: [
+            {
+                name: 'Fowl Pox Vaccine',
+                description: 'Protects against fowl pox virus',
+                price: 20000,
+                createdAt: new Date('2024-02-01')
+            }
+        ]
     },
     {
         id: 'pharmacy_003',
@@ -197,7 +223,23 @@ export const mockPharmacies: Pharmacy[] = [
         location: {
             latitude: -2.0500,
             longitude: 29.7800
-        }
+        },
+        rating: 4.4,
+        services: ['Feed & Nutrition', 'Disease Prevention', 'Livestock Medicines'],
+        vaccines: [
+            {
+                name: 'Marek\'s Disease Vaccine',
+                description: 'Prevents Marek\'s disease in chickens',
+                price: 35000,
+                createdAt: new Date('2024-01-10')
+            },
+            {
+                name: 'Gumboro Vaccine',
+                description: 'Protection against Infectious Bursal Disease',
+                price: 28000,
+                createdAt: new Date('2024-01-25')
+            }
+        ]
     },
 ];
 

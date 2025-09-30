@@ -46,7 +46,7 @@ export default function PharmacyDetailScreen() {
         );
     };
 
-    if (isLoading || !currentPharmacy) {
+    if (loading || !currentPharmacy) {
         return (
             <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Loading pharmacy details...</Text>
@@ -179,7 +179,7 @@ export default function PharmacyDetailScreen() {
                                         {vaccine.description}
                                     </Text>
                                     <Text style={tw`text-blue-700 font-medium`}>
-                                        ${vaccine.price}
+                                        {vaccine.price.toLocaleString()} RWF
                                     </Text>
                                 </View>
                             ))}
