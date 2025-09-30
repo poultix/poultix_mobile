@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useReducer, useEffect, useState } from 'react'
-import { MockDataService } from '@/services/mockData'
-import { Message, TypingStatus, User, UserRole } from '@/types'
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import { Message, TypingStatus, User } from '@/types'
 
 
 
@@ -8,6 +7,7 @@ import { Message, TypingStatus, User, UserRole } from '@/types'
 interface ChatContextTye {
     messages: Message[]
     currentChat: User | null
+    currentMessage: Message | null
     typingStatuses: TypingStatus[]
     onlineUsers: Set<string>
     loading: boolean
@@ -17,6 +17,7 @@ interface ChatContextTye {
     updateMessage: (data: Message) => void
     deleteMessage: (data: number) => void
     setCurrentChat: (user: User | null) => void
+    setCurrentMessage: (message: Message | null) => void
 }
 
 
@@ -35,6 +36,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [unreadTotal, setUnreadTotal] = useState(0)
+    const [currentMessage, setCurrentMessage] = useState<Message | null>(null)
     // Load initial data
     useEffect(() => {
         loadOnlineUsers()
@@ -48,15 +50,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         return () => clearInterval(interval)
     }, [])
 
-
-    const loadMessages = async (chatId: string) => {
-        try {
-
-            // setMessages(mockMessages)
-        } catch (error) {
-            console.error('Failed to load messages:', error)
-        }
-    }
 
     const loadOnlineUsers = async () => {
         // Mock online users
@@ -148,7 +141,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
 
     const returnValues: ChatContextTye = {
-
+        currentMessage,
         currentChat,
         messages,
         typingStatuses,
@@ -159,7 +152,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         addMessage,
         updateMessage,
         deleteMessage,
-        setCurrentChat
+        setCurrentChat,
+        setCurrentMessage
     }
 
     return (

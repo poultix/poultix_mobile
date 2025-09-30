@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
-import { router} from 'expo-router';
+import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
 import { useUsers } from '@/contexts/UserContext';
@@ -22,6 +22,10 @@ import DrawerButton from '@/components/DrawerButton';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
 import { Message, MessageType, MessageStatus } from '@/types';
+import ChatMessage from '@/components/chat/message';
+import ChatSender from '@/components/chat/sender';
+import ChatHeader from '@/components/chat/header';
+import ChatReactions from '@/components/chat/reactions';
 
 export default function ChatScreen() {
     const { currentUser } = useAuth();
@@ -207,46 +211,7 @@ export default function ChatScreen() {
                 behavior={'padding'}
             >
                 {/* Header */}
-                <LinearGradient
-                    colors={['#3B82F6', '#2563EB']}
-                    style={tw`px-4 shadow-xl py-10`}
-                >
-                    <View style={tw`flex-row items-center justify-between`}>
-                        <View style={tw`flex-row items-center flex-1`}>
-                            <TouchableOpacity
-                                style={tw`bg-white bg-opacity-20 p-2 rounded-xl mr-3`}
-                                onPress={() => router.back()}
-                            >
-                                <Ionicons name="arrow-back-outline" size={24} color="white" />
-                            </TouchableOpacity>
-
-                            <View style={tw`flex-1`}>
-                                <Text style={tw`text-white text-lg font-bold`}>
-                                    {otherUser?.name || 'Chat'}
-                                </Text>
-                                <View style={tw`flex-row items-center`}>
-                                    <View style={tw`w-2 h-2 rounded-full mr-2 ${isOnline(otherUser?.id || '')
-                                        ? 'bg-green-400' : 'bg-gray-400'
-                                        }`} />
-                                    <Text style={tw`text-blue-100 text-sm`}>
-                                        {isOnline(otherUser?.id || '')
-                                            ? 'Online' : 'Last seen recently'}
-                                    </Text>
-                                </View>
-                            </View>
-                        </View>
-
-                        <View style={tw`flex-row items-center`}>
-                            <TouchableOpacity style={tw`bg-white bg-opacity-20 p-2 rounded-xl mr-2`}>
-                                <Ionicons name="call-outline" size={20} color="white" />
-                            </TouchableOpacity>
-                            <TouchableOpacity style={tw`bg-white bg-opacity-20 p-2 rounded-xl mr-2`}>
-                                <Ionicons name="videocam-outline" size={20} color="white" />
-                            </TouchableOpacity>
-                            <DrawerButton />
-                        </View>
-                    </View>
-                </LinearGradient>
+                <ChatHeader />
 
                 {/* Messages */}
                 <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
@@ -257,79 +222,12 @@ export default function ChatScreen() {
                         onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
                     >
                         <View style={tw`py-4`}>
-                            {chatMessages.map((message, index) => {
-                                const isOwnMessage = message.sender.id === currentUser?.id;
-                                const showAvatar = !isOwnMessage && (
-                                    index === 0 ||
-                                    chatMessages[index - 1].sender.id !== message.sender.id
-                                );
-
-                                return (
-                                    <View key={message.id} style={tw`mb-4`}>
-                                        {/* Reply indicator */}
-                                        {message.replyTo && (
-                                            <View style={tw`${isOwnMessage ? 'items-end' : 'items-start'} mb-1`}>
-                                                <View style={tw`bg-gray-200 rounded-lg p-2 max-w-xs`}>
-                                                    {message.replyTo &&
-                                                        <Text style={tw`text-gray-600 text-xs`}>
-                                                            Replying to: {chatMessages.find(m => m.id === message?.replyTo?.id)?.content.substring(0, 30)}...
-                                                        </Text>}
-                                                </View>
-                                            </View>
-                                        )}
-
-                                        <View style={tw`flex-row ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-
-                                            <TouchableOpacity
-                                                onLongPress={() => handleMessageLongPress(message)}
-                                                style={tw`max-w-xs`}
-                                            >
-                                                <View style={tw`${isOwnMessage
-                                                    ? 'bg-blue-500 rounded-l-2xl rounded-tr-2xl'
-                                                    : 'bg-white rounded-r-2xl rounded-tl-2xl'
-                                                    } p-3 shadow-sm`}>
-
-                                                    <Text style={tw`${isOwnMessage ? 'text-white' : 'text-gray-800'
-                                                        } text-base`}>
-                                                        {message.content}
-                                                    </Text>
-
-                                                    {message.edited && (
-                                                        <Text style={tw`${isOwnMessage ? 'text-blue-200' : 'text-gray-500'
-                                                            } text-xs mt-1`}>
-                                                            edited
-                                                        </Text>
-                                                    )}
-
-                                                    {/* Reactions */}
-                                                    {message.reactions && message.reactions.length > 0 && (
-                                                        <View style={tw`flex-row flex-wrap mt-2`}>
-                                                            {message.reactions.map((reaction, idx) => (
-                                                                <View key={idx} style={tw`bg-gray-100 rounded-full px-2 py-1 mr-1 mb-1`}>
-                                                                    <Text style={tw`text-sm`}>{reaction.emoji}</Text>
-                                                                </View>
-                                                            ))}
-                                                        </View>
-                                                    )}
-
-                                                    <View style={tw`flex-row items-center justify-between mt-1`}>
-                                                        <Text style={tw`${isOwnMessage ? 'text-blue-200' : 'text-gray-500'
-                                                            } text-xs`}>
-                                                            {formatTime(message.timestamp)}
-                                                        </Text>
-
-                                                        {isOwnMessage && (
-                                                            <Text style={tw`text-blue-200 text-xs ml-2`}>
-                                                                {getMessageStatus(message)}
-                                                            </Text>
-                                                        )}
-                                                    </View>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                );
-                            })}
+                            {chatMessages.map((message, index) => (
+                                <ChatMessage
+                                    key={message.id}
+                                    message={message}
+                                    chatMessages={chatMessages} />
+                            ))}
 
                             {/* Typing indicators */}
                             {chatTyping.length > 0 && (
@@ -365,55 +263,11 @@ export default function ChatScreen() {
                 )}
 
                 {/* Message Input */}
-                <View style={tw`bg-white p-4 border-t border-gray-200`}>
-                    <View style={tw`flex-row items-end`}>
-                        <TouchableOpacity style={tw`bg-blue-100 p-3 rounded-full mr-3`}>
-                            <Ionicons name="add-outline" size={20} color="#3B82F6" />
-                        </TouchableOpacity>
-
-                        <View style={tw`flex-1 bg-gray-100 rounded-2xl px-4 py-2 mr-3`}>
-                            <TextInput
-                                style={tw`text-gray-800 text-base max-h-24`}
-                                placeholder="Type a message..."
-                                placeholderTextColor="#6B7280"
-                                value={messageText}
-                                onChangeText={handleTyping}
-                                multiline
-                                maxLength={1000}
-                            />
-                        </View>
-
-                        <TouchableOpacity
-                            style={tw`bg-blue-500 p-3 rounded-full ${!messageText.trim() ? 'opacity-50' : ''}`}
-                            onPress={handleSendMessage}
-                            disabled={!messageText.trim()}
-                        >
-                            <Ionicons name="send-outline" size={20} color="white" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                <ChatSender />
 
                 {/* Reaction Picker */}
                 {showReactions && (
-                    <View style={tw`absolute bottom-20 left-4 right-4 bg-white rounded-2xl p-4 shadow-lg`}>
-                        <View style={tw`flex-row justify-around`}>
-                            {['👍', '❤️', '😂', '😮', '😢', '😡'].map(reaction => (
-                                <TouchableOpacity
-                                    key={reaction}
-                                    style={tw`p-2`}
-                                    onPress={() => handleReaction(showReactions, reaction)}
-                                >
-                                    <Text style={tw`text-2xl`}>{reaction}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                        <TouchableOpacity
-                            style={tw`mt-3 p-2 bg-gray-100 rounded-xl`}
-                            onPress={() => setShowReactions(null)}
-                        >
-                            <Text style={tw`text-center text-gray-600`}>Cancel</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <ChatReactions />
                 )}
             </KeyboardAvoidingView>
         </View>
