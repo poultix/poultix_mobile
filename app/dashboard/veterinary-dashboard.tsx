@@ -22,15 +22,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import { useSchedules } from '@/contexts/ScheduleContext';
 import { ScheduleStatus } from '@/types/schedule';
+import BottomTabs from '@/components/BottomTabs';
 
 export default function VeterinaryDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const { currentUser } = useAuth();
   const { farms } = useFarms();
   const { schedules } = useSchedules();
-  
+
   const [selectedTab, setSelectedTab] = useState<'overview' | 'farms' | 'schedules'>('overview');
-  
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function VeterinaryDashboardScreen() {
       ]);
       return;
     }
-    
+
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 800,
@@ -66,14 +67,14 @@ export default function VeterinaryDashboardScreen() {
   const totalAnimals = assignedFarms.reduce((sum, farm) => sum + farm.livestock.total, 0);
   const healthyFarms = assignedFarms.filter(farm => farm.healthStatus === 'EXCELLENT' || farm.healthStatus === 'GOOD').length;
   const farmsNeedingAttention = assignedFarms.filter(farm => farm.healthStatus === 'FAIR' || farm.healthStatus === 'POOR').length;
-  
+
   const todaySchedules = mySchedules.filter(s => {
     const today = new Date();
     const scheduleDate = new Date(s.scheduledDate);
     return scheduleDate.toDateString() === today.toDateString();
   });
-  
-  const upcomingSchedules = mySchedules.filter(s => 
+
+  const upcomingSchedules = mySchedules.filter(s =>
     s.status === 'scheduled' && new Date(s.scheduledDate) >= new Date()
   );
 
@@ -101,7 +102,7 @@ export default function VeterinaryDashboardScreen() {
             {healthyFarms} healthy, {farmsNeedingAttention} need attention
           </Text>
         </View>
-        
+
         <View style={tw`flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]`}>
           <View style={tw`flex-row items-center justify-between mb-2`}>
             <Ionicons name="analytics-outline" size={24} color="#3B82F6" />
@@ -112,7 +113,7 @@ export default function VeterinaryDashboardScreen() {
             Across {totalFarms} farms
           </Text>
         </View>
-        
+
         <View style={tw`flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]`}>
           <View style={tw`flex-row items-center justify-between mb-2`}>
             <Ionicons name="calendar-outline" size={24} color="#F59E0B" />
@@ -123,7 +124,7 @@ export default function VeterinaryDashboardScreen() {
             {upcomingSchedules.length} upcoming total
           </Text>
         </View>
-        
+
         <View style={tw`flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]`}>
           <View style={tw`flex-row items-center justify-between mb-2`}>
             <Ionicons name="star-outline" size={24} color="#8B5CF6" />
@@ -144,7 +145,7 @@ export default function VeterinaryDashboardScreen() {
             <Text style={tw`text-red-600 font-semibold`}>View All</Text>
           </TouchableOpacity>
         </View>
-        
+
         {todaySchedules.length === 0 ? (
           <View style={tw`items-center py-8`}>
             <Ionicons name="calendar-outline" size={48} color="#9CA3AF" />
@@ -155,7 +156,7 @@ export default function VeterinaryDashboardScreen() {
           todaySchedules.map((schedule) => {
             // For now, we'll show the first farm or a default message
             const farm = assignedFarms[0];
-            
+
             return (
               <TouchableOpacity
                 key={schedule.id}
@@ -172,7 +173,7 @@ export default function VeterinaryDashboardScreen() {
                     {schedule.startTime} - {schedule.endTime}
                   </Text>
                 </View>
-                
+
                 <View style={tw`flex-row items-center justify-between`}>
                   <View style={tw`flex-row items-center`}>
                     <Ionicons name="location-outline" size={14} color="#6B7280" />
@@ -181,12 +182,12 @@ export default function VeterinaryDashboardScreen() {
                   <View style={[
                     tw`px-2 py-1 rounded-full`,
                     schedule.priority === 'urgent' ? tw`bg-red-100` :
-                    schedule.priority === 'high' ? tw`bg-orange-100` : tw`bg-yellow-100`
+                      schedule.priority === 'high' ? tw`bg-orange-100` : tw`bg-yellow-100`
                   ]}>
                     <Text style={[
                       tw`text-xs font-bold capitalize`,
                       schedule.priority === 'urgent' ? tw`text-red-600` :
-                      schedule.priority === 'high' ? tw`text-orange-600` : tw`text-yellow-600`
+                        schedule.priority === 'high' ? tw`text-orange-600` : tw`text-yellow-600`
                     ]}>
                       {schedule.priority}
                     </Text>
@@ -209,7 +210,7 @@ export default function VeterinaryDashboardScreen() {
             <Ionicons name="calendar-outline" size={24} color="#EF4444" />
             <Text style={tw`text-red-600 font-semibold mt-2`}>Manage Schedules</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={tw`flex-1 bg-green-50 border border-green-200 rounded-xl p-4 min-w-[45%]`}
             onPress={() => router.push('/farm/nearby-farms')}
@@ -217,7 +218,7 @@ export default function VeterinaryDashboardScreen() {
             <Ionicons name="leaf-outline" size={24} color="#10B981" />
             <Text style={tw`text-green-600 font-semibold mt-2`}>View Farms</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={tw`flex-1 bg-blue-50 border border-blue-200 rounded-xl p-4 min-w-[45%]`}
             onPress={() => router.push('/communication/messages')}
@@ -225,10 +226,10 @@ export default function VeterinaryDashboardScreen() {
             <Ionicons name="chatbubble-outline" size={24} color="#3B82F6" />
             <Text style={tw`text-blue-600 font-semibold mt-2`}>Messages</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={tw`flex-1 bg-purple-50 border border-purple-200 rounded-xl p-4 min-w-[45%]`}
-            onPress={() => router.push('/veterinary/vet-reports' )}
+            onPress={() => router.push('/veterinary/vet-reports')}
           >
             <Ionicons name="document-text-outline" size={24} color="#8B5CF6" />
             <Text style={tw`text-purple-600 font-semibold mt-2`}>Reports</Text>
@@ -239,7 +240,7 @@ export default function VeterinaryDashboardScreen() {
       {/* Farm Health Overview */}
       <View style={tw`bg-white rounded-2xl p-5 shadow-sm`}>
         <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>Farm Health Overview</Text>
-        
+
         <View style={tw`flex-row justify-between mb-4`}>
           <View style={tw`items-center flex-1`}>
             <Text style={tw`text-2xl font-bold text-green-600`}>{healthyFarms}</Text>
@@ -254,10 +255,10 @@ export default function VeterinaryDashboardScreen() {
             <Text style={tw`text-gray-600 text-sm`}>Success Rate</Text>
           </View>
         </View>
-        
+
         {assignedFarms.slice(0, 3).map((farm) => {
           const healthColors = getHealthStatusColor(farm.healthStatus);
-          
+
           return (
             <View key={farm.id} style={tw`flex-row items-center py-3 border-b border-gray-100 last:border-b-0`}>
               <View style={tw`w-10 h-10 rounded-full bg-green-100 items-center justify-center mr-3`}>
@@ -294,11 +295,11 @@ export default function VeterinaryDashboardScreen() {
           <Text style={tw`text-white font-semibold ml-1`}>View Map</Text>
         </TouchableOpacity>
       </View>
-      
+
       {assignedFarms.map((farm) => {
         const healthColors = getHealthStatusColor(farm.healthStatus);
         const owner = farm.owner;
-        
+
         return (
           <TouchableOpacity
             key={farm.id}
@@ -319,7 +320,7 @@ export default function VeterinaryDashboardScreen() {
                 </Text>
               </View>
             </View>
-            
+
             <View style={tw`bg-gray-50 rounded-xl p-4 mb-3`}>
               <Text style={tw`font-semibold text-gray-800 mb-2`}>Livestock Status</Text>
               <View style={tw`flex-row justify-between`}>
@@ -341,7 +342,7 @@ export default function VeterinaryDashboardScreen() {
                 </View>
               </View>
             </View>
-            
+
             <View style={tw`flex-row items-center justify-between`}>
               <View style={tw`flex-row items-center`}>
                 <Ionicons name="call-outline" size={16} color="#6B7280" />
@@ -363,17 +364,17 @@ export default function VeterinaryDashboardScreen() {
         <Text style={tw`text-xl font-bold text-gray-800`}>My Schedule</Text>
         <TouchableOpacity
           style={tw`bg-red-500 px-4 py-2 rounded-xl flex-row items-center`}
-          onPress={() => router.push('/communication/schedule-management' )}
+          onPress={() => router.push('/communication/schedule-management')}
         >
           <Ionicons name="settings-outline" size={16} color="white" />
           <Text style={tw`text-white font-semibold ml-1`}>Manage</Text>
         </TouchableOpacity>
       </View>
-      
+
       {mySchedules.map((schedule) => {
         // For now, we'll show the first farm or a default message
         const farm = assignedFarms[0];
-        
+
         return (
           <TouchableOpacity
             key={schedule.id}
@@ -391,22 +392,22 @@ export default function VeterinaryDashboardScreen() {
               <View style={[
                 tw`px-3 py-1 rounded-full border`,
                 schedule.status === 'completed' ? tw`bg-green-100 border-green-200` :
-                schedule.status === 'scheduled' ? tw`bg-blue-100 border-blue-200` :
-                schedule.status === 'in_progress' ? tw`bg-yellow-100 border-yellow-200` :
-                schedule.status === 'cancelled' ? tw`bg-red-100 border-red-200` : tw`bg-gray-100 border-gray-200`
+                  schedule.status === 'scheduled' ? tw`bg-blue-100 border-blue-200` :
+                    schedule.status === 'in_progress' ? tw`bg-yellow-100 border-yellow-200` :
+                      schedule.status === 'cancelled' ? tw`bg-red-100 border-red-200` : tw`bg-gray-100 border-gray-200`
               ]}>
                 <Text style={[
                   tw`text-xs font-bold capitalize`,
                   schedule.status === 'completed' ? tw`text-green-600` :
-                  schedule.status === 'scheduled' ? tw`text-blue-600` :
-                  schedule.status === 'in_progress' ? tw`text-yellow-600` :
-                  schedule.status === 'cancelled' ? tw`text-red-600` : tw`text-gray-600`
+                    schedule.status === 'scheduled' ? tw`text-blue-600` :
+                      schedule.status === 'in_progress' ? tw`text-yellow-600` :
+                        schedule.status === 'cancelled' ? tw`text-red-600` : tw`text-gray-600`
                 ]}>
                   {schedule.status.replace('_', ' ')}
                 </Text>
               </View>
             </View>
-            
+
             <View style={tw`bg-gray-50 rounded-xl p-4 mb-3`}>
               <View style={tw`flex-row items-center justify-between mb-2`}>
                 <View style={tw`flex-row items-center`}>
@@ -422,36 +423,36 @@ export default function VeterinaryDashboardScreen() {
                   </Text>
                 </View>
               </View>
-              
+
               <View style={tw`flex-row items-center`}>
                 <Ionicons name="location-outline" size={16} color="#6B7280" />
                 <Text style={tw`text-gray-600 ml-2`}>{farm?.location.address}</Text>
               </View>
             </View>
-            
+
             {schedule.notes && (
               <Text style={tw`text-gray-600 text-sm mb-3`}>
                 Note: {schedule.notes}
               </Text>
             )}
-            
+
             <View style={tw`flex-row items-center justify-between`}>
               <View style={[
                 tw`px-2 py-1 rounded-full`,
                 schedule.priority === 'urgent' ? tw`bg-red-100` :
-                schedule.priority === 'high' ? tw`bg-orange-100` :
-                schedule.priority === 'medium' ? tw`bg-yellow-100` : tw`bg-gray-100`
+                  schedule.priority === 'high' ? tw`bg-orange-100` :
+                    schedule.priority === 'medium' ? tw`bg-yellow-100` : tw`bg-gray-100`
               ]}>
                 <Text style={[
                   tw`text-xs font-bold capitalize`,
                   schedule.priority === 'urgent' ? tw`text-red-600` :
-                  schedule.priority === 'high' ? tw`text-orange-600` :
-                  schedule.priority === 'medium' ? tw`text-yellow-600` : tw`text-gray-600`
+                    schedule.priority === 'high' ? tw`text-orange-600` :
+                      schedule.priority === 'medium' ? tw`text-yellow-600` : tw`text-gray-600`
                 ]}>
                   {schedule.priority} priority
                 </Text>
               </View>
-              
+
               {schedule.status === 'scheduled' && (
                 <TouchableOpacity
                   style={tw`bg-blue-500 px-3 py-1 rounded-full`}
@@ -459,9 +460,11 @@ export default function VeterinaryDashboardScreen() {
                     // Start visit functionality
                     Alert.alert('Start Visit', 'Mark this visit as in progress?', [
                       { text: 'Cancel', style: 'cancel' },
-                      { text: 'Start', onPress: () => {
-                        // Update schedule status to in_progress
-                      }}
+                      {
+                        text: 'Start', onPress: () => {
+                          // Update schedule status to in_progress
+                        }
+                      }
                     ]);
                   }}
                 >
@@ -476,9 +479,7 @@ export default function VeterinaryDashboardScreen() {
   );
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-gray-50`}>
-      
-      
+    <View style={tw`flex-1 bg-gray-50`}>
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
         {/* Header */}
         <View style={tw`pb-4`}>
@@ -489,7 +490,7 @@ export default function VeterinaryDashboardScreen() {
             <View style={tw`flex-row items-center justify-between mb-4`}>
               <View style={tw`flex-1`}>
                 <Text style={tw`text-white text-sm opacity-90`}>
-                   Veterinary Dashboard
+                  Veterinary Dashboard
                 </Text>
                 <Text style={tw`text-white text-2xl font-bold`}>
                   Dr. {currentUser.name} 🩺
@@ -519,10 +520,10 @@ export default function VeterinaryDashboardScreen() {
                 ]}
                 onPress={() => setSelectedTab(tab.key as any)}
               >
-                <Ionicons 
-                  name={tab.icon as any} 
-                  size={16} 
-                  color={selectedTab === tab.key ? 'white' : '#6B7280'} 
+                <Ionicons
+                  name={tab.icon as any}
+                  size={16}
+                  color={selectedTab === tab.key ? 'white' : '#6B7280'}
                 />
                 <Text style={[
                   tw`ml-2 font-medium`,
@@ -536,17 +537,21 @@ export default function VeterinaryDashboardScreen() {
         </View>
 
         {/* Content */}
-        <ScrollView style={tw`flex-1`} showsVerticalScrollIndicator={false}>
+        <ScrollView style={tw`flex-1`} showsVerticalScrollIndicator={false}
+        contentContainerClassName='pb-40'
+        >
           {selectedTab === 'overview' && renderOverview()}
           {selectedTab === 'farms' && renderFarms()}
           {selectedTab === 'schedules' && renderSchedules()}
         </ScrollView>
       </Animated.View>
+      {/* Bottom Tabs */}
+      <BottomTabs currentRoute="/dashboard/veterinary-dashboard" />
 
       <CustomDrawer
         isVisible={isDrawerVisible}
         onClose={() => setIsDrawerVisible(false)}
       />
-    </SafeAreaView>
+    </View>
   );
 }
