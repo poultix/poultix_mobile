@@ -1,19 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-} from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import tw from 'twrnc';
-import { router } from 'expo-router';
+import DrawerButton from '@/components/DrawerButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSchedules } from '@/contexts/ScheduleContext';
-import DrawerButton from '@/components/DrawerButton';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Animated,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import tw from 'twrnc';
+ ;
 
 export default function HistoryScreen() {
   const { currentUser } = useAuth();

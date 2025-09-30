@@ -1,20 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
   Animated,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
 import tw from 'twrnc';
-import { router } from 'expo-router';
+ ;
 
 export default function CreateNewPasswordScreen() {
   const [newPassword, setNewPassword] = useState('');
@@ -123,7 +123,7 @@ export default function CreateNewPasswordScreen() {
         colors={['#FFF7ED', '#FFEDD5']}
         style={tw`flex-1`}
       >
-        <SafeAreaView style={tw`flex-1`}>
+        <View style={tw`flex-1`}>
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={tw`flex-1`}
@@ -198,7 +198,7 @@ export default function CreateNewPasswordScreen() {
               </Animated.View>
             </Animated.View>
           </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
       </LinearGradient>
     </ImageBackground>
   );

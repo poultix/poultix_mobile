@@ -1,20 +1,19 @@
-import React, { useEffect, useState, useRef } from 'react';
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    Animated,
-    ScrollView,
-    Alert,
-    ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Animated,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import tw from 'twrnc';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignUpScreen() {
     const [name, setName] = useState('');
@@ -77,7 +76,7 @@ export default function SignUpScreen() {
     };
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-white`}>
+        <View style={tw`flex-1 bg-white`}>
             <ScrollView
                 style={tw`flex-1`}
                 contentContainerStyle={tw`pb-10`}
@@ -272,6 +271,6 @@ export default function SignUpScreen() {
                     </View>
                 </Animated.View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }

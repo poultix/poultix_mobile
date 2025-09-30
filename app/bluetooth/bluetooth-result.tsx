@@ -1,16 +1,14 @@
+import { useBLE } from '@/hooks/useBLE';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
-    View,
-    Text,
-
     Animated,
     Easing,
     ScrollView,
+    Text,
+    View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import tw from 'twrnc';
-import { useBLE } from '@/hooks/useBLE';
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BluetoothResultScreen() {
 
@@ -38,7 +36,7 @@ export default function BluetoothResultScreen() {
     }, []);
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-white`}>
+        <View style={tw`flex-1 bg-white`}>
 
             <ScrollView>
                 <Animated.View
@@ -51,7 +49,7 @@ export default function BluetoothResultScreen() {
                     <StatusSection progressDistance={progressDistance} progressSignal={progressSignal} />
                 </Animated.View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }
 

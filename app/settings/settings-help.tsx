@@ -1,10 +1,9 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import tw from 'twrnc';
 import { router } from 'expo-router';
-import { SafeAreaView } from "react-native-safe-area-context";
+import React from 'react';
+import { Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import tw from 'twrnc';
 
 export default function HelpSettingsScreen() {
   const helpOptions = [
@@ -17,7 +16,7 @@ export default function HelpSettingsScreen() {
   ];
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+    <View style={tw`flex-1 bg-gray-50`}>
       <View style={tw` pb-4`}>
         <LinearGradient colors={['#8B5CF6', '#7C3AED']} style={tw` p-8`}>
           <View style={tw`flex-row items-center justify-between mb-4`}>
@@ -47,6 +46,6 @@ export default function HelpSettingsScreen() {
           ))}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -1,22 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    Animated,
-    ScrollView,
-    Alert,
-    ActivityIndicator,
-    Linking,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useBLE } from '@/hooks/useBLE';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import tw from 'twrnc';
-import { router } from 'expo-router';
-import { Device } from 'react-native-ble-plx';
 import * as Location from 'expo-location';
-import { useBLE } from '@/hooks/useBLE';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Animated,
+    Linking,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { Device } from 'react-native-ble-plx';
+import tw from 'twrnc';
 
 export default function ConnectToDeviceScreen() {
     const {
@@ -230,7 +229,7 @@ export default function ConnectToDeviceScreen() {
     };
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-white`}>
+        <View style={tw`flex-1 bg-white`}>
             {/* Header */}
             <View style={tw`px-6 py-10 border-b border-gray-100 bg-blue-600 relative -top-6`}>
                 <View style={tw`flex-row items-center justify-between`}>
@@ -487,6 +486,6 @@ export default function ConnectToDeviceScreen() {
                     </ScrollView>
                 </View>
             </Animated.View>
-        </SafeAreaView>
+        </View>
     );
 }

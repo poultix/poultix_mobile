@@ -1,22 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    View,
+    Alert,
+    Animated,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
-    KeyboardAvoidingView,
-    Platform,
-    Animated,
-    Alert,
-    ScrollView,
     TouchableWithoutFeedback,
-    Keyboard,
+    View,
 } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';
@@ -100,7 +98,7 @@ export default function VerifyCodeScreen() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+        <View style={{ flex: 1, backgroundColor: 'white' }}>
             <StatusBar style="dark" />
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
@@ -234,6 +232,6 @@ export default function VerifyCodeScreen() {
                     </ScrollView>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 }

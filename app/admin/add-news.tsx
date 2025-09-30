@@ -1,22 +1,22 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
-  View,
+  Alert,
+  Animated,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Animated,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from 'react-native'
-import { SafeAreaView } from "react-native-safe-area-context"
-import { Ionicons } from '@expo/vector-icons'
-import { LinearGradient } from 'expo-linear-gradient'
-import * as Haptics from 'expo-haptics'
-import tw from 'twrnc'
-import { router } from 'expo-router'
+ 
 import { News, NewsPriority } from '@/types'
+import { Ionicons } from '@expo/vector-icons'
+import * as Haptics from 'expo-haptics'
+import { LinearGradient } from 'expo-linear-gradient'
+import { router } from 'expo-router'
+import tw from 'twrnc'
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext'
@@ -163,7 +163,7 @@ export default function AddNewsScreen() {
   ]
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+    <View style={tw`flex-1 bg-gray-50`}>
       
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -353,6 +353,6 @@ export default function AddNewsScreen() {
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   )
 }

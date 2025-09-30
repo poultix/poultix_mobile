@@ -1,22 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-  Animated,
-} from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
-import tw from 'twrnc';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Animated,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import tw from 'twrnc';
 // New context imports
-import { useNews } from '@/contexts/NewsContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNews } from '@/contexts/NewsContext';
 
 export default function NewsScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
@@ -71,14 +69,14 @@ export default function NewsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+      <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <Text style={tw`text-gray-600 text-lg`}>Loading news...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+    <View style={tw`flex-1 bg-gray-50`}>
       <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
       
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
@@ -197,6 +195,6 @@ export default function NewsScreen() {
           </Animated.View>
         </ScrollView>
       </Animated.View>
-    </SafeAreaView>
+    </View>
   );
 }

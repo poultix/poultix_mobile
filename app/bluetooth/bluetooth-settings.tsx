@@ -1,15 +1,13 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
-    View,
+    Animated,
     Text,
     TouchableOpacity,
-    Animated,
+    View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
 import tw from 'twrnc';
-import { router } from 'expo-router';
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BluetoothSettingsScreen() {
     
@@ -65,7 +63,7 @@ export default function BluetoothSettingsScreen() {
     };
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-white`}>
+        <View style={tw`flex-1 bg-white`}>
             <Animated.View
                 style={[
                     tw`flex-1 px-6 pt-8 pb-16 relative`,
@@ -157,6 +155,6 @@ export default function BluetoothSettingsScreen() {
 
           
             </Animated.View>
-        </SafeAreaView>
+        </View>
     );
 }

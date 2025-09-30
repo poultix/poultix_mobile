@@ -3,6 +3,7 @@ import { User, UserRole } from '@/types/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Alert } from 'react-native';
 
 
 // Context types
@@ -62,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 } else if (role === 'VETERINARY') {
                     router.replace('/dashboard/veterinary-dashboard');
                 }
-            }else{
+            } else {
                 router.push('/auth/login')
             }
         } catch (error) {
@@ -75,7 +76,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const login = async (email: string, password: string): Promise<void> => {
         try {
             setLoading(true)
+            console.log(email, password)
             const { user, token } = await MockAuthService.signIn(email, password);
+            console.log("user", user)
             // Store in AsyncStorage
             await AsyncStorage.setItem('token', token);
             await AsyncStorage.setItem('userEmail', email);
@@ -83,9 +86,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setAuthenticated(true)
             setCurrentUser(user)
             setLoading(false)
+
+            switch (currentUser?.role) {
+                case 'ADMIN': router.replace('/dashboard/admin-dashboard'); break
+                case 'FARMER': router.replace('/dashboard/farmer-dashboard'); break
+                case 'VETERINARY': router.replace('/dashboard/veterinary-dashboard'); break
+                default: router.replace('/')
+            }
         } catch (error) {
             setError('Login failed' + error)
             setLoading(false)
+            Alert.alert('Login failed', "" + error)
         }
     };
 

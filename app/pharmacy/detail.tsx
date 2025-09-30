@@ -1,21 +1,19 @@
+import { usePharmacies } from '@/contexts/PharmacyContext';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Linking from 'expo-linking';
+import { router } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import {
-    View,
+    Alert,
+    Animated,
+    ScrollView,
     Text,
     TouchableOpacity,
-    ScrollView,
-    Animated,
-    Alert,
+    View,
 } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker } from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import * as Linking from 'expo-linking';
 import tw from 'twrnc';
-import { router } from 'expo-router';
-import { usePharmacies } from '@/contexts/PharmacyContext';
-import { LinearGradient } from 'expo-linear-gradient';
 
 export default function PharmacyDetailScreen() {
     const { currentPharmacy, loading } = usePharmacies();
@@ -48,14 +46,14 @@ export default function PharmacyDetailScreen() {
 
     if (loading || !currentPharmacy) {
         return (
-            <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+            <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Loading pharmacy details...</Text>
-            </SafeAreaView>
+            </View>
         );
     }
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+        <View style={tw`flex-1 bg-gray-50`}>
             <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
                 {/* Header */}
                 <View style={tw`px-4 pt-2 pb-4`}>
@@ -216,6 +214,6 @@ export default function PharmacyDetailScreen() {
                     </View>
                 </ScrollView>
             </Animated.View>
-        </SafeAreaView>
+        </View>
     );
 }

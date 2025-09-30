@@ -1,22 +1,21 @@
-import React from 'react';
-import { Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { apiClient } from '@/services/client';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { apiClient } from '@/services/client';
-import { SafeAreaView } from "react-native-safe-area-context";
+import React from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function NetworkErrorScreen() {
     const onRetry = async () => {
         try {
             const response = await apiClient.get('/ping')
-            if (response.status == 200) router.push('/' )
+            if (response.status === 200) router.push('/' )
         } catch (error) {
             if (error instanceof Error) Alert.alert('Network Error!', 'Make sure you are connected to internet and try again.')
         }
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <MaterialIcons name="wifi-off" size={80} color="#d9534f" />
             <Text style={styles.title}>Network Error</Text>
             <Text style={styles.subtitle}>Please check your internet connection and try again.</Text>
@@ -25,7 +24,7 @@ export default function NetworkErrorScreen() {
                 onPress={() => { onRetry() }}>
                 <Text style={styles.buttonText}>Retry</Text>
             </TouchableOpacity>
-        </SafeAreaView>
+        </View>
     );
 };
 

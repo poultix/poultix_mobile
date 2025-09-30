@@ -1,4 +1,9 @@
+import CustomDrawer from '@/components/CustomDrawer';
+import DrawerButton from '@/components/DrawerButton';
 import { IOSDesign } from '@/constants/iosDesign';
+import { useDrawer } from '@/contexts/DrawerContext';
+import { AIMessage, AIService, QUICK_SUGGESTIONS } from '@/services/ai/aiService';
+import { LocalAIService } from '@/services/ai/localAIService';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
@@ -15,12 +20,6 @@ import {
     View,
 } from 'react-native';
 import tw from 'twrnc';
-import { SafeAreaView } from "react-native-safe-area-context";
-import CustomDrawer from '@/components/CustomDrawer';
-import DrawerButton from '@/components/DrawerButton';
-import { useDrawer } from '@/contexts/DrawerContext';
-import { AIMessage, AIService, QUICK_SUGGESTIONS } from '@/services/ai/aiService';
-import { LocalAIService } from '@/services/ai/localAIService';
 
 export default function AIScreen() {
     
@@ -191,7 +190,7 @@ export default function AIScreen() {
     };
 
     return (
-        <SafeAreaView style={[tw`flex-1`, { backgroundColor: IOSDesign.colors.background.primary }]}>
+        <View style={[tw`flex-1`, { backgroundColor: IOSDesign.colors.background.primary }]}>
             <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
             
             <KeyboardAvoidingView 
@@ -371,6 +370,6 @@ export default function AIScreen() {
                     </View>
                 </Animated.View>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 }

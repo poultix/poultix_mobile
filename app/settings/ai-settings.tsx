@@ -1,19 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { IOSDesign } from '@/constants/iosDesign';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    View,
-    Text,
-    TouchableOpacity,
-    ScrollView,
     Alert,
     Animated,
-    Switch,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import * as Haptics from 'expo-haptics';
 import tw from 'twrnc';
-import { IOSDesign } from '@/constants/iosDesign';
 
 // Import local AI services  
 import { LocalAIService, PH_DISEASE_DATABASE } from '@/services/ai/localAIService';
@@ -87,7 +85,7 @@ export default function AISettingsScreen() {
   ];
 
   return (
-    <SafeAreaView style={[tw`flex-1`, { backgroundColor: IOSDesign.colors.background.primary }]}>
+    <View style={[tw`flex-1`, { backgroundColor: IOSDesign.colors.background.primary }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Animated.View style={{
           opacity: fadeAnim,
@@ -428,6 +426,6 @@ export default function AISettingsScreen() {
           </View>
         </Animated.View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

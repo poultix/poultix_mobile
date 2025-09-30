@@ -1,23 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
+import CustomDrawer from '@/components/CustomDrawer';
+import DrawerButton from '@/components/DrawerButton';
+import { useAuth } from '@/contexts/AuthContext';
+import { useDrawer } from '@/contexts/DrawerContext';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    View,
-    Text,
-    TouchableOpacity,
-    ScrollView,
-    TextInput,
     Alert,
     Animated,
     Linking,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
-import { router } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
-import { SafeAreaView } from "react-native-safe-area-context";
-import DrawerButton from '@/components/DrawerButton';
-import CustomDrawer from '@/components/CustomDrawer';
-import { useDrawer } from '@/contexts/DrawerContext';
+ ;
 
 interface Veterinary {
     id: string;

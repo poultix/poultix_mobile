@@ -1,27 +1,26 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-  Alert,
-} from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
+import BottomTabs from '@/components/BottomTabs';
+import CustomDrawer from '@/components/CustomDrawer';
+import DrawerButton from '@/components/DrawerButton';
+import { useBottomTabsContext } from '@/contexts/BottomTabsContext';
+import { useDrawer } from '@/contexts/DrawerContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import CustomDrawer from '@/components/CustomDrawer';
-import { useDrawer } from '@/contexts/DrawerContext';
-import DrawerButton from '@/components/DrawerButton';
-import BottomTabs from '@/components/BottomTabs';
-import { useBottomTabsContext } from '@/contexts/BottomTabsContext';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Alert,
+    Animated,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 
 // Context and hook imports
+import FarmsDashboard from '@/components/dashboard/farmer/farms';
+import FarmerOverview from '@/components/dashboard/farmer/overview';
+import FarmerSchedulesDashboard from '@/components/dashboard/farmer/schedules';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
-import FarmerOverview from '@/components/dashboard/farmer/overview';
-import FarmsDashboard from '@/components/dashboard/farmer/farms';
-import FarmerSchedulesDashboard from '@/components/dashboard/farmer/schedules';
 
 
 export default function FarmerDashboardScreen() {
@@ -56,10 +55,10 @@ export default function FarmerDashboardScreen() {
 
   if (!currentUser || currentUser.role !== 'FARMER') {
     return (
-      <SafeAreaView className={`flex-1 bg-gray-50 justify-center items-center`}>
+      <View className={`flex-1 bg-gray-50 justify-center items-center`}>
         <Ionicons name="lock-closed-outline" size={64} color="#6B7280" />
         <Text className={`text-gray-600 text-lg mt-4`}>Access Denied</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 

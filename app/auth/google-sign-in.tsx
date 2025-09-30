@@ -5,10 +5,10 @@ import * as Google from 'expo-auth-session/providers/google';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image,  Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 import { IOSDesign } from '../../constants/iosDesign';
 import { GoogleAuthConfig, getConfigurationStatus } from './googleAuthConfig';
-import { SafeAreaView } from "react-native-safe-area-context";
+ ;
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -179,7 +179,7 @@ export default function SignInWithGoogleScreen() {
     };
 
     return (
-        <SafeAreaView style={{
+        <View style={{
             flex: 1,
             backgroundColor: IOSDesign.colors.background.primary,
         }}>
@@ -363,6 +363,6 @@ export default function SignInWithGoogleScreen() {
                     </View>
                 )}
             </View>
-        </SafeAreaView>
+        </View>
     );
 }

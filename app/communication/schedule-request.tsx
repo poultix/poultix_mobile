@@ -1,27 +1,26 @@
-import React, { useState, useRef, useEffect } from 'react';
+import CustomDrawer from '@/components/CustomDrawer';
+import { useDrawer } from '@/contexts/DrawerContext';
+import { SchedulePriority, ScheduleStatus, ScheduleType } from '@/types/schedule';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    View,
+    Alert,
+    Animated,
+    ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
-    ScrollView,
-    Alert,
-    Animated,
+    View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
-import { router } from 'expo-router';
-import { SafeAreaView } from "react-native-safe-area-context";
-import CustomDrawer from '@/components/CustomDrawer';
-import { useDrawer } from '@/contexts/DrawerContext';
-import { ScheduleType, SchedulePriority, ScheduleStatus } from '@/types/schedule';
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';
 import { useSchedules } from '@/contexts/ScheduleContext';
-import { useScheduleActions } from '@/hooks/useScheduleActions';
 import { useUsers } from '@/contexts/UserContext';
+import { useScheduleActions } from '@/hooks/useScheduleActions';
 
 export default function ScheduleRequestScreen() {
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
@@ -96,14 +95,14 @@ export default function ScheduleRequestScreen() {
 
     if (loading || !currentUser) {
         return (
-            <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+            <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Loading...</Text>
-            </SafeAreaView>
+            </View>
         );
     }
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+        <View style={tw`flex-1 bg-gray-50`}>
             <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
             
             <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
@@ -253,6 +252,6 @@ export default function ScheduleRequestScreen() {
                     </TouchableOpacity>
                 </ScrollView>
             </Animated.View>
-        </SafeAreaView>
+        </View>
     );
 }

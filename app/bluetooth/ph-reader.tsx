@@ -1,22 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { LocalAIService } from '@/services/ai/localAIService';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-  Alert,
-  Vibration,
-  Dimensions,
+    Alert,
+    Animated,
+    Dimensions,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    Vibration,
+    View,
 } from 'react-native';
 import tw from 'twrnc';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LocalAIService, PH_DISEASE_DATABASE } from '@/services/ai/localAIService';
-import { router } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -288,7 +287,7 @@ export default function PoultryPHInputScreen() {
   );
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+    <View style={tw`flex-1 bg-gray-50`}>
 
       <ScrollView contentContainerStyle={tw`pb-20 `} showsVerticalScrollIndicator={false}>
         <Animated.View style={{ opacity: fadeAnim }}>
@@ -591,6 +590,6 @@ export default function PoultryPHInputScreen() {
 
         </Animated.View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

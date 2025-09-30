@@ -1,24 +1,23 @@
-import React, { useEffect, useState, useRef } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    ScrollView,
-    Animated,
-    TextInput,
-    Platform,
-    ActivityIndicator,
-    Alert,
-} from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Linking from 'expo-linking';
 import * as Location from 'expo-location';
-import tw from 'twrnc';
 import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Animated,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import tw from 'twrnc';
 
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
@@ -179,7 +178,7 @@ const PharmaciesScreen = () => {
     }
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+        <View style={tw`flex-1 bg-gray-50`}>
 
             <ScrollView
                 style={tw`flex-1`}
@@ -379,7 +378,7 @@ const PharmaciesScreen = () => {
                 isVisible={isDrawerVisible}
                 onClose={() => setIsDrawerVisible(false)}
             />
-        </SafeAreaView>
+        </View>
     );
 };
 

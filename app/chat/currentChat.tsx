@@ -1,26 +1,25 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    ScrollView,
-    KeyboardAvoidingView,
-    Animated,
-} from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from '@expo/vector-icons';
-import tw from 'twrnc';
+import ChatHeader from '@/components/chat/header';
+import ChatMessage from '@/components/chat/message';
+import ChatReactions from '@/components/chat/reactions';
+import ChatSender from '@/components/chat/sender';
+import CustomDrawer from '@/components/CustomDrawer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
+import { useDrawer } from '@/contexts/DrawerContext';
 import { useUsers } from '@/contexts/UserContext';
 import { useChatActions } from '@/hooks/useChatActions';
-import CustomDrawer from '@/components/CustomDrawer';
-import { useDrawer } from '@/contexts/DrawerContext';
 import { Message } from '@/types';
-import ChatMessage from '@/components/chat/message';
-import ChatSender from '@/components/chat/sender';
-import ChatHeader from '@/components/chat/header';
-import ChatReactions from '@/components/chat/reactions';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Animated,
+    KeyboardAvoidingView,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import tw from 'twrnc';
 
 export default function ChatScreen() {
     const { currentUser } = useAuth();
@@ -81,9 +80,9 @@ export default function ChatScreen() {
 
     if (!isValidChatScenario()) {
         return (
-            <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+            <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Chat not found</Text>
-            </SafeAreaView>
+            </View>
         );
     }
 

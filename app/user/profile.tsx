@@ -1,20 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
-  Alert,
-  Animated,
-} from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
+import DrawerButton from '@/components/DrawerButton';
+import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import tw from 'twrnc';
 import { router } from 'expo-router';
-import { useAuth} from '@/contexts/AuthContext';
-import DrawerButton from '@/components/DrawerButton';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Alert,
+    Animated,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import tw from 'twrnc';
 
 export default function ProfileScreen() {
   const { currentUser,logout } = useAuth();
@@ -83,9 +82,9 @@ export default function ProfileScreen() {
 
   if (!currentUser) {
     return (
-      <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+      <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <Text style={tw`text-gray-600`}>Please log in to view profile</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 

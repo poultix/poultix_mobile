@@ -3,7 +3,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { IOSDesign, getRoleColor } from '../../constants/iosDesign';
-import { SafeAreaView } from "react-native-safe-area-context";
 
 interface User {
     id: string;
@@ -141,30 +140,30 @@ export default function UserDetailScreen() {
 
     if (loading) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: IOSDesign.colors.background.primary }}>
+            <View style={{ flex: 1, backgroundColor: IOSDesign.colors.background.primary }}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ ...IOSDesign.typography.body, color: IOSDesign.colors.text.secondary }}>
                         Loading user details...
                     </Text>
                 </View>
-            </SafeAreaView>
+            </View>
         );
     }
 
     if (!user) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: IOSDesign.colors.background.primary }}>
+            <View style={{ flex: 1, backgroundColor: IOSDesign.colors.background.primary }}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ ...IOSDesign.typography.body, color: IOSDesign.colors.text.secondary }}>
                         User not found
                     </Text>
                 </View>
-            </SafeAreaView>
+            </View>
         );
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: IOSDesign.colors.background.secondary }}>
+        <View style={{ flex: 1, backgroundColor: IOSDesign.colors.background.secondary }}>
             {/* Header */}
             <View style={{
                 flexDirection: 'row',
@@ -462,6 +461,6 @@ export default function UserDetailScreen() {
                     </View>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }

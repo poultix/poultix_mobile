@@ -1,25 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    View,
-    Text,
-    TouchableOpacity,
-    ScrollView,
-    TextInput,
     Animated,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
 
+import CustomDrawer from '@/components/CustomDrawer';
+import DrawerButton from '@/components/DrawerButton';
+import { useAuth } from '@/contexts/AuthContext';
+import { useChat } from '@/contexts/ChatContext';
+import { useDrawer } from '@/contexts/DrawerContext';
+import { useUsers } from '@/contexts/UserContext';
+import { User, UserRole } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import tw from 'twrnc';
 import { router } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
-import { useUsers } from '@/contexts/UserContext';
-import { useChat } from '@/contexts/ChatContext';
-import DrawerButton from '@/components/DrawerButton';
-import CustomDrawer from '@/components/CustomDrawer';
-import { useDrawer } from '@/contexts/DrawerContext';
-import { User, UserRole } from '@/types';
+import tw from 'twrnc';
 
 export default function ChatScreen() {
     const { currentUser } = useAuth();
@@ -140,9 +139,9 @@ export default function ChatScreen() {
 
     if (loading) {
         return (
-            <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+            <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Loading users...</Text>
-            </SafeAreaView>
+            </View>
         );
     }
 

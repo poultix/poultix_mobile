@@ -1,20 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    View,
+    ActivityIndicator,
+    Alert,
+    Animated,
+    ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
-    ScrollView,
-    Animated,
-    Alert,
-    ActivityIndicator,
+    View,
 } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import tw from 'twrnc';
-import { router } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
+ ;
 
 export default function ForgotPasswordScreen() {
     const [email, setEmail] = useState('');
@@ -68,7 +68,7 @@ export default function ForgotPasswordScreen() {
     };
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-white`}>
+        <View style={tw`flex-1 bg-white`}>
             <ScrollView
                 contentContainerStyle={tw`flex-grow`}
                 keyboardShouldPersistTaps="handled"
@@ -88,7 +88,7 @@ export default function ForgotPasswordScreen() {
                             Forgot Password?
                         </Text>
                         <Text style={tw`text-white/90 text-base leading-6`}>
-                            Enter your email address and we'll send you instructions to reset your password.
+                            Enter your email address and we&apos;ll send you instructions to reset your password.
                         </Text>
                     </View>
 
@@ -163,6 +163,6 @@ export default function ForgotPasswordScreen() {
                     </View>
                 </Animated.View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }

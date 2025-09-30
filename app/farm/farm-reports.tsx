@@ -1,9 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import {router } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { IOSDesign } from '../../constants/iosDesign';
-import { SafeAreaView } from "react-native-safe-area-context";
 
 interface Report {
     id: string; 
@@ -138,7 +137,7 @@ export default function FarmReportsScreen() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: IOSDesign.colors.background.secondary }}>
+        <View style={{ flex: 1, backgroundColor: IOSDesign.colors.background.secondary }}>
             {/* Header */}
             <View style={{
                 flexDirection: 'row',
@@ -407,6 +406,6 @@ export default function FarmReportsScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }

@@ -1,22 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  Animated,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from 'expo-linear-gradient';
-import tw from 'twrnc';
-import { router } from 'expo-router';
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
 import { FarmStatus } from '@/types/farm';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Alert,
+    Animated,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import tw from 'twrnc';
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';
@@ -121,9 +120,9 @@ export default function CreateFarmScreen() {
 
   if (loading || !currentUser) {
     return (
-      <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+      <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <Text style={tw`text-gray-600 text-lg`}>Loading...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 

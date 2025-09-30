@@ -1,23 +1,23 @@
-import React, { useEffect, useRef } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    ScrollView,
-    Animated,
-} from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import tw from 'twrnc';
 import { router } from 'expo-router';
+import React, { useEffect, useRef } from 'react';
+import {
+    Animated,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import tw from 'twrnc';
 
 // New context imports
-import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/contexts/AdminContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
-import { useUsers } from '@/contexts/UserContext';
 import { useNews } from '@/contexts/NewsContext';
+import { useUsers } from '@/contexts/UserContext';
+ ;
 
 export default function AdminDashboard() {
     const { currentUser } = useAuth();
@@ -38,21 +38,21 @@ export default function AdminDashboard() {
 
     if (loading || !currentUser) {
         return (
-            <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+            <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
                 <Text style={tw`text-gray-600 text-lg`}>Loading dashboard...</Text>
-            </SafeAreaView>
+            </View>
         );
     }
 
     return (
-        <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+        <View style={tw`flex-1 bg-gray-50`}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
                     {/* Header */}
-                    <View style={tw`px-4 pt-2 pb-4`}>
+                    <View style={tw` pb-4`}>
                         <LinearGradient
                             colors={['#7C3AED', '#5B21B6']}
-                            style={tw`rounded-3xl p-8 shadow-xl`}
+                            style={tw`p-8 shadow-xl`}
                         >
                             <View style={tw`flex-row items-center justify-between mb-4`}>
                                 <View style={tw`flex-1`}>
@@ -169,6 +169,6 @@ export default function AdminDashboard() {
                     </View>
                 </Animated.View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }

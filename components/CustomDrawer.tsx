@@ -16,7 +16,6 @@ import {
   View,
 } from 'react-native';
 import tw from 'twrnc';
-import { SafeAreaView } from "react-native-safe-area-context";
 
 interface DrawerItem {
   label: string;
@@ -159,7 +158,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
   const loadUserInfo = async () => {
     try {
       // This is a fallback - should primarily use AppContext
-      const role = await AsyncStorage.getItem('role') || 'farmer';
+      const role = await AsyncStorage.getItem('role') || 'FARMER';
       const email = await AsyncStorage.getItem('userEmail') || 'user@example.com';
       const name = email.split('@')[0];
 
@@ -174,7 +173,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
   };
 
   const filterItemsByRole = () => {
-    if (userInfo.role === 'admin') {
+    if (userInfo.role === 'ADMIN') {
       setFilteredItems(allDrawerItems);
     } else {
       setFilteredItems(allDrawerItems.filter(item => !item.adminOnly));
@@ -231,18 +230,18 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'admin': return 'shield';
-      case 'veterinary': return 'medical';
-      case 'farmer': return 'leaf';
+      case 'ADMIN': return 'shield';
+      case 'VETERINARY': return 'medical';
+      case 'FARMER': return 'leaf';
       default: return 'person';
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return '#7C3AED';
-      case 'veterinary': return '#EF4444';
-      case 'farmer': return '#10B981';
+      case 'ADMIN': return '#7C3AED';
+      case 'VETERINARY': return '#EF4444';
+      case 'FARMER': return '#10B981';
       default: return '#6B7280';
     }
   };
@@ -288,7 +287,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
           },
         ]}
       >
-        <SafeAreaView style={tw`flex-1`}>
+        <View style={tw`flex-1`}>
           {/* iOS-style Header */}
           <View style={[
             tw`px-4 py-3 border-b border-gray-100`,
@@ -320,7 +319,9 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
               </View>
               <View style={tw`flex-1`}>
                 <Text style={tw`text-lg font-semibold text-gray-900`}>{userInfo.name}</Text>
-                <Text style={tw`text-sm text-gray-500 capitalize`}>{userInfo.role}</Text>
+                <Text style={tw`text-sm text-gray-500`}>
+                  {userInfo.role.charAt(0) + userInfo.role.slice(1).toLowerCase()}
+                </Text>
               </View>
               <TouchableOpacity
                 onPress={() => handleItemPress('/user/profile')}
@@ -445,7 +446,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
               <Text style={tw`text-gray-400 text-xs`}>Poultix v2.0</Text>
             </View>
           </View>
-        </SafeAreaView>
+        </View>
       </Animated.View>
     </Modal>
   );

@@ -17,7 +17,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { StatusBar } from 'expo-status-bar'
 
 export default function SignInScreen() {
-    const { currentUser, loading: authLoading ,login} = useAuth()
+    const { currentUser, loading: authLoading, login } = useAuth()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -80,13 +80,7 @@ export default function SignInScreen() {
             Vibration.vibrate(20)
             if (authLoading) return
             await login(email.trim(), password.trim())
-
-            switch (currentUser?.role) {
-                case 'ADMIN': router.replace('/dashboard/admin-dashboard'); break
-                case 'FARMER': router.replace('/dashboard/farmer-dashboard'); break
-                case 'VETERINARY': router.replace('/dashboard/veterinary-dashboard'); break
-                default: router.replace('/')
-            }
+           
         } catch (error) {
             setIsLoading(false)
             const errorMessage = error instanceof Error ? error.message : 'Authentication failed'
@@ -216,7 +210,7 @@ export default function SignInScreen() {
                                     end={{ x: 1, y: 0 }}
                                     className="w-full h-full items-center justify-center"
                                 >
-                                    {authLoading? (
+                                    {authLoading ? (
                                         <View className="flex-row items-center">
                                             <ActivityIndicator size="small" color="white" />
                                             <Text className="text-white font-semibold text-lg ml-2">Signing In...</Text>

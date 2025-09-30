@@ -1,27 +1,22 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-  Dimensions,
-  Platform,
-  ActivityIndicator,
-  Alert,
-  FlatList,
-} from 'react-native';
-import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
-import tw from 'twrnc';
-import { Farm, FarmStatus } from '@/types/farm';
-import { User } from '@/types/user';
 import CustomDrawer from '@/components/CustomDrawer';
-import { useDrawer } from '@/contexts/DrawerContext';
 import DrawerButton from '@/components/DrawerButton';
+import { useDrawer } from '@/contexts/DrawerContext';
+import { Farm, FarmStatus } from '@/types/farm';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+    ActivityIndicator,
+    Animated,
+    Dimensions,
+    FlatList,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import tw from 'twrnc';
 
 
 // New context imports
@@ -134,18 +129,18 @@ export default function FarmDataScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+      <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <View style={tw`items-center`}>
           <ActivityIndicator size="large" color="#10B981" />
           <Text style={tw`text-gray-600 text-lg mt-4`}>Loading farms...</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (!farms || farms.length === 0) {
     return (
-      <SafeAreaView style={tw`flex-1 bg-gray-50 justify-center items-center`}>
+      <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <View style={tw`items-center p-8`}>
           <Ionicons name="home-outline" size={64} color="#9CA3AF" />
           <Text style={tw`text-gray-600 text-lg mt-4`}>No farms available</Text>
@@ -153,7 +148,7 @@ export default function FarmDataScreen() {
             Farms will appear here once they are registered in the system
           </Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
