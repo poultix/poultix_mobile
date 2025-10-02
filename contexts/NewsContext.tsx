@@ -1,25 +1,15 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { News, NewsPriority } from '@/types/news';
-import { User } from '@/types/user';
-import { MockDataService } from '@/services/mockData';
+import { newsService } from '@/services/api';
+import type { NewsCreateRequest, NewsUpdateRequest } from '@/services/api';
 
 // News state interface
 interface NewsState {
   news: News[];
   currentNews: News | null;
-  isLoading: boolean;
+  loading: boolean;
   error: string | null;
 }
-
-// News actions
-type NewsAction =
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SET_NEWS'; payload: News[] }
-  | { type: 'ADD_NEWS'; payload: News }
-  | { type: 'UPDATE_NEWS'; payload: News }
-  | { type: 'DELETE_NEWS'; payload: string }
-  | { type: 'SET_CURRENT_NEWS'; payload: News | null };
 
 // Context types
 interface NewsContextType {
@@ -27,9 +17,12 @@ interface NewsContextType {
   currentNews: News | null;
   loading: boolean;
   error: string | null;
-  addNews: (news: News) => void;
-  editNews: (news: News) => void;
-  deleteNews: (title: string) => void;
+
+  // API operations
+  createNews: (authorId: string, newsData: NewsCreateRequest) => Promise<void>;
+  getNewsById: (id: string) => Promise<News | null>;
+  updateNews: (id: string, updates: NewsUpdateRequest) => Promise<void>;
+  deleteNews: (id: string) => Promise<void>;
   setCurrentNews: (news: News | null) => void;
   refreshNews: () => Promise<void>;
 }
@@ -51,29 +44,102 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const loadNews = async () => {
     try {
-
-      const news = await MockDataService.getNews();
-      setNews(news)
-    } catch (error) {
+      setLoading(true);
+      setError('');
+      
+      const response = await newsService.getAllNews();
+      
+      if (response.success && response.data) {
+        setNews(response.data);
+      } else {
+        throw new Error(response.message || 'Failed to load news');
+      }
+    } catch (error: any) {
+      console.error('Failed to load news:', error);
+      setError(error.message || 'Failed to load news');
+    } finally {
+      setLoading(false);
     }
   };
 
 
-  const addNews = (news: News) => {
-    setNews((prev) => [...prev, news])
+  const createNews = async (authorId: string, newsData: NewsCreateRequest): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await newsService.createNews(authorId, newsData);
+      
+      if (response.success && response.data) {
+        setNews(prev => [...prev, response.data!]);
+      } else {
+        throw new Error(response.message || 'Failed to create news');
+      }
+    } catch (error: any) {
+      console.error('Failed to create news:', error);
+      setError(error.message || 'Failed to create news');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const getNewsById = async (id: string): Promise<News | null> => {
+    try {
+      const response = await newsService.getNewsById(id);
+      
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      console.error('Failed to get news by ID:', error);
+      setError(error.message || 'Failed to get news');
+      return null;
+    }
   };
 
-  const editNews = (news: News) => {
-    setNews((prev) => prev.map(newsItem =>
-      newsItem.title === news.title ? news : newsItem
-    ))
+  const updateNews = async (id: string, updates: NewsUpdateRequest): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await newsService.updateNews(id, updates);
+      
+      if (response.success && response.data) {
+        setNews(prev => prev.map(article => article.id === id ? response.data! : article));
+      } else {
+        throw new Error(response.message || 'Failed to update news');
+      }
+    } catch (error: any) {
+      console.error('Failed to update news:', error);
+      setError(error.message || 'Failed to update news');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const deleteNews = (title: string) => {
-    setNews((prev) => prev.filter(newsItem => newsItem.title !== title))
+  const deleteNews = async (id: string): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await newsService.deleteNews(id);
+      
+      if (response.success) {
+        setNews(prev => prev.filter(article => article.id !== id));
+      } else {
+        throw new Error(response.message || 'Failed to delete news');
+      }
+    } catch (error: any) {
+      console.error('Failed to delete news:', error);
+      setError(error.message || 'Failed to delete news');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
-
-
 
   const refreshNews = async (): Promise<void> => {
     await loadNews();
@@ -84,8 +150,9 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
     currentNews,
     loading,
     error,
-    addNews,
-    editNews,
+    createNews,
+    getNewsById,
+    updateNews,
     deleteNews,
     setCurrentNews,
     refreshNews,

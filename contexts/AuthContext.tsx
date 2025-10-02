@@ -1,6 +1,6 @@
-import { MockAuthService } from '@/services/mockData';
+import { authService } from '@/services/api';
+import type { UserRegistrationRequest, UserLoginRequest } from '@/services/api';
 import { User, UserRole } from '@/types/user';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
@@ -14,9 +14,16 @@ interface AuthContextType {
     error: string;
     logout: () => Promise<void>
     login: (email: string, password: string) => Promise<void>
-    signUp: (email: string, password: string, name: string, role: string) => Promise<void>
+    signUp: (email: string, password: string, name: string, role:UserRole) => Promise<void>
     forgotPassword: (email: string) => Promise<void>
-    verifyCode: (email: string, code: string) => Promise<void>
+    verifyCode: (verificationToken: string) => Promise<void>
+    resetPassword: (resetCode: string, newPassword: string) => Promise<void>
+    resendVerification: (email: string) => Promise<void>
+    refreshToken: () => Promise<void>
+    // Dev helpers
+    loginAsFarmer: () => Promise<void>
+    loginAsVeterinary: () => Promise<void>
+    loginAsAdmin: () => Promise<void>
 }
 
 // Create contexts
@@ -37,111 +44,295 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const checkAuthStatus = async () => {
         try {
             setLoading(true)
-            const token = await AsyncStorage.getItem('token');
-            const userEmail = await AsyncStorage.getItem('userEmail');
-            const role = await AsyncStorage.getItem('role');
-
-            if (token && userEmail && role) {
-                // Create user object from stored data
-                const user: User = {
-                    id: `user_${Date.now()}`,
-                    email: userEmail,
-                    name: userEmail.split('@')[0],
-                    role: role as UserRole,
-                    phone: '+250 788 000 000',
-                    location: 'Rwanda',
-                    createdAt: new Date(),
-                    isActive: true,
-                };
-                setAuthenticated(true)
-                setCurrentUser(user)
-
-                if (role === 'ADMIN') {
-                    router.replace('/dashboard/admin-dashboard');
-                } else if (role === 'FARMER') {
-                    router.replace('/dashboard/farmer-dashboard');
-                } else if (role === 'VETERINARY') {
-                    router.replace('/dashboard/veterinary-dashboard');
+            setError('');
+            
+            const isAuth = await authService.isAuthenticated();
+            const isTokenValid = await authService.isTokenValid();
+            
+            if (isAuth && isTokenValid) {
+                // Get user info from JWT token
+                const userInfo = await authService.getCurrentUserFromToken();
+                
+                if (userInfo) {
+                    const user: User = {
+                        id: userInfo.id,
+                        email: userInfo.email,
+                        name: userInfo.name,
+                        role: userInfo.role as UserRole,
+                        phone: '',
+                        location: '',
+                        createdAt: new Date(),
+                        isActive: true,
+                    };
+                    
+                    setAuthenticated(true)
+                    setCurrentUser(user)
+                    
+                    // Navigate based on role
+                    navigateByRole(user.role);
+                } else {
+                    // Token invalid, clear and redirect
+                    await authService.logout();
+                    setAuthenticated(false);
+                    setCurrentUser(null);
+                    router.push('/auth/login');
+                }
+            } else if (isAuth && !isTokenValid) {
+                // Try to refresh token
+                try {
+                    await authService.refreshToken();
+                    // Retry auth check
+                    await checkAuthStatus();
+                    return;
+                } catch (refreshError) {
+                    // Refresh failed, logout
+                    await authService.logout();
+                    setAuthenticated(false);
+                    setCurrentUser(null);
+                    router.push('/auth/login');
                 }
             } else {
-                router.push('/auth/login')
+                // Not authenticated
+                setAuthenticated(false);
+                setCurrentUser(null);
+                router.push('/auth/login');
             }
         } catch (error) {
-            setError('Failed to check auth status');
+            console.error('Auth status check failed:', error);
+            setError('Failed to check authentication status');
+            setAuthenticated(false);
+            setCurrentUser(null);
+            router.push('/auth/login');
         } finally {
             setLoading(false)
+        }
+    };
+    
+    const navigateByRole = (role: UserRole) => {
+        switch (role) {
+            case 'ADMIN':
+                router.replace('/dashboard/admin-dashboard');
+                break;
+            case 'FARMER':
+                router.replace('/dashboard/farmer-dashboard');
+                break;
+            case 'VETERINARY':
+                router.replace('/dashboard/veterinary-dashboard');
+                break;
+            default:
+                router.replace('/');
         }
     };
 
     const login = async (email: string, password: string): Promise<void> => {
         try {
-            setLoading(true)
-            console.log(email, password)
-            const { user, token } = await MockAuthService.signIn(email, password);
-            console.log("user", user)
-            // Store in AsyncStorage
-            await AsyncStorage.setItem('token', token);
-            await AsyncStorage.setItem('userEmail', email);
-            await AsyncStorage.setItem('role', user.role);
-            setAuthenticated(true)
-            setCurrentUser(user)
-            setLoading(false)
-
-            switch (currentUser?.role) {
-                case 'ADMIN': router.replace('/dashboard/admin-dashboard'); break
-                case 'FARMER': router.replace('/dashboard/farmer-dashboard'); break
-                case 'VETERINARY': router.replace('/dashboard/veterinary-dashboard'); break
-                default: router.replace('/')
+            setLoading(true);
+            setError('');
+            
+            const loginData: UserLoginRequest = { email, password };
+            const response = await authService.login(loginData);
+            
+            if (response.success && response.data) {
+                const authData = response.data;
+                
+                // Create user object from API response
+                const user: User = {
+                    id: authData.user.id,
+                    email: authData.user.email,
+                    name: authData.user.name,
+                    role: authData.user.role,
+                    phone: authData.user.phone || '',
+                    location: authData.user.location || '',
+                    createdAt: new Date(),
+                    isActive: authData.user.isActive,
+                };
+                
+                setAuthenticated(true);
+                setCurrentUser(user);
+                
+                // Navigate based on role
+                navigateByRole(user.role);
+                
+                Alert.alert('Success', 'Login successful!');
+            } else {
+                throw new Error(response.message || 'Login failed');
             }
-        } catch (error) {
-            setError('Login failed' + error)
-            setLoading(false)
-            Alert.alert('Login failed', "" + error)
+        } catch (error: any) {
+            const errorMessage = error.message || 'Login failed. Please try again.';
+            setError(errorMessage);
+            Alert.alert('Login Failed', errorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
     const logout = async (): Promise<void> => {
         try {
-
-            await MockAuthService.logout();
-            setCurrentUser(null)
-            router.push('/auth/login')
-        } catch (error) {
-            setError('Logout failed')
+            setLoading(true);
+            
+            // Call API logout (this clears server-side tokens)
+            await authService.logout();
+            
+            // Clear local state
+            setAuthenticated(false);
+            setCurrentUser(null);
+            setError('');
+            
+            // Navigate to login
+            router.push('/auth/login');
+        } catch (error: any) {
+            // Even if API call fails, clear local state
+            setAuthenticated(false);
+            setCurrentUser(null);
+            setError('');
+            router.push('/auth/login');
+            
+            console.error('Logout error:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const signUp = async (email: string, password: string, name: string, role: string): Promise<void> => {
+    const signUp = async (email: string, password: string, name: string, role: UserRole): Promise<void> => {
         try {
-            setLoading(true)
-            await MockAuthService.signUp(email, password, name, role);
-
-        } catch (error) {
-            setError("Signup")
+            setLoading(true);
+            setError('');
+            
+            const registrationData: UserRegistrationRequest = {
+                email,
+                password,
+                name,
+                role,
+            };
+            
+            const response = await authService.register(registrationData);
+            
+            if (response.success && response.data) {
+                const authData = response.data;
+                
+                // Create user object from API response
+                const user: User = {
+                    id: authData.user.id,
+                    email: authData.user.email,
+                    name: authData.user.name,
+                    role: authData.user.role,
+                    phone: authData.user.phone || '',
+                    location: authData.user.location || '',
+                    createdAt: new Date(),
+                    isActive: authData.user.isActive,
+                };
+                
+                setAuthenticated(true);
+                setCurrentUser(user);
+                
+                // Navigate based on role (registration includes auto-login)
+                navigateByRole(user.role);
+                
+                Alert.alert('Success', 'Registration successful! You are now logged in.');
+            } else {
+                throw new Error(response.message || 'Registration failed');
+            }
+        } catch (error: any) {
+            const errorMessage = error.message || 'Registration failed. Please try again.';
+            setError(errorMessage);
+            Alert.alert('Registration Failed', errorMessage);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
     };
 
     const forgotPassword = async (email: string): Promise<void> => {
         try {
             setLoading(true);
-            await MockAuthService.forgotPassword(email);
-
-        } catch (error) {
-            setLoading(false)
+            setError('');
+            
+            const response = await authService.forgotPassword({ email });
+            
+            if (response.success) {
+                Alert.alert('Success', 'Password reset instructions sent to your email.');
+            } else {
+                throw new Error(response.message || 'Failed to send reset email');
+            }
+        } catch (error: any) {
+            const errorMessage = error.message || 'Failed to send reset email. Please try again.';
+            setError(errorMessage);
+            Alert.alert('Error', errorMessage);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
     };
 
-    const verifyCode = async (email: string, code: string): Promise<void> => {
+    const verifyCode = async (verificationToken: string): Promise<void> => {
         try {
-            setLoading(true)
-            await MockAuthService.verifyCode(email, code);
-            setLoading(false)
-        } catch (error) {
-            setLoading(false)
+            setLoading(true);
+            setError('');
+            
+            const response = await authService.verifyEmail({ verificationToken });
+            
+            if (response.success) {
+                Alert.alert('Success', 'Email verified successfully!');
+            } else {
+                throw new Error(response.message || 'Email verification failed');
+            }
+        } catch (error: any) {
+            const errorMessage = error.message || 'Email verification failed. Please try again.';
+            setError(errorMessage);
+            Alert.alert('Verification Failed', errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const resetPassword = async (resetCode: string, newPassword: string): Promise<void> => {
+        try {
+            setLoading(true);
+            setError('');
+            
+            const response = await authService.resetPassword({ resetCode, newPassword });
+            
+            if (response.success) {
+                Alert.alert('Success', 'Password reset successful! Please login with your new password.');
+                router.push('/auth/login');
+            } else {
+                throw new Error(response.message || 'Password reset failed');
+            }
+        } catch (error: any) {
+            const errorMessage = error.message || 'Password reset failed. Please try again.';
+            setError(errorMessage);
+            Alert.alert('Reset Failed', errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const resendVerification = async (email: string): Promise<void> => {
+        try {
+            setLoading(true);
+            setError('');
+            
+            const response = await authService.resendVerification(email);
+            
+            if (response.success) {
+                Alert.alert('Success', 'Verification email sent!');
+            } else {
+                throw new Error(response.message || 'Failed to send verification email');
+            }
+        } catch (error: any) {
+            const errorMessage = error.message || 'Failed to send verification email. Please try again.';
+            setError(errorMessage);
+            Alert.alert('Error', errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const refreshToken = async (): Promise<void> => {
+        try {
+            await authService.refreshToken();
+        } catch (error: any) {
+            console.error('Token refresh failed:', error);
+            // Force logout on refresh failure
+            await logout();
         }
     };
 
@@ -153,20 +344,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
 
-    // Quick dev methods
+    // Quick dev methods (for testing)
     const loginAsFarmer = async (): Promise<void> => {
-        await MockAuthService.loginAsFarmer();
-        await checkAuthStatus();
+        await login('farmer@test.com', 'password123');
     };
 
     const loginAsVeterinary = async (): Promise<void> => {
-        await MockAuthService.loginAsVeterinary();
-        await checkAuthStatus();
+        await login('vet@test.com', 'password123');
     };
 
     const loginAsAdmin = async (): Promise<void> => {
-        await MockAuthService.loginAsAdmin();
-        await checkAuthStatus();
+        await login('admin@test.com', 'password123');
     };
 
     const contextValue: AuthContextType = {
@@ -179,6 +367,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signUp,
         forgotPassword,
         verifyCode,
+        resetPassword,
+        resendVerification,
+        refreshToken,
+        loginAsFarmer,
+        loginAsVeterinary,
+        loginAsAdmin,
     };
 
 

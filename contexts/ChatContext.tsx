@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { Message, TypingStatus, User } from '@/types'
+import { messageService } from '@/services/api'
+import type { MessageCreateRequest, MessageResponse } from '@/services/api'
 
 
 
 
-interface ChatContextTye {
+interface ChatContextType {
     messages: Message[]
     currentChat: User | null
     editMessage: Message | null
@@ -14,9 +16,14 @@ interface ChatContextTye {
     loading: boolean
     error: string | null
     unreadTotal: number
+    // API methods
+    sendMessage: (receiverId: string, content: string, messageType?: 'TEXT' | 'IMAGE' | 'FILE' | 'VOICE') => Promise<void>
+    getConversation: (user1Id: string, user2Id: string) => Promise<void>
+    getMessagesBySender: (senderId: string) => Promise<void>
+    deleteMessage: (messageId: string) => Promise<void>
+    // UI state methods
     addMessage: (data: Message) => void
     updateMessage: (data: Message) => void
-    deleteMessage: (data: number) => void
     setCurrentChat: (user: User | null) => void
     setCurrentMessage: (message: Message | null) => void
     setEditMessage: (message: Message | null) => void
@@ -27,7 +34,7 @@ interface ChatContextTye {
 
 
 // Context
-const ChatContext = createContext<ChatContextTye | undefined>(undefined)
+const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
 // Provider
 export function ChatProvider({ children }: { children: React.ReactNode }) {
@@ -55,26 +62,25 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
 
     const loadOnlineUsers = async () => {
-        // Mock online users
+        // TODO: Replace with real API call for online users
         const onlineUsers: Set<string> = new Set(['farmer_001', 'vet_001'])
         setOnlineUsers(onlineUsers)
     }
 
     const updateOnlineUsers = () => {
-        // Simulate online status changes
+        // TODO: Replace with real-time online status from WebSocket/API
         const allUsers = ['farmer_001', 'vet_001', 'admin_001']
         const onlineUsers = allUsers.filter(() => Math.random() > 0.3)
         setOnlineUsers(new Set(onlineUsers))
     }
 
     const simulateTypingIndicators = () => {
-        // Randomly show typing indicators
+        // TODO: Replace with real-time typing indicators from WebSocket
         if (Math.random() > 0.8) {
             const users = ['farmer_001', 'vet_001', 'admin_001']
             const chats = ['chat_farmer_vet', 'group_poultry_experts']
             const randomUser = users[Math.floor(Math.random() * users.length)]
             const randomChat = chats[Math.floor(Math.random() * chats.length)]
-
 
             const payload = {
                 chatId: randomChat,
@@ -97,7 +103,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
             setTypingStatuses(newTypingStatuses)
 
-
             // Clear typing after 3 seconds
             setTimeout(() => {
                 setTypingStatuses((prev) => prev.filter(
@@ -107,9 +112,186 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
+    // API Methods
+    const sendMessage = async (receiverId: string, content: string, messageType: 'TEXT' | 'IMAGE' | 'FILE' | 'VOICE' = 'TEXT'): Promise<void> => {
+        try {
+            setLoading(true)
+            setError(null)
+            
+            const messageData: MessageCreateRequest = {
+                receiverId,
+                content,
+                messageType,
+            }
+            
+            const response = await messageService.sendMessage(messageData)
+            
+            if (response.success && response.data) {
+                // Convert API response to our Message format
+                const newMessage: Message = {
+                    id: response.data.id,
+                    content: response.data.content,
+                    sender: {
+                        id: response.data.senderId,
+                        name: 'Current User', // TODO: Get from auth context
+                        email: '',
+                        role: 'FARMER',
+                        phone: '',
+                        location: '',
+                        createdAt: new Date(),
+                        isActive: true,
+                    },
+                    receiver: {
+                        id: response.data.receiverId,
+                        name: 'Receiver', // TODO: Get from users context
+                        email: '',
+                        role: 'VETERINARY',
+                        phone: '',
+                        location: '',
+                        createdAt: new Date(),
+                        isActive: true,
+                    },
+                    timestamp: new Date(response.data.createdAt),
+                    isRead: response.data.isRead,
+                    messageType: response.data.messageType,
+                }
+                
+                // Add to local state
+                addMessage(newMessage)
+            } else {
+                throw new Error(response.message || 'Failed to send message')
+            }
+        } catch (error: any) {
+            console.error('Failed to send message:', error)
+            setError(error.message || 'Failed to send message')
+            throw error
+        } finally {
+            setLoading(false)
+        }
+    }
+    
+    const getConversation = async (user1Id: string, user2Id: string): Promise<void> => {
+        try {
+            setLoading(true)
+            setError(null)
+            
+            const response = await messageService.getConversation(user1Id, user2Id)
+            
+            if (response.success && response.data) {
+                // Convert API messages to our Message format
+                const conversationMessages: Message[] = response.data.map(apiMessage => ({
+                    id: apiMessage.id,
+                    content: apiMessage.content,
+                    sender: {
+                        id: apiMessage.senderId,
+                        name: 'Sender', // TODO: Lookup user names
+                        email: '',
+                        role: 'FARMER',
+                        phone: '',
+                        location: '',
+                        createdAt: new Date(),
+                        isActive: true,
+                    },
+                    receiver: {
+                        id: apiMessage.receiverId,
+                        name: 'Receiver',
+                        email: '',
+                        role: 'VETERINARY',
+                        phone: '',
+                        location: '',
+                        createdAt: new Date(),
+                        isActive: true,
+                    },
+                    timestamp: new Date(apiMessage.createdAt),
+                    isRead: apiMessage.isRead,
+                    messageType: apiMessage.messageType,
+                }))
+                
+                setMessages(conversationMessages)
+            } else {
+                throw new Error(response.message || 'Failed to load conversation')
+            }
+        } catch (error: any) {
+            console.error('Failed to load conversation:', error)
+            setError(error.message || 'Failed to load conversation')
+        } finally {
+            setLoading(false)
+        }
+    }
+    
+    const getMessagesBySender = async (senderId: string): Promise<void> => {
+        try {
+            setLoading(true)
+            setError(null)
+            
+            const response = await messageService.getMessagesBySender(senderId)
+            
+            if (response.success && response.data) {
+                // Convert and set messages
+                const senderMessages: Message[] = response.data.map(apiMessage => ({
+                    id: apiMessage.id,
+                    content: apiMessage.content,
+                    sender: {
+                        id: apiMessage.senderId,
+                        name: 'Sender',
+                        email: '',
+                        role: 'FARMER',
+                        phone: '',
+                        location: '',
+                        createdAt: new Date(),
+                        isActive: true,
+                    },
+                    receiver: {
+                        id: apiMessage.receiverId,
+                        name: 'Receiver',
+                        email: '',
+                        role: 'VETERINARY',
+                        phone: '',
+                        location: '',
+                        createdAt: new Date(),
+                        isActive: true,
+                    },
+                    timestamp: new Date(apiMessage.createdAt),
+                    isRead: apiMessage.isRead,
+                    messageType: apiMessage.messageType,
+                }))
+                
+                setMessages(senderMessages)
+            } else {
+                throw new Error(response.message || 'Failed to load messages')
+            }
+        } catch (error: any) {
+            console.error('Failed to load messages by sender:', error)
+            setError(error.message || 'Failed to load messages')
+        } finally {
+            setLoading(false)
+        }
+    }
+    
+    const deleteMessage = async (messageId: string): Promise<void> => {
+        try {
+            setLoading(true)
+            setError(null)
+            
+            const response = await messageService.deleteMessage(messageId)
+            
+            if (response.success) {
+                // Remove from local state
+                setMessages(prev => prev.filter(m => m.id !== messageId))
+            } else {
+                throw new Error(response.message || 'Failed to delete message')
+            }
+        } catch (error: any) {
+            console.error('Failed to delete message:', error)
+            setError(error.message || 'Failed to delete message')
+            throw error
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // UI State Methods (keep existing functionality)
     const addMessage = (data: Message) => {
-
-
         setMessages(prevMessages => {
             if (data.sender.id === currentChat?.id) {
                 return prevMessages.map(m =>
@@ -137,13 +319,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         })
     }
 
-    const deleteMessage = (data: number) => {
-        setMessages((prev) => prev.filter(m => m.id !== data))
-    }
 
 
-
-    const returnValues: ChatContextTye = {
+    const returnValues: ChatContextType = {
         editMessage,
         currentMessage,
         currentChat,
@@ -153,9 +331,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         loading,
         error,
         unreadTotal,
+        // API methods
+        sendMessage,
+        getConversation,
+        getMessagesBySender,
+        deleteMessage,
+        // UI state methods
         addMessage,
         updateMessage,
-        deleteMessage,
         setCurrentChat,
         setEditMessage,
         setCurrentMessage

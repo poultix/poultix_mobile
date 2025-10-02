@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { User, UserRole } from '@/types/user';
-import { MockDataService } from '@/services/mockData';
+import { userService } from '@/services/api';
+import type { UserUpdateRequest } from '@/services/api';
 
 // User state interface
 interface UserState {
@@ -26,11 +27,13 @@ interface UserContextType {
   currentUser: User | null;
   loading: boolean;
   error: string | null;
-  // CRUD functions for hooks to call
-  addUser: (user: User) => void;
-  editUser: (user: User) => void;
-  deleteUser: (id: string) => void;
-  setCurrentUser: (user: User | null) => void;
+  // CRUD functions
+  getUserById: (id: string) => Promise<User | null>;
+  getUsersByRole: (role: UserRole) => User[];
+  updateUser: (id: string, updates: UserUpdateRequest) => Promise<void>;
+  activateUser: (id: string) => Promise<void>;
+  deactivateUser: (id: string) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
   refreshUsers: () => Promise<void>;
 }
 
@@ -91,28 +94,167 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
   const loadUsers = async () => {
     try {
-
-      const users = await MockDataService.getUsers();
-      setUsers(users)
-    } catch (error) {
-    
+      setLoading(true);
+      setError('');
+      
+      const response = await userService.getAllUsers();
+      
+      if (response.success && response.data) {
+        // Convert API users to our User type
+        const convertedUsers: User[] = response.data.map(apiUser => ({
+          id: apiUser.id,
+          email: apiUser.email,
+          name: apiUser.name,
+          role: apiUser.role === 'VETERINARIAN' ? 'VETERINARY' : apiUser.role as UserRole,
+          phone: apiUser.phone || '',
+          location: apiUser.location?.address || '',
+          createdAt: new Date(apiUser.createdAt || Date.now()),
+          isActive: apiUser.isActive,
+        }));
+        
+        setUsers(convertedUsers);
+      } else {
+        throw new Error(response.message || 'Failed to load users');
+      }
+    } catch (error: any) {
+      console.error('Failed to load users:', error);
+      setError(error.message || 'Failed to load users');
+    } finally {
+      setLoading(false);
     }
   };
 
 
 
-  const addUser = (data: User) => {
-    setUsers((prev) => [...prev, data])
+  const getUserById = async (id: string): Promise<User | null> => {
+    try {
+      const response = await userService.getUserById(id);
+      
+      if (response.success && response.data) {
+        return {
+          id: response.data.id,
+          email: response.data.email,
+          name: response.data.name,
+          role: response.data.role === 'VETERINARY' ? 'VETERINARY' : response.data.role as UserRole,
+          phone: response.data.phone || '',
+          location: response.data.location?.address || '',
+          createdAt: new Date(response.data.createdAt || Date.now()),
+          isActive: response.data.isActive,
+        };
+      }
+      return null;
+    } catch (error: any) {
+      console.error('Failed to get user by ID:', error);
+      setError(error.message || 'Failed to get user');
+      return null;
+    }
+  };
+  
+  const getUsersByRole = (role: UserRole): User[] => {
+    return users.filter(user => user.role === role);
   };
 
-  const editUser = (data: User) => {
-    setUsers((prev) => prev.map(user =>
-      user.id === data.id ? data : user
-    ))
+  const updateUser = async (id: string, updates: UserUpdateRequest): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await userService.updateUser(id, updates);
+      
+      if (response.success && response.data) {
+        const updatedUser: User = {
+          id: response.data.id,
+          email: response.data.email,
+          name: response.data.name,
+          role: response.data.role === 'VETERINARIAN' ? 'VETERINARY' : response.data.role as UserRole,
+          phone: response.data.phone || '',
+          location: response.data.location?.address || '',
+          createdAt: new Date(response.data.createdAt || Date.now()),
+          isActive: response.data.isActive,
+        };
+        
+        // Update local state
+        setUsers(prev => prev.map(user => user.id === id ? updatedUser : user));
+      } else {
+        throw new Error(response.message || 'Failed to update user');
+      }
+    } catch (error: any) {
+      console.error('Failed to update user:', error);
+      setError(error.message || 'Failed to update user');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const activateUser = async (id: string): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await userService.activateUser(id);
+      
+      if (response.success) {
+        // Update local state
+        setUsers(prev => prev.map(user => 
+          user.id === id ? { ...user, isActive: true } : user
+        ));
+      } else {
+        throw new Error(response.message || 'Failed to activate user');
+      }
+    } catch (error: any) {
+      console.error('Failed to activate user:', error);
+      setError(error.message || 'Failed to activate user');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const deactivateUser = async (id: string): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await userService.deactivateUser(id);
+      
+      if (response.success) {
+        // Update local state
+        setUsers(prev => prev.map(user => 
+          user.id === id ? { ...user, isActive: false } : user
+        ));
+      } else {
+        throw new Error(response.message || 'Failed to deactivate user');
+      }
+    } catch (error: any) {
+      console.error('Failed to deactivate user:', error);
+      setError(error.message || 'Failed to deactivate user');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const deleteUser = (id: string) => {
-    setUsers((prev) => prev.filter(user => user.id !== id))
+  const deleteUser = async (id: string): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await userService.deleteUser(id);
+      
+      if (response.success) {
+        // Remove from local state
+        setUsers(prev => prev.filter(user => user.id !== id));
+      } else {
+        throw new Error(response.message || 'Failed to delete user');
+      }
+    } catch (error: any) {
+      console.error('Failed to delete user:', error);
+      setError(error.message || 'Failed to delete user');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -126,10 +268,12 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     currentUser,
     loading,
     error,
-    addUser,
-    editUser,
+    getUserById,
+    getUsersByRole,
+    updateUser,
+    activateUser,
+    deactivateUser,
     deleteUser,
-    setCurrentUser,
     refreshUsers,
   };
 

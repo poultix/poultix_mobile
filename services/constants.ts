@@ -11,9 +11,22 @@ export const API_CONFIG = {
 export const API_ENDPOINTS = {
     // Authentication
     AUTH: {
+        REGISTER: '/auth/register',
         LOGIN: '/auth/login',
+        REFRESH_TOKEN: '/auth/refresh-token',
         LOGOUT: '/auth/logout',
-        REFRESH: '/auth/refresh',
+        FORGOT_PASSWORD: '/auth/forgot-password',
+        RESET_PASSWORD: '/auth/reset-password',
+        VERIFY_EMAIL: '/auth/verify-email',
+        RESEND_VERIFICATION: '/auth/resend-verification',
+    },
+
+    // File Upload
+    UPLOAD: {
+        PROFILE_IMAGE: '/upload/profile-image',
+        ATTACHMENT: '/upload/attachment',
+        DOCUMENT: '/upload/document',
+        DELETE: (folder: string, fileName: string) => `/upload/${folder}/${fileName}`,
     },
 
     // User Management

@@ -1,4 +1,6 @@
 // Export all API services
+export { authService, AuthService } from './auth';
+export { uploadService, UploadService } from './upload';
 export { adminService, AdminService } from './admin';
 export { userService, UserService } from './user';
 export { farmService, FarmService } from './farm';
@@ -14,6 +16,20 @@ export { supportService, SupportService } from './support';
 // Export types
 export type {
     UserRegistrationRequest,
+    UserLoginRequest,
+    RefreshTokenRequest,
+    ForgotPasswordRequest,
+    PasswordResetRequest,
+    EmailVerificationRequest,
+    AuthResponse,
+    FileUploadResponse,
+} from './auth';
+
+export type {
+    FileUploadResponse as UploadResponse,
+} from './upload';
+
+export type {
     UserUpdateRequest,
 } from './user';
 

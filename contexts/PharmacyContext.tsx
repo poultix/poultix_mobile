@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { Pharmacy, Vaccine } from '@/types/pharmacy';
-import { MockDataService } from '@/services/mockData';
+import { pharmacyService } from '@/services/api';
+import type { PharmacyCreateRequest, PharmacyUpdateRequest } from '@/services/api';
 
 
 interface PharmacyContextType {
@@ -9,9 +10,11 @@ interface PharmacyContextType {
   loading: boolean;
   error: string | null;
 
-  addPharmacy: (pharmacy: Pharmacy) => void;
-  editPharmacy: (pharmacy: Pharmacy) => void;
-  deletePharmacy: (id: string) => void;
+  // API operations
+  createPharmacy: (pharmacyData: PharmacyCreateRequest) => Promise<void>;
+  getPharmacyById: (id: string) => Promise<Pharmacy | null>;
+  updatePharmacy: (id: string, updates: PharmacyUpdateRequest) => Promise<void>;
+  deletePharmacy: (id: string) => Promise<void>;
   setCurrentPharmacy: (pharmacy: Pharmacy | null) => void;
   refreshPharmacies: () => Promise<void>;
 }
@@ -32,26 +35,100 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
 
   const loadPharmacies = async () => {
     try {
-
-      const pharmacies = await MockDataService.getPharmacies();
-      setPharmacies(pharmacies)
-    } catch (error) {
-
+      setLoading(true);
+      setError('');
+      
+      const response = await pharmacyService.getAllPharmacies();
+      
+      if (response.success && response.data) {
+        setPharmacies(response.data);
+      } else {
+        throw new Error(response.message || 'Failed to load pharmacies');
+      }
+    } catch (error: any) {
+      console.error('Failed to load pharmacies:', error);
+      setError(error.message || 'Failed to load pharmacies');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const addPharmacy = (pharmacy: Pharmacy) => {
-    setPharmacies((prev) => [...prev, pharmacy])
+  const createPharmacy = async (pharmacyData: PharmacyCreateRequest): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await pharmacyService.createPharmacy(pharmacyData);
+      
+      if (response.success && response.data) {
+        setPharmacies(prev => [...prev, response.data!]);
+      } else {
+        throw new Error(response.message || 'Failed to create pharmacy');
+      }
+    } catch (error: any) {
+      console.error('Failed to create pharmacy:', error);
+      setError(error.message || 'Failed to create pharmacy');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const getPharmacyById = async (id: string): Promise<Pharmacy | null> => {
+    try {
+      const response = await pharmacyService.getPharmacyById(id);
+      
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      console.error('Failed to get pharmacy by ID:', error);
+      setError(error.message || 'Failed to get pharmacy');
+      return null;
+    }
   };
 
-  const editPharmacy = (data: Pharmacy) => {
-    setPharmacies((prev) => prev.map(pharmacy =>
-      pharmacy.id === data.id ? data : pharmacy
-    ))
+  const updatePharmacy = async (id: string, updates: PharmacyUpdateRequest): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await pharmacyService.updatePharmacy(id, updates);
+      
+      if (response.success && response.data) {
+        setPharmacies(prev => prev.map(pharmacy => pharmacy.id === id ? response.data! : pharmacy));
+      } else {
+        throw new Error(response.message || 'Failed to update pharmacy');
+      }
+    } catch (error: any) {
+      console.error('Failed to update pharmacy:', error);
+      setError(error.message || 'Failed to update pharmacy');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const deletePharmacy = (id: string) => {
-    setPharmacies((prev) => prev.filter(pharmacy => pharmacy.id !== id))
+  const deletePharmacy = async (id: string): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await pharmacyService.deletePharmacy(id);
+      
+      if (response.success) {
+        setPharmacies(prev => prev.filter(pharmacy => pharmacy.id !== id));
+      } else {
+        throw new Error(response.message || 'Failed to delete pharmacy');
+      }
+    } catch (error: any) {
+      console.error('Failed to delete pharmacy:', error);
+      setError(error.message || 'Failed to delete pharmacy');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -65,8 +142,9 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
     currentPharmacy,
     loading,
     error,
-    addPharmacy,
-    editPharmacy,
+    createPharmacy,
+    getPharmacyById,
+    updatePharmacy,
     deletePharmacy,
     setCurrentPharmacy,
     refreshPharmacies,
