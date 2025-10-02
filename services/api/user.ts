@@ -1,31 +1,7 @@
-import { User, ApiResponse } from '@/types';
+import { User, ApiResponse, UserRegistrationRequest, UserUpdateRequest } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 
-// Request types
-export interface UserRegistrationRequest {
-    name: string;
-    email: string;
-    password: string;
-    phone?: string;
-    role: 'FARMER' | 'VETERINARY' | 'ADMIN';
-    location?: {
-        address: string;
-        latitude?: number;
-        longitude?: number;
-    };
-}
-
-export interface UserUpdateRequest {
-    name?: string;
-    email?: string;
-    phone?: string;
-    location?: {
-        address: string;
-        latitude?: number;
-        longitude?: number;
-    };
-}
 
 export class UserService {
     // Create/Register User

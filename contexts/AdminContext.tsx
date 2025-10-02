@@ -1,12 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole } from '@/types/user';
 import { Farm } from '@/types/farm';
-import { Schedule, ScheduleStatus } from '@/types/schedule';
+import { Schedule, ScheduleStatus, AdminState, FilterOptions, User } from '@/types';
 import { News } from '@/types/news';
-import { Pharmacy } from '@/types/pharmacy';
-import { FilterOptions, SearchOptions } from '@/types/filter';
-import { AdminState } from '@/types';
-import { MockDataService } from '@/services/mockData';
+
 
 // Context types
 interface AdminContextType {
@@ -82,12 +78,6 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             setLoading(true);
             setError(null);
-
-            // Get real data from MockDataService
-            const users = await MockDataService.getUsers();
-            const farms = await MockDataService.getFarms();
-            const schedules = await MockDataService.getSchedules();
-            const news = await MockDataService.getNews();
 
             const stats = {
                 totalUsers: users.length,
@@ -241,7 +231,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     // Search functions
     const searchUsers = async (query: string, filters?: FilterOptions): Promise<User[]> => {
         const users = await MockDataService.getUsers();
-        return users.filter(user => 
+        return users.filter(user =>
             user.name.toLowerCase().includes(query.toLowerCase()) ||
             user.email.toLowerCase().includes(query.toLowerCase())
         );
@@ -249,7 +239,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
     const searchFarms = async (query: string, filters?: FilterOptions): Promise<Farm[]> => {
         const farms = await MockDataService.getFarms();
-        return farms.filter(farm => 
+        return farms.filter(farm =>
             farm.name.toLowerCase().includes(query.toLowerCase()) ||
             farm.location.address.toLowerCase().includes(query.toLowerCase())
         );
@@ -257,7 +247,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
     const searchSchedules = async (query: string, filters?: FilterOptions): Promise<Schedule[]> => {
         const schedules = await MockDataService.getSchedules();
-        return schedules.filter(schedule => 
+        return schedules.filter(schedule =>
             schedule.title.toLowerCase().includes(query.toLowerCase()) ||
             schedule.description.toLowerCase().includes(query.toLowerCase())
         );

@@ -54,3 +54,45 @@ export interface Farm {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface FarmCreateRequest {
+    name: string;
+    location: {
+        address: string;
+        latitude?: number;
+        longitude?: number;
+    };
+    livestock: {
+        total: number;
+        healthy: number;
+        sick: number;
+        atRisk: number;
+    };
+    facilities: {
+        coops: number;
+        feeders: number;
+        waterers: number;
+    };
+    healthStatus: 'HEALTHY' | 'AT_RISK' | 'SICK' | 'QUARANTINE';
+}
+
+export interface FarmUpdateRequest {
+    name?: string;
+    location?: {
+        address: string;
+        latitude?: number;
+        longitude?: number;
+    };
+    livestock?: {
+        total: number;
+        healthy: number;
+        sick: number;
+        atRisk: number;
+    };
+    facilities?: {
+        coops: number;
+        feeders: number;
+        waterers: number;
+    };
+    healthStatus?: 'HEALTHY' | 'AT_RISK' | 'SICK' | 'QUARANTINE';
+}

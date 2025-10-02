@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { Farm, FarmStatus } from '@/types/farm';
-import { User } from '@/types/user';
+import { Farm, FarmStatus,FarmCreateRequest, FarmUpdateRequest } from '@/types';
 import { farmService } from '@/services/api';
-import type { FarmCreateRequest, FarmUpdateRequest } from '@/services/api';
 
 // Farm context interface
 interface FarmContextType {

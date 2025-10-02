@@ -1,6 +1,6 @@
 import { authService } from '@/services/api';
-import type { UserRegistrationRequest, UserLoginRequest } from '@/services/api';
-import { User, UserRole } from '@/types/user';
+import type {  } from '@/services/api';
+import { User, UserRole,UserRegistrationRequest, UserLoginRequest } from '@/types';
 import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Alert } from 'react-native';

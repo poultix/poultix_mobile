@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { Message, TypingStatus, User } from '@/types'
+import { Message, TypingStatus, User,MessageCreateRequest, } from '@/types'
 import { messageService } from '@/services/api'
-import type { MessageCreateRequest, MessageResponse } from '@/services/api'
 
 
 
@@ -135,7 +134,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
                         id: response.data.senderId,
                         name: 'Current User', // TODO: Get from auth context
                         email: '',
-                        role: 'FARMER',
+                        role: '',
                         phone: '',
                         location: '',
                         createdAt: new Date(),

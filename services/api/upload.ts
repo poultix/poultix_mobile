@@ -1,16 +1,8 @@
-import { ApiResponse } from '@/types';
+import { ApiResponse, FileUploadResponse } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 
 // Response type (matching backend DTO)
-export interface FileUploadResponse {
-    fileName: string;
-    originalFileName: string;
-    fileUrl: string;
-    contentType: string;
-    fileSize: number;
-    uploadedAt: string; // ISO date string
-}
 
 export class UploadService {
     // Upload profile image
@@ -18,14 +10,9 @@ export class UploadService {
         const formData = new FormData();
         formData.append('file', file, fileName);
 
-        return await apiClient.post<FileUploadResponse>(
+        return await apiClient.uploadFile<FileUploadResponse>(
             API_ENDPOINTS.UPLOAD.PROFILE_IMAGE,
             formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }
         );
     }
 
@@ -37,18 +24,13 @@ export class UploadService {
         return await apiClient.post<FileUploadResponse>(
             API_ENDPOINTS.UPLOAD.ATTACHMENT,
             formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }
         );
     }
 
     // Upload document to specific folder
     async uploadDocument(
-        file: File | Blob, 
-        folder: string, 
+        file: File | Blob,
+        folder: string,
         fileName?: string
     ): Promise<ApiResponse<FileUploadResponse>> {
         const formData = new FormData();
@@ -58,11 +40,6 @@ export class UploadService {
         return await apiClient.post<FileUploadResponse>(
             API_ENDPOINTS.UPLOAD.DOCUMENT,
             formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }
         );
     }
 
@@ -73,13 +50,13 @@ export class UploadService {
 
     // Upload multiple files
     async uploadMultiple(
-        files: (File | Blob)[], 
+        files: (File | Blob)[],
         uploadType: 'profile-image' | 'attachment' | 'document',
         folder?: string
     ): Promise<ApiResponse<FileUploadResponse[]>> {
         const uploadPromises = files.map(async (file, index) => {
             const fileName = `file_${index}_${Date.now()}`;
-            
+
             switch (uploadType) {
                 case 'profile-image':
                     return this.uploadProfileImage(file, fileName);
@@ -102,7 +79,8 @@ export class UploadService {
             return {
                 success: true,
                 message: `Successfully uploaded ${uploadedFiles.length} files`,
-                data: uploadedFiles
+                data: uploadedFiles,
+                status: 200
             };
         } catch (error) {
             throw error;
@@ -111,8 +89,8 @@ export class UploadService {
 
     // Validate file before upload
     validateFile(
-        file: File | Blob, 
-        maxSizeInMB: number = 5, 
+        file: File | Blob,
+        maxSizeInMB: number = 5,
         allowedTypes: string[] = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf']
     ): { isValid: boolean; error?: string } {
         // Check file size

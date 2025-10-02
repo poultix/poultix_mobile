@@ -1,79 +1,18 @@
-import { User, ApiResponse, UserRole } from '@/types';
+import { User, ApiResponse, UserRole, UserRegistrationRequest, AuthResponse, UserLoginRequest, ForgotPasswordRequest ,PasswordResetRequest,EmailVerificationRequest} from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 import * as SecureStore from 'expo-secure-store';
-
-// Request types (matching backend DTOs)
-export interface UserRegistrationRequest {
-    name: string;
-    email: string;
-    password: string;
-    role: UserRole;
-    phone?: string;
-    location?: string;
-}
-
-export interface UserLoginRequest {
-    email: string;
-    password: string;
-}
-
-export interface RefreshTokenRequest {
-    refreshToken: string;
-}
-
-export interface ForgotPasswordRequest {
-    email: string;
-}
-
-export interface PasswordResetRequest {
-    resetCode: string;
-    newPassword: string;
-}
-
-export interface EmailVerificationRequest {
-    verificationToken: string;
-}
-
-// Response types (matching backend DTOs)
-export interface AuthResponse {
-    accessToken: string;
-    refreshToken: string;
-    tokenType: 'Bearer';
-    expiresAt: string; // ISO date string
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        role:UserRole;
-        avatar?: string;
-        phone?: string;
-        location?: string;
-        isActive: boolean;
-        emailVerified: boolean;
-    };
-}
-
-export interface FileUploadResponse {
-    fileName: string;
-    originalFileName: string;
-    fileUrl: string;
-    contentType: string;
-    fileSize: number;
-    uploadedAt: string; // ISO date string
-}
-
 export class AuthService {
     // Register user (with auto-login)
     async register(userData: UserRegistrationRequest): Promise<ApiResponse<AuthResponse>> {
         try {
             const response = await apiClient.post<AuthResponse>(API_ENDPOINTS.AUTH.REGISTER, userData);
-            
+
             // Store tokens securely (registration includes tokens)
             if (response.success && response.data) {
                 await this.storeTokens(response.data.accessToken, response.data.refreshToken);
             }
-            
+
             return response;
         } catch (error) {
             throw error;
@@ -84,12 +23,12 @@ export class AuthService {
     async login(loginData: UserLoginRequest): Promise<ApiResponse<AuthResponse>> {
         try {
             const response = await apiClient.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, loginData);
-            
+
             // Store tokens securely
             if (response.success && response.data) {
                 await this.storeTokens(response.data.accessToken, response.data.refreshToken);
             }
-            
+
             return response;
         } catch (error) {
             throw error;
@@ -105,7 +44,7 @@ export class AuthService {
             }
 
             const response = await apiClient.post<AuthResponse>(
-                API_ENDPOINTS.AUTH.REFRESH_TOKEN, 
+                API_ENDPOINTS.AUTH.REFRESH_TOKEN,
                 { refreshToken }
             );
 
@@ -125,10 +64,10 @@ export class AuthService {
         try {
             // Call backend logout endpoint
             const response = await apiClient.post<void>(API_ENDPOINTS.AUTH.LOGOUT);
-            
+
             // Clear stored tokens regardless of backend response
             await this.clearTokens();
-            
+
             return response;
         } catch (error) {
             // Clear tokens even if backend call fails
@@ -140,7 +79,7 @@ export class AuthService {
     // Request password reset
     async forgotPassword(forgotPasswordData: ForgotPasswordRequest): Promise<ApiResponse<void>> {
         return await apiClient.post<void>(
-            API_ENDPOINTS.AUTH.FORGOT_PASSWORD, 
+            API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
             forgotPasswordData
         );
     }
@@ -153,7 +92,7 @@ export class AuthService {
     // Verify email with token
     async verifyEmail(verificationData: EmailVerificationRequest): Promise<ApiResponse<void>> {
         return await apiClient.post<void>(
-            API_ENDPOINTS.AUTH.VERIFY_EMAIL, 
+            API_ENDPOINTS.AUTH.VERIFY_EMAIL,
             verificationData
         );
     }
@@ -231,7 +170,7 @@ export class AuthService {
             // Basic JWT expiry check - decode the payload
             const payload = this.decodeJWTPayload(accessToken);
             if (!payload.exp) return false; // If no expiry, assume valid
-            
+
             // Check if current time is past expiry (exp is in seconds, Date.now() is in milliseconds)
             return payload.exp * 1000 < Date.now();
         } catch (error) {

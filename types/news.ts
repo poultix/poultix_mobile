@@ -17,3 +17,27 @@ export interface News {
     createdAt: Date;
     updatedAt: Date;
 }
+
+
+// Request types
+export interface NewsCreateRequest {
+    title: string;
+    content: string;
+    category: 'HEALTH' | 'NUTRITION' | 'MANAGEMENT' | 'TECHNOLOGY' | 'MARKET' | 'GENERAL';
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+    excerpt?: string;
+    imageUrl?: string;
+    tags?: string[];
+    isPublished?: boolean;
+}
+
+export interface NewsUpdateRequest {
+    title?: string;
+    content?: string;
+    category?: 'HEALTH' | 'NUTRITION' | 'MANAGEMENT' | 'TECHNOLOGY' | 'MARKET' | 'GENERAL';
+    priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+    excerpt?: string;
+    imageUrl?: string;
+    tags?: string[];
+    isPublished?: boolean;
+}

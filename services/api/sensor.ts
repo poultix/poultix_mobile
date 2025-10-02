@@ -1,51 +1,7 @@
-import { ApiResponse } from '@/types';
+import { ApiResponse, SensorReadingCreateRequest, SensorReadingResponse } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 
-// Response types
-export interface SensorReadingResponse {
-    id: string;
-    deviceId: string;
-    farmId: string;
-    sensorType: 'TEMPERATURE' | 'HUMIDITY' | 'PH' | 'WEIGHT' | 'AIR_QUALITY' | 'AMMONIA' | 'LIGHT';
-    value: number;
-    unit: string;
-    threshold?: {
-        min: number;
-        max: number;
-    };
-    isWithinThreshold: boolean;
-    alertLevel?: 'NORMAL' | 'WARNING' | 'CRITICAL';
-    location?: {
-        area: string;
-        coordinates?: {
-            latitude: number;
-            longitude: number;
-        };
-    };
-    timestamp: string;
-    createdAt: string;
-}
-
-// Request types
-export interface SensorReadingCreateRequest {
-    deviceId: string;
-    sensorType: 'TEMPERATURE' | 'HUMIDITY' | 'PH' | 'WEIGHT' | 'AIR_QUALITY' | 'AMMONIA' | 'LIGHT';
-    value: number;
-    unit: string;
-    threshold?: {
-        min: number;
-        max: number;
-    };
-    location?: {
-        area: string;
-        coordinates?: {
-            latitude: number;
-            longitude: number;
-        };
-    };
-    timestamp?: string;
-}
 
 export class SensorReadingService {
     // Create Sensor Reading (Device/Admin only)

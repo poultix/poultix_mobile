@@ -1,34 +1,8 @@
-import { Schedule, ApiResponse } from '@/types';
+import { Schedule, ApiResponse ,ScheduleCreateRequest,ScheduleUpdateRequest} from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 
-// Request types
-export interface ScheduleCreateRequest {
-    farmId: string;
-    veterinaryId: string;
-    farmerId: string;
-    type: 'INSPECTION' | 'VACCINATION' | 'TREATMENT' | 'CONSULTATION' | 'EMERGENCY';
-    title: string;
-    description?: string;
-    scheduledDate: string; // ISO date string
-    startTime: string;
-    endTime: string;
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-    notes?: string;
-}
 
-export interface ScheduleUpdateRequest {
-    farmId?: string;
-    veterinaryId?: string;
-    type?: 'INSPECTION' | 'VACCINATION' | 'TREATMENT' | 'CONSULTATION' | 'EMERGENCY';
-    title?: string;
-    description?: string;
-    scheduledDate?: string; // ISO date string
-    startTime?: string;
-    endTime?: string;
-    priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-    notes?: string;
-}
 
 export class ScheduleService {
     // Create Schedule

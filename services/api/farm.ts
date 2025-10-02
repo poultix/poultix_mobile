@@ -1,49 +1,8 @@
-import { Farm, ApiResponse } from '@/types';
+import { Farm, ApiResponse,FarmCreateRequest,FarmUpdateRequest } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 
 // Request types
-export interface FarmCreateRequest {
-    name: string;
-    location: {
-        address: string;
-        latitude?: number;
-        longitude?: number;
-    };
-    livestock: {
-        total: number;
-        healthy: number;
-        sick: number;
-        atRisk: number;
-    };
-    facilities: {
-        coops: number;
-        feeders: number;
-        waterers: number;
-    };
-    healthStatus: 'HEALTHY' | 'AT_RISK' | 'SICK' | 'QUARANTINE';
-}
-
-export interface FarmUpdateRequest {
-    name?: string;
-    location?: {
-        address: string;
-        latitude?: number;
-        longitude?: number;
-    };
-    livestock?: {
-        total: number;
-        healthy: number;
-        sick: number;
-        atRisk: number;
-    };
-    facilities?: {
-        coops: number;
-        feeders: number;
-        waterers: number;
-    };
-    healthStatus?: 'HEALTHY' | 'AT_RISK' | 'SICK' | 'QUARANTINE';
-}
 
 export class FarmService {
     // Create Farm

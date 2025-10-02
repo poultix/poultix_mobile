@@ -1,65 +1,8 @@
-import { Pharmacy, ApiResponse } from '@/types';
+import { Pharmacy, ApiResponse, PharmacyCreateRequest, PharmacyUpdateRequest } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 
-// Request types
-export interface PharmacyCreateRequest {
-    name: string;
-    address: string;
-    location: {
-        latitude: number;
-        longitude: number;
-    };
-    phone: string;
-    email?: string;
-    website?: string;
-    operatingHours: {
-        [key: string]: {
-            open: string;
-            close: string;
-            isOpen: boolean;
-        };
-    };
-    services: string[];
-    medications: {
-        name: string;
-        category: string;
-        inStock: boolean;
-        price?: number;
-    }[];
-    licenseNumber: string;
-    rating?: number;
-    description?: string;
-}
 
-export interface PharmacyUpdateRequest {
-    name?: string;
-    address?: string;
-    location?: {
-        latitude: number;
-        longitude: number;
-    };
-    phone?: string;
-    email?: string;
-    website?: string;
-    operatingHours?: {
-        [key: string]: {
-            open: string;
-            close: string;
-            isOpen: boolean;
-        };
-    };
-    services?: string[];
-    medications?: {
-        name: string;
-        category: string;
-        inStock: boolean;
-        price?: number;
-    }[];
-    licenseNumber?: string;
-    rating?: number;
-    description?: string;
-}
 
 export class PharmacyService {
     // Create Pharmacy (Admin only)

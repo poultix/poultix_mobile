@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { Schedule, ScheduleType, ScheduleStatus, SchedulePriority } from '@/types/schedule';
+import { Schedule, ScheduleType, ScheduleStatus, ScheduleCreateRequest, ScheduleUpdateRequest } from '@/types';
 import { scheduleService } from '@/services/api';
-import type { ScheduleCreateRequest, ScheduleUpdateRequest } from '@/services/api';
-
 interface ScheduleContextType {
   schedules: Schedule[];
   currentSchedule: Schedule | null;

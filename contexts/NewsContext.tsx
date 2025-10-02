@@ -1,15 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { News, NewsPriority } from '@/types/news';
+import { News,  NewsCreateRequest, NewsUpdateRequest} from '@/types';
 import { newsService } from '@/services/api';
-import type { NewsCreateRequest, NewsUpdateRequest } from '@/services/api';
 
-// News state interface
-interface NewsState {
-  news: News[];
-  currentNews: News | null;
-  loading: boolean;
-  error: string | null;
-}
 
 // Context types
 interface NewsContextType {

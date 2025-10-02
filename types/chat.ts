@@ -26,7 +26,7 @@ export enum MessageStatus{
  * Represents a direct message between users.
  */
 export interface Message {
-    id: number
+    id: string
     sender: User
     receiver: User
     content: string
@@ -41,7 +41,7 @@ export interface Message {
 
 
 export interface Reaction {
-    userId: number
+    userId: string
     emoji: string
 }
 
@@ -61,4 +61,37 @@ export interface SendMessageRequest {
     type: MessageType
     fileName?: string
     replyToId?: number
+}
+
+// Response types
+export interface MessageResponse {
+    id: string;
+    senderId: string;
+    receiverId: string;
+    content: string;
+    messageType: 'TEXT' | 'IMAGE' | 'FILE' | 'VOICE';
+    attachments?: {
+        url: string;
+        type: string;
+        name: string;
+        size: number;
+    }[];
+    isRead: boolean;
+    readAt?: string;
+    deliveredAt?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+// Request types
+export interface MessageCreateRequest {
+    receiverId: string;
+    content: string;
+    messageType?: 'TEXT' | 'IMAGE' | 'FILE' | 'VOICE';
+    attachments?: {
+        url: string;
+        type: string;
+        name: string;
+        size: number;
+    }[];
 }

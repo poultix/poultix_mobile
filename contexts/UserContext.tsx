@@ -1,7 +1,6 @@
-import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { User, UserRole } from '@/types/user';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User, UserRole,UserUpdateRequest  } from '@/types';
 import { userService } from '@/services/api';
-import type { UserUpdateRequest } from '@/services/api';
 
 // User state interface
 interface UserState {
@@ -105,7 +104,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           id: apiUser.id,
           email: apiUser.email,
           name: apiUser.name,
-          role: apiUser.role === 'VETERINARIAN' ? 'VETERINARY' : apiUser.role as UserRole,
+          role: apiUser.role ,
           phone: apiUser.phone || '',
           location: apiUser.location?.address || '',
           createdAt: new Date(apiUser.createdAt || Date.now()),
@@ -135,7 +134,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           id: response.data.id,
           email: response.data.email,
           name: response.data.name,
-          role: response.data.role === 'VETERINARY' ? 'VETERINARY' : response.data.role as UserRole,
+          role: response.data.role,
           phone: response.data.phone || '',
           location: response.data.location?.address || '',
           createdAt: new Date(response.data.createdAt || Date.now()),
@@ -166,7 +165,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           id: response.data.id,
           email: response.data.email,
           name: response.data.name,
-          role: response.data.role === 'VETERINARIAN' ? 'VETERINARY' : response.data.role as UserRole,
+          role: response.data.role,
           phone: response.data.phone || '',
           location: response.data.location?.address || '',
           createdAt: new Date(response.data.createdAt || Date.now()),

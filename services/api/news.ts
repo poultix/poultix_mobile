@@ -1,29 +1,7 @@
-import { News, ApiResponse } from '@/types';
+import { News, ApiResponse, NewsCreateRequest, NewsUpdateRequest } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 
-// Request types
-export interface NewsCreateRequest {
-    title: string;
-    content: string;
-    category: 'HEALTH' | 'NUTRITION' | 'MANAGEMENT' | 'TECHNOLOGY' | 'MARKET' | 'GENERAL';
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-    excerpt?: string;
-    imageUrl?: string;
-    tags?: string[];
-    isPublished?: boolean;
-}
-
-export interface NewsUpdateRequest {
-    title?: string;
-    content?: string;
-    category?: 'HEALTH' | 'NUTRITION' | 'MANAGEMENT' | 'TECHNOLOGY' | 'MARKET' | 'GENERAL';
-    priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-    excerpt?: string;
-    imageUrl?: string;
-    tags?: string[];
-    isPublished?: boolean;
-}
 
 export class NewsService {
     // Create News Article

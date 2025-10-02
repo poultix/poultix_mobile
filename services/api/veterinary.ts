@@ -1,52 +1,7 @@
-import { ApiResponse } from '@/types';
+import { ApiResponse, VeterinaryCreateRequest, VeterinaryResponse, VeterinaryUpdateRequest } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 
-// Response types
-export interface VeterinaryResponse {
-    id: string;
-    userId: string;
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        phone?: string;
-        location?: {
-            address: string;
-            latitude?: number;
-            longitude?: number;
-        };
-    };
-    specialization: string[];
-    experience: number;
-    rating: number;
-    totalVisits: number;
-    isAvailable: boolean;
-    licenseNumber: string;
-    education: string;
-    certifications: string[];
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
-
-// Request types
-export interface VeterinaryCreateRequest {
-    specialization: string[];
-    experience: number;
-    licenseNumber: string;
-    education: string;
-    certifications?: string[];
-}
-
-export interface VeterinaryUpdateRequest {
-    specialization?: string[];
-    experience?: number;
-    licenseNumber?: string;
-    education?: string;
-    certifications?: string[];
-    isAvailable?: boolean;
-}
 
 export class VeterinaryService {
     // Create Veterinary Profile

@@ -1,39 +1,8 @@
-import { ApiResponse } from '@/types';
+import { ApiResponse,MessageCreateRequest,MessageResponse } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 
-// Response types
-export interface MessageResponse {
-    id: string;
-    senderId: string;
-    receiverId: string;
-    content: string;
-    messageType: 'TEXT' | 'IMAGE' | 'FILE' | 'VOICE';
-    attachments?: {
-        url: string;
-        type: string;
-        name: string;
-        size: number;
-    }[];
-    isRead: boolean;
-    readAt?: string;
-    deliveredAt?: string;
-    createdAt: string;
-    updatedAt: string;
-}
 
-// Request types
-export interface MessageCreateRequest {
-    receiverId: string;
-    content: string;
-    messageType?: 'TEXT' | 'IMAGE' | 'FILE' | 'VOICE';
-    attachments?: {
-        url: string;
-        type: string;
-        name: string;
-        size: number;
-    }[];
-}
 
 export class MessageService {
     // Send Message

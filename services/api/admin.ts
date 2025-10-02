@@ -1,59 +1,6 @@
-import { User, ApiResponse } from '@/types';
+import { User, ApiResponse, UpdateUserStatusRequest, ChartData, SystemMetric, AdminStats, Alert } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
-
-// Admin-specific types
-export interface AdminStats {
-    totalUsers: number;
-    activeUsers: number;
-    totalFarms: number;
-    activeFarms: number;
-    totalSchedules: number;
-    pendingSchedules: number;
-    totalDevices: number;
-    activeDevices: number;
-    systemHealth: 'HEALTHY' | 'WARNING' | 'CRITICAL';
-    lastUpdated: string;
-}
-
-export interface SystemMetric {
-    id: string;
-    name: string;
-    value: number;
-    unit: string;
-    status: 'NORMAL' | 'WARNING' | 'CRITICAL';
-    threshold?: {
-        min: number;
-        max: number;
-    };
-    timestamp: string;
-}
-
-export interface Alert {
-    id: string;
-    type: 'SYSTEM' | 'SECURITY' | 'PERFORMANCE' | 'USER';
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    title: string;
-    message: string;
-    source: string;
-    isRead: boolean;
-    createdAt: string;
-}
-
-export interface ChartData {
-    date: string;
-    activeUsers: number;
-    newUsers: number;
-    totalFarms: number;
-    messages: number;
-    schedules: number;
-}
-
-export interface UpdateUserStatusRequest {
-    isActive: boolean;
-    reason?: string;
-}
-
 export class AdminService {
     // User Management
     async getAllUsers(): Promise<ApiResponse<User[]>> {
