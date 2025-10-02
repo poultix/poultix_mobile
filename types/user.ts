@@ -1,3 +1,5 @@
+import { Location } from "./farm";
+
 export enum UserRole {
     ADMIN = 'ADMIN',
     FARMER = 'FARMER',
@@ -5,15 +7,18 @@ export enum UserRole {
 }
 
 export interface User {
-    id: string;
-    email: string;
+    id: string; // UUID
     name: string;
-    role: UserRole;
-    phone: string;
+    email: string;
+    password: string;
     avatar?: string;
-    location: string;
-    createdAt: Date;
+    location?: Location;
+    role: UserRole;
     isActive: boolean;
+    emailVerified: boolean;
+    recoverMode: boolean;
+    createdAt: string; // ISO date string
+    updatedAt: string; // ISO date string
 }
 
 export interface Farmer {
@@ -32,7 +37,7 @@ export interface Veterinary {
     specializations: string[];
     serviceRadius: number; // km
     availability: {
-        [key: string]: { 
+        [key: string]: {
             start: string;
             end: string;
             available: boolean;

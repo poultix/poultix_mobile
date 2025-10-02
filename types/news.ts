@@ -1,3 +1,4 @@
+import { Location } from "./farm";
 import { User } from "./user";
 
 export enum NewsPriority {
@@ -7,12 +8,24 @@ export enum NewsPriority {
     URGENT = 'URGENT'
 }
 
+export enum NewCategory {
+    HEALTH = 'HEALTH',
+    NUTRITION = 'NUTRITION',
+    MANAGEMENT = 'MANAGEMENT',
+    TECHNOLOGY = 'TECHNOLOGY',
+    MARKET = 'MARKET',
+    GENERAL = 'GENERAL'
+}
+
 export interface News {
+    id: string
     title: string;
     content: string;
-    category: string;
+    category: NewCategory;
     priority: NewsPriority;
     tags: string[];
+    image: string
+    location: Location
     author: User;
     createdAt: Date;
     updatedAt: Date;

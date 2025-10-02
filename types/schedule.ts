@@ -1,27 +1,27 @@
 import { User } from "./user";
 
 export enum ScheduleType {
-    INSPECTION = 'inspection',
-    VACCINATION = 'vaccination',
-    TREATMENT = 'treatment',
-    CONSULTATION = 'consultation',
-    EMERGENCY = 'emergency',
-    ROUTINE_CHECKUP = 'routine_checkup'
+    INSPECTION = 'INSPECTION',
+    VACCINATION = 'VACCINATION',
+    TREATMENT = 'TREATMENT',
+    CONSULTATION = 'CONSULTATION',
+    EMERGENCY = 'EMERGENCY',
+    ROUTINE_CHECKUP = 'ROUTINE_CHECKUP'
 }
 
 export enum ScheduleStatus {
-    SCHEDULED = 'scheduled',
-    IN_PROGRESS = 'in_progress',
-    COMPLETED = 'completed',
-    CANCELLED = 'cancelled',
-    RESCHEDULED = 'rescheduled'
+    SCHEDULED = 'SCHEDULED',
+    IN_PROGRESS = 'IN_PROGRESS',
+    COMPLETED = 'COMPLETED',
+    CANCELLED = 'CANCELLED',
+    RESCHEDULED = 'RESCHEDULED'
 }
 
 export enum SchedulePriority {
-    LOW = 'low',
-    MEDIUM = 'medium',
-    HIGH = 'high',
-    URGENT = 'urgent'
+    LOW = 'LOW',
+    MEDIUM = 'MEDIUM',
+    HIGH = 'HIGH',
+    URGENT = 'URGENT'
 }
 
 export interface ScheduleMedication{
@@ -50,8 +50,6 @@ export interface Schedule {
     endTime: string;
     status: ScheduleStatus;
     priority: SchedulePriority;
-    notes?: string;
-    results?: ScheduleResults;
     createdAt: Date;
     updatedAt: Date;
     createdBy: User;

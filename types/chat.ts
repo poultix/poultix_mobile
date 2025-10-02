@@ -15,28 +15,30 @@ export enum MessageType {
     FILE = "FILE",
     VIDEO = "VIDEO"
 }
-export enum MessageStatus{
-    SENDING="SENDING",
-    DELIVERED="DELIVERED",
-    READ="READ",
-    FAILED="FAILED"
+export enum MessageStatus {
+    SENDING = "SENDING",
+    DELIVERED = "DELIVERED",
+    READ = "READ",
+    FAILED = "FAILED"
 }
 
 /**
  * Represents a direct message between users.
  */
 export interface Message {
-    id: string
-    sender: User
-    receiver: User
-    content: string
-    timestamp: string
-    edited?: boolean
-    type: MessageType
-    reactions?: Reaction[]
-    replyTo?: Message
-    fileName?: string
-    status:MessageStatus
+    id: string;
+    sender: User;
+    receiver: User;
+    content: string;
+    type: MessageType;
+    status: MessageStatus;
+    edited: boolean;
+    fileName: string;
+    reactions: Reaction[];
+    replyTo: Message;
+    timestamp: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 

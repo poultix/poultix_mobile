@@ -1,23 +1,16 @@
 import { User } from "./user";
 
 export interface Location {
-    address: string;
-    coordinates: {
-        latitude: number;
-        longitude: number;
-    };
-    district: string;
-    sector: string;
+    latitude: number;
+    longitude: number;
 }
 
 export interface LiveStock {
-
     total: number;
     healthy: number;
     sick: number;
     atRisk: number;
     breeds: string[];
-
 }
 
 
@@ -43,16 +36,16 @@ export interface Farm {
     owner: User
     location: Location;
     size: number;
-    establishedDate: Date;
+    establishedDate: string;
     livestock: LiveStock
     facilities: Facility
     assignedVeterinary?: User;
     healthStatus: FarmStatus;
-    lastInspection?: Date;
+    lastInspection?: string;
     certifications: string[];
     isActive: boolean;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface FarmCreateRequest {
