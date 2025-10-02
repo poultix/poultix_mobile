@@ -81,10 +81,10 @@ export default function DataManagementScreen() {
     <View style={tw`flex-1 bg-gray-50`}>
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
         {/* Header */}
-        <View style={tw`px-4 pt-2 pb-4`}>
+        <View style={tw` pb-4`}>
           <LinearGradient
             colors={['#7C3AED', '#5B21B6']}
-            style={tw`rounded-3xl p-6 shadow-xl`}
+            style={tw` p-6 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between`}>
               <TouchableOpacity

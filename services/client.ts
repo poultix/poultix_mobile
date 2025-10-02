@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store'
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosProgressEvent, CancelToken } from 'axios';
-import { API_CONFIG, API_ENDPOINTS, HTTP_STATUS } from './constants';
+import axios, { AxiosInstance, AxiosResponse, AxiosProgressEvent, CancelToken } from 'axios';
+import { API_CONFIG, HTTP_STATUS } from './constants';
 import { ApiResponse, ApiError } from '@/types';
 
 class ApiClient {
@@ -29,7 +29,7 @@ class ApiClient {
                     }
                     return config;
                 } catch (error) {
-                    console.error('Error in request interceptor:', error.message);
+                    console.error('Error in request interceptor:', error);
                     return Promise.reject(error);
                 }
             },
