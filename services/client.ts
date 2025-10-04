@@ -1,7 +1,7 @@
-import * as SecureStore from 'expo-secure-store'
-import axios, { AxiosInstance, AxiosResponse, AxiosProgressEvent, CancelToken } from 'axios';
+import { ApiError, ApiResponse } from '@/types';
+import axios, { AxiosInstance, AxiosProgressEvent, AxiosResponse, CancelToken } from 'axios';
+import * as SecureStore from 'expo-secure-store';
 import { API_CONFIG, HTTP_STATUS } from './constants';
-import { ApiResponse, ApiError } from '@/types';
 
 class ApiClient {
     private axiosInstance: AxiosInstance;
@@ -63,26 +63,78 @@ class ApiClient {
 
     }
     private normalizeError(error: any): ApiError {
+        // Server responded with an error status
         if (error.response) {
+            const status = error.response.status;
+            
+            // Server errors (5xx)
+            if (status >= 500) {
+                return {
+                    status: HTTP_STATUS.SERVICE_UNAVAILABLE,
+                    message: 'Server is temporarily unavailable',
+                    errors: {},
+                };
+            }
+            
             return {
-                status: error.response.status,
+                status: status,
                 message: error.response.data?.message || 'An error occurred',
             };
         }
 
-        if (error.code === 'ECONNABORTED') {
-            return {
-                status: HTTP_STATUS.REQUEST_TIMEOUT,
-                message: 'Request timeout',
-                errors: {},
-            };
+        // Network-related errors (no response from server)
+        if (error.request) {
+            // Request timeout
+            if (error.code === 'ECONNABORTED') {
+                return {
+                    status: HTTP_STATUS.REQUEST_TIMEOUT,
+                    message: 'Request timeout - please check your connection and try again',
+                    errors: {},
+                };
+            }
+            
+            // Network connection issues
+            if (error.code === 'NETWORK_ERROR' || 
+                error.message?.includes('Network Error') ||
+                error.message?.includes('fetch'))
+            {
+                return {
+                    status: HTTP_STATUS.NETWORK_ERROR,
+                    message: 'No internet connection - please check your network settings',
+                    errors: {},
+                };
+            }
+            
+            // Server unreachable (connection refused, DNS issues, etc.)
+            if (error.code === 'ECONNREFUSED' || 
+                error.code === 'ENOTFOUND' ||
+                error.code === 'ETIMEDOUT' ||
+                error.message?.includes('connect ECONNREFUSED') ||
+                error.message?.includes('getaddrinfo ENOTFOUND'))
+            {
+                return {
+                    status: HTTP_STATUS.SERVER_UNREACHABLE,
+                    message: 'Cannot reach server - please try again later',
+                    errors: {},
+                };
+            }
         }
 
+        // Generic connection failure
         return {
-            status: HTTP_STATUS.SERVICE_UNAVAILABLE,
-            message: 'Network error',
+            status: HTTP_STATUS.CONNECTION_FAILED,
+            message: 'Connection failed - please check your internet and try again',
             errors: {},
         };
+    }
+
+    /**
+     * Handles errors and returns normalized error for components to handle
+     * @param error - The error object
+     * @returns Normalized ApiError with status for routing decisions
+     */
+    public handleError(error: any): ApiError {
+        return this.normalizeError(error);
     }
 
     private async getAuthToken(): Promise<string | null> {

@@ -179,6 +179,10 @@ export const HTTP_STATUS = {
     CONFLICT: 409,
     INTERNAL_SERVER_ERROR: 500,
     SERVICE_UNAVAILABLE: 503,
+    // Custom error codes for different network scenarios
+    NETWORK_ERROR: 600,      // No internet connection
+    SERVER_UNREACHABLE: 601, // Server is down/unreachable
+    CONNECTION_FAILED: 602,  // General connection failure
 }
 
 

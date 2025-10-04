@@ -1,13 +1,14 @@
 import React from 'react';
-import { AuthProvider } from './AuthContext';
 import { AdminProvider } from './AdminContext';
-import { UserProvider } from './UserContext';
-import { FarmProvider } from './FarmContext';
-import { ScheduleProvider } from './ScheduleContext';
+import { AuthProvider } from './AuthContext';
+import { BottomTabsProvider } from './BottomTabsContext';
 import { ChatProvider } from './ChatContext';
+import { ErrorProvider } from './ErrorContext';
+import { FarmProvider } from './FarmContext';
 import { NewsProvider } from './NewsContext';
 import { PharmacyProvider } from './PharmacyContext';
-import { BottomTabsProvider } from './BottomTabsContext';
+import { ScheduleProvider } from './ScheduleContext';
+import { UserProvider } from './UserContext';
 
 interface RootProviderProps {
   children: React.ReactNode;
@@ -16,24 +17,26 @@ interface RootProviderProps {
 
 export const RootProvider: React.FC<RootProviderProps> = ({ children }) => {
   return (
-    <AuthProvider>
-      <AdminProvider>
-        <UserProvider>
-          <FarmProvider>
-            <ScheduleProvider>
-                <ChatProvider>
-                  <NewsProvider>
-                    <PharmacyProvider>
-                      <BottomTabsProvider>
-                        {children}
-                      </BottomTabsProvider>
-                    </PharmacyProvider>
-                  </NewsProvider>
-                </ChatProvider>
-            </ScheduleProvider>
-          </FarmProvider>
-        </UserProvider>
-      </AdminProvider>
-    </AuthProvider>
+    <ErrorProvider>
+      <AuthProvider>
+        <AdminProvider>
+          <UserProvider>
+            <FarmProvider>
+              <ScheduleProvider>
+                  <ChatProvider>
+                    <NewsProvider>
+                      <PharmacyProvider>
+                        <BottomTabsProvider>
+                          {children}
+                        </BottomTabsProvider>
+                      </PharmacyProvider>
+                    </NewsProvider>
+                  </ChatProvider>
+              </ScheduleProvider>
+            </FarmProvider>
+          </UserProvider>
+        </AdminProvider>
+      </AuthProvider>
+    </ErrorProvider>
   );
 };
