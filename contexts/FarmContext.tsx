@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { Farm, FarmStatus,FarmCreateRequest, FarmUpdateRequest } from '@/types';
 import { farmService } from '@/services/api';
+import { useError } from './ErrorContext';
+import { HTTP_STATUS } from '@/services/constants';
 
 // Farm context interface
 interface FarmContextType {
@@ -32,6 +34,7 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentFarm, setCurrentFarm] = useState<Farm | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
   // Load farms on mount
   useEffect(() => {
     loadFarms();
@@ -51,7 +54,13 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to load farms:', error);
-      setError(error.message || 'Failed to load farms');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to load farms'); // ✅ Show inline error for minor issues
+      }
     } finally {
       setLoading(false);
     }
@@ -73,7 +82,13 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to create farm:', error);
-      setError(error.message || 'Failed to create farm');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to create farm'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);
