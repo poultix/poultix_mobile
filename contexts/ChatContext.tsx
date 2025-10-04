@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { Message, TypingStatus, User,MessageCreateRequest, } from '@/types'
+import { Message, TypingStatus, User,MessageCreateRequest} from '@/types'
 import { messageService } from '@/services/api'
 
 
@@ -127,33 +127,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             
             if (response.success && response.data) {
                 // Convert API response to our Message format
-                const newMessage: Message = {
-                    id: response.data.id,
-                    content: response.data.content,
-                    sender: {
-                        id: response.data.senderId,
-                        name: 'Current User', // TODO: Get from auth context
-                        email: '',
-                        role: '',
-                        phone: '',
-                        location: '',
-                        createdAt: new Date(),
-                        isActive: true,
-                    },
-                    receiver: {
-                        id: response.data.receiverId,
-                        name: 'Receiver', // TODO: Get from users context
-                        email: '',
-                        role: 'VETERINARY',
-                        phone: '',
-                        location: '',
-                        createdAt: new Date(),
-                        isActive: true,
-                    },
-                    timestamp: new Date(response.data.createdAt),
-                    isRead: response.data.isRead,
-                    messageType: response.data.messageType,
-                }
+                const newMessage=response.data
                 
                 // Add to local state
                 addMessage(newMessage)
@@ -178,33 +152,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             
             if (response.success && response.data) {
                 // Convert API messages to our Message format
-                const conversationMessages: Message[] = response.data.map(apiMessage => ({
-                    id: apiMessage.id,
-                    content: apiMessage.content,
-                    sender: {
-                        id: apiMessage.senderId,
-                        name: 'Sender', // TODO: Lookup user names
-                        email: '',
-                        role: 'FARMER',
-                        phone: '',
-                        location: '',
-                        createdAt: new Date(),
-                        isActive: true,
-                    },
-                    receiver: {
-                        id: apiMessage.receiverId,
-                        name: 'Receiver',
-                        email: '',
-                        role: 'VETERINARY',
-                        phone: '',
-                        location: '',
-                        createdAt: new Date(),
-                        isActive: true,
-                    },
-                    timestamp: new Date(apiMessage.createdAt),
-                    isRead: apiMessage.isRead,
-                    messageType: apiMessage.messageType,
-                }))
+                const conversationMessages: Message[] = response.data
                 
                 setMessages(conversationMessages)
             } else {
@@ -227,33 +175,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             
             if (response.success && response.data) {
                 // Convert and set messages
-                const senderMessages: Message[] = response.data.map(apiMessage => ({
-                    id: apiMessage.id,
-                    content: apiMessage.content,
-                    sender: {
-                        id: apiMessage.senderId,
-                        name: 'Sender',
-                        email: '',
-                        role: 'FARMER',
-                        phone: '',
-                        location: '',
-                        createdAt: new Date(),
-                        isActive: true,
-                    },
-                    receiver: {
-                        id: apiMessage.receiverId,
-                        name: 'Receiver',
-                        email: '',
-                        role: 'VETERINARY',
-                        phone: '',
-                        location: '',
-                        createdAt: new Date(),
-                        isActive: true,
-                    },
-                    timestamp: new Date(apiMessage.createdAt),
-                    isRead: apiMessage.isRead,
-                    messageType: apiMessage.messageType,
-                }))
+                const senderMessages: Message[] = response.data
                 
                 setMessages(senderMessages)
             } else {

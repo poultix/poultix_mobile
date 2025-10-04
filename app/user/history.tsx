@@ -202,7 +202,8 @@ export default function HistoryScreen() {
                     </View>
 
                     {/* Results for completed schedules */}
-                    {schedule.results && schedule.status === 'completed' && (
+                    {/* Results section removed - not in Schedule type */}
+                    {/* schedule.results && schedule.status === 'COMPLETED' && (
                       <View style={tw`bg-gray-50 rounded-xl p-4 mt-3`}>
                         <Text style={tw`font-semibold text-gray-800 mb-2`}>Results</Text>
                         <Text style={tw`text-gray-600 text-sm mb-2`}>
@@ -211,34 +212,34 @@ export default function HistoryScreen() {
                         {schedule.results.recommendations && schedule.results.recommendations.length > 0 && (
                           <View>
                             <Text style={tw`font-medium text-gray-700 text-sm mb-1`}>Recommendations:</Text>
-                            {schedule.results.recommendations.slice(0, 2).map((rec, idx) => (
+                            schedule.results.recommendations.slice(0, 2).map((rec, idx) => (
                               <Text key={idx} style={tw`text-gray-600 text-sm`}>
                                 • {rec}
                               </Text>
-                            ))}
-                            {schedule.results.recommendations.length > 2 && (
+                            ))
+                            schedule.results.recommendations.length > 2 && (
                               <Text style={tw`text-purple-600 text-sm mt-1`}>
                                 +{schedule.results.recommendations.length - 2} more
                               </Text>
-                            )}
+                            )
                           </View>
-                        )}
+                        )
                       </View>
-                    )}
+                    ) */}
 
                     {/* Priority indicator */}
                     <View style={tw`flex-row items-center justify-between mt-3`}>
                       <View style={[
                         tw`px-2 py-1 rounded-full`,
-                        schedule.priority === 'urgent' ? tw`bg-red-100` :
-                        schedule.priority === 'high' ? tw`bg-orange-100` :
-                        schedule.priority === 'medium' ? tw`bg-yellow-100` : tw`bg-gray-100`
+                        schedule.priority === 'URGENT' ? tw`bg-red-100` :
+                        schedule.priority === 'HIGH' ? tw`bg-orange-100` :
+                        schedule.priority === 'MEDIUM' ? tw`bg-yellow-100` : tw`bg-gray-100`
                       ]}>
                         <Text style={[
                           tw`text-xs font-bold capitalize`,
-                          schedule.priority === 'urgent' ? tw`text-red-600` :
-                          schedule.priority === 'high' ? tw`text-orange-600` :
-                          schedule.priority === 'medium' ? tw`text-yellow-600` : tw`text-gray-600`
+                          schedule.priority === 'URGENT' ? tw`text-red-600` :
+                          schedule.priority === 'HIGH' ? tw`text-orange-600` :
+                          schedule.priority === 'MEDIUM' ? tw`text-yellow-600` : tw`text-gray-600`
                         ]}>
                           {schedule.priority} priority
                         </Text>

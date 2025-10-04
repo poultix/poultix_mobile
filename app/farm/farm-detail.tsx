@@ -76,7 +76,7 @@ export default function FarmDetailScreen() {
                             <Ionicons name="leaf" size={24} color="#10B981" />
                             <Text className="ml-2 text-lg font-semibold text-gray-900">{currentFarm.name}</Text>
                         </View>
-                        <Text className="text-gray-500 mb-2">📍 {currentFarm.location.address}</Text>
+                        <Text className="text-gray-500 mb-2">📍 {currentFarm.location.latitude}, {currentFarm.location.longitude}</Text>
                         <View className="flex-row items-center">
                             <Text className="text-gray-500">Status:</Text>
                             <View className={`ml-2 px-2 py-1 rounded ${healthClasses.bg}`}>
@@ -91,7 +91,7 @@ export default function FarmDetailScreen() {
                     <View className="bg-white rounded-xl shadow p-4 mb-6">
                         <Text className="text-lg font-semibold text-gray-900 mb-3">Owner Information</Text>
                         <Text className="text-gray-800 font-medium mb-1">{currentFarm.owner.name}</Text>
-                        <Text className="text-gray-500 mb-1">📞 {currentFarm.owner.phone}</Text>
+                        <Text className="text-gray-500 mb-1">📞 N/A</Text>
                         <Text className="text-gray-500">✉️ {currentFarm.owner.email}</Text>
                     </View>
 

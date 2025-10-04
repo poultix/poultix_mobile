@@ -147,8 +147,8 @@ export default function PharmacyDetailScreen() {
                         )}
                     </View>
 
-                    {/* Services */}
-                    {currentPharmacy.services && currentPharmacy.services.length > 0 && (
+                    {/* Services - Removed as not in Pharmacy type */}
+                    {/* currentPharmacy.services && currentPharmacy.services.length > 0 && (
                         <View style={tw`bg-white rounded-2xl p-6 mb-6 shadow-md`}>
                             <Text style={tw`text-xl font-bold text-gray-800 mb-4`}>
                                 Services Available
@@ -160,7 +160,7 @@ export default function PharmacyDetailScreen() {
                                 </View>
                             ))}
                         </View>
-                    )}
+                    ) */}
 
                     {/* Vaccines */}
                     {currentPharmacy.vaccines && currentPharmacy.vaccines.length > 0 && (
@@ -174,7 +174,7 @@ export default function PharmacyDetailScreen() {
                                         {vaccine.name}
                                     </Text>
                                     <Text style={tw`text-blue-600 text-sm mb-2`}>
-                                        {vaccine.description}
+                                        Target: {vaccine.targetDisease}
                                     </Text>
                                     <Text style={tw`text-blue-700 font-medium`}>
                                         {vaccine.price.toLocaleString()} RWF

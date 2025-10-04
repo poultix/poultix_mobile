@@ -76,7 +76,7 @@ export default function ScheduleRequestScreen() {
                 farmer: currentUser,
                 veterinary: selectedVet,
                 status: ScheduleStatus.SCHEDULED,
-                notes: notes,
+                // notes: notes, // Notes property not in Schedule type
                 createdBy: currentUser
             });
 

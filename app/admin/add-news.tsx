@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native'
  
-import { News, NewsPriority } from '@/types'
+import { NewsCategory, News, NewsPriority } from '@/types'
 import { Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -32,7 +32,7 @@ export default function AddNewsScreen() {
   const [article, setArticle] = useState<Partial<News>>({
     title: '',
     content: '',
-    category:'General',
+    category: NewsCategory.GENERAL,
     priority: NewsPriority.MEDIUM,
     tags: []
   })
@@ -114,11 +114,14 @@ export default function AddNewsScreen() {
       
       // Create news article using context action
       await createNews({
+        id: `news_${Date.now()}`,
         title: article.title!,
         content: article.content!,
-        category: article.category || 'General',
+        category: article.category || NewsCategory.GENERAL,
         priority: article.priority || NewsPriority.MEDIUM,
         tags: article.tags || [],
+        image: '',
+        location: { latitude: 0, longitude: 0 },
         author: currentUser
       })
       
@@ -139,7 +142,7 @@ export default function AddNewsScreen() {
     setArticle({
       title: '',
       content: '',
-      category: 'General',
+      category: NewsCategory.GENERAL,
       priority: NewsPriority.MEDIUM,
       tags: []
     })
@@ -147,12 +150,12 @@ export default function AddNewsScreen() {
   }
 
   const categories = [
-    { value: 'General', label: 'General', color: '#6B7280' },
-    { value: 'Health', label: 'Health & Disease', color: '#EF4444' },
-    { value: 'Nutrition', label: 'Nutrition', color: '#10B981' },
-    { value: 'Breeding', label: 'Breeding', color: '#F59E0B' },
-    { value: 'Market', label: 'Market News', color: '#3B82F6' },
-    { value: 'Technology', label: 'Technology', color: '#8B5CF6' },
+    { value: NewsCategory.GENERAL, label: 'General', color: '#6B7280' },
+    { value: NewsCategory.HEALTH, label: 'Health & Disease', color: '#EF4444' },
+    { value: NewsCategory.NUTRITION, label: 'Nutrition', color: '#10B981' },
+    { value: NewsCategory.MANAGEMENT, label: 'Management', color: '#F59E0B' },
+    { value: NewsCategory.MARKET, label: 'Market News', color: '#3B82F6' },
+    { value: NewsCategory.TECHNOLOGY, label: 'Technology', color: '#8B5CF6' },
   ]
 
   const priorities = [

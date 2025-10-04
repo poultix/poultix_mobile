@@ -13,7 +13,7 @@ export default function ChatReactions({ showReactions, setShowReactions }: ChatR
     const { currentUser } = useAuth()
     const reactions = ['👍', '❤️', '😂', '😮', '😢', '😡']
     const handleReaction = (messageId: string, reaction: string) => {
-        addReaction(Number(messageId), Number(currentUser?.id), reaction);
+        addReaction(messageId, currentUser?.id || '', reaction);
     }
     return (
         <View style={tw`absolute bottom-20 left-4 right-4 bg-white rounded-2xl p-4 shadow-lg`}>

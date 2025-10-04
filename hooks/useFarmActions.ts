@@ -1,5 +1,5 @@
 import { Farm, FarmStatus } from '@/types/farm';
-import { MockDataService } from '@/services/mockData';
+import { farmService } from '@/services/api';
 
 export interface FarmActionsType {
   loadFarms: () => Promise<Farm[]>;
@@ -15,15 +15,16 @@ export interface FarmActionsType {
 
 export const useFarmActions = (): FarmActionsType => {
   const loadFarms = async (): Promise<Farm[]> => {
-    return await MockDataService.getFarms();
+    const response = await farmService.getAllFarms();
+    return response.success && response.data ? response.data : [];
   };
 
   const createFarm = async (farmData: Omit<Farm, 'id' | 'createdAt' | 'updatedAt'>): Promise<Farm> => {
     const newFarm: Farm = {
       ...farmData,
       id: `farm_${Date.now()}`,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     
     // In a real app, this would make an API call
@@ -39,7 +40,7 @@ export const useFarmActions = (): FarmActionsType => {
       throw new Error('Farm not found');
     }
     
-    const updatedFarm = { ...existingFarm, ...farmData, updatedAt: new Date() };
+    const updatedFarm = { ...existingFarm, ...farmData, updatedAt: new Date().toISOString() };
     return updatedFarm;
   };
 

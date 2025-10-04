@@ -28,15 +28,15 @@ export default function VetOverview() {
         return scheduleDate.toDateString() === today.toDateString();
     });
     const upcomingSchedules = mySchedules.filter(s =>
-        s.status === 'scheduled' && new Date(s.scheduledDate) >= new Date()
+        s.status === 'SCHEDULED' && new Date(s.scheduledDate) >= new Date()
     );
 
     const getHealthStatusColor = (status: string) => {
         switch (status) {
-            case 'excellent': return { bg: 'bg-green-100', text: 'text-green-600', border: 'border-green-200' };
-            case 'good': return { bg: 'bg-blue-100', text: 'text-blue-600', border: 'border-blue-200' };
-            case 'fair': return { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-200' };
-            case 'poor': return { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-200' };
+            case 'EXCELLENT': return { bg: 'bg-green-100', text: 'text-green-600', border: 'border-green-200' };
+            case 'GOOD': return { bg: 'bg-blue-100', text: 'text-blue-600', border: 'border-blue-200' };
+            case 'FAIR': return { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-200' };
+            case 'POOR': return { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-200' };
             default: return { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-200' };
         }
     };
@@ -71,7 +71,7 @@ export default function VetOverview() {
                         <Ionicons name="calendar-outline" size={24} color="#F59E0B" />
                         <Text style={tw`text-2xl font-bold text-gray-800`}>{todaySchedules.length}</Text>
                     </View>
-                    <Text style={tw`text-gray-600 font-medium`}>Today's Visits</Text>
+                    <Text style={tw`text-gray-600 font-medium`}>Today&apos;s Visits</Text>
                     <Text style={tw`text-xs text-gray-500 mt-1`}>
                         {upcomingSchedules.length} upcoming total
                     </Text>
@@ -84,7 +84,7 @@ export default function VetOverview() {
                     </View>
                     <Text style={tw`text-gray-600 font-medium`}>Rating</Text>
                     <Text style={tw`text-xs text-gray-500 mt-1`}>
-                        {mySchedules.filter(s => s.status === 'completed').length} total visits
+                        {mySchedules.filter(s => s.status === 'COMPLETED').length} total visits
                     </Text>
                 </View>
             </View>
@@ -92,7 +92,7 @@ export default function VetOverview() {
             {/* Today's Schedule */}
             <View style={tw`bg-white rounded-2xl p-5 shadow-sm mb-6`}>
                 <View style={tw`flex-row justify-between items-center mb-4`}>
-                    <Text style={tw`text-lg font-bold text-gray-800`}>Today's Schedule</Text>
+                    <Text style={tw`text-lg font-bold text-gray-800`}>Today&apos;s Schedule</Text>
                     <TouchableOpacity onPress={() => setSelectedTab('schedules')}>
                         <Text style={tw`text-red-600 font-semibold`}>View All</Text>
                     </TouchableOpacity>
@@ -129,17 +129,17 @@ export default function VetOverview() {
                                 <View style={tw`flex-row items-center justify-between`}>
                                     <View style={tw`flex-row items-center`}>
                                         <Ionicons name="location-outline" size={14} color="#6B7280" />
-                                        <Text style={tw`text-gray-500 text-xs ml-1`}>{farm?.location.address}</Text>
+                                        <Text style={tw`text-gray-500 text-xs ml-1`}>{farm?.location.latitude}, {farm?.location.longitude}</Text>
                                     </View>
                                     <View style={[
                                         tw`px-2 py-1 rounded-full`,
-                                        schedule.priority === 'urgent' ? tw`bg-red-100` :
-                                            schedule.priority === 'high' ? tw`bg-orange-100` : tw`bg-yellow-100`
+                                        schedule.priority === 'URGENT' ? tw`bg-red-100` :
+                                            schedule.priority === 'HIGH' ? tw`bg-orange-100` : tw`bg-yellow-100`
                                     ]}>
                                         <Text style={[
                                             tw`text-xs font-bold capitalize`,
-                                            schedule.priority === 'urgent' ? tw`text-red-600` :
-                                                schedule.priority === 'high' ? tw`text-orange-600` : tw`text-yellow-600`
+                                            schedule.priority === 'URGENT' ? tw`text-red-600` :
+                                                schedule.priority === 'HIGH' ? tw`text-orange-600` : tw`text-yellow-600`
                                         ]}>
                                             {schedule.priority}
                                         </Text>
@@ -218,9 +218,9 @@ export default function VetOverview() {
                             </View>
                             <View style={tw`flex-1`}>
                                 <Text style={tw`font-medium text-gray-800`}>{farm.name}</Text>
-                                <Text style={tw`text-sm text-gray-600`}>{farm.location.address}</Text>
+                                <Text style={tw`text-sm text-gray-600`}>{farm.location.latitude}, {farm.location.longitude}</Text>
                                 <Text style={tw`text-xs text-gray-500`}>
-                                    {farm.livestock.total} chickens • Last visit: {farm.lastInspection?.toLocaleDateString() || 'Never'}
+                                    {farm.livestock.total} chickens • Last visit: {farm.lastInspection ? new Date(farm.lastInspection).toLocaleDateString() : 'Never'}
                                 </Text>
                             </View>
                             <View style={tw`${healthColors.bg} ${healthColors.border} border px-2 py-1 rounded-full`}>

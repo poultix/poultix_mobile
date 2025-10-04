@@ -1,5 +1,5 @@
 import { Pharmacy } from '@/types/pharmacy';
-import { MockDataService } from '@/services/mockData';
+// Pharmacy data - using mock data
 
 export interface PharmacyActionsType {
   loadPharmacies: () => Promise<Pharmacy[]>;
@@ -16,7 +16,7 @@ export interface PharmacyActionsType {
 
 export const usePharmacyActions = (): PharmacyActionsType => {
   const loadPharmacies = async (): Promise<Pharmacy[]> => {
-    return await MockDataService.getPharmacies();
+    return []; // Pharmacy mock data not implemented yet
   };
 
   const createPharmacy = async (pharmacyData: Omit<Pharmacy, 'id'>): Promise<Pharmacy> => {

@@ -40,9 +40,9 @@ export default function FarmsDashboard() {
                         <View className="flex-row items-start justify-between mb-3">
                             <View className="flex-1">
                                 <Text className="text-lg font-bold text-gray-800">{farm.name}</Text>
-                                <Text className="text-gray-600">{farm.location.address}</Text>
+                                <Text className="text-gray-600">{farm.location.latitude}, {farm.location.longitude}</Text>
                                 <Text className="text-sm text-gray-500">
-                                    {farm.size} hectares • Est. {farm.establishedDate.getFullYear()}
+                                    {farm.size} hectares • Est. {new Date(farm.establishedDate).getFullYear()}
                                 </Text>
                             </View>
                             <View className={`${healthColors.bg} ${healthColors.border} border px-3 py-1 rounded-full`}>
@@ -76,7 +76,7 @@ export default function FarmsDashboard() {
 
                         <View className="flex-row items-center justify-between">
                             <Text className="text-gray-500 text-sm">
-                                Last inspection: {farm.lastInspection?.toLocaleDateString() || 'Never'}
+                                Last inspection: {farm.lastInspection ? new Date(farm.lastInspection).toLocaleDateString() : 'Never'}
                             </Text>
                             <Ionicons name="chevron-forward-outline" size={16} color="#9CA3AF" />
                         </View>

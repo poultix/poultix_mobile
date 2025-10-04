@@ -68,7 +68,7 @@ export default function VerifyCodeScreen() {
 
         try {
             setIsLoading(true);
-             await verifyCode('demo@example.com', code.trim());
+             await verifyCode(code.trim());
 
         } catch (error) {
             console.error('Verify code error:', error);

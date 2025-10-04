@@ -34,7 +34,7 @@ export default function AdminDataList() {
                 filteredData = farms.filter(farm => {
                     const matchesSearch = !searchQuery ||
                         farm.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        farm.location.address.toLowerCase().includes(searchQuery.toLowerCase());
+                        `${farm.location.latitude}, ${farm.location.longitude}`.toLowerCase().includes(searchQuery.toLowerCase());
                     const matchesFilter = selectedFilter === 'all' || farm.healthStatus === selectedFilter;
                     return matchesSearch && matchesFilter;
                 });
@@ -181,7 +181,7 @@ export default function AdminDataList() {
                             <View style={tw`flex-row items-center justify-between`}>
                                 <View style={tw`flex-1`}>
                                     <Text style={tw`font-bold text-gray-800`}>{item.name}</Text>
-                                    <Text style={tw`text-gray-600`}>{item.location.address}</Text>
+                                    <Text style={tw`text-gray-600`}>{item.location.latitude}, {item.location.longitude}</Text>
                                     <Text style={tw`text-sm text-gray-500`}>
                                         {item.livestock.total} chickens • {item.size} hectares
                                     </Text>

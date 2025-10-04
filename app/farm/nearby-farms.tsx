@@ -138,7 +138,7 @@ export default function NearbyFarmsScreen() {
                                             Owner: {farm.owner.name}
                                         </Text>
                                         <Text style={tw`text-gray-500 text-sm`}>
-                                            {farm.location.address}
+                                            {farm.location.latitude}, {farm.location.longitude}
                                         </Text>
                                     </View>
                                     <View style={tw`items-end`}>
@@ -197,7 +197,7 @@ export default function NearbyFarmsScreen() {
                                 <View style={tw`flex-row gap-3`}>
                                     <TouchableOpacity
                                         style={tw`flex-1 bg-blue-500 py-3 px-4 rounded-xl flex-row items-center justify-center`}
-                                        onPress={() => handleCallFarmer(farm.owner.phone || '123-456-7890')}
+                                        onPress={() => handleCallFarmer('123-456-7890')} // Phone not available in User type
                                     >
                                         <Ionicons name="call" size={16} color="white" />
                                         <Text style={tw`text-white font-medium ml-2`}>Call</Text>

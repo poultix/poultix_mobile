@@ -1,11 +1,10 @@
-import { User, UserRole } from '@/types/user';
-import { MockDataService } from '@/services/mockData';
-import { useUsers } from '@/contexts/UserContext';
+import { User, UserRole, UserRegistrationRequest, UserUpdateRequest } from '@/types';
+import { userService } from '@/services/api';
 
 export interface UserActionsType {
   loadUsers: () => Promise<User[]>;
-  createUser: (userData: Omit<User, 'id' | 'createdAt'>) => Promise<User>;
-  updateUser: (id: string, userData: Partial<User>) => Promise<User>;
+  createUser: (userData: UserRegistrationRequest) => Promise<User>;
+  updateUser: (id: string, userData: UserUpdateRequest) => Promise<User>;
   deleteUser: (id: string) => Promise<void>;
   getUserById: (users: User[], id: string) => User | undefined;
   getUsersByRole: (users: User[], role: UserRole) => User[];
@@ -13,47 +12,42 @@ export interface UserActionsType {
 }
 
 export const useUserActions = (): UserActionsType => {
-  const { addUser, editUser, deleteUser: deleteUserFromContext, refreshUsers } = useUsers();
-
   const loadUsers = async (): Promise<User[]> => {
-    return await MockDataService.getUsers();
+    const response = await userService.getAllUsers();
+    return response.success && response.data ? response.data : [];
   };
 
-  const createUser = async (userData: Omit<User, 'id' | 'createdAt'>): Promise<User> => {
-    const newUser: User = {
-      ...userData,
-      id: `user_${Date.now()}`,
-      createdAt: new Date(),
-    };
-
-    // Add to context state
-    addUser(newUser);
-    return newUser;
+  const refreshUsers = async (): Promise<void> => {
+    // This method would typically refresh the context state
+    await loadUsers();
   };
 
-  const updateUser = async (id: string, userData: Partial<User>): Promise<User> => {
-    const users = await loadUsers();
-    const existingUser = users.find(user => user.id === id);
-
-    if (!existingUser) {
-      throw new Error('User not found');
+  const createUser = async (userData: UserRegistrationRequest): Promise<User> => {
+    const response = await userService.register(userData);
+    if (response.success && response.data) {
+      return response.data;
     }
+    throw new Error('Failed to create user');
+  };
 
-    const updatedUser = { ...existingUser, ...userData };
-    // Update in context state
-    editUser(updatedUser);
-    return updatedUser;
+  const updateUser = async (id: string, userData: UserUpdateRequest): Promise<User> => {
+    const response = await userService.updateUser(id, userData);
+    if (response.success && response.data) {
+      return response.data;
+    }
+    throw new Error('Failed to update user');
   };
 
   const deleteUser = async (id: string): Promise<void> => {
-    // Delete from context state
-    deleteUserFromContext(id);
+    const response = await userService.deleteUser(id);
+    if (!response.success) {
+      throw new Error('Failed to delete user');
+    }
   };
 
   const getUserById = (users: User[], id: string): User | undefined => {
     return users.find(user => user.id === id);
   };
-
   const getUsersByRole = (users: User[], role: UserRole): User[] => {
     return users.filter(user => user.role === role);
   };

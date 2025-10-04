@@ -50,7 +50,7 @@ export default function FarmDataScreen() {
       filtered = filtered.filter(farm => 
         farm.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         farm.owner.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        farm.location.address.toLowerCase().includes(searchQuery.toLowerCase())
+        `${farm.location.latitude}, ${farm.location.longitude}`.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     
@@ -231,7 +231,7 @@ export default function FarmDataScreen() {
                     <View style={tw`flex-row justify-between items-start mb-2`}>
                       <View style={tw`flex-1`}>
                         <Text style={tw`text-xl font-bold text-gray-900`}>{farm.name}</Text>
-                        <Text style={tw`text-gray-600 text-sm mt-1`}>{farm.location.address}</Text>
+                        <Text style={tw`text-gray-600 text-sm mt-1`}>{farm.location.latitude}, {farm.location.longitude}</Text>
                       </View>
                       <View style={tw`${healthColor.bg} ${healthColor.border} border px-3 py-1 rounded-full`}>
                         <Text style={tw`${healthColor.text} text-xs font-medium`}>{farm.healthStatus}</Text>

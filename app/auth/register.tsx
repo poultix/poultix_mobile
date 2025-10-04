@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -64,7 +65,7 @@ export default function SignUpScreen() {
                 email.trim(),
                 password.trim(),
                 name.trim(),
-                isVeterinary ? 'VETERINARY' : 'FARMER'
+                isVeterinary ? UserRole.VETERINARY : UserRole.FARMER
             );
 
             Alert.alert('Success', 'Account created successfully!');

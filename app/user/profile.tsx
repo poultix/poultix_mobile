@@ -19,8 +19,11 @@ export default function ProfileScreen() {
   const { currentUser,logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(currentUser?.name || '');
-  const [phone, setPhone] = useState(currentUser?.phone || '');
-  const [location, setLocation] = useState(currentUser?.location || '');
+  // Phone property doesn't exist in User type - removing for now
+  // const [phone, setPhone] = useState(currentUser?.phone || '');
+  const [location, setLocation] = useState(
+    currentUser?.location ? `${currentUser.location.latitude}, ${currentUser.location.longitude}` : ''
+  );
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -166,13 +169,13 @@ export default function ProfileScreen() {
               {isEditing ? (
                 <TextInput
                   style={tw`border border-gray-300 rounded-xl p-4 text-gray-800`}
-                  value={phone}
-                  onChangeText={setPhone}
-                  placeholder="Enter your phone"
+                  value="N/A"
+                  placeholder="Phone not available"
+                  editable={false}
                   keyboardType="phone-pad"
                 />
               ) : (
-                <Text style={tw`text-gray-800 font-medium text-base`}>{currentUser.phone}</Text>
+                <Text style={tw`text-gray-800 font-medium text-base`}>N/A</Text>
               )}
             </View>
 
@@ -186,7 +189,9 @@ export default function ProfileScreen() {
                   placeholder="Enter your location"
                 />
               ) : (
-                <Text style={tw`text-gray-800 font-medium text-base`}>{currentUser.location}</Text>
+                <Text style={tw`text-gray-800 font-medium text-base`}>
+                  {currentUser.location ? `${currentUser.location.latitude}, ${currentUser.location.longitude}` : 'N/A'}
+                </Text>
               )}
             </View>
 

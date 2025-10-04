@@ -127,7 +127,12 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
   
   const getFarmsByStatus = async (status: FarmStatus): Promise<Farm[]> => {
     try {
-      const response = await farmService.getFarmsByStatus(status);
+      // Convert FarmStatus to service expected format
+      const serviceStatus = status === FarmStatus.EXCELLENT ? 'HEALTHY' :
+                           status === FarmStatus.GOOD ? 'HEALTHY' :
+                           status === FarmStatus.FAIR ? 'AT_RISK' :
+                           status === FarmStatus.POOR ? 'SICK' : 'QUARANTINE';
+      const response = await farmService.getFarmsByStatus(serviceStatus as 'HEALTHY' | 'AT_RISK' | 'SICK' | 'QUARANTINE');
       
       if (response.success && response.data) {
         return response.data;
@@ -187,7 +192,12 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(true);
       setError('');
       
-      const response = await farmService.updateHealthStatus(farmId, status);
+      // Convert FarmStatus to service expected format
+      const serviceStatus = status === FarmStatus.EXCELLENT ? 'HEALTHY' :
+                           status === FarmStatus.GOOD ? 'HEALTHY' :
+                           status === FarmStatus.FAIR ? 'AT_RISK' :
+                           status === FarmStatus.POOR ? 'SICK' : 'QUARANTINE';
+      const response = await farmService.updateHealthStatus(farmId, serviceStatus as 'HEALTHY' | 'AT_RISK' | 'SICK' | 'QUARANTINE');
       
       if (response.success && response.data) {
         setFarms(prev => prev.map(farm => farm.id === farmId ? response.data! : farm));

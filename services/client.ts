@@ -67,7 +67,6 @@ class ApiClient {
             return {
                 status: error.response.status,
                 message: error.response.data?.message || 'An error occurred',
-                errors: error.response.data?.errors || {},
             };
         }
 
@@ -76,7 +75,6 @@ class ApiClient {
                 status: HTTP_STATUS.REQUEST_TIMEOUT,
                 message: 'Request timeout',
                 errors: {},
-                code: error.code,
             };
         }
 
@@ -84,7 +82,6 @@ class ApiClient {
             status: HTTP_STATUS.SERVICE_UNAVAILABLE,
             message: 'Network error',
             errors: {},
-            code: error.code,
         };
     }
 
@@ -92,7 +89,7 @@ class ApiClient {
         try {
             return await SecureStore.getItemAsync('access_token');
         } catch (error) {
-            console.error('Error accessing localStorage:', error.message);
+            console.error('Error accessing localStorage:', (error as Error).message || 'Unknown error');
             this.logout();
             return null;
         }
@@ -124,7 +121,7 @@ class ApiClient {
                 throw new Error('Refresh token invalid or expired');
             }
         } catch (error) {
-            console.error('Failed to refresh token:', error.message);
+            console.error('Failed to refresh token:', (error as Error).message || 'Unknown error');
             this.logout();
             throw this.normalizeError(error);
         }
@@ -139,17 +136,17 @@ class ApiClient {
                 try {
                     callback();
                 } catch (error) {
-                    console.error('Error in logout callback:', error.message);
+                    console.error('Error in logout callback:', (error as Error).message || 'Unknown error');
                 }
             });
         } catch (error) {
-            console.error('Error during logout:', error.message);
+            console.error('Error during logout:', (error as Error).message || 'Unknown error');
         } finally {
             this.logoutListeners.forEach((callback) => {
                 try {
                     callback();
                 } catch (error) {
-                    console.error('Error in final logout callback:', error.message);
+                    console.error('Error in final logout callback:', (error as Error).message || 'Unknown error');
                 }
             });
         }
@@ -159,7 +156,7 @@ class ApiClient {
         try {
             this.logoutListeners.push(callback);
         } catch (error) {
-            console.error('Error adding logout listener:', error.message);
+            console.error('Error adding logout listener:', (error as Error).message || 'Unknown error');
         }
     }
 
@@ -167,7 +164,7 @@ class ApiClient {
         try {
             this.logoutListeners = this.logoutListeners.filter(cb => cb !== callback);
         } catch (error) {
-            console.error('Error removing logout listener:', error.message);
+            console.error('Error removing logout listener:', (error as Error).message || 'Unknown error');
         }
     }
 
@@ -176,8 +173,8 @@ class ApiClient {
             const response = await this.axiosInstance.get<ApiResponse<T>>(endpoint, { params });
             return response.data;
         } catch (error) {
-            console.error(`GET ${endpoint} failed:`, error.message);
-            if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+            console.error(`GET ${endpoint} failed:`, (error as Error).message || 'Unknown error');
+            if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.get<T>(endpoint, params); // Retry
             }
@@ -191,8 +188,8 @@ class ApiClient {
             console.log("This is the response", response, "endpoint", endpoint)
             return response.data;
         } catch (error) {
-            console.error(`POST ${endpoint} failed:`, error.request);
-            if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+            console.error(`POST ${endpoint} failed:`, (error as any).request || 'Unknown error');
+            if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.post<T>(endpoint, data); // Retry
             }
@@ -205,8 +202,8 @@ class ApiClient {
             const response = await this.axiosInstance.put<ApiResponse<T>>(endpoint, data);
             return response.data;
         } catch (error) {
-            console.error(`PUT ${endpoint} failed:`, error.message);
-            if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+            console.error(`PUT ${endpoint} failed:`, (error as Error).message || 'Unknown error');
+            if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.put<T>(endpoint, data); // Retry
             }
@@ -219,8 +216,8 @@ class ApiClient {
             const response = await this.axiosInstance.patch<ApiResponse<T>>(endpoint, data);
             return response.data;
         } catch (error) {
-            console.error(`PATCH ${endpoint} failed:`, error.message);
-            if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+            console.error(`PATCH ${endpoint} failed:`, (error as Error).message || 'Unknown error');
+            if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.patch<T>(endpoint, data); // Retry
             }
@@ -233,8 +230,8 @@ class ApiClient {
             const response = await this.axiosInstance.delete<ApiResponse<T>>(endpoint);
             return response.data;
         } catch (error) {
-            console.error(`DELETE ${endpoint} failed:`, error.message);
-            if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+            console.error(`DELETE ${endpoint} failed:`, (error as Error).message || 'Unknown error');
+            if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.delete<T>(endpoint); // Retry
             }
@@ -261,8 +258,8 @@ class ApiClient {
             });
             return response.data;
         } catch (error) {
-            console.error(`UPLOAD ${endpoint} failed:`, error.message);
-            if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+            console.error(`UPLOAD ${endpoint} failed:`, (error as Error).message || 'Unknown error');
+            if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.uploadFile<T>(endpoint, formData, onUploadProgress, cancelToken, timeout); // Retry
             }

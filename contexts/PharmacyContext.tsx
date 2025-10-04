@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { Pharmacy, Vaccine } from '@/types/pharmacy';
+import { Pharmacy, Vaccine, PharmacyCreateRequest, PharmacyUpdateRequest } from '@/types/pharmacy';
 import { pharmacyService } from '@/services/api';
-import type { PharmacyCreateRequest, PharmacyUpdateRequest } from '@/services/api';
 
 
 interface PharmacyContextType {

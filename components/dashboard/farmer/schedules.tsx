@@ -38,8 +38,8 @@ export default function FarmerSchedulesDashboard() {
                                     {farm?.name} • {schedule.veterinary?.name}
                                 </Text>
                             </View>
-                            <View className={`px-3 py-1 rounded-full border ${schedule.status === 'completed' ? 'bg-green-100 border-green-200' : schedule.status === 'scheduled' ? 'bg-blue-100 border-blue-200' : schedule.status === 'cancelled' ? 'bg-red-100 border-red-200' : 'bg-gray-100 border-gray-200'}`}>
-                                <Text className={`text-xs font-bold capitalize ${schedule.status === 'completed' ? 'text-green-600' : schedule.status === 'scheduled' ? 'text-blue-600' : schedule.status === 'cancelled' ? 'text-red-600' : 'text-gray-600'}`}>
+                            <View className={`px-3 py-1 rounded-full border ${schedule.status === 'COMPLETED' ? 'bg-green-100 border-green-200' : schedule.status === 'SCHEDULED' ? 'bg-blue-100 border-blue-200' : schedule.status === 'CANCELLED' ? 'bg-red-100 border-red-200' : 'bg-gray-100 border-gray-200'}`}>
+                                <Text className={`text-xs font-bold capitalize ${schedule.status === 'COMPLETED' ? 'text-green-600' : schedule.status === 'SCHEDULED' ? 'text-blue-600' : schedule.status === 'CANCELLED' ? 'text-red-600' : 'text-gray-600'}`}>
                                     {schedule.status}
                                 </Text>
                             </View>
@@ -50,7 +50,7 @@ export default function FarmerSchedulesDashboard() {
                                 <View className="flex-row items-center">
                                     <Ionicons name="calendar-outline" size={16} color="#6B7280" />
                                     <Text className="text-gray-600 ml-2">
-                                        {schedule.scheduledDate.toLocaleDateString()}
+                                        {new Date(schedule.scheduledDate).toLocaleDateString()}
                                     </Text>
                                 </View>
                                 <View className="flex-row items-center">
@@ -62,15 +62,15 @@ export default function FarmerSchedulesDashboard() {
                             </View>
                         </View>
 
-                        {schedule.notes && (
+                        {schedule.description && (
                             <Text className="text-gray-600 text-sm mb-3">
-                                Note: {schedule.notes}
+                                Note: {schedule.description}
                             </Text>
                         )}
 
                         <View className="flex-row items-center justify-between">
-                            <View className={`px-2 py-1 rounded-full ${schedule.priority === 'urgent' ? 'bg-red-100' : schedule.priority === 'high' ? 'bg-orange-100' : schedule.priority === 'medium' ? 'bg-yellow-100' : 'bg-gray-100'}`}>
-                                <Text className={`text-xs font-bold capitalize ${schedule.priority === 'urgent' ? 'text-red-600' : schedule.priority === 'high' ? 'text-orange-600' : schedule.priority === 'medium' ? 'text-yellow-600' : 'text-gray-600'}`}>
+                            <View className={`px-2 py-1 rounded-full ${schedule.priority === 'URGENT' ? 'bg-red-100' : schedule.priority === 'HIGH' ? 'bg-orange-100' : schedule.priority === 'MEDIUM' ? 'bg-yellow-100' : 'bg-gray-100'}`}>
+                                <Text className={`text-xs font-bold capitalize ${schedule.priority === 'URGENT' ? 'text-red-600' : schedule.priority === 'HIGH' ? 'text-orange-600' : schedule.priority === 'MEDIUM' ? 'text-yellow-600' : 'text-gray-600'}`}>
                                     {schedule.priority} priority
                                 </Text>
                             </View>

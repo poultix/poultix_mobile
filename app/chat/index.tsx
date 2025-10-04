@@ -63,7 +63,7 @@ export default function ChatScreen() {
             filtered = filtered.filter(user =>
                 user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                user.location.toLowerCase().includes(searchQuery.toLowerCase())
+                (user.location ? `${user.location.latitude}, ${user.location.longitude}` : '').toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
 
@@ -321,7 +321,9 @@ export default function ChatScreen() {
 
                                         <View style={tw`flex-row items-center`}>
                                             <Ionicons name="location-outline" size={14} color="#6B7280" style={tw`mr-1`} />
-                                            <Text style={tw`text-gray-500 text-sm`}>{user.location}</Text>
+                                            <Text style={tw`text-gray-500 text-sm`}>
+                                                {user.location ? `${user.location.latitude}, ${user.location.longitude}` : 'N/A'}
+                                            </Text>
                                         </View>
                                     </View>
                                 </View>

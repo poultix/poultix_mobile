@@ -35,7 +35,7 @@ export interface Message {
     edited: boolean;
     fileName: string;
     reactions: Reaction[];
-    replyTo: Message;
+    replyTo: Message | null;
     timestamp: string;
     createdAt: string;
     updatedAt: string;
@@ -65,25 +65,6 @@ export interface SendMessageRequest {
     replyToId?: number
 }
 
-// Response types
-export interface MessageResponse {
-    id: string;
-    senderId: string;
-    receiverId: string;
-    content: string;
-    messageType: 'TEXT' | 'IMAGE' | 'FILE' | 'VOICE';
-    attachments?: {
-        url: string;
-        type: string;
-        name: string;
-        size: number;
-    }[];
-    isRead: boolean;
-    readAt?: string;
-    deliveredAt?: string;
-    createdAt: string;
-    updatedAt: string;
-}
 
 // Request types
 export interface MessageCreateRequest {

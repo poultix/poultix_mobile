@@ -46,17 +46,17 @@ export default function VetDashSchedules() {
                             </View>
                             <View style={[
                                 tw`px-3 py-1 rounded-full border`,
-                                schedule.status === 'completed' ? tw`bg-green-100 border-green-200` :
-                                    schedule.status === 'scheduled' ? tw`bg-blue-100 border-blue-200` :
-                                        schedule.status === 'in_progress' ? tw`bg-yellow-100 border-yellow-200` :
-                                            schedule.status === 'cancelled' ? tw`bg-red-100 border-red-200` : tw`bg-gray-100 border-gray-200`
+                                schedule.status === 'COMPLETED' ? tw`bg-green-100 border-green-200` :
+                                    schedule.status === 'SCHEDULED' ? tw`bg-blue-100 border-blue-200` :
+                                        schedule.status === 'IN_PROGRESS' ? tw`bg-yellow-100 border-yellow-200` :
+                                            schedule.status === 'CANCELLED' ? tw`bg-red-100 border-red-200` : tw`bg-gray-100 border-gray-200`
                             ]}>
                                 <Text style={[
                                     tw`text-xs font-bold capitalize`,
-                                    schedule.status === 'completed' ? tw`text-green-600` :
-                                        schedule.status === 'scheduled' ? tw`text-blue-600` :
-                                            schedule.status === 'in_progress' ? tw`text-yellow-600` :
-                                                schedule.status === 'cancelled' ? tw`text-red-600` : tw`text-gray-600`
+                                    schedule.status === 'COMPLETED' ? tw`text-green-600` :
+                                        schedule.status === 'SCHEDULED' ? tw`text-blue-600` :
+                                            schedule.status === 'IN_PROGRESS' ? tw`text-yellow-600` :
+                                                schedule.status === 'CANCELLED' ? tw`text-red-600` : tw`text-gray-600`
                                 ]}>
                                     {schedule.status.replace('_', ' ')}
                                 </Text>
@@ -68,7 +68,7 @@ export default function VetDashSchedules() {
                                 <View style={tw`flex-row items-center`}>
                                     <Ionicons name="calendar-outline" size={16} color="#6B7280" />
                                     <Text style={tw`text-gray-600 ml-2`}>
-                                        {schedule.scheduledDate.toLocaleDateString()}
+                                        {new Date(schedule.scheduledDate).toLocaleDateString()}
                                     </Text>
                                 </View>
                                 <View style={tw`flex-row items-center`}>
@@ -81,34 +81,34 @@ export default function VetDashSchedules() {
 
                             <View style={tw`flex-row items-center`}>
                                 <Ionicons name="location-outline" size={16} color="#6B7280" />
-                                <Text style={tw`text-gray-600 ml-2`}>{farm?.location.address}</Text>
+                                <Text style={tw`text-gray-600 ml-2`}>{farm?.location.latitude}, {farm?.location.longitude}</Text>
                             </View>
                         </View>
 
-                        {schedule.notes && (
+                        {schedule.description && (
                             <Text style={tw`text-gray-600 text-sm mb-3`}>
-                                Note: {schedule.notes}
+                                Note: {schedule.description}
                             </Text>
                         )}
 
                         <View style={tw`flex-row items-center justify-between`}>
                             <View style={[
                                 tw`px-2 py-1 rounded-full`,
-                                schedule.priority === 'urgent' ? tw`bg-red-100` :
-                                    schedule.priority === 'high' ? tw`bg-orange-100` :
-                                        schedule.priority === 'medium' ? tw`bg-yellow-100` : tw`bg-gray-100`
+                                schedule.priority === 'URGENT' ? tw`bg-red-100` :
+                                    schedule.priority === 'HIGH' ? tw`bg-orange-100` :
+                                        schedule.priority === 'MEDIUM' ? tw`bg-yellow-100` : tw`bg-gray-100`
                             ]}>
                                 <Text style={[
                                     tw`text-xs font-bold capitalize`,
-                                    schedule.priority === 'urgent' ? tw`text-red-600` :
-                                        schedule.priority === 'high' ? tw`text-orange-600` :
-                                            schedule.priority === 'medium' ? tw`text-yellow-600` : tw`text-gray-600`
+                                    schedule.priority === 'URGENT' ? tw`text-red-600` :
+                                        schedule.priority === 'HIGH' ? tw`text-orange-600` :
+                                            schedule.priority === 'MEDIUM' ? tw`text-yellow-600` : tw`text-gray-600`
                                 ]}>
                                     {schedule.priority} priority
                                 </Text>
                             </View>
 
-                            {schedule.status === 'scheduled' && (
+                            {schedule.status === 'SCHEDULED' && (
                                 <TouchableOpacity
                                     style={tw`bg-blue-500 px-3 py-1 rounded-full`}
                                     onPress={() => {

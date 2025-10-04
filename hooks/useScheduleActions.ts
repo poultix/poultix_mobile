@@ -1,5 +1,5 @@
 import { Schedule, ScheduleType, ScheduleStatus, SchedulePriority } from '@/types/schedule';
-import { MockDataService } from '@/services/mockData';
+import { scheduleService } from '@/services/api';
 
 export interface ScheduleActionsType {
   loadSchedules: () => Promise<Schedule[]>;
@@ -17,7 +17,8 @@ export interface ScheduleActionsType {
 
 export const useScheduleActions = (): ScheduleActionsType => {
   const loadSchedules = async (): Promise<Schedule[]> => {
-    return await MockDataService.getSchedules();
+    const response = await scheduleService.getAllSchedules();
+    return response.success && response.data ? response.data : [];
   };
 
   const createSchedule = async (scheduleData: Omit<Schedule, 'id' | 'createdAt' | 'updatedAt'>): Promise<Schedule> => {

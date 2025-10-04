@@ -74,19 +74,16 @@ export default function CreateFarmScreen() {
     }
 
     try {
-      setIsSubmitting(true);
       
       await createFarm({
         name: farmName.trim(),
         owner: currentUser,
         location: {
-          address: address.trim(),
-          coordinates: { latitude: 0, longitude: 0 },
-          district: city.trim() || 'Unknown District',
-          sector: state.trim() || 'Unknown Sector'
+          latitude: 0, // Default coordinates - should be updated with GPS
+          longitude: 0,
         },
         size: total, // Using total chickens as farm size
-        establishedDate: new Date(),
+        establishedDate: new Date().toISOString(),
         livestock: {
           total,
           healthy,

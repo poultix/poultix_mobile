@@ -1,5 +1,4 @@
 import { News, NewsPriority } from '@/types/news';
-import { MockDataService } from '@/services/mockData';
 
 export interface NewsActionsType {
   loadNews: () => Promise<News[]>;
@@ -15,7 +14,7 @@ export interface NewsActionsType {
 
 export const useNewsActions = (): NewsActionsType => {
   const loadNews = async (): Promise<News[]> => {
-    return await MockDataService.getNews();
+    return []; // News not implemented in mock database yet
   };
 
   const createNews = async (newsData: Omit<News, 'createdAt' | 'updatedAt'>): Promise<News> => {

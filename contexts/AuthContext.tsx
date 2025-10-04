@@ -59,9 +59,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         email: userInfo.email,
                         name: userInfo.name,
                         role: userInfo.role as UserRole,
-                        phone: '',
-                        location: '',
-                        createdAt: new Date(),
+                        location: {
+                            latitude: 0,
+                            longitude: 0
+                        },
+                        createdAt: new Date().toISOString(),
+                        password: '', // Will be set by backend
+                        emailVerified: true,
+                        recoverMode: false,
+                        updatedAt: new Date().toISOString(),
                         isActive: true,
                     };
                     
@@ -141,9 +147,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     email: authData.user.email,
                     name: authData.user.name,
                     role: authData.user.role,
-                    phone: authData.user.phone || '',
-                    location: authData.user.location || '',
-                    createdAt: new Date(),
+                    password: '', // Not provided by API for security
+                    emailVerified: true,
+                    recoverMode: false,
+                    location: {
+                        latitude: 0,
+                        longitude: 0
+                    },
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
                     isActive: authData.user.isActive,
                 };
                 
@@ -216,9 +228,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     email: authData.user.email,
                     name: authData.user.name,
                     role: authData.user.role,
-                    phone: authData.user.phone || '',
-                    location: authData.user.location || '',
-                    createdAt: new Date(),
+                    password: '', // Not provided by API for security
+                    emailVerified: true,
+                    recoverMode: false,
+                    location: {
+                        latitude: 0,
+                        longitude: 0
+                    },
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
                     isActive: authData.user.isActive,
                 };
                 

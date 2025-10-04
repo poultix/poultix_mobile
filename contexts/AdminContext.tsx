@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Farm } from '@/types/farm';
-import { Schedule, ScheduleStatus, AdminState, FilterOptions, User } from '@/types';
+import { Schedule, ScheduleStatus, AdminState, FilterOptions, User, UserRole } from '@/types';
 import { News } from '@/types/news';
+import { userService, farmService, scheduleService, newsService } from '@/services/api';
 
 
 // Context types
@@ -79,6 +80,19 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
             setLoading(true);
             setError(null);
 
+            // Load data from API services
+            const [usersRes, farmsRes, schedulesRes, newsRes] = await Promise.all([
+                userService.getAllUsers(),
+                farmService.getAllFarms(),
+                scheduleService.getAllSchedules(),
+                newsService.getAllNews()
+            ]);
+            
+            const users = usersRes.success && usersRes.data ? usersRes.data : [];
+            const farms = farmsRes.success && farmsRes.data ? farmsRes.data : [];
+            const schedules = schedulesRes.success && schedulesRes.data ? schedulesRes.data : [];
+            const news = newsRes.success && newsRes.data ? newsRes.data : [];
+
             const stats = {
                 totalUsers: users.length,
                 totalFarms: farms.length,
@@ -113,7 +127,8 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
     // User management functions
     const getAllUsers = async (): Promise<User[]> => {
-        return await MockDataService.getUsers();
+        const response = await userService.getAllUsers();
+        return response.success && response.data ? response.data : [];
     };
 
     const activateUser = async (userId: string): Promise<void> => {
@@ -133,7 +148,8 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Farm management functions
     const getAllFarms = async (): Promise<Farm[]> => {
-        return await MockDataService.getFarms();
+        const response = await farmService.getAllFarms();
+        return response.success && response.data ? response.data : [];
     };
 
     const approveFarm = async (farmId: string): Promise<void> => {
@@ -148,7 +164,8 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Schedule oversight functions
     const getAllSchedules = async (): Promise<Schedule[]> => {
-        return await MockDataService.getSchedules();
+        const response = await scheduleService.getAllSchedules();
+        return response.success && response.data ? response.data : [];
     };
 
     const approveSchedule = async (scheduleId: string): Promise<void> => {
@@ -198,58 +215,52 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Analytics functions
     const getUserAnalytics = async (dateRange?: { start: Date; end: Date }): Promise<any> => {
-        const users = await MockDataService.getUsers();
+        const users = await getAllUsers();
         return {
             totalUsers: users.length,
-            activeUsers: users.filter(u => u.isActive).length,
+            activeUsers: users.filter((u: User) => u.isActive).length,
             usersByRole: {
-                farmers: users.filter(u => u.role === 'FARMER').length,
-                veterinarians: users.filter(u => u.role === 'VETERINARY').length,
-                admins: users.filter(u => u.role === 'ADMIN').length,
+                farmers: users.filter((u: User) => u.role === UserRole.FARMER).length,
+                veterinarians: users.filter((u: User) => u.role === UserRole.VETERINARY).length,
+                admins: users.filter((u: User) => u.role === UserRole.ADMIN).length,
             }
         };
     };
 
     const getFarmAnalytics = async (dateRange?: { start: Date; end: Date }): Promise<any> => {
-        const farms = await MockDataService.getFarms();
+        const farms = await getAllFarms();
         return {
             totalFarms: farms.length,
-            totalLivestock: farms.reduce((sum, farm) => sum + farm.livestock.total, 0),
-            healthyLivestock: farms.reduce((sum, farm) => sum + farm.livestock.healthy, 0),
+            totalLivestock: farms.reduce((sum: number, farm: Farm) => sum + farm.livestock.total, 0),
+            healthyLivestock: farms.reduce((sum: number, farm: Farm) => sum + farm.livestock.healthy, 0),
         };
     };
 
     const getScheduleAnalytics = async (dateRange?: { start: Date; end: Date }): Promise<any> => {
-        const schedules = await MockDataService.getSchedules();
+        const schedules = await getAllSchedules();
         return {
             totalSchedules: schedules.length,
-            pendingSchedules: schedules.filter(s => s.status === ScheduleStatus.IN_PROGRESS).length,
-            completedSchedules: schedules.filter(s => s.status === ScheduleStatus.COMPLETED).length,
+            pendingSchedules: schedules.filter((s: Schedule) => s.status === ScheduleStatus.IN_PROGRESS).length,
+            completedSchedules: schedules.filter((s: Schedule) => s.status === ScheduleStatus.COMPLETED).length,
         };
     };
 
     // Search functions
     const searchUsers = async (query: string, filters?: FilterOptions): Promise<User[]> => {
-        const users = await MockDataService.getUsers();
-        return users.filter(user =>
-            user.name.toLowerCase().includes(query.toLowerCase()) ||
-            user.email.toLowerCase().includes(query.toLowerCase())
-        );
+        const users = await getAllUsers();
+        return users.filter((u: User) => u.name.toLowerCase().includes(query.toLowerCase()) ||
+                          u.email.toLowerCase().includes(query.toLowerCase()));
     };
 
     const searchFarms = async (query: string, filters?: FilterOptions): Promise<Farm[]> => {
-        const farms = await MockDataService.getFarms();
-        return farms.filter(farm =>
-            farm.name.toLowerCase().includes(query.toLowerCase()) ||
-            farm.location.address.toLowerCase().includes(query.toLowerCase())
-        );
+        const farms = await getAllFarms();
+        return farms.filter((f: Farm) => f.name.toLowerCase().includes(query.toLowerCase()));
     };
 
     const searchSchedules = async (query: string, filters?: FilterOptions): Promise<Schedule[]> => {
-        const schedules = await MockDataService.getSchedules();
-        return schedules.filter(schedule =>
-            schedule.title.toLowerCase().includes(query.toLowerCase()) ||
-            schedule.description.toLowerCase().includes(query.toLowerCase())
+        const schedules = await getAllSchedules();
+        return schedules.filter((s: Schedule) => s.title.toLowerCase().includes(query.toLowerCase()) ||
+            s.description.toLowerCase().includes(query.toLowerCase())
         );
     };
 

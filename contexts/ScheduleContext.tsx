@@ -128,7 +128,12 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
   
   const getSchedulesByStatus = async (status: ScheduleStatus): Promise<Schedule[]> => {
     try {
-      const response = await scheduleService.getSchedulesByStatus(status);
+      // Convert ScheduleStatus to service expected format
+      const serviceStatus = status === ScheduleStatus.SCHEDULED ? 'PENDING' :
+                           status === ScheduleStatus.IN_PROGRESS ? 'CONFIRMED' :
+                           status === ScheduleStatus.COMPLETED ? 'COMPLETED' :
+                           status === ScheduleStatus.CANCELLED ? 'CANCELLED' : 'PENDING';
+      const response = await scheduleService.getSchedulesByStatus(serviceStatus as 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED');
       
       if (response.success && response.data) {
         return response.data;
@@ -197,7 +202,12 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       setLoading(true);
       setError('');
       
-      const response = await scheduleService.updateScheduleStatus(id, status);
+      // Convert ScheduleStatus to service expected format
+      const serviceStatus = status === ScheduleStatus.SCHEDULED ? 'PENDING' :
+                           status === ScheduleStatus.IN_PROGRESS ? 'CONFIRMED' :
+                           status === ScheduleStatus.COMPLETED ? 'COMPLETED' :
+                           status === ScheduleStatus.CANCELLED ? 'CANCELLED' : 'PENDING';
+      const response = await scheduleService.updateScheduleStatus(id, serviceStatus as 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED');
       
       if (response.success && response.data) {
         setSchedules(prev => prev.map(schedule => schedule.id === id ? response.data! : schedule));

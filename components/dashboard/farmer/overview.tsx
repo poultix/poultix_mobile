@@ -160,11 +160,11 @@ export default function FarmerOverview() {
                                 <Text className="font-medium text-gray-800">{schedule.title}</Text>
                                 <Text className="text-sm text-gray-600">{farm?.name}</Text>
                                 <Text className="text-xs text-gray-500">
-                                    {schedule.scheduledDate.toLocaleDateString()}
+                                    {new Date(schedule.scheduledDate).toLocaleDateString()}
                                 </Text>
                             </View>
-                            <View className={`px-2 py-1 rounded-full ${schedule.status === 'completed' ? 'bg-green-100' : schedule.status === 'scheduled' ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                                <Text className={`text-xs font-medium capitalize ${schedule.status === 'completed' ? 'text-green-600' : schedule.status === 'scheduled' ? 'text-blue-600' : 'text-gray-600'}`}>
+                            <View className={`px-2 py-1 rounded-full ${schedule.status === 'COMPLETED' ? 'bg-green-100' : schedule.status === 'SCHEDULED' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                                <Text className={`text-xs font-medium capitalize ${schedule.status === 'COMPLETED' ? 'text-green-600' : schedule.status === 'SCHEDULED' ? 'text-blue-600' : 'text-gray-600'}`}>
                                     {schedule.status}
                                 </Text>
                             </View>

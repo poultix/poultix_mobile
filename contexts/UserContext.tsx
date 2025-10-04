@@ -104,10 +104,16 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           id: apiUser.id,
           email: apiUser.email,
           name: apiUser.name,
-          role: apiUser.role ,
-          phone: apiUser.phone || '',
-          location: apiUser.location?.address || '',
-          createdAt: new Date(apiUser.createdAt || Date.now()),
+          role: apiUser.role,
+          password: '', // Not provided by API for security
+          emailVerified: true,
+          recoverMode: false,
+          location: {
+            latitude: 0,
+            longitude: 0
+          },
+          createdAt: new Date(apiUser.createdAt || Date.now()).toISOString(),
+          updatedAt: new Date().toISOString(),
           isActive: apiUser.isActive,
         }));
         
@@ -135,9 +141,15 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           email: response.data.email,
           name: response.data.name,
           role: response.data.role,
-          phone: response.data.phone || '',
-          location: response.data.location?.address || '',
-          createdAt: new Date(response.data.createdAt || Date.now()),
+          password: '', // Not provided by API for security
+          emailVerified: true,
+          recoverMode: false,
+          location: {
+            latitude: 0,
+            longitude: 0
+          },
+          createdAt: new Date(response.data.createdAt || Date.now()).toISOString(),
+          updatedAt: new Date().toISOString(),
           isActive: response.data.isActive,
         };
       }
@@ -166,9 +178,15 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           email: response.data.email,
           name: response.data.name,
           role: response.data.role,
-          phone: response.data.phone || '',
-          location: response.data.location?.address || '',
-          createdAt: new Date(response.data.createdAt || Date.now()),
+          password: '', // Not provided by API for security
+          emailVerified: true,
+          recoverMode: false,
+          location: {
+            latitude: 0,
+            longitude: 0
+          },
+          createdAt: new Date(response.data.createdAt || Date.now()).toISOString(),
+          updatedAt: new Date().toISOString(),
           isActive: response.data.isActive,
         };
         

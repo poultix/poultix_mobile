@@ -48,7 +48,7 @@ export default function VetDashboardFarms() {
                                 <Text style={tw`text-lg font-bold text-gray-800`}>{farm.name}</Text>
                                 <Text style={tw`text-gray-600`}>{owner?.name}</Text>
                                 <Text style={tw`text-sm text-gray-500`}>
-                                    {farm.location.address} • {farm.size} hectares
+                                    {farm.location.latitude}, {farm.location.longitude} • {farm.size} hectares
                                 </Text>
                             </View>
                             <View style={tw`${healthColors.bg} ${healthColors.border} border px-3 py-1 rounded-full`}>
@@ -83,10 +83,10 @@ export default function VetDashboardFarms() {
                         <View style={tw`flex-row items-center justify-between`}>
                             <View style={tw`flex-row items-center`}>
                                 <Ionicons name="call-outline" size={16} color="#6B7280" />
-                                <Text style={tw`text-gray-500 text-sm ml-1`}>{owner?.phone}</Text>
+                                <Text style={tw`text-gray-500 text-sm ml-1`}>{owner?.email}</Text>
                             </View>
                             <Text style={tw`text-gray-500 text-sm`}>
-                                Last visit: {farm.lastInspection?.toLocaleDateString() || 'Never'}
+                                Last visit: {farm.lastInspection ? new Date(farm.lastInspection).toLocaleDateString() : 'Never'}
                             </Text>
                         </View>
                     </TouchableOpacity>

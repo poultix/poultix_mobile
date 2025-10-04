@@ -8,7 +8,7 @@ export enum NewsPriority {
     URGENT = 'URGENT'
 }
 
-export enum NewCategory {
+export enum NewsCategory {
     HEALTH = 'HEALTH',
     NUTRITION = 'NUTRITION',
     MANAGEMENT = 'MANAGEMENT',
@@ -21,7 +21,7 @@ export interface News {
     id: string
     title: string;
     content: string;
-    category: NewCategory;
+    category: NewsCategory;
     priority: NewsPriority;
     tags: string[];
     image: string

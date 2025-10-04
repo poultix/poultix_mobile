@@ -43,7 +43,7 @@ export default function AdminOverview() {
                     </View>
                     <Text style={tw`text-gray-600 font-medium`}>Schedules</Text>
                     <Text style={tw`text-xs text-gray-500 mt-1`}>
-                        {schedules.filter(s => s.status === 'scheduled').length} Pending
+                        {schedules.filter(s => s.status === 'SCHEDULED').length} Pending
                     </Text>
                 </View>
 
@@ -78,18 +78,18 @@ export default function AdminOverview() {
                                     {farm?.name} • {farmer?.name}
                                 </Text>
                                 <Text style={tw`text-xs text-gray-500`}>
-                                    {schedule.scheduledDate.toLocaleDateString()}
+                                    {new Date(schedule.scheduledDate).toLocaleDateString()}
                                 </Text>
                             </View>
                             <View style={[
                                 tw`px-2 py-1 rounded-full`,
-                                schedule.status === 'completed' ? tw`bg-green-100` :
-                                    schedule.status === 'scheduled' ? tw`bg-blue-100` : tw`bg-gray-100`
+                                schedule.status === 'COMPLETED' ? tw`bg-green-100` :
+                                    schedule.status === 'SCHEDULED' ? tw`bg-blue-100` : tw`bg-gray-100`
                             ]}>
                                 <Text style={[
                                     tw`text-xs font-medium capitalize`,
-                                    schedule.status === 'completed' ? tw`text-green-600` :
-                                        schedule.status === 'scheduled' ? tw`text-blue-600` : tw`text-gray-600`
+                                    schedule.status === 'COMPLETED' ? tw`text-green-600` :
+                                        schedule.status === 'SCHEDULED' ? tw`text-blue-600` : tw`text-gray-600`
                                 ]}>
                                     {schedule.status}
                                 </Text>
