@@ -75,7 +75,7 @@ export default function ServerErrorScreen() {
                 
                 <Text style={tw`text-gray-600 text-center text-base leading-6 mb-8`}>
                     Our servers are taking a quick break. {"\n"}
-                    Don't worry - this happens sometimes! {"\n"}
+                    Don&apos;t worry - this happens sometimes! {"\n"}
                     Please try again in a moment.
                 </Text>
 

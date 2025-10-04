@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { Schedule, ScheduleType, ScheduleStatus, ScheduleCreateRequest, ScheduleUpdateRequest } from '@/types';
 import { scheduleService } from '@/services/api';
+import { useError } from './ErrorContext';
+import { HTTP_STATUS } from '@/services/constants';
 interface ScheduleContextType {
   schedules: Schedule[];
   currentSchedule: Schedule | null;
@@ -27,18 +29,17 @@ interface ScheduleContextType {
 
 // Create context
 const ScheduleContext = createContext<ScheduleContextType | undefined>(undefined);
-
 // Provider component
 export const ScheduleProvider = ({ children }: { children: React.ReactNode }) => {
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [currentSchedule, setCurrentSchedule] = useState<Schedule | null>(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const { handleApiError } = useError(); // Use ErrorContext for routing
   // Load schedules on mount
   useEffect(() => {
-    loadSchedules();
+    loadSchedules().catch(handleApiError);
   }, []);
-
   const loadSchedules = async () => {
     try {
       setLoading(true);
@@ -53,7 +54,13 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to load schedules:', error);
-      setError(error.message || 'Failed to load schedules');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to load schedules'); // ✅ Show inline error for minor issues
+      }
     } finally {
       setLoading(false);
     }
@@ -74,7 +81,13 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to create schedule:', error);
-      setError(error.message || 'Failed to create schedule');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to create schedule'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);

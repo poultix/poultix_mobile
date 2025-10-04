@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, UserRole,UserUpdateRequest  } from '@/types';
+import { User, UserRole, UserUpdateRequest } from '@/types';
 import { userService } from '@/services/api';
+import { useError } from './ErrorContext';
+import { HTTP_STATUS } from '@/services/constants';
 
 // User state interface
 interface UserState {
@@ -86,6 +88,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
   // Load users on mount
   useEffect(() => {
     loadUsers();
@@ -123,7 +126,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to load users:', error);
-      setError(error.message || 'Failed to load users');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to load users'); // ✅ Show inline error for minor issues
+      }
     } finally {
       setLoading(false);
     }
@@ -156,7 +165,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       return null;
     } catch (error: any) {
       console.error('Failed to get user by ID:', error);
-      setError(error.message || 'Failed to get user');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to get user'); // ✅ Show inline error for minor issues
+      }
       return null;
     }
   };
@@ -197,7 +212,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to update user:', error);
-      setError(error.message || 'Failed to update user');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to update user'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -221,7 +242,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to activate user:', error);
-      setError(error.message || 'Failed to activate user');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to activate user'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -245,7 +272,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to deactivate user:', error);
-      setError(error.message || 'Failed to deactivate user');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to deactivate user'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -267,7 +300,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to delete user:', error);
-      setError(error.message || 'Failed to delete user');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to delete user'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);

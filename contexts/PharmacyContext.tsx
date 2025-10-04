@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { Pharmacy, Vaccine, PharmacyCreateRequest, PharmacyUpdateRequest } from '@/types/pharmacy';
+import { Pharmacy, PharmacyCreateRequest, PharmacyUpdateRequest } from '@/types';
 import { pharmacyService } from '@/services/api';
+import { useError } from './ErrorContext';
+import { HTTP_STATUS } from '@/services/constants';
 
 
 interface PharmacyContextType {
@@ -27,6 +29,7 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
   // Load pharmacies on mount
   useEffect(() => {
     loadPharmacies();
@@ -46,7 +49,13 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to load pharmacies:', error);
-      setError(error.message || 'Failed to load pharmacies');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to load pharmacies'); // ✅ Show inline error for minor issues
+      }
     } finally {
       setLoading(false);
     }
@@ -66,7 +75,13 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to create pharmacy:', error);
-      setError(error.message || 'Failed to create pharmacy');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to create pharmacy'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -83,7 +98,13 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
       return null;
     } catch (error: any) {
       console.error('Failed to get pharmacy by ID:', error);
-      setError(error.message || 'Failed to get pharmacy');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to get pharmacy'); // ✅ Show inline error for minor issues
+      }
       return null;
     }
   };
@@ -102,7 +123,13 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to update pharmacy:', error);
-      setError(error.message || 'Failed to update pharmacy');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to update pharmacy'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -123,7 +150,13 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to delete pharmacy:', error);
-      setError(error.message || 'Failed to delete pharmacy');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to delete pharmacy'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);

@@ -1,11 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Farm } from '@/types/farm';
-import { Schedule, ScheduleStatus, AdminState, FilterOptions, User, UserRole } from '@/types';
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
+import { User, Farm, Schedule, AdminState, FilterOptions, UserRole, ScheduleStatus } from '@/types';
+import { adminService } from '@/services/api';
+import { useError } from './ErrorContext';
+import { HTTP_STATUS } from '@/services/constants';
 import { News } from '@/types/news';
 import { userService, farmService, scheduleService, newsService } from '@/services/api';
-
-
-// Context types
 interface AdminContextType {
     dashboardStats: AdminState['dashboardStats'];
     systemHealth: AdminState['systemHealth'];
@@ -68,6 +67,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
 
     // Load dashboard data on mount
     useEffect(() => {
@@ -103,8 +103,15 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
             };
 
             setDashboardStats(stats);
-        } catch (error) {
-            setError('Failed to load dashboard stats');
+        } catch (error: any) {
+            console.error('Failed to load dashboard stats:', error);
+            
+            // ✅ Check if it's a network/server error that needs routing
+            if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+                handleApiError(error); // ✅ Auto-route to appropriate error screen
+            } else {
+                setError('Failed to load dashboard stats'); // ✅ Show inline error for minor issues
+            }
         } finally {
             setLoading(false);
         }
@@ -120,8 +127,15 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
             };
 
             setSystemHealth(health);
-        } catch (error) {
-            setError('Failed to load system health');
+        } catch (error: any) {
+            console.error('Failed to load system health:', error);
+            
+            // ✅ Check if it's a network/server error that needs routing
+            if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+                handleApiError(error); // ✅ Auto-route to appropriate error screen
+            } else {
+                setError('Failed to load system health'); // ✅ Show inline error for minor issues
+            }
         }
     };
 
@@ -201,8 +215,15 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
                 lastBackup: new Date(),
             };
             setSystemHealth(newHealth);
-        } catch (error) {
-            setError('Backup failed');
+        } catch (error: any) {
+            console.error('Backup failed:', error);
+            
+            // ✅ Check if it's a network/server error that needs routing
+            if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+                handleApiError(error); // ✅ Auto-route to appropriate error screen
+            } else {
+                setError('Backup failed'); // ✅ Show inline error for minor issues
+            }
         } finally {
             setLoading(false);
         }

@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { News,  NewsCreateRequest, NewsUpdateRequest} from '@/types';
 import { newsService } from '@/services/api';
+import { HTTP_STATUS } from '@/services/constants';
+import { News, NewsCreateRequest, NewsUpdateRequest } from '@/types';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useError } from './ErrorContext';
 
 
 // Context types
@@ -28,6 +30,7 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentNews, setCurrentNews] = useState<News | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
 
   // Load news on mount
   useEffect(() => {
@@ -48,7 +51,13 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to load news:', error);
-      setError(error.message || 'Failed to load news');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to load news'); // ✅ Show inline error for minor issues
+      }
     } finally {
       setLoading(false);
     }
@@ -69,7 +78,13 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to create news:', error);
-      setError(error.message || 'Failed to create news');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to create news'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -86,7 +101,13 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
       return null;
     } catch (error: any) {
       console.error('Failed to get news by ID:', error);
-      setError(error.message || 'Failed to get news');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to get news'); // ✅ Show inline error for minor issues
+      }
       return null;
     }
   };
@@ -105,7 +126,13 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to update news:', error);
-      setError(error.message || 'Failed to update news');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to update news'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -126,7 +153,13 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to delete news:', error);
-      setError(error.message || 'Failed to delete news');
+      
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+        setError(error.message || 'Failed to delete news'); // ✅ Show inline error for minor issues
+      }
       throw error;
     } finally {
       setLoading(false);

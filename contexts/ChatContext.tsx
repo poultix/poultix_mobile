@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import { Message, TypingStatus, User,MessageCreateRequest} from '@/types'
-import { messageService } from '@/services/api'
-
-
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import {  Message, MessageCreateRequest,  TypingStatus, User } from '@/types';
+import { messageService } from '@/services/api';
+import { useError } from './ErrorContext';
+import { HTTP_STATUS } from '@/services/constants';
 
 
 interface ChatContextType {
@@ -46,6 +46,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const [unreadTotal, setUnreadTotal] = useState(0)
     const [currentMessage, setCurrentMessage] = useState<Message | null>(null)
     const [editMessage, setEditMessage] = useState<Message | null>(null)
+    const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
     // Load initial data
     useEffect(() => {
         loadOnlineUsers()
@@ -136,7 +137,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             }
         } catch (error: any) {
             console.error('Failed to send message:', error)
-            setError(error.message || 'Failed to send message')
+            
+            // ✅ Check if it's a network/server error that needs routing
+            if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+                handleApiError(error); // ✅ Auto-route to appropriate error screen
+            } else {
+                setError(error.message || 'Failed to send message'); // ✅ Show inline error for minor issues
+            }
             throw error
         } finally {
             setLoading(false)
@@ -160,7 +167,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             }
         } catch (error: any) {
             console.error('Failed to load conversation:', error)
-            setError(error.message || 'Failed to load conversation')
+            
+            // ✅ Check if it's a network/server error that needs routing
+            if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+                handleApiError(error); // ✅ Auto-route to appropriate error screen
+            } else {
+                setError(error.message || 'Failed to load conversation'); // ✅ Show inline error for minor issues
+            }
         } finally {
             setLoading(false)
         }
@@ -183,7 +196,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             }
         } catch (error: any) {
             console.error('Failed to load messages by sender:', error)
-            setError(error.message || 'Failed to load messages')
+            
+            // ✅ Check if it's a network/server error that needs routing
+            if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+                handleApiError(error); // ✅ Auto-route to appropriate error screen
+            } else {
+                setError(error.message || 'Failed to load messages'); // ✅ Show inline error for minor issues
+            }
         } finally {
             setLoading(false)
         }
@@ -204,7 +223,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             }
         } catch (error: any) {
             console.error('Failed to delete message:', error)
-            setError(error.message || 'Failed to delete message')
+            
+            // ✅ Check if it's a network/server error that needs routing
+            if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+                handleApiError(error); // ✅ Auto-route to appropriate error screen
+            } else {
+                setError(error.message || 'Failed to delete message'); // ✅ Show inline error for minor issues
+            }
             throw error
         } finally {
             setLoading(false)

@@ -72,7 +72,7 @@ export default function NetworkErrorScreen() {
                 </Text>
                 
                 <Text style={tw`text-gray-600 text-center text-base leading-6 mb-8`}>
-                    Looks like you're offline! {"\n"}
+                    Looks like you&apos;re offline! {"\n"}
                     Please check your internet connection {"\n"}
                     and try again.
                 </Text>
@@ -128,7 +128,7 @@ export default function NetworkErrorScreen() {
                     </TouchableOpacity>
                 </View>
                 <Text style={tw`text-gray-500 text-sm text-center mt-8 leading-5`}>
-                    📶 We'll be here when you're back online!
+                    📶 We&apos;ll be here when you&apos;re back online!
                 </Text>
             </Animated.View>
         </SafeAreaView>
