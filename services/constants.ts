@@ -1,10 +1,10 @@
 import Constants from 'expo-constants';
 
-export const SERVER_URL = "http://localhost:8080"
+export const SERVER_URL = "http://10.12.75.125:8080"
 
 export const API_CONFIG = {
     BASE_URL: SERVER_URL,
-    API_VERSION: 'api',
+    API_VERSION: 'v1',
     TIMEOUT: 20000,
 };
 

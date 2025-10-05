@@ -62,7 +62,10 @@ export class AuthService {
     // Logout user
     async logout(): Promise<ApiResponse<void>> {
         try {
-            // Call backend logout endpoint
+            // Get token for logout request (required by API)
+            const token = await this.getAccessToken();
+            
+            // Call backend logout endpoint with Authorization header
             const response = await apiClient.post<void>(API_ENDPOINTS.AUTH.LOGOUT);
 
             // Clear stored tokens regardless of backend response

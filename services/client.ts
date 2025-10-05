@@ -20,9 +20,9 @@ class ApiClient {
 
         // Request interceptor to add auth token
         this.axiosInstance.interceptors.request.use(
-            (config) => {
+            async (config) => {
                 try {
-                    const token = this.getAuthToken();
+                    const token = await this.getAuthToken();
                     console.log('Token in interceptor:', token, 'For URL:', config.url);
                     if (token) {
                         config.headers.Authorization = `Bearer ${token}`;
@@ -160,13 +160,14 @@ class ApiClient {
                 throw new Error('No refresh token available');
             }
             const response = await axios.post(
-                `${API_CONFIG.BASE_URL}/api/${API_CONFIG.API_VERSION}/auth/refresh`,
+                `${API_CONFIG.BASE_URL}/api/${API_CONFIG.API_VERSION}/auth/refresh-token`,
                 { refreshToken },
                 { headers: { 'Content-Type': 'application/json' } }
             );
-            if (response.status === HTTP_STATUS.OK) {
-                const { accessToken } = response.data;
+            if (response.status === HTTP_STATUS.OK && response.data.success) {
+                const { accessToken, refreshToken } = response.data.data;
                 await SecureStore.setItemAsync('access_token', accessToken);
+                await SecureStore.setItemAsync('refresh_token', refreshToken);
                 console.log('Token refreshed successfully');
                 this.refreshAttempts = 0;
             } else {
