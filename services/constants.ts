@@ -95,6 +95,22 @@ export const API_ENDPOINTS = {
         DELETE: (id: string) => `/schedules/${id}`,
     },
 
+    // Vaccine Management
+    VACCINES: {
+        BASE: '/vaccines',
+        CREATE: '/vaccines',
+        BY_ID: (id: string) => `/vaccines/${id}`,
+        ALL: '/vaccines',
+        BY_TYPE: (type: string) => `/vaccines/type/${type}`,
+        BY_TARGET_DISEASE: (targetDisease: string) => `/vaccines/target-disease/${targetDisease}`,
+        BY_NAME: (name: string) => `/vaccines/name/${name}`,
+        BY_PRESCRIPTION_REQUIRED: (prescriptionRequired: boolean) => `/vaccines/prescription-required/${prescriptionRequired}`,
+        SEARCH: (keyword: string) => `/vaccines/search?keyword=${keyword}`,
+        EXISTS_BY_NAME: (name: string) => `/vaccines/exists/name/${name}`,
+        UPDATE: (id: string) => `/vaccines/${id}`,
+        DELETE: (id: string) => `/vaccines/${id}`,
+    },
+
     // Device Management
     DEVICES: {
         BASE: '/devices',

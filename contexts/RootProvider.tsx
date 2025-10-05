@@ -9,6 +9,9 @@ import { NewsProvider } from './NewsContext';
 import { PharmacyProvider } from './PharmacyContext';
 import { ScheduleProvider } from './ScheduleContext';
 import { UserProvider } from './UserContext';
+import { VeterinaryProvider } from './VeterinaryContext';
+import { VaccineProvider } from './VaccineContext';
+import { SupportProvider } from './SupportContext';
 
 interface RootProviderProps {
   children: React.ReactNode;
@@ -26,9 +29,15 @@ export const RootProvider: React.FC<RootProviderProps> = ({ children }) => {
                   <ChatProvider>
                     <NewsProvider>
                       <PharmacyProvider>
-                        <BottomTabsProvider>
-                          {children}
-                        </BottomTabsProvider>
+                        <VeterinaryProvider>
+                          <VaccineProvider>
+                            <SupportProvider>
+                              <BottomTabsProvider>
+                                {children}
+                              </BottomTabsProvider>
+                            </SupportProvider>
+                          </VaccineProvider>
+                        </VeterinaryProvider>
                       </PharmacyProvider>
                     </NewsProvider>
                   </ChatProvider>

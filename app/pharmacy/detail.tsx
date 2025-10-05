@@ -176,9 +176,7 @@ export default function PharmacyDetailScreen() {
                                     <Text style={tw`text-blue-600 text-sm mb-2`}>
                                         Target: {vaccine.targetDisease}
                                     </Text>
-                                    <Text style={tw`text-blue-700 font-medium`}>
-                                        {vaccine.price.toLocaleString()} RWF
-                                    </Text>
+                                    
                                 </View>
                             ))}
                         </View>

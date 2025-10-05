@@ -1,4 +1,5 @@
 import { Location } from "./farm";
+import { Vaccine } from "./vaccine";
 
 export interface PharmacySchedule {
     day: string
@@ -20,16 +21,6 @@ export interface Pharmacy {
     updatedAt: string;
 }
 
-export interface Vaccine {
-    name: string;
-    type: string;
-    targetDisease: string;
-    dosage: string;
-    administration: string;
-    storage: string;
-    prescriptionRequired: boolean;
-    price: number
-}
 
 // Request types
 export interface PharmacyCreateRequest {

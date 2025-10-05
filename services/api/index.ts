@@ -9,5 +9,5 @@ export { scheduleService, ScheduleService } from './schedule';
 export { newsService, NewsService } from './news';
 export { messageService, MessageService } from './message';
 export { pharmacyService, PharmacyService } from './pharmacy';
-export { supportService, SupportService } from './support';
-
+export { supportService } from './support';
+export { vaccineService } from './vaccine';
