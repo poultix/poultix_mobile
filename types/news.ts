@@ -1,4 +1,4 @@
-import { Location } from "./farm";
+import { Coords } from "./farm";
 import { User } from "./user";
 
 export enum NewsPriority {
@@ -25,7 +25,7 @@ export interface News {
     priority: NewsPriority;
     tags: string[];
     image: string
-    location: Location
+    location: Coords
     author: User;
     createdAt: Date;
     updatedAt: Date;

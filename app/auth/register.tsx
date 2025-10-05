@@ -1,5 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { UserRole } from '@/types';
+import { Coords, UserRole } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -15,6 +15,7 @@ import {
     View,
 } from 'react-native';
 import tw from 'twrnc';
+import * as Location from 'expo-location';
 
 export default function SignUpScreen() {
     const [name, setName] = useState('');
@@ -36,17 +37,42 @@ export default function SignUpScreen() {
     const [emailError, setEmailError] = useState('');
     const [isPasswordFocused, setIsPasswordFocused] = useState(false);
     const [passwordError, setPasswordError] = useState('');
+    const [location, setLocation] = useState<Coords>({
+        latitude: 0,
+        longitude: 0,
+    });
 
-    const { currentUser, signUp ,loading} = useAuth();
+    const { currentUser, signUp, loading } = useAuth();
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(20)).current;
+
+    useEffect(() => {
+        const requestLocationPermission = async () => {
+            try {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+                if (status !== 'granted') {
+                    Alert.alert('Permission Required', 'Location permission is required to use this feature.');
+                    return;
+                }
+                const location = await Location.getCurrentPositionAsync({});
+                setLocation({
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                })
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        requestLocationPermission()
+    }, [])
 
     useEffect(() => {
         if (currentUser) {
             router.replace('/');
             return;
         }
+
 
         Animated.parallel([
             Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
@@ -65,11 +91,11 @@ export default function SignUpScreen() {
                 email.trim(),
                 password.trim(),
                 name.trim(),
-                isVeterinary ? UserRole.VETERINARY : UserRole.FARMER
+                isVeterinary ? UserRole.VETERINARY : UserRole.FARMER,
+                location
             );
 
-            Alert.alert('Success', 'Account created successfully!');
-            router.push('/auth/login');
+          
         } catch (error) {
             console.error('Sign up error:', error);
             Alert.alert('Error', 'Sign up failed. Please try again.');

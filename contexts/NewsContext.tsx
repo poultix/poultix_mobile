@@ -3,6 +3,7 @@ import { HTTP_STATUS } from '@/services/constants';
 import { News, NewsCreateRequest, NewsUpdateRequest } from '@/types';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useError } from './ErrorContext';
+import { useAuth } from './AuthContext';
 
 
 // Context types
@@ -26,6 +27,7 @@ const NewsContext = createContext<NewsContextType | undefined>(undefined);
 
 // Provider component
 export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
+  const {authenticated}=useAuth()
   const [news, setNews] = useState<News[]>([])
   const [currentNews, setCurrentNews] = useState<News | null>(null)
   const [loading, setLoading] = useState(false)
@@ -34,8 +36,10 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Load news on mount
   useEffect(() => {
+    if(authenticated){
     loadNews();
-  }, []);
+    }
+  }, [authenticated]);
 
   const loadNews = async () => {
     try {

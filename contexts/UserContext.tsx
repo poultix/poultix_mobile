@@ -3,6 +3,7 @@ import { User, UserRole, UserUpdateRequest } from '@/types';
 import { userService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
+import { useAuth } from './AuthContext';
 
 // User state interface
 interface UserState {
@@ -84,15 +85,17 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 // Provider component
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+  const {authenticated,currentUser}=useAuth()
   const [users, setUsers] = useState<User[]>([])
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
   // Load users on mount
   useEffect(() => {
+    if(authenticated){
     loadUsers();
-  }, []);
+    }
+  }, [authenticated]);
 
   const loadUsers = async () => {
     try {

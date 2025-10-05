@@ -1,9 +1,10 @@
 import { authService } from '@/services/api';
-import type {  } from '@/services/api';
-import { User, UserRole,UserRegistrationRequest, UserLoginRequest } from '@/types';
+import type { } from '@/services/api';
+import { User, UserRole, UserRegistrationRequest, UserLoginRequest, Coords } from '@/types';
 import { router } from 'expo-router';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { Alert } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 
 
 // Context types
@@ -14,7 +15,7 @@ interface AuthContextType {
     error: string;
     logout: () => Promise<void>
     login: (email: string, password: string) => Promise<void>
-    signUp: (email: string, password: string, name: string, role:UserRole) => Promise<void>
+    signUp: (email: string, password: string, name: string, role: UserRole, location: Coords) => Promise<void>
     forgotPassword: (email: string) => Promise<void>
     verifyCode: (verificationToken: string) => Promise<void>
     resetPassword: (resetCode: string, newPassword: string) => Promise<void>
@@ -24,6 +25,7 @@ interface AuthContextType {
     loginAsFarmer: () => Promise<void>
     loginAsVeterinary: () => Promise<void>
     loginAsAdmin: () => Promise<void>
+    checkAuthStatus: () => Promise<void>
 }
 
 // Create contexts
@@ -36,46 +38,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [error, setError] = useState('')
     const [authenticated, setAuthenticated] = useState(false)
 
-    // Check auth status on mount
-    useEffect(() => {
-        checkAuthStatus();
-    }, []);
+
 
     const checkAuthStatus = async () => {
         try {
             setLoading(true)
             setError('');
-            
+
             const isAuth = await authService.isAuthenticated();
             const isTokenValid = await authService.isTokenValid();
-            
-            if (isAuth && isTokenValid) {
+            const isTokeAvailable = await authService.getAccessToken();
+            console.log(isAuth && !isTokenValid && isTokeAvailable)
+            if (isAuth && isTokenValid && isTokeAvailable) {
                 // Get user info from JWT token
-                const userInfo = await authService.getCurrentUserFromToken();
-                
+                const userInfo = await authService.getCurrentUser();
+
                 if (userInfo) {
-                    const user: User = {
-                        id: userInfo.id,
-                        email: userInfo.email,
-                        name: userInfo.name,
-                        role: userInfo.role as UserRole,
-                        location: {
-                            latitude: 0,
-                            longitude: 0
-                        },
-                        createdAt: new Date().toISOString(),
-                        password: '', // Will be set by backend
-                        emailVerified: true,
-                        recoverMode: false,
-                        updatedAt: new Date().toISOString(),
-                        isActive: true,
-                    };
-                    
+
+
                     setAuthenticated(true)
-                    setCurrentUser(user)
-                    
+                    setCurrentUser(userInfo)
+
                     // Navigate based on role
-                    navigateByRole(user.role);
+                    navigateByRole(userInfo.role);
                 } else {
                     // Token invalid, clear and redirect
                     await authService.logout();
@@ -83,7 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setCurrentUser(null);
                     router.push('/auth/login');
                 }
-            } else if (isAuth && !isTokenValid) {
+            } else if (isAuth && !isTokenValid && isTokeAvailable) {
                 // Try to refresh token
                 try {
                     await authService.refreshToken();
@@ -113,7 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setLoading(false)
         }
     };
-    
+
     const navigateByRole = (role: UserRole) => {
         switch (role) {
             case 'ADMIN':
@@ -134,37 +119,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             setLoading(true);
             setError('');
-            
+
             const loginData: UserLoginRequest = { email, password };
             const response = await authService.login(loginData);
-            
+
+            console.log(response)
+
             if (response.success && response.data) {
                 const authData = response.data;
-                
+
                 // Create user object from API response
-                const user: User = {
-                    id: authData.user.id,
-                    email: authData.user.email,
-                    name: authData.user.name,
-                    role: authData.user.role,
-                    password: '', // Not provided by API for security
-                    emailVerified: true,
-                    recoverMode: false,
-                    location: {
-                        latitude: 0,
-                        longitude: 0
-                    },
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    isActive: authData.user.isActive,
-                };
-                
+                const user: User = authData.user
+
                 setAuthenticated(true);
                 setCurrentUser(user);
-                
+
                 // Navigate based on role
                 navigateByRole(user.role);
-                
+
                 Alert.alert('Success', 'Login successful!');
             } else {
                 throw new Error(response.message || 'Login failed');
@@ -181,15 +153,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const logout = async (): Promise<void> => {
         try {
             setLoading(true);
-            
+
             // Call API logout (this clears server-side tokens)
             await authService.logout();
-            
+
             // Clear local state
             setAuthenticated(false);
             setCurrentUser(null);
             setError('');
-            
+
             // Navigate to login
             router.push('/auth/login');
         } catch (error: any) {
@@ -198,58 +170,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setCurrentUser(null);
             setError('');
             router.push('/auth/login');
-            
+
             console.error('Logout error:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const signUp = async (email: string, password: string, name: string, role: UserRole): Promise<void> => {
+    const signUp = async (email: string, password: string, name: string, role: UserRole, location: Coords): Promise<void> => {
         try {
             setLoading(true);
             setError('');
-            
+
             const registrationData: UserRegistrationRequest = {
                 email,
                 password,
                 name,
                 role,
+                location,
             };
-            
+
             const response = await authService.register(registrationData);
-            
+            if (!response.success) {
+                Alert.alert('Error', response.message || 'Registration failed');
+                return;
+            }
+
             if (response.success && response.data) {
                 const authData = response.data;
-                
-                // Create user object from API response
-                const user: User = {
-                    id: authData.user.id,
-                    email: authData.user.email,
-                    name: authData.user.name,
-                    role: authData.user.role,
-                    password: '', // Not provided by API for security
-                    emailVerified: true,
-                    recoverMode: false,
-                    location: {
-                        latitude: 0,
-                        longitude: 0
-                    },
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    isActive: authData.user.isActive,
-                };
-                
+
+                const user: User = authData.user
+
                 setAuthenticated(true);
                 setCurrentUser(user);
-                
+                await SecureStore.setItemAsync('user', JSON.stringify(user));
+                await SecureStore.setItemAsync('token', authData.accessToken);
+                await SecureStore.setItemAsync('refreshToken', authData.refreshToken);
                 // Navigate based on role (registration includes auto-login)
                 navigateByRole(user.role);
-                
+
                 Alert.alert('Success', 'Registration successful! You are now logged in.');
-            } else {
-                throw new Error(response.message || 'Registration failed');
             }
+            console.log(response)
         } catch (error: any) {
             const errorMessage = error.message || 'Registration failed. Please try again.';
             setError(errorMessage);
@@ -263,9 +225,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             setLoading(true);
             setError('');
-            
+
             const response = await authService.forgotPassword({ email });
-            
+
             if (response.success) {
                 Alert.alert('Success', 'Password reset instructions sent to your email.');
             } else {
@@ -284,9 +246,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             setLoading(true);
             setError('');
-            
+
             const response = await authService.verifyEmail({ verificationToken });
-            
+
             if (response.success) {
                 Alert.alert('Success', 'Email verified successfully!');
             } else {
@@ -300,14 +262,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setLoading(false);
         }
     };
-    
+
     const resetPassword = async (resetCode: string, newPassword: string): Promise<void> => {
         try {
             setLoading(true);
             setError('');
-            
+
             const response = await authService.resetPassword({ resetCode, newPassword });
-            
+
             if (response.success) {
                 Alert.alert('Success', 'Password reset successful! Please login with your new password.');
                 router.push('/auth/login');
@@ -322,14 +284,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setLoading(false);
         }
     };
-    
+
     const resendVerification = async (email: string): Promise<void> => {
         try {
             setLoading(true);
             setError('');
-            
+
             const response = await authService.resendVerification(email);
-            
+
             if (response.success) {
                 Alert.alert('Success', 'Verification email sent!');
             } else {
@@ -343,7 +305,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setLoading(false);
         }
     };
-    
+
     const refreshToken = async (): Promise<void> => {
         try {
             await authService.refreshToken();
@@ -356,10 +318,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 
 
-
-    const isUserRole = (role: UserRole): boolean => {
-        return currentUser?.role === role;
-    };
 
 
     // Quick dev methods (for testing)
@@ -391,6 +349,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loginAsFarmer,
         loginAsVeterinary,
         loginAsAdmin,
+        checkAuthStatus
     };
 
 

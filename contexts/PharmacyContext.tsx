@@ -3,6 +3,7 @@ import { Pharmacy, PharmacyCreateRequest, PharmacyUpdateRequest } from '@/types'
 import { pharmacyService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
+import { useAuth } from './AuthContext';
 
 
 interface PharmacyContextType {
@@ -25,6 +26,7 @@ const PharmacyContext = createContext<PharmacyContextType | undefined>(undefined
 
 // Provider component
 export const PharmacyProvider = ({ children }: { children: React.ReactNode }) => {
+  const {authenticated}=useAuth()
   const [currentPharmacy, setCurrentPharmacy] = useState<Pharmacy | null>(null)
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([])
   const [error, setError] = useState('')
@@ -32,8 +34,10 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
   const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
   // Load pharmacies on mount
   useEffect(() => {
+    if(authenticated){
     loadPharmacies();
-  }, []);
+    }
+  }, [authenticated]);
 
   const loadPharmacies = async () => {
     try {

@@ -3,6 +3,7 @@ import { Schedule, ScheduleType, ScheduleStatus, ScheduleCreateRequest, Schedule
 import { scheduleService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
+import { useAuth } from './AuthContext';
 interface ScheduleContextType {
   schedules: Schedule[];
   currentSchedule: Schedule | null;
@@ -31,6 +32,7 @@ interface ScheduleContextType {
 const ScheduleContext = createContext<ScheduleContextType | undefined>(undefined);
 // Provider component
 export const ScheduleProvider = ({ children }: { children: React.ReactNode }) => {
+  const {authenticated}=useAuth()
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [currentSchedule, setCurrentSchedule] = useState<Schedule | null>(null)
   const [loading, setLoading] = useState(false)
@@ -38,8 +40,10 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
   const { handleApiError } = useError(); // Use ErrorContext for routing
   // Load schedules on mount
   useEffect(() => {
+    if(authenticated){
     loadSchedules().catch(handleApiError);
-  }, []);
+    }
+  }, [authenticated]);
   const loadSchedules = async () => {
     try {
       setLoading(true);

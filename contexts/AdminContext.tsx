@@ -5,6 +5,7 @@ import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
 import { News } from '@/types/news';
 import { userService, farmService, scheduleService, newsService } from '@/services/api';
+import { useAuth } from './AuthContext';
 interface AdminContextType {
     dashboardStats: AdminState['dashboardStats'];
     systemHealth: AdminState['systemHealth'];
@@ -52,6 +53,7 @@ const AdminActionsContext = createContext<AdminActionsType | undefined>(undefine
 
 // Provider component
 export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
+    const {authenticated}=useAuth()
     const [dashboardStats, setDashboardStats] = useState<AdminState['dashboardStats']>({
         totalUsers: 0,
         totalFarms: 0,
@@ -71,9 +73,11 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Load dashboard data on mount
     useEffect(() => {
-        loadDashboardStats();
-        loadSystemHealth();
-    }, []);
+        if(authenticated){
+            loadDashboardStats();
+            loadSystemHealth();
+        }
+    }, [authenticated]);
 
     const loadDashboardStats = async () => {
         try {

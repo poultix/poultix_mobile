@@ -3,6 +3,7 @@ import { Farm, FarmStatus,FarmCreateRequest, FarmUpdateRequest } from '@/types';
 import { farmService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
+import { useAuth } from './AuthContext';
 
 // Farm context interface
 interface FarmContextType {
@@ -30,6 +31,7 @@ const FarmContext = createContext<FarmContextType | undefined>(undefined);
 
 // Provider component
 export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
+  const {authenticated}=useAuth()
   const [farms, setFarms] = useState<Farm[]>([])
   const [currentFarm, setCurrentFarm] = useState<Farm | null>(null)
   const [loading, setLoading] = useState(false)
@@ -37,8 +39,10 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
   const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
   // Load farms on mount
   useEffect(() => {
+    if(authenticated){
     loadFarms();
-  }, []);
+    }
+  }, [authenticated]);
 
   const loadFarms = async () => {
     try {

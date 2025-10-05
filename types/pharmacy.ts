@@ -1,4 +1,4 @@
-import { Location } from "./farm";
+import { Coords  } from "./farm";
 import { Vaccine } from "./vaccine";
 
 export interface PharmacySchedule {
@@ -14,7 +14,7 @@ export interface Pharmacy {
     phone: string;
     schedule: PharmacySchedule[]
     isOpen: boolean;
-    location: Location
+    location: Coords
     rating: number;
     vaccines: Vaccine[];
     createdAt: string;
@@ -26,10 +26,7 @@ export interface Pharmacy {
 export interface PharmacyCreateRequest {
     name: string;
     address: string;
-    location: {
-        latitude: number;
-        longitude: number;
-    };
+    location: Coords
     phone: string;
     email?: string;
     website?: string;
@@ -55,10 +52,7 @@ export interface PharmacyCreateRequest {
 export interface PharmacyUpdateRequest {
     name?: string;
     address?: string;
-    location?: {
-        latitude: number;
-        longitude: number;
-    };
+    location?: Coords;
     phone?: string;
     email?: string;
     website?: string;

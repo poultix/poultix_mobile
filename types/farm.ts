@@ -1,6 +1,6 @@
 import { User } from "./user";
 
-export interface Location {
+export interface Coords {
     latitude: number;
     longitude: number;
 }
@@ -34,7 +34,7 @@ export interface Farm {
     id: string;
     name: string;
     owner: User
-    location: Location;
+    location: Coords;
     size: number;
     establishedDate: string;
     livestock: LiveStock
@@ -50,11 +50,7 @@ export interface Farm {
 
 export interface FarmCreateRequest {
     name: string;
-    location: {
-        address: string;
-        latitude?: number;
-        longitude?: number;
-    };
+    location: Coords;
     livestock: {
         total: number;
         healthy: number;
@@ -71,11 +67,7 @@ export interface FarmCreateRequest {
 
 export interface FarmUpdateRequest {
     name?: string;
-    location?: {
-        address: string;
-        latitude?: number;
-        longitude?: number;
-    };
+    location?: Coords;
     livestock?: {
         total: number;
         healthy: number;

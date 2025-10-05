@@ -1,4 +1,4 @@
-import { User, ApiResponse, UserRole, UserRegistrationRequest, AuthResponse, UserLoginRequest, ForgotPasswordRequest ,PasswordResetRequest,EmailVerificationRequest} from '@/types';
+import { User, ApiResponse, UserRole, UserRegistrationRequest, AuthResponse, UserLoginRequest, ForgotPasswordRequest, PasswordResetRequest, EmailVerificationRequest } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 import * as SecureStore from 'expo-secure-store';
@@ -26,6 +26,7 @@ export class AuthService {
 
             // Store tokens securely
             if (response.success && response.data) {
+                
                 await this.storeTokens(response.data.accessToken, response.data.refreshToken);
             }
 
@@ -64,7 +65,7 @@ export class AuthService {
         try {
             // Get token for logout request (required by API)
             const token = await this.getAccessToken();
-            
+
             // Call backend logout endpoint with Authorization header
             const response = await apiClient.post<void>(API_ENDPOINTS.AUTH.LOGOUT);
 
@@ -200,20 +201,13 @@ export class AuthService {
     }
 
     // Get user info from token
-    async getCurrentUserFromToken(): Promise<any | null> {
-        const accessToken = await this.getAccessToken();
-        if (!accessToken) return null;
+    async getCurrentUser(): Promise<User | null> {
 
         try {
-            const payload = this.decodeJWTPayload(accessToken);
-            return {
-                id: payload.sub,
-                email: payload.email,
-                role: payload.role,
-                name: payload.name,
-                exp: payload.exp,
-                iat: payload.iat
-            };
+            const payload = await SecureStore.getItemAsync('user');
+            if (!payload) return null;
+            return JSON.parse(payload);
+
         } catch (error) {
             console.error('Error decoding user from token:', error);
             return null;

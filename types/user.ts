@@ -1,4 +1,4 @@
-import { Location } from "./farm";
+import { Coords } from "./farm";
 
 export enum UserRole {
     ADMIN = 'ADMIN',
@@ -12,7 +12,7 @@ export interface User {
     email: string;
     password: string;
     avatar?: string;
-    location?: Location;
+    location?: Coords;
     role: UserRole;
     isActive: boolean;
     emailVerified: boolean;
@@ -63,11 +63,7 @@ export interface UserUpdateRequest {
     name?: string;
     email?: string;
     phone?: string;
-    location?: {
-        address: string;
-        latitude?: number;
-        longitude?: number;
-    };
+    location?: Coords;
 }
 
 
@@ -81,11 +77,7 @@ export interface VeterinaryResponse {
         name: string;
         email: string;
         phone?: string;
-        location?: {
-            address: string;
-            latitude?: number;
-            longitude?: number;
-        };
+        location?: Coords;
     };
     specialization: string[];
     experience: number;

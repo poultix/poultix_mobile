@@ -3,6 +3,7 @@ import { VeterinaryResponse, VeterinaryCreateRequest, VeterinaryUpdateRequest } 
 import { veterinaryService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
+import { useAuth } from './AuthContext';
 
 interface VeterinaryContextType {
   veterinaries: VeterinaryResponse[];
@@ -30,6 +31,7 @@ const VeterinaryContext = createContext<VeterinaryContextType | undefined>(undef
 
 // Provider component
 export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) => {
+  const {authenticated}=useAuth()
   const [veterinaries, setVeterinaries] = useState<VeterinaryResponse[]>([])
   const [currentVeterinary, setCurrentVeterinary] = useState<VeterinaryResponse | null>(null)
   const [loading, setLoading] = useState(false)
@@ -38,8 +40,10 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
 
   // Load veterinaries on mount
   useEffect(() => {
+    if(authenticated){
     loadVeterinaries();
-  }, []);
+    }
+  }, [authenticated]);
 
   const loadVeterinaries = async () => {
     try {

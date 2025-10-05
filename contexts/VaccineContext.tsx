@@ -3,6 +3,7 @@ import { Vaccine, VaccineCreateRequest, VaccineUpdateRequest } from '@/types';
 import { vaccineService } from '@/services/api/vaccine';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
+import { useAuth } from './AuthContext';
 
 interface VaccineContextType {
   vaccines: Vaccine[];
@@ -30,6 +31,7 @@ const VaccineContext = createContext<VaccineContextType | undefined>(undefined);
 
 // Provider component
 export const VaccineProvider = ({ children }: { children: React.ReactNode }) => {
+  const {authenticated}=useAuth()
   const [vaccines, setVaccines] = useState<Vaccine[]>([])
   const [currentVaccine, setCurrentVaccine] = useState<Vaccine | null>(null)
   const [loading, setLoading] = useState(false)
@@ -63,8 +65,10 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
 
   // Load vaccines on mount
   useEffect(() => {
+    if(authenticated){
     loadVaccines();
-  }, [loadVaccines]);
+    }
+  }, [loadVaccines,authenticated]);
 
   const createVaccine = async (vaccineData: VaccineCreateRequest): Promise<void> => {
     try {

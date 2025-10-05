@@ -3,6 +3,7 @@ import { HelpSupportResponse, HelpSupportCreateRequest } from '@/types';
 import { supportService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
+import { useAuth } from './AuthContext';
 
 interface SupportContextType {
   tickets: HelpSupportResponse[];
@@ -24,6 +25,7 @@ const SupportContext = createContext<SupportContextType | undefined>(undefined);
 
 // Provider component
 export const SupportProvider = ({ children }: { children: React.ReactNode }) => {
+  const {authenticated}=useAuth()
   const [tickets, setTickets] = useState<HelpSupportResponse[]>([])
   const [currentTicket, setCurrentTicket] = useState<HelpSupportResponse | null>(null)
   const [loading, setLoading] = useState(false)
@@ -32,8 +34,10 @@ export const SupportProvider = ({ children }: { children: React.ReactNode }) => 
 
   // Load tickets on mount
   useEffect(() => {
+    if(authenticated){
     loadTickets();
-  }, []);
+    }
+  }, [authenticated]);
 
   const loadTickets = async () => {
     try {

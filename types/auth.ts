@@ -1,4 +1,5 @@
-import { UserRole } from "./user";
+import { Coords } from "./farm";
+import { User, UserRole } from "./user";
 
 // Request types (matching backend DTOs)
 export interface UserRegistrationRequest {
@@ -6,8 +7,7 @@ export interface UserRegistrationRequest {
     email: string;
     password: string;
     role: UserRole;
-    phone?: string;
-    location?: string;
+    location: Coords;
 }
  
 export interface UserLoginRequest {
@@ -38,15 +38,5 @@ export interface AuthResponse {
     refreshToken: string;
     tokenType: 'Bearer';
     expiresAt: string; // ISO date string
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        role:UserRole;
-        avatar?: string;
-        phone?: string;
-        location?: string;
-        isActive: boolean;
-        emailVerified: boolean;
-    };
+    user:User;
 }

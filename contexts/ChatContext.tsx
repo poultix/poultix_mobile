@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {  Message, MessageCreateRequest,  TypingStatus, User } from '@/types';
+import { Message, MessageCreateRequest, TypingStatus, User } from '@/types';
 import { messageService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
+import { useAuth } from './AuthContext';
 
 
 interface ChatContextType {
@@ -37,6 +38,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
 // Provider
 export function ChatProvider({ children }: { children: React.ReactNode }) {
+    const { authenticated } = useAuth()
     const [messages, setMessages] = useState<Message[]>([])
     const [currentChat, setCurrentChat] = useState<User | null>(null)
     const [typingStatuses, setTypingStatuses] = useState<TypingStatus[]>([])
@@ -49,16 +51,18 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
     // Load initial data
     useEffect(() => {
-        loadOnlineUsers()
+        if (authenticated) {
+            loadOnlineUsers()
 
-        // Simulate real-time updates
-        const interval = setInterval(() => {
-            updateOnlineUsers()
-            simulateTypingIndicators()
-        }, 3000)
+            // Simulate real-time updates
+            const interval = setInterval(() => {
+                updateOnlineUsers()
+                simulateTypingIndicators()
+            }, 3000)
 
-        return () => clearInterval(interval)
-    }, [])
+            return () => clearInterval(interval)
+        }
+    }, [authenticated])
 
 
     const loadOnlineUsers = async () => {
@@ -117,19 +121,19 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         try {
             setLoading(true)
             setError(null)
-            
+
             const messageData: MessageCreateRequest = {
                 receiverId,
                 content,
                 messageType,
             }
-            
+
             const response = await messageService.sendMessage(messageData)
-            
+
             if (response.success && response.data) {
                 // Convert API response to our Message format
-                const newMessage=response.data
-                
+                const newMessage = response.data
+
                 // Add to local state
                 addMessage(newMessage)
             } else {
@@ -137,7 +141,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             }
         } catch (error: any) {
             console.error('Failed to send message:', error)
-            
+
             // ✅ Check if it's a network/server error that needs routing
             if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
                 handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -149,25 +153,25 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             setLoading(false)
         }
     }
-    
+
     const getConversation = async (user1Id: string, user2Id: string): Promise<void> => {
         try {
             setLoading(true)
             setError(null)
-            
+
             const response = await messageService.getConversation(user1Id, user2Id)
-            
+
             if (response.success && response.data) {
                 // Convert API messages to our Message format
                 const conversationMessages: Message[] = response.data
-                
+
                 setMessages(conversationMessages)
             } else {
                 throw new Error(response.message || 'Failed to load conversation')
             }
         } catch (error: any) {
             console.error('Failed to load conversation:', error)
-            
+
             // ✅ Check if it's a network/server error that needs routing
             if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
                 handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -178,25 +182,25 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             setLoading(false)
         }
     }
-    
+
     const getMessagesBySender = async (senderId: string): Promise<void> => {
         try {
             setLoading(true)
             setError(null)
-            
+
             const response = await messageService.getMessagesBySender(senderId)
-            
+
             if (response.success && response.data) {
                 // Convert and set messages
                 const senderMessages: Message[] = response.data
-                
+
                 setMessages(senderMessages)
             } else {
                 throw new Error(response.message || 'Failed to load messages')
             }
         } catch (error: any) {
             console.error('Failed to load messages by sender:', error)
-            
+
             // ✅ Check if it's a network/server error that needs routing
             if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
                 handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -207,14 +211,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             setLoading(false)
         }
     }
-    
+
     const deleteMessage = async (messageId: string): Promise<void> => {
         try {
             setLoading(true)
             setError(null)
-            
+
             const response = await messageService.deleteMessage(messageId)
-            
+
             if (response.success) {
                 // Remove from local state
                 setMessages(prev => prev.filter(m => m.id !== messageId))
@@ -223,7 +227,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             }
         } catch (error: any) {
             console.error('Failed to delete message:', error)
-            
+
             // ✅ Check if it's a network/server error that needs routing
             if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
                 handleApiError(error); // ✅ Auto-route to appropriate error screen
