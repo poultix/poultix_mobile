@@ -23,7 +23,7 @@ export const useNewsActions = (): NewsActionsType => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    
+
     // In a real app, this would make an API call
     return newNews;
   };
@@ -32,11 +32,11 @@ export const useNewsActions = (): NewsActionsType => {
     // In a real app, this would make an API call
     const news = await loadNews();
     const existingNews = news.find(newsItem => newsItem.title === title);
-    
+
     if (!existingNews) {
       throw new Error('News not found');
     }
-    
+
     const updatedNews = { ...existingNews, ...newsData, updatedAt: new Date() };
     return updatedNews;
   };
