@@ -3,7 +3,6 @@ import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 
 
-
 export class MessageService {
     // Send Message
     async sendMessage(messageData: MessageCreateRequest): Promise<ApiResponse<Message>> {

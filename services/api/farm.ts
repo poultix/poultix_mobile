@@ -1,4 +1,4 @@
-import { Farm, ApiResponse,FarmCreateRequest,FarmUpdateRequest } from '@/types';
+import { Farm, ApiResponse,FarmCreateRequest,FarmUpdateRequest, FarmStatus } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 
@@ -31,7 +31,7 @@ export class FarmService {
     }
 
     // Get Farms by Health Status
-    async getFarmsByStatus(status: 'HEALTHY' | 'AT_RISK' | 'SICK' | 'QUARANTINE'): Promise<ApiResponse<Farm[]>> {
+    async getFarmsByStatus(status:FarmStatus): Promise<ApiResponse<Farm[]>> {
         return await apiClient.get<Farm[]>(API_ENDPOINTS.FARMS.BY_STATUS(status));
     }
 
@@ -51,7 +51,7 @@ export class FarmService {
     }
 
     // Update Farm Health Status
-    async updateHealthStatus(farmId: string, status: 'HEALTHY' | 'AT_RISK' | 'SICK' | 'QUARANTINE'): Promise<ApiResponse<Farm>> {
+    async updateHealthStatus(farmId: string, status: FarmStatus): Promise<ApiResponse<Farm>> {
         return await apiClient.patch<Farm>(API_ENDPOINTS.FARMS.UPDATE_HEALTH_STATUS(farmId, status));
     }
 
