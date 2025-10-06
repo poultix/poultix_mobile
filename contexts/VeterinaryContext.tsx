@@ -31,7 +31,7 @@ const VeterinaryContext = createContext<VeterinaryContextType | undefined>(undef
 
 // Provider component
 export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) => {
-  const {authenticated}=useAuth()
+  const { authenticated } = useAuth()
   const [veterinaries, setVeterinaries] = useState<VeterinaryResponse[]>([])
   const [currentVeterinary, setCurrentVeterinary] = useState<VeterinaryResponse | null>(null)
   const [loading, setLoading] = useState(false)
@@ -40,8 +40,8 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
 
   // Load veterinaries on mount
   useEffect(() => {
-    if(authenticated){
-    loadVeterinaries();
+    if (authenticated) {
+      loadVeterinaries();
     }
   }, [authenticated]);
 
@@ -49,9 +49,9 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await veterinaryService.getAllVeterinaries();
-      
+
       if (response.success && response.data) {
         setVeterinaries(response.data);
       } else {
@@ -59,7 +59,7 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
       }
     } catch (error: any) {
       console.error('Failed to load veterinaries:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -74,9 +74,9 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await veterinaryService.createVeterinary(userId, veterinaryData);
-      
+
       if (response.success && response.data) {
         setVeterinaries(prev => [...prev, response.data!]);
       } else {
@@ -84,7 +84,7 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
       }
     } catch (error: any) {
       console.error('Failed to create veterinary:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -99,14 +99,14 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
   const getVeterinaryById = async (id: string): Promise<VeterinaryResponse | null> => {
     try {
       const response = await veterinaryService.getVeterinaryById(id);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
       return null;
     } catch (error: any) {
       console.error('Failed to get veterinary by ID:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -119,14 +119,14 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
   const getVeterinaryByUserId = async (userId: string): Promise<VeterinaryResponse | null> => {
     try {
       const response = await veterinaryService.getVeterinaryByUserId(userId);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
       return null;
     } catch (error: any) {
       console.error('Failed to get veterinary by user ID:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -139,7 +139,7 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
   const getActiveVeterinaries = async (): Promise<VeterinaryResponse[]> => {
     try {
       const response = await veterinaryService.getActiveVeterinaries();
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -154,7 +154,7 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
   const getTopRatedVeterinaries = async (minRating?: number): Promise<VeterinaryResponse[]> => {
     try {
       const response = await veterinaryService.getTopRatedVeterinaries(minRating);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -170,9 +170,9 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await veterinaryService.updateVeterinary(id, updates);
-      
+
       if (response.success && response.data) {
         setVeterinaries(prev => prev.map(vet => vet.id === id ? response.data! : vet));
       } else {
@@ -180,7 +180,7 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
       }
     } catch (error: any) {
       console.error('Failed to update veterinary:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -195,10 +195,10 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
   const updateRating = async (id: string, rating: number): Promise<void> => {
     try {
       const response = await veterinaryService.updateRating(id, rating);
-      
+
       if (response.success) {
         // Update local state
-        setVeterinaries(prev => prev.map(vet => 
+        setVeterinaries(prev => prev.map(vet =>
           vet.id === id ? { ...vet, rating } : vet
         ));
       } else {
@@ -214,10 +214,10 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
   const incrementVisits = async (id: string): Promise<void> => {
     try {
       const response = await veterinaryService.incrementVisits(id);
-      
+
       if (response.success) {
         // Update local state
-        setVeterinaries(prev => prev.map(vet => 
+        setVeterinaries(prev => prev.map(vet =>
           vet.id === id ? { ...vet, totalVisits: vet.totalVisits + 1 } : vet
         ));
       } else {
@@ -234,11 +234,11 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await veterinaryService.deactivateVeterinary(id);
-      
+
       if (response.success) {
-        setVeterinaries(prev => prev.map(vet => 
+        setVeterinaries(prev => prev.map(vet =>
           vet.id === id ? { ...vet, isActive: false } : vet
         ));
       } else {
@@ -246,7 +246,7 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
       }
     } catch (error: any) {
       console.error('Failed to deactivate veterinary:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -262,9 +262,9 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await veterinaryService.deleteVeterinary(id);
-      
+
       if (response.success) {
         setVeterinaries(prev => prev.filter(vet => vet.id !== id));
       } else {
@@ -272,7 +272,7 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
       }
     } catch (error: any) {
       console.error('Failed to delete veterinary:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {

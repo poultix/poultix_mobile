@@ -25,7 +25,7 @@ const SupportContext = createContext<SupportContextType | undefined>(undefined);
 
 // Provider component
 export const SupportProvider = ({ children }: { children: React.ReactNode }) => {
-  const {authenticated}=useAuth()
+  const { authenticated } = useAuth()
   const [tickets, setTickets] = useState<HelpSupportResponse[]>([])
   const [currentTicket, setCurrentTicket] = useState<HelpSupportResponse | null>(null)
   const [loading, setLoading] = useState(false)
@@ -34,8 +34,8 @@ export const SupportProvider = ({ children }: { children: React.ReactNode }) => 
 
   // Load tickets on mount
   useEffect(() => {
-    if(authenticated){
-    loadTickets();
+    if (authenticated) {
+      loadTickets();
     }
   }, [authenticated]);
 
@@ -43,9 +43,9 @@ export const SupportProvider = ({ children }: { children: React.ReactNode }) => 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await supportService.getAllTickets();
-      
+
       if (response.success && response.data) {
         setTickets(response.data);
       } else {
@@ -53,7 +53,7 @@ export const SupportProvider = ({ children }: { children: React.ReactNode }) => 
       }
     } catch (error: any) {
       console.error('Failed to load support tickets:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -68,9 +68,9 @@ export const SupportProvider = ({ children }: { children: React.ReactNode }) => 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await supportService.createTicket(userId, ticketData);
-      
+
       if (response.success && response.data) {
         setTickets(prev => [...prev, response.data!]);
       } else {
@@ -78,7 +78,7 @@ export const SupportProvider = ({ children }: { children: React.ReactNode }) => 
       }
     } catch (error: any) {
       console.error('Failed to create support ticket:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -93,14 +93,14 @@ export const SupportProvider = ({ children }: { children: React.ReactNode }) => 
   const getTicketById = async (id: string): Promise<HelpSupportResponse | null> => {
     try {
       const response = await supportService.getTicketById(id);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
       return null;
     } catch (error: any) {
       console.error('Failed to get support ticket by ID:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -113,7 +113,7 @@ export const SupportProvider = ({ children }: { children: React.ReactNode }) => 
   const getTicketsByUser = async (userId: string): Promise<HelpSupportResponse[]> => {
     try {
       const response = await supportService.getTicketsByUser(userId);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -129,9 +129,9 @@ export const SupportProvider = ({ children }: { children: React.ReactNode }) => 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await supportService.deleteTicket(id);
-      
+
       if (response.success) {
         setTickets(prev => prev.filter(ticket => ticket.id !== id));
       } else {
@@ -139,7 +139,7 @@ export const SupportProvider = ({ children }: { children: React.ReactNode }) => 
       }
     } catch (error: any) {
       console.error('Failed to delete support ticket:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {

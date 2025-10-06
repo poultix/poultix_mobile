@@ -31,7 +31,7 @@ const VaccineContext = createContext<VaccineContextType | undefined>(undefined);
 
 // Provider component
 export const VaccineProvider = ({ children }: { children: React.ReactNode }) => {
-  const {authenticated}=useAuth()
+  const { authenticated } = useAuth()
   const [vaccines, setVaccines] = useState<Vaccine[]>([])
   const [currentVaccine, setCurrentVaccine] = useState<Vaccine | null>(null)
   const [loading, setLoading] = useState(false)
@@ -42,9 +42,9 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await vaccineService.getAllVaccines();
-      
+
       if (response.success && response.data) {
         setVaccines(response.data);
       } else {
@@ -52,7 +52,7 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
       }
     } catch (error: any) {
       console.error('Failed to load vaccines:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -63,20 +63,20 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
     }
   }, [handleApiError]);
 
-  // Load vaccines on mount
+  // Load vaccines on mount 
   useEffect(() => {
-    if(authenticated){
-    loadVaccines();
+    if (authenticated) {
+      loadVaccines();
     }
-  }, [loadVaccines,authenticated]);
+  }, [loadVaccines, authenticated]);
 
   const createVaccine = async (vaccineData: VaccineCreateRequest): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await vaccineService.createVaccine(vaccineData);
-      
+
       if (response.success && response.data) {
         setVaccines(prev => [...prev, response.data!]);
       } else {
@@ -84,7 +84,7 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
       }
     } catch (error: any) {
       console.error('Failed to create vaccine:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -96,17 +96,17 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
     }
   };
 
-  const getVaccineById = async (id: string): Promise<Vaccine| null> => {
+  const getVaccineById = async (id: string): Promise<Vaccine | null> => {
     try {
       const response = await vaccineService.getVaccineById(id);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
       return null;
     } catch (error: any) {
       console.error('Failed to get vaccine by ID:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -119,7 +119,7 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
   const getVaccinesByType = async (type: string): Promise<Vaccine[]> => {
     try {
       const response = await vaccineService.getVaccinesByType(type);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -134,7 +134,7 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
   const getVaccinesByTargetDisease = async (targetDisease: string): Promise<Vaccine[]> => {
     try {
       const response = await vaccineService.getVaccinesByTargetDisease(targetDisease);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -149,7 +149,7 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
   const getVaccineByName = async (name: string): Promise<Vaccine | null> => {
     try {
       const response = await vaccineService.getVaccineByName(name);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -164,7 +164,7 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
   const getVaccinesByPrescriptionRequired = async (prescriptionRequired: boolean): Promise<Vaccine[]> => {
     try {
       const response = await vaccineService.getVaccinesByPrescriptionRequired(prescriptionRequired);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -179,7 +179,7 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
   const searchVaccines = async (keyword: string): Promise<Vaccine[]> => {
     try {
       const response = await vaccineService.searchVaccines(keyword);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -194,7 +194,7 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
   const checkVaccineExists = async (name: string): Promise<boolean> => {
     try {
       const response = await vaccineService.checkVaccineExists(name);
-      
+
       if (response.success && response.data !== undefined) {
         return response.data;
       }
@@ -210,9 +210,9 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await vaccineService.updateVaccine(id, updates);
-      
+
       if (response.success && response.data) {
         setVaccines(prev => prev.map(vaccine => vaccine.id === id ? response.data! : vaccine));
       } else {
@@ -220,7 +220,7 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
       }
     } catch (error: any) {
       console.error('Failed to update vaccine:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {
@@ -236,9 +236,9 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await vaccineService.deleteVaccine(id);
-      
+
       if (response.success) {
         setVaccines(prev => prev.filter(vaccine => vaccine.id !== id));
       } else {
@@ -246,7 +246,7 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
       }
     } catch (error: any) {
       console.error('Failed to delete vaccine:', error);
-      
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error);
       } else {

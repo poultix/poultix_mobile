@@ -5,24 +5,6 @@ import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
 import { useAuth } from './AuthContext';
 
-// User state interface
-interface UserState {
-  users: User[];
-  currentUser: User | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-// User actions
-type UserAction =
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SET_USERS'; payload: User[] }
-  | { type: 'ADD_USER'; payload: User }
-  | { type: 'UPDATE_USER'; payload: User }
-  | { type: 'DELETE_USER'; payload: string }
-  | { type: 'SET_CURRENT_USER'; payload: User | null };
-
 // Context types
 interface UserContextType {
   users: User[];
@@ -39,61 +21,21 @@ interface UserContextType {
   refreshUsers: () => Promise<void>;
 }
 
-// Initial state
-const initialState: UserState = {
-  users: [],
-  currentUser: null,
-  isLoading: false,
-  error: null,
-};
-
-// Reducer
-const userReducer = (state: UserState, action: UserAction): UserState => {
-  switch (action.type) {
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload, isLoading: false };
-    case 'SET_USERS':
-      return { ...state, users: action.payload, isLoading: false, error: null };
-    case 'ADD_USER':
-      return { ...state, users: [...state.users, action.payload] };
-    case 'UPDATE_USER':
-      return {
-        ...state,
-        users: state.users.map(user =>
-          user.id === action.payload.id ? action.payload : user
-        )
-      };
-    case 'DELETE_USER':
-      return {
-        ...state,
-        users: state.users.filter(user => user.id !== action.payload)
-      };
-    case 'SET_CURRENT_USER':
-      return {
-        ...state,
-        currentUser: action.payload
-      };
-    default:
-      return state;
-  }
-};
 
 // Create context
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 // Provider component
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const {authenticated,currentUser}=useAuth()
+  const { authenticated, currentUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
   // Load users on mount
   useEffect(() => {
-    if(authenticated){
-    loadUsers();
+    if (authenticated) {
+      loadUsers();
     }
   }, [authenticated]);
 
@@ -101,9 +43,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await userService.getAllUsers();
-      
+
       if (response.success && response.data) {
         // Convert API users to our User type
         const convertedUsers: User[] = response.data.map(apiUser => ({
@@ -122,14 +64,14 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           updatedAt: new Date().toISOString(),
           isActive: apiUser.isActive,
         }));
-        
+
         setUsers(convertedUsers);
       } else {
         throw new Error(response.message || 'Failed to load users');
       }
     } catch (error: any) {
       console.error('Failed to load users:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -146,7 +88,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const getUserById = async (id: string): Promise<User | null> => {
     try {
       const response = await userService.getUserById(id);
-      
+
       if (response.success && response.data) {
         return {
           id: response.data.id,
@@ -168,7 +110,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       return null;
     } catch (error: any) {
       console.error('Failed to get user by ID:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -178,7 +120,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       return null;
     }
   };
-  
+
   const getUsersByRole = (role: UserRole): User[] => {
     return users.filter(user => user.role === role);
   };
@@ -187,9 +129,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await userService.updateUser(id, updates);
-      
+
       if (response.success && response.data) {
         const updatedUser: User = {
           id: response.data.id,
@@ -207,7 +149,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           updatedAt: new Date().toISOString(),
           isActive: response.data.isActive,
         };
-        
+
         // Update local state
         setUsers(prev => prev.map(user => user.id === id ? updatedUser : user));
       } else {
@@ -215,7 +157,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to update user:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -227,17 +169,17 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     }
   };
-  
+
   const activateUser = async (id: string): Promise<void> => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await userService.activateUser(id);
-      
+
       if (response.success) {
         // Update local state
-        setUsers(prev => prev.map(user => 
+        setUsers(prev => prev.map(user =>
           user.id === id ? { ...user, isActive: true } : user
         ));
       } else {
@@ -245,7 +187,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to activate user:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -257,17 +199,17 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     }
   };
-  
+
   const deactivateUser = async (id: string): Promise<void> => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await userService.deactivateUser(id);
-      
+
       if (response.success) {
         // Update local state
-        setUsers(prev => prev.map(user => 
+        setUsers(prev => prev.map(user =>
           user.id === id ? { ...user, isActive: false } : user
         ));
       } else {
@@ -275,7 +217,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to deactivate user:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -292,9 +234,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await userService.deleteUser(id);
-      
+
       if (response.success) {
         // Remove from local state
         setUsers(prev => prev.filter(user => user.id !== id));
@@ -303,7 +245,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to delete user:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen

@@ -32,7 +32,7 @@ interface ScheduleContextType {
 const ScheduleContext = createContext<ScheduleContextType | undefined>(undefined);
 // Provider component
 export const ScheduleProvider = ({ children }: { children: React.ReactNode }) => {
-  const {authenticated}=useAuth()
+  const { authenticated } = useAuth()
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [currentSchedule, setCurrentSchedule] = useState<Schedule | null>(null)
   const [loading, setLoading] = useState(false)
@@ -40,17 +40,17 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
   const { handleApiError } = useError(); // Use ErrorContext for routing
   // Load schedules on mount
   useEffect(() => {
-    if(authenticated){
-    loadSchedules().catch(handleApiError);
+    if (authenticated) {
+      loadSchedules().catch(handleApiError);
     }
   }, [authenticated]);
   const loadSchedules = async () => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await scheduleService.getAllSchedules();
-      
+
       if (response.success && response.data) {
         setSchedules(response.data);
       } else {
@@ -58,7 +58,7 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to load schedules:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -75,9 +75,9 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await scheduleService.createSchedule(createdBy, scheduleData);
-      
+
       if (response.success && response.data) {
         setSchedules(prev => [...prev, response.data!]);
       } else {
@@ -85,7 +85,7 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to create schedule:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -97,11 +97,11 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       setLoading(false);
     }
   };
-  
+
   const getScheduleById = async (id: string): Promise<Schedule | null> => {
     try {
       const response = await scheduleService.getScheduleById(id);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -112,11 +112,11 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       return null;
     }
   };
-  
+
   const getSchedulesByFarmer = async (farmerId: string): Promise<Schedule[]> => {
     try {
       const response = await scheduleService.getSchedulesByFarmer(farmerId);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -127,11 +127,11 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       return [];
     }
   };
-  
+
   const getSchedulesByVeterinary = async (veterinaryId: string): Promise<Schedule[]> => {
     try {
       const response = await scheduleService.getSchedulesByVeterinary(veterinaryId);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -142,16 +142,16 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       return [];
     }
   };
-  
+
   const getSchedulesByStatus = async (status: ScheduleStatus): Promise<Schedule[]> => {
     try {
       // Convert ScheduleStatus to service expected format
       const serviceStatus = status === ScheduleStatus.SCHEDULED ? 'PENDING' :
-                           status === ScheduleStatus.IN_PROGRESS ? 'CONFIRMED' :
-                           status === ScheduleStatus.COMPLETED ? 'COMPLETED' :
-                           status === ScheduleStatus.CANCELLED ? 'CANCELLED' : 'PENDING';
+        status === ScheduleStatus.IN_PROGRESS ? 'CONFIRMED' :
+          status === ScheduleStatus.COMPLETED ? 'COMPLETED' :
+            status === ScheduleStatus.CANCELLED ? 'CANCELLED' : 'PENDING';
       const response = await scheduleService.getSchedulesByStatus(serviceStatus as 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED');
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -162,11 +162,11 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       return [];
     }
   };
-  
+
   const getSchedulesByDate = async (date: string): Promise<Schedule[]> => {
     try {
       const response = await scheduleService.getSchedulesByDate(date);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -177,11 +177,11 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       return [];
     }
   };
-  
+
   const getSchedulesByDateRange = async (startDate: string, endDate: string): Promise<Schedule[]> => {
     try {
       const response = await scheduleService.getSchedulesByDateRange(startDate, endDate);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
@@ -197,9 +197,9 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await scheduleService.updateSchedule(id, updates);
-      
+
       if (response.success && response.data) {
         setSchedules(prev => prev.map(schedule => schedule.id === id ? response.data! : schedule));
       } else {
@@ -213,19 +213,19 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       setLoading(false);
     }
   };
-  
+
   const updateScheduleStatus = async (id: string, status: ScheduleStatus): Promise<void> => {
     try {
       setLoading(true);
       setError('');
-      
+
       // Convert ScheduleStatus to service expected format
       const serviceStatus = status === ScheduleStatus.SCHEDULED ? 'PENDING' :
-                           status === ScheduleStatus.IN_PROGRESS ? 'CONFIRMED' :
-                           status === ScheduleStatus.COMPLETED ? 'COMPLETED' :
-                           status === ScheduleStatus.CANCELLED ? 'CANCELLED' : 'PENDING';
+        status === ScheduleStatus.IN_PROGRESS ? 'CONFIRMED' :
+          status === ScheduleStatus.COMPLETED ? 'COMPLETED' :
+            status === ScheduleStatus.CANCELLED ? 'CANCELLED' : 'PENDING';
       const response = await scheduleService.updateScheduleStatus(id, serviceStatus as 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED');
-      
+
       if (response.success && response.data) {
         setSchedules(prev => prev.map(schedule => schedule.id === id ? response.data! : schedule));
       } else {
@@ -239,14 +239,14 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       setLoading(false);
     }
   };
-  
+
   const completeSchedule = async (id: string): Promise<void> => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await scheduleService.completeSchedule(id);
-      
+
       if (response.success && response.data) {
         setSchedules(prev => prev.map(schedule => schedule.id === id ? response.data! : schedule));
       } else {
@@ -260,14 +260,14 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       setLoading(false);
     }
   };
-  
+
   const cancelSchedule = async (id: string): Promise<void> => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await scheduleService.cancelSchedule(id);
-      
+
       if (response.success && response.data) {
         setSchedules(prev => prev.map(schedule => schedule.id === id ? response.data! : schedule));
       } else {
@@ -286,9 +286,9 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await scheduleService.deleteSchedule(id);
-      
+
       if (response.success) {
         setSchedules(prev => prev.filter(schedule => schedule.id !== id));
       } else {

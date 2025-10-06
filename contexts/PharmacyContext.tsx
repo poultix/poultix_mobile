@@ -26,7 +26,7 @@ const PharmacyContext = createContext<PharmacyContextType | undefined>(undefined
 
 // Provider component
 export const PharmacyProvider = ({ children }: { children: React.ReactNode }) => {
-  const {authenticated}=useAuth()
+  const { authenticated } = useAuth()
   const [currentPharmacy, setCurrentPharmacy] = useState<Pharmacy | null>(null)
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([])
   const [error, setError] = useState('')
@@ -34,8 +34,8 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
   const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
   // Load pharmacies on mount
   useEffect(() => {
-    if(authenticated){
-    loadPharmacies();
+    if (authenticated) {
+      loadPharmacies();
     }
   }, [authenticated]);
 
@@ -43,9 +43,9 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await pharmacyService.getAllPharmacies();
-      
+
       if (response.success && response.data) {
         setPharmacies(response.data);
       } else {
@@ -53,7 +53,7 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to load pharmacies:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -69,9 +69,9 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await pharmacyService.createPharmacy(pharmacyData);
-      
+
       if (response.success && response.data) {
         setPharmacies(prev => [...prev, response.data!]);
       } else {
@@ -79,7 +79,7 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to create pharmacy:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -91,18 +91,18 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
       setLoading(false);
     }
   };
-  
+
   const getPharmacyById = async (id: string): Promise<Pharmacy | null> => {
     try {
       const response = await pharmacyService.getPharmacyById(id);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
       return null;
     } catch (error: any) {
       console.error('Failed to get pharmacy by ID:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -117,9 +117,9 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await pharmacyService.updatePharmacy(id, updates);
-      
+
       if (response.success && response.data) {
         setPharmacies(prev => prev.map(pharmacy => pharmacy.id === id ? response.data! : pharmacy));
       } else {
@@ -127,7 +127,7 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to update pharmacy:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -144,9 +144,9 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await pharmacyService.deletePharmacy(id);
-      
+
       if (response.success) {
         setPharmacies(prev => prev.filter(pharmacy => pharmacy.id !== id));
       } else {
@@ -154,7 +154,7 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
       }
     } catch (error: any) {
       console.error('Failed to delete pharmacy:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen

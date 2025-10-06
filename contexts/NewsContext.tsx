@@ -4,6 +4,7 @@ import { News, NewsCreateRequest, NewsUpdateRequest } from '@/types';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useError } from './ErrorContext';
 import { useAuth } from './AuthContext';
+import { Alert } from 'react-native';
 
 
 // Context types
@@ -27,7 +28,7 @@ const NewsContext = createContext<NewsContextType | undefined>(undefined);
 
 // Provider component
 export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
-  const {authenticated}=useAuth()
+  const { authenticated } = useAuth()
   const [news, setNews] = useState<News[]>([])
   const [currentNews, setCurrentNews] = useState<News | null>(null)
   const [loading, setLoading] = useState(false)
@@ -36,8 +37,8 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Load news on mount
   useEffect(() => {
-    if(authenticated){
-    loadNews();
+    if (authenticated) {
+      loadNews();
     }
   }, [authenticated]);
 
@@ -45,17 +46,17 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await newsService.getAllNews();
-      
+
       if (response.success && response.data) {
         setNews(response.data);
       } else {
-        throw new Error(response.message || 'Failed to load news');
+        Alert.alert('Failed to load news', response.message || 'Failed to load news');
       }
     } catch (error: any) {
       console.error('Failed to load news:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -72,40 +73,39 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await newsService.createNews(authorId, newsData);
-      
+
       if (response.success && response.data) {
         setNews(prev => [...prev, response.data!]);
       } else {
-        throw new Error(response.message || 'Failed to create news');
+        Alert.alert('Failed to create news', response.message || 'Failed to create news');
       }
     } catch (error: any) {
       console.error('Failed to create news:', error);
-      
-      // ✅ Check if it's a network/server error that needs routing
+
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
       } else {
-        setError(error.message || 'Failed to create news'); // ✅ Show inline error for minor issues
+        Alert.alert('Failed to create news', error.message || 'Failed to create news'); // ✅ Show inline error for minor issues
       }
       throw error;
     } finally {
       setLoading(false);
     }
   };
-  
+
   const getNewsById = async (id: string): Promise<News | null> => {
     try {
       const response = await newsService.getNewsById(id);
-      
+
       if (response.success && response.data) {
         return response.data;
       }
       return null;
     } catch (error: any) {
       console.error('Failed to get news by ID:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -120,17 +120,17 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await newsService.updateNews(id, updates);
-      
+
       if (response.success && response.data) {
         setNews(prev => prev.map(article => article.id === id ? response.data! : article));
       } else {
-        throw new Error(response.message || 'Failed to update news');
+        Alert.alert('Failed to update news', response.message || 'Failed to update news');
       }
     } catch (error: any) {
       console.error('Failed to update news:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -147,9 +147,9 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await newsService.deleteNews(id);
-      
+
       if (response.success) {
         setNews(prev => prev.filter(article => article.id !== id));
       } else {
@@ -157,7 +157,7 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error: any) {
       console.error('Failed to delete news:', error);
-      
+
       // ✅ Check if it's a network/server error that needs routing
       if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
         handleApiError(error); // ✅ Auto-route to appropriate error screen
