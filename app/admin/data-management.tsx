@@ -21,7 +21,7 @@ import { useFarms } from '@/contexts/FarmContext';
 import { useNews } from '@/contexts/NewsContext';
 import { usePharmacies } from '@/contexts/PharmacyContext';
 import { useUsers } from '@/contexts/UserContext';
- ;
+
 
 export default function DataManagementScreen() {
   const { currentUser } = useAuth();
@@ -30,7 +30,7 @@ export default function DataManagementScreen() {
   const { farms } = useFarms();
   const { users } = useUsers();
   const { pharmacies } = usePharmacies();
-  
+
   const [selectedTab, setSelectedTab] = useState<'news' | 'farms' | 'users' | 'pharmacies'>('news');
   const [searchQuery, setSearchQuery] = useState('');
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -63,7 +63,7 @@ export default function DataManagementScreen() {
     }
   };
 
-  const filteredData = getDataForTab().filter((item: any) => 
+  const filteredData = getDataForTab().filter((item: any) =>
     item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.email?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -127,14 +127,12 @@ export default function DataManagementScreen() {
               {(['news', 'farms', 'users', 'pharmacies'] as const).map((tab) => (
                 <TouchableOpacity
                   key={tab}
-                  style={tw`px-4 py-2 rounded-full ${
-                    selectedTab === tab ? 'bg-purple-500' : 'bg-white'
-                  } shadow-sm`}
+                  style={tw`px-4 py-2 rounded-full ${selectedTab === tab ? 'bg-purple-500' : 'bg-white'
+                    } shadow-sm`}
                   onPress={() => setSelectedTab(tab)}
                 >
-                  <Text style={tw`font-medium ${
-                    selectedTab === tab ? 'text-white' : 'text-gray-700'
-                  }`}>
+                  <Text style={tw`font-medium ${selectedTab === tab ? 'text-white' : 'text-gray-700'
+                    }`}>
                     {tab.charAt(0).toUpperCase() + tab.slice(1)} ({getDataForTab().length})
                   </Text>
                 </TouchableOpacity>
@@ -179,12 +177,11 @@ export default function DataManagementScreen() {
                     )}
                   </View>
                   <View style={tw`items-end`}>
-                    <View style={tw`w-3 h-3 rounded-full ${
-                      item.isActive !== false ? 'bg-green-500' : 'bg-red-500'
-                    }`} />
+                    <View style={tw`w-3 h-3 rounded-full ${item.isActive !== false ? 'bg-green-500' : 'bg-red-500'
+                      }`} />
                   </View>
                 </View>
-                
+
                 <View style={tw`flex-row items-center justify-between pt-3 border-t border-gray-100 mt-3`}>
                   <Text style={tw`text-gray-400 text-xs`}>
                     {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'No date'}
