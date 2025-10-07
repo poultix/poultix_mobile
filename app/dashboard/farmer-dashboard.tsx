@@ -72,7 +72,7 @@ export default function FarmerDashboardScreen() {
         {/* Header */}
         <View className={`pb-4`}>
           <LinearGradient
-            colors={['#F59E0B', '#F59E0B']}
+            colors={['#F59E0B', '#D97706']}
             className={`p-8 shadow-xl`}
           >
             <View className={`flex-row items-center justify-between mb-4`}>

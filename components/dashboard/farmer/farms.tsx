@@ -20,7 +20,7 @@ export default function FarmsDashboard() {
             <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-xl font-bold text-gray-800">My Farms</Text>
                 <TouchableOpacity
-                    className="bg-green-500 px-4 py-2 rounded-xl flex-row items-center"
+                    className="bg-amber-500 px-4 py-2 rounded-xl flex-row items-center"
                     onPress={() => router.push('/farm/create')}
                 >
                     <Ionicons name="add-outline" size={16} color="white" />
