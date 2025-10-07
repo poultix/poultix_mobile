@@ -87,7 +87,7 @@ export function useBLE() {
             try {
                 // Safely get platform API level with fallback
                 const apiLevel = ExpoDevice?.platformApiLevel || Platform.Version || 30;
-                
+
                 if (apiLevel < 31) {
                     const granted = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -124,7 +124,7 @@ export function useBLE() {
     // Check Bluetooth state
     const checkBluetoothState = async () => {
         const manager = initializeBleManager();
-        
+
         if (manager && bleSupported) {
             try {
                 const state = await manager.state();
@@ -143,12 +143,12 @@ export function useBLE() {
 
     const scanForPeripherals = async () => {
         const manager = initializeBleManager();
-        
+
         if (manager && bleSupported) {
             try {
                 // Check Bluetooth state first
                 const state = await checkBluetoothState();
-                
+
                 if (state !== 'PoweredOn') {
                     console.log(`Bluetooth is not powered on. Current state: ${state}`);
                     Alert.alert(
@@ -162,9 +162,9 @@ export function useBLE() {
                 // Clear previous devices
                 setDevices([]);
                 setIsScanning(true);
-                
+
                 console.log('Starting BLE scan...');
-                
+
                 manager.startDeviceScan(null, null, (error: BleError | null, device: Device | null) => {
                     if (error) {
                         console.log('Scan error:', error);
@@ -178,16 +178,28 @@ export function useBLE() {
                     }
 
                     if (device) {
-                        console.log('Found device:', device.name || device.localName || 'Unknown', device.id);
-                        
-                        // Add all discovered devices (not just Arduino)
-                        setDevices((prevState: Device[]) => {
-                            if (!isDuplicateDevice(prevState, device)) {
-                                return [...prevState, device];
-                            }
-                            return prevState;
-                        });
+                        if (!device.isConnectable) return
+                        if (!device.name) {
+                            fetchDeviceName(manager, device).then((updatedDevice) => {
+                                setDevices((prevDevices) => {
+                                    if (!prevDevices.find(d => d.id === device.id)) {
+                                        return [...prevDevices, updatedDevice];
+                                    }
+                                    return prevDevices;
+                                });
+
+                            });
+                        } else {
+                            setDevices((prevDevices) => {
+                                if (!prevDevices.find(d => d.id === device.id)) {
+                                    return [...prevDevices, device];
+                                }
+                                return prevDevices;
+                            });
+
+                        }
                     }
+
                 });
 
                 // Stop scanning after 10 seconds
@@ -196,7 +208,7 @@ export function useBLE() {
                     setIsScanning(false);
                     console.log('Scan completed');
                 }, 10000);
-                
+
             } catch (error) {
                 console.error('Scan initialization error:', error);
                 setIsScanning(false);
@@ -211,7 +223,7 @@ export function useBLE() {
             console.log("Using mock BLE scanning");
             setDevices([]);
             setIsScanning(true);
-            
+
             setTimeout(() => {
                 setDevices([mockDevice]);
                 setIsScanning(false);
@@ -220,9 +232,36 @@ export function useBLE() {
         }
     };
 
+    // Fetch device name if missing
+    const fetchDeviceName = async (manager: BleManager, device: Device): Promise<Device> => {
+        try {
+            const connected = await manager.connectToDevice(device.id, { autoConnect: false });
+            await connected.discoverAllServicesAndCharacteristics();
+
+            const characteristic = await connected.readCharacteristicForService(
+                "1800", // Generic Access
+                "2A00"  // Device Name
+            );
+
+            if (characteristic?.value) {
+                const name = Buffer.from(characteristic.value, "base64").toString("utf8");
+                console.log(`Fetched name for ${device.id}:`, name);
+                await manager.cancelDeviceConnection(device.id);
+                return { ...device, name };
+            }
+
+            await manager.cancelDeviceConnection(device.id);
+            return device;
+        } catch (error) {
+            console.log(`Failed to fetch name for ${device.id}:`, error);
+            return device;
+        }
+    };
+
+
     const connectToDevice = async (device: Device) => {
         const manager = initializeBleManager();
-        
+
         if (manager && bleSupported) {
             // Real BLE connection
             try {
@@ -245,7 +284,7 @@ export function useBLE() {
 
     const disconnectDevice = async (device: Device) => {
         const manager = initializeBleManager();
-        
+
         if (manager && bleSupported) {
             try {
                 await manager.cancelDeviceConnection(device.id);
@@ -264,7 +303,7 @@ export function useBLE() {
 
     const startStreamingData = async (device: Device) => {
         const manager = initializeBleManager();
-        
+
         if (manager && bleSupported && device) {
             // Real BLE data streaming
             device.monitorCharacteristicForService(
@@ -296,7 +335,7 @@ export function useBLE() {
             console.log("Mock streaming data from device");
             const colors = ["red", "green", "blue", "white"];
             let colorIndex = 0;
-            
+
             const interval = setInterval(() => {
                 setColor(colors[colorIndex]);
                 colorIndex = (colorIndex + 1) % colors.length;
