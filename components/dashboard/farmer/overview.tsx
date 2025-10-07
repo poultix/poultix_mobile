@@ -54,7 +54,7 @@ export default function FarmerOverview() {
                         </View>
                         <Text className="text-gray-600 font-medium">Upcoming Visits</Text>
                         <Text className="text-xs text-gray-500 mt-1">
-                            Next: {upcomingSchedules[0]?.scheduledDate.toLocaleDateString() || 'None'}
+                            Next: {new Date(upcomingSchedules[0]?.scheduledDate).toLocaleDateString() || 'None'}
                         </Text>
                     </View>
 

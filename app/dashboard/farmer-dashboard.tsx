@@ -131,7 +131,7 @@ export default function FarmerDashboardScreen() {
       </Animated.View>
 
       {/* Bottom Tabs */}
-      <BottomTabs currentRoute="/dashboard/farmer-dashboard" />
+      <BottomTabs  />
 
       <CustomDrawer
         isVisible={isDrawerVisible}

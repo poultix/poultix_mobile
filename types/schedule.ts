@@ -46,13 +46,13 @@ export interface Schedule {
     type: ScheduleType;
     farmer: User;
     veterinary: User;
-    scheduledDate: Date;
+    scheduledDate: string;
     startTime: string; 
     endTime: string;
     status: ScheduleStatus;
     priority: SchedulePriority;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt:string;
     createdBy: User;
 }
 
@@ -64,8 +64,6 @@ export interface ScheduleCreateRequest {
     title: string;
     description: string;
     scheduledDate: string;
-    startTime: string;
-    endTime: string;
     priority: SchedulePriority;
 }
 

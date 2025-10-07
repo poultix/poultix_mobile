@@ -65,9 +65,11 @@ export default function ScheduleRequestScreen() {
         return date.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
-            hour12: true
+            hour12: false
         });
     };
+
+
 
     // Create combined DateTime for scheduling
     const getScheduledDateTime = () => {
@@ -124,8 +126,6 @@ export default function ScheduleRequestScreen() {
                 title: `Veterinary Visit - ${selectedFarm.name}`,
                 description: reason,
                 scheduledDate: getScheduledDateTime().toISOString(),
-                startTime: formatTime(preferredTime),
-                endTime: formatTime(new Date(preferredTime.getTime() + 60 * 60 * 1000)), // 1 hour later
                 priority: urgency
             });
             Alert.alert(

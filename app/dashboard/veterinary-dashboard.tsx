@@ -126,7 +126,7 @@ export default function VeterinaryDashboardScreen() {
         </ScrollView>
       </Animated.View>
       {/* Bottom Tabs */}
-      <BottomTabs currentRoute="/dashboard/veterinary-dashboard" />
+      <BottomTabs />
 
       <CustomDrawer
         isVisible={isDrawerVisible}

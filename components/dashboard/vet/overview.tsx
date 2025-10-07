@@ -1,11 +1,11 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import tw from 'twrnc';
 import { useAuth } from "@/contexts/AuthContext";
 import { useFarms } from "@/contexts/FarmContext";
 import { useSchedules } from "@/contexts/ScheduleContext";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
+import tw from 'twrnc';
 
 export default function VetOverview() {
     const { currentUser } = useAuth();
@@ -35,7 +35,6 @@ export default function VetOverview() {
         switch (status) {
             case 'EXCELLENT': return { bg: 'bg-green-100', text: 'text-green-600', border: 'border-green-200' };
             case 'GOOD': return { bg: 'bg-blue-100', text: 'text-blue-600', border: 'border-blue-200' };
-            case 'FAIR': return { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-200' };
             case 'POOR': return { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-200' };
             default: return { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-200' };
         }
@@ -51,7 +50,7 @@ export default function VetOverview() {
                     </View>
                     <Text style={tw`text-gray-600 font-medium`}>Assigned Farms</Text>
                     <Text style={tw`text-xs text-gray-500 mt-1`}>
-                        {healthyFarms} healthy, {farmsNeedingAttention} need attention
+                        {totalFarms === 0 ? 'No farms assigned yet' : `${healthyFarms} healthy, ${farmsNeedingAttention} need attention`}
                     </Text>
                 </View>
 
@@ -62,7 +61,7 @@ export default function VetOverview() {
                     </View>
                     <Text style={tw`text-gray-600 font-medium`}>Animals Under Care</Text>
                     <Text style={tw`text-xs text-gray-500 mt-1`}>
-                        Across {totalFarms} farms
+                        {totalFarms === 0 ? 'No animals to care for' : `Across ${totalFarms} farms`}
                     </Text>
                 </View>
 
@@ -73,24 +72,30 @@ export default function VetOverview() {
                     </View>
                     <Text style={tw`text-gray-600 font-medium`}>Today&apos;s Visits</Text>
                     <Text style={tw`text-xs text-gray-500 mt-1`}>
-                        {upcomingSchedules.length} upcoming total
+                        {mySchedules.length === 0 ? 'No schedules yet' : `${upcomingSchedules.length} upcoming total`}
                     </Text>
                 </View>
 
                 <View style={tw`flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]`}>
                     <View style={tw`flex-row items-center justify-between mb-2`}>
                         <Ionicons name="star-outline" size={24} color="#8B5CF6" />
-                        <Text style={tw`text-2xl font-bold text-gray-800`}>4.8</Text>
+                        <Text style={tw`text-2xl font-bold text-gray-800`}>
+                            {mySchedules.filter(s => s.status === 'COMPLETED').length === 0 ? 'New' : '4.8'}
+                        </Text>
                     </View>
                     <Text style={tw`text-gray-600 font-medium`}>Rating</Text>
                     <Text style={tw`text-xs text-gray-500 mt-1`}>
-                        {mySchedules.filter(s => s.status === 'COMPLETED').length} total visits
+                        {mySchedules.filter(s => s.status === 'COMPLETED').length === 0
+                            ? 'Complete your first visit'
+                            : `${mySchedules.filter(s => s.status === 'COMPLETED').length} total visits`
+                        }
                     </Text>
                 </View>
             </View>
 
             {/* Today's Schedule */}
             <View style={tw`bg-white rounded-2xl p-5 shadow-sm mb-6`}>
+                <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>Today&apos;s Schedule</Text>
                 <View style={tw`flex-row justify-between items-center mb-4`}>
                     <Text style={tw`text-lg font-bold text-gray-800`}>Today&apos;s Schedule</Text>
                     <TouchableOpacity onPress={() => setSelectedTab('schedules')}>
