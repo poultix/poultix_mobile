@@ -1,10 +1,11 @@
-import { Schedule, ScheduleType, ScheduleStatus, SchedulePriority } from '@/types/schedule';
+import { Schedule, ScheduleType, ScheduleStatus, SchedulePriority, ScheduleCreateRequest } from '@/types/schedule';
 import { scheduleService } from '@/services/api';
+import { useSchedules } from '@/contexts/ScheduleContext';
 
 export interface ScheduleActionsType {
   loadSchedules: () => Promise<Schedule[]>;
-  createSchedule: (scheduleData: Omit<Schedule, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Schedule>;
-  updateSchedule: (id: string, scheduleData: Partial<Schedule>) => Promise<Schedule>;
+  createSchedule: (scheduleData: ScheduleCreateRequest) => Promise<void>;
+  updateSchedule: (id: string, scheduleData: Partial<Schedule>) => Promise<void>;
   deleteSchedule: (id: string) => Promise<void>;
   getScheduleById: (schedules: Schedule[], id: string) => Schedule | undefined;
   getSchedulesByFarmer: (schedules: Schedule[], farmerId: string) => Schedule[];
@@ -16,34 +17,33 @@ export interface ScheduleActionsType {
 }
 
 export const useScheduleActions = (): ScheduleActionsType => {
+
+  const { schedules, addSchedule } = useSchedules()
+
   const loadSchedules = async (): Promise<Schedule[]> => {
     const response = await scheduleService.getAllSchedules();
     return response.success && response.data ? response.data : [];
   };
 
-  const createSchedule = async (scheduleData: Omit<Schedule, 'id' | 'createdAt' | 'updatedAt'>): Promise<Schedule> => {
-    const newSchedule: Schedule = {
-      ...scheduleData,
-      id: `schedule_${Date.now()}`,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    
-    // In a real app, this would make an API call
-    return newSchedule;
+  const createSchedule = async (scheduleData: ScheduleCreateRequest) => {
+    const response = await scheduleService.createSchedule(scheduleData);
+    if (response.success && response.data) {
+      addSchedule(response.data)
+    }
+
   };
 
-  const updateSchedule = async (id: string, scheduleData: Partial<Schedule>): Promise<Schedule> => {
-    // In a real app, this would make an API call
+  const updateSchedule = async (id: string, scheduleData: Partial<Schedule>) => {
     const schedules = await loadSchedules();
     const existingSchedule = schedules.find(schedule => schedule.id === id);
-    
+
     if (!existingSchedule) {
       throw new Error('Schedule not found');
     }
-    
+
     const updatedSchedule = { ...existingSchedule, ...scheduleData, updatedAt: new Date() };
-    return updatedSchedule;
+
+
   };
 
   const deleteSchedule = async (id: string): Promise<void> => {

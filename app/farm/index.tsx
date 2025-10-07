@@ -23,6 +23,7 @@ import tw from 'twrnc';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import { useSchedules } from '@/contexts/ScheduleContext';
+import BottomTabs from '@/components/BottomTabs';
 const { width } = Dimensions.get('window');
 const isLargePhone = width >= 428;
 
@@ -34,7 +35,7 @@ export default function FarmDataScreen() {
   
   // Use new contexts
   const { currentUser } = useAuth();
-  const { farms, loading } = useFarms();
+  const { farms, loading,setCurrentFarm } = useFarms();
   const { schedules } = useSchedules();
 
   // Animations
@@ -107,7 +108,8 @@ export default function FarmDataScreen() {
 
   const handleFarmPress = (farm: Farm) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    router.push(`/farm/farm-detail?farmId=${farm.id}`);
+    setCurrentFarm(farm)
+    router.push(`/farm/farm-detail`);
   };
 
   const getHealthStatusColor = (status: FarmStatus) => {
@@ -201,13 +203,11 @@ export default function FarmDataScreen() {
           onRefresh={handleRefresh}
           renderItem={({ item: farm, index }) => {
             const healthColor = getHealthStatusColor(farm.healthStatus);
-            const totalLivestock = farm.livestock.total;
-            const healthPercentage = totalLivestock > 0 ? Math.round((farm.livestock.healthy / totalLivestock) * 100) : 0;
 
             return (
               <Animated.View
                 style={[
-                  tw`mb-4 mx-4`,
+                  tw`mb-2 mx-4`,
                   {
                     opacity: cardAnim,
                     transform: [
@@ -222,98 +222,45 @@ export default function FarmDataScreen() {
                 ]}
               >
                 <TouchableOpacity
-                  style={tw`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden`}
+                  style={tw`bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex-row items-center`}
                   onPress={() => handleFarmPress(farm)}
                   activeOpacity={0.7}
                 >
-                  {/* Farm Header */}
-                  <View style={tw`p-4 border-b border-gray-100`}>
-                    <View style={tw`flex-row justify-between items-start mb-2`}>
-                      <View style={tw`flex-1`}>
-                        <Text style={tw`text-xl font-bold text-gray-900`}>{farm.name}</Text>
-                        <Text style={tw`text-gray-600 text-sm mt-1`}>{farm.location.latitude}, {farm.location.longitude}</Text>
-                      </View>
-                      <View style={tw`${healthColor.bg} ${healthColor.border} border px-3 py-1 rounded-full`}>
+                  {/* Farm Icon */}
+                  <View style={tw`w-12 h-12 rounded-full bg-green-100 items-center justify-center mr-4`}>
+                    <Ionicons name="home" size={20} color="#10B981" />
+                  </View>
+
+                  {/* Farm Info */}
+                  <View style={tw`flex-1`}>
+                    <View style={tw`flex-row items-center justify-between mb-1`}>
+                      <Text style={tw`text-lg font-semibold text-gray-900`}>{farm.name}</Text>
+                      <View style={tw`${healthColor.bg} ${healthColor.border} border px-2 py-1 rounded-full`}>
                         <Text style={tw`${healthColor.text} text-xs font-medium`}>{farm.healthStatus}</Text>
                       </View>
                     </View>
-                    <View style={tw`flex-row items-center`}>
-                      <Ionicons name="person-outline" size={16} color="#6B7280" />
-                      <Text style={tw`text-gray-600 text-sm ml-1`}>Owner: {farm.owner.name}</Text>
-                    </View>
-                  </View>
 
-                  {/* Farm Stats */}
-                  <View style={tw`p-4`}>
-                    <View style={tw`flex-row justify-between mb-3`}>
-                      <View style={tw`items-center flex-1`}>
-                        <Text style={tw`text-2xl font-bold text-gray-900`}>{totalLivestock}</Text>
-                        <Text style={tw`text-gray-500 text-xs`}>Total Birds</Text>
-                      </View>
-                      <View style={tw`items-center flex-1`}>
-                        <Text style={tw`text-2xl font-bold text-green-600`}>{farm.livestock.healthy}</Text>
-                        <Text style={tw`text-gray-500 text-xs`}>Healthy</Text>
-                      </View>
-                      <View style={tw`items-center flex-1`}>
-                        <Text style={tw`text-2xl font-bold text-yellow-600`}>{farm.livestock.atRisk}</Text>
-                        <Text style={tw`text-gray-500 text-xs`}>At Risk</Text>
-                      </View>
-                      <View style={tw`items-center flex-1`}>
-                        <Text style={tw`text-2xl font-bold text-red-600`}>{farm.livestock.sick}</Text>
-                        <Text style={tw`text-gray-500 text-xs`}>Sick</Text>
-                      </View>
+                    <View style={tw`flex-row items-center justify-between`}>
+                      <Text style={tw`text-gray-600 text-sm`}>{farm.owner.name}</Text>
+                      <Text style={tw`text-gray-600 text-sm`}>
+                        {farm.livestock.total} birds
+                      </Text>
                     </View>
 
-                    {/* Health Progress Bar */}
-                    <View style={tw`mt-3`}>
-                      <View style={tw`flex-row justify-between items-center mb-2`}>
-                        <Text style={tw`text-gray-700 font-medium text-sm`}>Overall Health</Text>
-                        <Text style={tw`text-gray-600 text-sm`}>{healthPercentage}%</Text>
-                      </View>
-                      <View style={tw`h-2 bg-gray-200 rounded-full overflow-hidden`}>
-                        <View 
-                          style={[
-                            tw`h-full rounded-full`,
-                            { 
-                              width: `${healthPercentage}%`,
-                              backgroundColor: healthPercentage >= 80 ? '#10B981' : healthPercentage >= 60 ? '#F59E0B' : '#EF4444'
-                            }
-                          ]} 
-                        />
-                      </View>
-                    </View>
+                    <Text style={tw`text-gray-500 text-xs mt-1`}>
+                      {farm.location.latitude.toFixed(4)}, {farm.location.longitude.toFixed(4)}
+                    </Text>
                   </View>
 
-                  {/* Action Row */}
-                  <View style={tw`flex-row border-t border-gray-100`}>
-                    <TouchableOpacity 
-                      style={tw`flex-1 p-3 items-center border-r border-gray-100`}
-                      onPress={() => router.push('/communication/messages')}
-                    >
-                      <Ionicons name="chatbubble-outline" size={20} color="#3B82F6" />
-                      <Text style={tw`text-blue-600 text-xs mt-1`}>Message</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={tw`flex-1 p-3 items-center border-r border-gray-100`}
-                      onPress={() => router.push('/communication/schedule-request')}
-                    >
-                      <Ionicons name="calendar-outline" size={20} color="#059669" />
-                      <Text style={tw`text-green-600 text-xs mt-1`}>Schedule</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={tw`flex-1 p-3 items-center`}
-                      onPress={() => handleFarmPress(farm)}
-                    >
-                      <Ionicons name="eye-outline" size={20} color="#6B7280" />
-                      <Text style={tw`text-gray-600 text-xs mt-1`}>View</Text>
-                    </TouchableOpacity>
-                  </View>
+                  {/* Arrow */}
+                  <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
                 </TouchableOpacity>
               </Animated.View>
             );
           }}
         />
       </Animated.View>
+      <BottomTabs />
       
       <CustomDrawer
         isVisible={isDrawerVisible}

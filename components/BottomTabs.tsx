@@ -5,7 +5,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import tw from 'twrnc';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,10 +46,10 @@ const tabItems: TabItem[] = [
         color: '#F59E0B'
     },
     {
-        key: 'more',
-        label: 'More',
-        icon: 'menu-outline',
-        activeIcon: 'menu',
+        key: 'profile',
+        label: 'Profile',
+        icon: 'person-outline',
+        activeIcon: 'person',
         route: '/user/profile',
         color: '#8B5CF6'
     }
@@ -60,8 +60,9 @@ interface BottomTabsProps {
     style?: any;
 }
 
-export default function BottomTabs({ currentRoute, style }: BottomTabsProps) {
+export default function BottomTabs({ style }: BottomTabsProps) {
     const { currentUser } = useAuth();
+    const pathname = usePathname();
     const [activeTab, setActiveTab] = useState('home');
 
     const handleTabPress = (tab: TabItem) => {
@@ -86,7 +87,7 @@ export default function BottomTabs({ currentRoute, style }: BottomTabsProps) {
             case 'farms':
                 router.push('/farm');
                 break;
-            case 'more':
+            case 'profile':
                 router.push('/user/profile');
                 break;
             default:
@@ -95,13 +96,11 @@ export default function BottomTabs({ currentRoute, style }: BottomTabsProps) {
     };
 
     const isTabActive = (tabKey: string) => {
-        if (currentRoute) {
-            // Determine active tab based on current route
-            if (currentRoute.includes('/dashboard') || currentRoute === '/') return tabKey === 'home';
-            if (currentRoute.includes('/communication/messages') || currentRoute.includes('/user/directory')) return tabKey === 'chat';
-            if (currentRoute.includes('/farm/')) return tabKey === 'farms';
-            if (currentRoute.includes('/user/profile') || currentRoute.includes('/settings/')) return tabKey === 'more';
-        }
+        // Determine active tab based on current pathname
+        if (pathname.includes('/dashboard') || pathname === '/') return tabKey === 'home';
+        if (pathname.includes('/communication/messages') || pathname.includes('/user/directory') || pathname === '/chat') return tabKey === 'chat';
+        if (pathname.includes('/farm/') || pathname === '/farm') return tabKey === 'farms';
+        if (pathname.includes('/user/profile') || pathname.includes('/settings/')) return tabKey === 'more';
         return activeTab === tabKey;
     };
 
@@ -148,3 +147,19 @@ export function useBottomTabs() {
         tabHeight: 85, // Height to add padding to screen content
     };
 }
+
+// Additional Expo Router hooks you can use for route detection:
+// import { usePathname, useSegments, useRouter } from 'expo-router';
+//
+// const pathname = usePathname(); // Current path like '/farm/index' or '/chat'
+// const segments = useSegments(); // Array of route segments like ['farm', 'index']
+// const router = useRouter(); // Router object with methods like push(), back(), etc.
+//
+// Example usage:
+// const currentTab = useMemo(() => {
+//   if (pathname.startsWith('/farm')) return 'farms';
+//   if (pathname.startsWith('/chat')) return 'chat';
+//   if (pathname.startsWith('/dashboard') || pathname === '/') return 'home';
+//   if (pathname.startsWith('/user') || pathname.startsWith('/settings')) return 'more';
+//   return 'home';
+// }, [pathname]);

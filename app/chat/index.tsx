@@ -156,7 +156,7 @@ export default function ChatScreen() {
                         colors={['#3B82F6', '#2563EB']}
                         style={tw`p-8 shadow-xl`}
                     >
-                        <View style={tw`flex-row items-center justify-between mb-6`}>
+                        <View style={tw`flex-row items-center justify-between `}>
                             <TouchableOpacity
                                 style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
                                 onPress={() => router.back()}
@@ -168,41 +168,12 @@ export default function ChatScreen() {
 
                             <DrawerButton />
                         </View>
-
-                        {/* Stats */}
-                        <View style={tw`bg-white bg-opacity-15 rounded-2xl p-6`}>
-                            <Text style={tw`text-white font-bold text-lg mb-4`}>Community Chat</Text>
-                            <View style={tw`flex-row justify-between`}>
-                                <View style={tw`items-center flex-1`}>
-                                    <Text style={tw`text-white text-3xl font-bold`}>
-                                        {users.filter(u => getOnlineStatus(u.id)).length}
-                                    </Text>
-                                    <Text style={tw`text-blue-100 text-xs font-medium`}>Online</Text>
-                                </View>
-                                <View style={tw`items-center flex-1`}>
-                                    <Text style={tw`text-white text-3xl font-bold`}>
-                                        {messages.length}
-                                    </Text>
-                                    <Text style={tw`text-blue-100 text-xs font-medium`}>Messages</Text>
-                                </View>
-                                <View style={tw`items-center flex-1`}>
-                                    <Text style={tw`text-white text-3xl font-bold`}>
-                                        {users.filter(u => u.role === UserRole.VETERINARY).length}
-                                    </Text>
-                                    <Text style={tw`text-blue-100 text-xs font-medium`}>Vets</Text>
-                                </View>
-                                <View style={tw`items-center flex-1`}>
-                                    <Text style={tw`text-white text-3xl font-bold`}>{users.length}</Text>
-                                    <Text style={tw`text-blue-100 text-xs font-medium`}>Total</Text>
-                                </View>
-                            </View>
-                        </View>
                     </LinearGradient>
                 </Animated.View>
 
                 <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
                     {/* Search Bar */}
-                    <View style={tw`flex-row items-center bg-white rounded-2xl p-3 mb-4 shadow-sm border border-gray-200`}>
+                    <View style={tw`flex-row items-center bg-white rounded-3xl px-4 py-1 mb-4 shadow-sm border border-gray-200`}>
                         <Ionicons name="search-outline" size={20} color="#6B7280" style={tw`mr-2`} />
                         <TextInput
                             style={tw`flex-1 text-gray-800 text-base`}
@@ -228,7 +199,7 @@ export default function ChatScreen() {
                         {tabs.map((tab) => (
                             <TouchableOpacity
                                 key={tab.key}
-                                style={tw`mr-3 px-4 py-3 rounded-2xl flex-row items-center ${selectedTab === tab.key
+                                style={tw`mr-3 px-4 py-2 rounded-2xl flex-row items-center ${selectedTab === tab.key
                                     ? 'bg-blue-500'
                                     : 'bg-white border border-gray-200'
                                     }`}

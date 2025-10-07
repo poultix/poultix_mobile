@@ -1,22 +1,33 @@
+import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View, Modal, Alert, TextInput } from 'react-native';
+import React, { useState } from 'react';
 
 
 
 export default function FarmDetailScreen() {
-    const { loading, currentFarm } = useFarms();
+    const { currentUser } = useAuth();
+    const { loading, currentFarm, updateFarm } = useFarms();
+
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [editFormData, setEditFormData] = useState({
+        name: '',
+        totalChickens: '',
+        healthyChickens: '',
+        sickChickens: '',
+        atRiskChickens: '',
+    });
 
     const getHealthStatusClasses = (status: string) => {
         switch (status) {
-            case 'EXCELLENT': return { bg: 'bg-green-100', text: 'text-green-600' };
-            case 'GOOD': return { bg: 'bg-blue-100', text: 'text-blue-600' };
-            case 'FAIR': return { bg: 'bg-orange-100', text: 'text-orange-600' };
-            case 'POOR': return { bg: 'bg-red-100', text: 'text-red-600' };
-            case 'CRITICAL': return { bg: 'bg-red-100', text: 'text-red-600' };
-            default: return { bg: 'bg-gray-100', text: 'text-gray-600' };
+            case 'EXCELLENT': return { bg: 'bg-green-100', text: 'text-green-600', border: 'border-green-200' };
+            case 'GOOD': return { bg: 'bg-blue-100', text: 'text-blue-600', border: 'border-blue-200' };
+            case 'FAIR': return { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-200' };
+            case 'POOR': return { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-200' };
+            case 'CRITICAL': return { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-200' };
+            default: return { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-200' };
         }
     };
 
@@ -31,131 +42,377 @@ export default function FarmDetailScreen() {
         }
     };
 
+    const isOwner = currentFarm && currentUser && currentFarm.owner.id === currentUser.id;
+
+    const openEditModal = () => {
+        if (currentFarm) {
+            setEditFormData({
+                name: currentFarm.name,
+                totalChickens: currentFarm.livestock.total.toString(),
+                healthyChickens: currentFarm.livestock.healthy.toString(),
+                sickChickens: currentFarm.livestock.sick.toString(),
+                atRiskChickens: currentFarm.livestock.atRisk.toString(),
+            });
+            setIsEditModalVisible(true);
+        }
+    };
+
+    const handleSaveEdit = async () => {
+        if (!currentFarm) return;
+
+        const total = parseInt(editFormData.totalChickens);
+        const healthy = parseInt(editFormData.healthyChickens) || 0;
+        const sick = parseInt(editFormData.sickChickens) || 0;
+        const atRisk = parseInt(editFormData.atRiskChickens) || 0;
+
+        if (healthy + sick + atRisk > total) {
+            Alert.alert('Error', 'Total chickens count does not match individual counts');
+            return;
+        }
+
+        try {
+            await updateFarm(currentFarm.id, {
+                name: editFormData.name,
+                livestock: {
+                    total,
+                    healthy,
+                    sick,
+                    atRisk,
+                }
+            });
+            setIsEditModalVisible(false);
+            Alert.alert('Success', 'Farm updated successfully!');
+        } catch (error) {
+            console.error('Error updating farm:', error);
+            Alert.alert('Error', 'Failed to update farm. Please try again.');
+        }
+    };
+
     if (loading) {
         return (
-            <View className="flex-1 bg-white">
-                <View className="flex-1 justify-center items-center">
-                    <Text className="text-gray-500">Loading farm details...</Text>
-                </View>
+            <View className="flex-1 bg-gray-50 justify-center items-center">
+                <Text className="text-gray-500 text-lg">Loading farm details...</Text>
             </View>
         );
     }
 
     if (!currentFarm) {
         return (
-            <View className="flex-1 bg-white">
-                <View className="flex-1 justify-center items-center">
-                    <Text className="text-gray-500">Farm not found</Text>
-                </View>
+            <View className="flex-1 bg-gray-50 justify-center items-center">
+                <Ionicons name="leaf-outline" size={64} color="#D1D5DB" />
+                <Text className="text-xl font-bold text-gray-800 mt-4">Farm Not Found</Text>
+                <Text className="text-gray-600 text-center mt-2 px-8">
+                    The farm you&apos;re looking for doesn&apos;t exist or has been removed.
+                </Text>
+                <TouchableOpacity
+                    className="bg-blue-500 px-8 py-4 rounded-xl mt-6 flex-row items-center"
+                    onPress={() => router.back()}
+                >
+                    <Ionicons name="arrow-back" size={20} color="white" />
+                    <Text className="text-white font-semibold ml-2">Go Back</Text>
+                </TouchableOpacity>
             </View>
         );
     }
 
     const healthClasses = getHealthStatusClasses(currentFarm.healthStatus);
+    const healthPercentage = currentFarm.livestock.total > 0 
+        ? Math.round((currentFarm.livestock.healthy / currentFarm.livestock.total) * 100) 
+        : 0;
 
 
     return (
         <View className="flex-1 bg-gray-50">
             {/* Header */}
-            <View className="flex-row items-center px-4 py-10 bg-amber-500 shadow-sm">
-                <TouchableOpacity onPress={() => router.back()} className="mr-3">
-                    <Ionicons name="chevron-back" size={24} color="white" />
-                </TouchableOpacity>
-                <Text className="text-xl font-semibold text-white flex-1">Farm Details</Text>
-                <TouchableOpacity onPress={() => router.push('/communication/messages')}>
-                    <Ionicons name="chatbubble-outline" size={24} color="white" />
-                </TouchableOpacity>
+            <View className="bg-amber-500 px-6 py-12 shadow-lg">
+                <View className="flex-row items-center justify-between">
+                    <TouchableOpacity
+                        className="bg-white/20 p-3 rounded-2xl"
+                        onPress={() => router.back()}
+                    >
+                        <Ionicons name="arrow-back" size={24} color="white" />
+                    </TouchableOpacity>
+                    <View className="flex-1 ml-4">
+                        <Text className="text-white font-medium text-sm">My Farm</Text>
+                        <Text className="text-white text-2xl font-bold">{currentFarm.name}</Text>
+                        <Text className="text-green-100 text-sm"> 
+                            {isOwner ? 'Owner Dashboard' : 'Farm Details'}
+                        </Text>
+                    </View>
+                    {isOwner && (
+                        <TouchableOpacity
+                            className="bg-white/20 p-3 rounded-2xl"
+                            onPress={openEditModal}
+                        >
+                            <Ionicons name="pencil" size={24} color="white" />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
 
-            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-                <View className="p-4">
+            <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+                {/* Health Overview */}
+                <View className="bg-white rounded-2xl p-5 shadow-sm -mt-6 mb-6">
+                    <Text className="text-lg font-bold text-gray-800 mb-4">Health Overview</Text>
 
-                    {/* Farm Basic Info */}
-                    <View className="bg-white rounded-xl shadow p-4 mb-6">
-                        <View className="flex-row items-center mb-3">
-                            <Ionicons name="leaf" size={24} color="#10B981" />
-                            <Text className="ml-2 text-lg font-semibold text-gray-900">{currentFarm.name}</Text>
-                        </View>
-                        <Text className="text-gray-500 mb-2">📍 {currentFarm.location.latitude}, {currentFarm.location.longitude}</Text>
-                        <View className="flex-row items-center">
-                            <Text className="text-gray-500">Status:</Text>
-                            <View className={`ml-2 px-2 py-1 rounded ${healthClasses.bg}`}>
-                                <Text className={`text-xs font-semibold ${healthClasses.text}`}>
-                                    {getHealthStatusText(currentFarm.healthStatus)}
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    {/* Owner Info */}
-                    <View className="bg-white rounded-xl shadow p-4 mb-6">
-                        <Text className="text-lg font-semibold text-gray-900 mb-3">Owner Information</Text>
-                        <Text className="text-gray-800 font-medium mb-1">{currentFarm.owner.name}</Text>
-                        <Text className="text-gray-500 mb-1">📞 N/A</Text>
-                        <Text className="text-gray-500">✉️ {currentFarm.owner.email}</Text>
-                    </View>
-
-                    {/* Chicken Stats */}
-                    <View className="bg-white rounded-xl shadow p-4 mb-6">
-                        <Text className="text-lg font-semibold text-gray-900 mb-3">Chicken Health Statistics</Text>
-                        <View className="flex-row flex-wrap gap-2">
-                            <View className="flex-1 min-w-[45%] bg-blue-50 rounded-lg p-3">
-                                <Text className="text-xl font-bold text-blue-600">{currentFarm.livestock.total.toLocaleString()}</Text>
-                                <Text className="text-gray-500 text-sm">Total Chickens</Text>
-                            </View>
-                            <View className="flex-1 min-w-[45%] bg-green-50 rounded-lg p-3">
-                                <Text className="text-xl font-bold text-green-600">{currentFarm.livestock.healthy.toLocaleString()}</Text>
-                                <Text className="text-gray-500 text-sm">Healthy</Text>
-                            </View>
-                            <View className="flex-1 min-w-[45%] bg-orange-50 rounded-lg p-3">
-                                <Text className="text-xl font-bold text-orange-600">{currentFarm.livestock.atRisk.toLocaleString()}</Text>
-                                <Text className="text-gray-500 text-sm">At Risk</Text>
-                            </View>
-                            <View className="flex-1 min-w-[45%] bg-red-50 rounded-lg p-3">
-                                <Text className="text-xl font-bold text-red-600">{currentFarm.livestock.sick.toLocaleString()}</Text>
-                                <Text className="text-gray-500 text-sm">Sick</Text>
-                            </View>
+                    <View className="flex-row items-center justify-center mb-4">
+                        <View className="relative w-32 h-32 rounded-full border-8 border-gray-200 items-center justify-center">
+                            <View
+                                className="absolute -top-2 -left-2 w-32 h-32 rounded-full border-8 border-green-500"
+                                style={{
+                                    borderTopColor: 'transparent',
+                                    borderRightColor: 'transparent',
+                                    transform: [{ rotate: `${healthPercentage * 3.6}deg` }]
+                                }}
+                            />
+                            <Text className="text-2xl font-bold text-gray-800">
+                                {healthPercentage}%
+                            </Text>
+                            <Text className="text-gray-600 text-sm">Healthy</Text>
                         </View>
                     </View>
 
-                    {/* Farm Info */}
-                    <View className="bg-white rounded-xl shadow p-4 mb-6">
-                        <Text className="text-lg font-semibold text-gray-900 mb-3">Farm Information</Text>
-                        <Text className="text-gray-500 mb-1">Size: {currentFarm.size} hectares</Text>
-                        <Text className="text-gray-500 mb-1">Coops: {currentFarm.facilities.coops}</Text>
-                        <Text className="text-gray-500 mb-1">Established: {new Date(currentFarm.establishedDate).toLocaleDateString()}</Text>
-                        {currentFarm.lastInspection && (
-                            <Text className="text-gray-500 mb-1">Last Inspection: {new Date(currentFarm.lastInspection).toLocaleDateString()}</Text>
-                        )}
-                        <Text className="text-gray-500">Status: {currentFarm.isActive ? 'Active' : 'Inactive'}</Text>
+                    <View className="flex-row justify-between mb-4">
+                        <View className="items-center flex-1">
+                            <View className="w-4 h-4 rounded-full bg-green-500 mb-1" />
+                            <Text className="text-gray-800 font-semibold">{currentFarm.livestock.healthy}</Text>
+                            <Text className="text-gray-600 text-xs">Healthy</Text>
+                        </View>
+                        <View className="items-center flex-1">
+                            <View className="w-4 h-4 rounded-full bg-yellow-500 mb-1" />
+                            <Text className="text-gray-800 font-semibold">{currentFarm.livestock.atRisk}</Text>
+                            <Text className="text-gray-600 text-xs">At Risk</Text>
+                        </View>
+                        <View className="items-center flex-1">
+                            <View className="w-4 h-4 rounded-full bg-red-500 mb-1" />
+                            <Text className="text-gray-800 font-semibold">{currentFarm.livestock.sick}</Text>
+                            <Text className="text-gray-600 text-xs">Sick</Text>
+                        </View>
                     </View>
 
-                    {/* Notes */}
-                    <View className="bg-white rounded-xl shadow p-4 mb-6">
-                        <Text className="text-lg font-semibold text-gray-900 mb-3">Farm Information</Text>
-                        <Text className="text-gray-600 leading-6">Breeds: {currentFarm.livestock.breeds.join(', ')}</Text>
-                        {currentFarm.certifications.length > 0 && (
-                            <Text className="text-gray-600 leading-6 mt-2">Certifications: {currentFarm.certifications.join(', ')}</Text>
-                        )}
+                    <View className={`px-4 py-3 rounded-xl border ${healthClasses.bg} ${healthClasses.border}`}>
+                        <Text className={`text-center font-semibold ${healthClasses.text}`}>
+                            Farm Health Status: {getHealthStatusText(currentFarm.healthStatus)}
+                        </Text>
+                    </View>
+                </View>
+
+                {/* Quick Stats */}
+                <View className="flex-row flex-wrap gap-3 mb-6">
+                    <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]">
+                        <View className="flex-row items-center justify-between mb-2">
+                            <Ionicons name="analytics-outline" size={24} color="#3B82F6" />
+                            <Text className="text-2xl font-bold text-gray-800">{currentFarm.livestock.total.toLocaleString()}</Text>
+                        </View>
+                        <Text className="text-gray-600 font-medium">Total Chickens</Text>
+                        <Text className="text-xs text-gray-500 mt-1">
+                            {currentFarm.size} hectares land
+                        </Text>
                     </View>
 
-                    {/* Actions */}
-                    <View className="flex-row gap-3 mb-8">
+                    <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]">
+                        <View className="flex-row items-center justify-between mb-2">
+                            <Ionicons name="home-outline" size={24} color="#10B981" />
+                            <Text className="text-2xl font-bold text-gray-800">{currentFarm.facilities.coops}</Text>
+                        </View>
+                        <Text className="text-gray-600 font-medium">Coops</Text>
+                        <Text className="text-xs text-gray-500 mt-1">
+                            {currentFarm.facilities.feedStorage ? 'Feed storage available' : 'No feed storage'}
+                        </Text>
+                    </View>
+
+                    <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]">
+                        <View className="flex-row items-center justify-between mb-2">
+                            <Ionicons name="calendar-outline" size={24} color="#F59E0B" />
+                            <Text className="text-2xl font-bold text-gray-800">
+                                {currentFarm.lastInspection ? new Date(currentFarm.lastInspection).toLocaleDateString() : 'Never'}
+                            </Text>
+                        </View>
+                        <Text className="text-gray-600 font-medium">Last Inspection</Text>
+                        <Text className="text-xs text-gray-500 mt-1">
+                            {currentFarm.isActive ? 'Active farm' : 'Inactive farm'}
+                        </Text>
+                    </View>
+
+                    <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]">
+                        <View className="flex-row items-center justify-between mb-2">
+                            <Ionicons name="location-outline" size={24} color="#8B5CF6" />
+                            <Text className="text-2xl font-bold text-gray-800">
+                                {currentFarm.location.latitude.toFixed(2)}
+                            </Text>
+                        </View>
+                        <Text className="text-gray-600 font-medium">Latitude</Text>
+                        <Text className="text-xs text-gray-500 mt-1">
+                            {currentFarm.location.longitude.toFixed(2)} lng
+                        </Text>
+                    </View>
+                </View>
+
+                {/* Quick Actions */}
+                <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+                    <Text className="text-lg font-bold text-gray-800 mb-4">Quick Actions</Text>
+                    <View className="flex-row flex-wrap gap-3">
                         <TouchableOpacity
-                            className="flex-1 bg-blue-500 py-3 rounded-lg items-center shadow"
+                            className="flex-1 bg-blue-50 border border-blue-200 rounded-xl p-4 min-w-[45%] items-center"
                             onPress={() => router.push('/communication/schedule-request')}
                         >
-                            <Text className="text-white font-semibold">Schedule Visit</Text>
+                            <Ionicons name="calendar-outline" size={24} color="#3B82F6" />
+                            <Text className="text-blue-500 font-semibold mt-2">Request Visit</Text>
                         </TouchableOpacity>
+
                         <TouchableOpacity
-                            className="flex-1 bg-green-500 py-3 rounded-lg items-center shadow"
+                            className="flex-1 bg-green-50 border border-green-200 rounded-xl p-4 min-w-[45%] items-center"
                             onPress={() => router.push('/communication/messages')}
                         >
-                            <Text className="text-white font-semibold">Message Owner</Text>
+                            <Ionicons name="chatbubble-outline" size={24} color="#10B981" />
+                            <Text className="text-green-500 font-semibold mt-2">Messages</Text>
                         </TouchableOpacity>
+
+                        <TouchableOpacity
+                            className="flex-1 bg-purple-50 border border-purple-200 rounded-xl p-4 min-w-[45%] items-center"
+                            onPress={() => router.push('/farm/farm-reports')}
+                        >
+                            <Ionicons name="document-text-outline" size={24} color="#8B5CF6" />
+                            <Text className="text-purple-500 font-semibold mt-2">Reports</Text>
+                        </TouchableOpacity>
+
+                        {isOwner && (
+                            <TouchableOpacity
+                                className="flex-1 bg-orange-50 border border-orange-200 rounded-xl p-4 min-w-[45%] items-center"
+                                onPress={() => {/* TODO: Add edit farm functionality */}}
+                            >
+                                <Ionicons name="settings-outline" size={24} color="#F59E0B" />
+                                <Text className="text-orange-500 font-semibold mt-2">Settings</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </View>
+
+                {/* Farm Details */}
+                <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+                    <Text className="text-lg font-bold text-gray-800 mb-4">Farm Details</Text>
+                    <View className="space-y-3">
+                        <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
+                            <Text className="text-gray-600">Owner</Text>
+                            <Text className="font-semibold text-gray-800">{currentFarm.owner.name}</Text>
+                        </View>
+                        <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
+                            <Text className="text-gray-600">Established</Text>
+                            <Text className="font-semibold text-gray-800">{new Date(currentFarm.establishedDate).toLocaleDateString()}</Text>
+                        </View>
+                        <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
+                            <Text className="text-gray-600">Water System</Text>
+                            <Text className="font-semibold text-gray-800">{currentFarm.facilities.waterSystem}</Text>
+                        </View>
+                        <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
+                            <Text className="text-gray-600">Electricity</Text>
+                            <Text className="font-semibold text-gray-800">{currentFarm.facilities.electricityAccess ? 'Available' : 'Not Available'}</Text>
+                        </View>
+                        <View className="flex-row justify-between items-center py-2">
+                            <Text className="text-gray-600">Certifications</Text>
+                            <Text className="font-semibold text-gray-800">{currentFarm.certifications.length > 0 ? currentFarm.certifications.join(', ') : 'None'}</Text>
+                        </View>
                     </View>
                 </View>
             </ScrollView>
+
+            {/* Edit Farm Modal */}
+            <Modal
+            className='h-full bg-white'
+                visible={isEditModalVisible}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setIsEditModalVisible(false)}
+            >
+                <View className="flex-1 bg-gray-50">
+                    {/* Modal Header */}
+                    <View className="bg-amber-500 px-6 py-12 shadow-lg">
+                        <View className="flex-row items-center justify-between">
+                            <TouchableOpacity
+                                className="bg-white/20 p-3 rounded-2xl"
+                                onPress={() => setIsEditModalVisible(false)}
+                            >
+                                <Ionicons name="close" size={24} color="white" />
+                            </TouchableOpacity>
+                            <View className="flex-1 ml-4">
+                                <Text className="text-white font-medium text-sm">Edit Farm</Text>
+                                <Text className="text-white text-2xl font-bold">Update Details</Text>
+                            </View>
+                            <TouchableOpacity
+                                className="bg-white/20 p-3 rounded-2xl"
+                                onPress={handleSaveEdit}
+                            >
+                                <Ionicons name="checkmark" size={24} color="white" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+                        {/* Edit Form */}
+                        <View className="bg-white rounded-2xl p-5 shadow-sm mt-6 mb-6">
+                            <Text className="text-lg font-bold text-gray-800 mb-4">Farm Information</Text>
+
+                            <View className="mb-4">
+                                <Text className="text-gray-700 font-medium mb-2">Farm Name</Text>
+                                <TextInput
+                                    className="bg-gray-50 rounded-xl px-4 py-3 text-gray-800"
+                                    placeholder="Enter farm name"
+                                    value={editFormData.name}
+                                    onChangeText={(text) => setEditFormData(prev => ({ ...prev, name: text }))}
+                                />
+                            </View>
+                        </View>
+
+                        <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+                            <Text className="text-lg font-bold text-gray-800 mb-4">Livestock Information</Text>
+
+                            <View className="mb-4">
+                                <Text className="text-gray-700 font-medium mb-2">Total Chickens</Text>
+                                <TextInput
+                                    className="bg-gray-50 rounded-xl px-4 py-3 text-gray-800"
+                                    placeholder="Total number of chickens"
+                                    value={editFormData.totalChickens}
+                                    onChangeText={(text) => setEditFormData(prev => ({ ...prev, totalChickens: text }))}
+                                    keyboardType="numeric"
+                                />
+                            </View>
+
+                            <View className="flex-row gap-3">
+                                <View className="flex-1">
+                                    <Text className="text-gray-700 font-medium mb-2">Healthy</Text>
+                                    <TextInput
+                                        className="bg-gray-50 rounded-xl px-4 py-3 text-gray-800"
+                                        placeholder="0"
+                                        value={editFormData.healthyChickens}
+                                        onChangeText={(text) => setEditFormData(prev => ({ ...prev, healthyChickens: text }))}
+                                        keyboardType="numeric"
+                                    />
+                                </View>
+                                <View className="flex-1">
+                                    <Text className="text-gray-700 font-medium mb-2">At Risk</Text>
+                                    <TextInput
+                                        className="bg-gray-50 rounded-xl px-4 py-3 text-gray-800"
+                                        placeholder="0"
+                                        value={editFormData.atRiskChickens}
+                                        onChangeText={(text) => setEditFormData(prev => ({ ...prev, atRiskChickens: text }))}
+                                        keyboardType="numeric"
+                                    />
+                                </View>
+                                <View className="flex-1">
+                                    <Text className="text-gray-700 font-medium mb-2">Sick</Text>
+                                    <TextInput
+                                        className="bg-gray-50 rounded-xl px-4 py-3 text-gray-800"
+                                        placeholder="0"
+                                        value={editFormData.sickChickens}
+                                        onChangeText={(text) => setEditFormData(prev => ({ ...prev, sickChickens: text }))}
+                                        keyboardType="numeric"
+                                    />
+                                </View>
+                            </View>
+                        </View>
+                    </ScrollView>
+                </View>
+            </Modal>
         </View>
     );
 }

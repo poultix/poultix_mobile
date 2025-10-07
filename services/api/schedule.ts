@@ -6,8 +6,8 @@ import { API_ENDPOINTS } from '@/services/constants';
 
 export class ScheduleService {
     // Create Schedule
-    async createSchedule(createdBy: string, scheduleData: ScheduleCreateRequest): Promise<ApiResponse<Schedule>> {
-        return await apiClient.post<Schedule>(API_ENDPOINTS.SCHEDULES.CREATE(createdBy), scheduleData);
+    async createSchedule(scheduleData: ScheduleCreateRequest): Promise<ApiResponse<Schedule>> {
+        return await apiClient.post<Schedule>(API_ENDPOINTS.SCHEDULES.CREATE, scheduleData);
     }
 
     // Get Schedule by ID

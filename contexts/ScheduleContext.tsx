@@ -11,7 +11,7 @@ interface ScheduleContextType {
   error: string | null;
 
   // API operations
-  createSchedule: (createdBy: string, scheduleData: ScheduleCreateRequest) => Promise<void>;
+  addSchedule: (scheduleData: Schedule) => void;
   getScheduleById: (id: string) => Promise<Schedule | null>;
   getSchedulesByFarmer: (farmerId: string) => Promise<Schedule[]>;
   getSchedulesByVeterinary: (veterinaryId: string) => Promise<Schedule[]>;
@@ -44,6 +44,7 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
       loadSchedules().catch(handleApiError);
     }
   }, [authenticated]);
+
   const loadSchedules = async () => {
     try {
       setLoading(true);
@@ -70,32 +71,11 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
+  const addSchedule = (scheduleData: Schedule) => {
 
-  const createSchedule = async (createdBy: string, scheduleData: ScheduleCreateRequest): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
 
-      const response = await scheduleService.createSchedule(createdBy, scheduleData);
+    setSchedules(prev => [...prev, scheduleData]);
 
-      if (response.success && response.data) {
-        setSchedules(prev => [...prev, response.data!]);
-      } else {
-        throw new Error(response.message || 'Failed to create schedule');
-      }
-    } catch (error: any) {
-      console.error('Failed to create schedule:', error);
-
-      // ✅ Check if it's a network/server error that needs routing
-      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
-        handleApiError(error); // ✅ Auto-route to appropriate error screen
-      } else {
-        setError(error.message || 'Failed to create schedule'); // ✅ Show inline error for minor issues
-      }
-      throw error;
-    } finally {
-      setLoading(false);
-    }
   };
 
   const getScheduleById = async (id: string): Promise<Schedule | null> => {
@@ -314,7 +294,7 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
     currentSchedule,
     loading,
     error,
-    createSchedule,
+    addSchedule,
     getScheduleById,
     getSchedulesByFarmer,
     getSchedulesByVeterinary,

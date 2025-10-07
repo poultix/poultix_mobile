@@ -2,6 +2,8 @@ import CustomDrawer from '@/components/CustomDrawer';
 import DrawerButton from '@/components/DrawerButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDrawer } from '@/contexts/DrawerContext';
+import { useFarms } from '@/contexts/FarmContext';
+import { User } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -17,85 +19,35 @@ import {
     View,
 } from 'react-native';
 import tw from 'twrnc';
- ;
-
-interface Veterinary {
-    id: string;
-    name: string;
-    location: string;
-    specialization: string;
-    experience: string;
-    rating: number;
-    phone: string;
-    email: string;
-    isAvailable: boolean;
-    nextAvailableSlot: string;
-}
-
-const mockVets: Veterinary[] = [
-    {
-        id: 'vet_001',
-        name: 'Dr. Patricia Uwimana',
-        location: 'Byose, Muhanga District',
-        specialization: 'Poultry Health & Disease Prevention',
-        experience: '8 years',
-        rating: 4.8,
-        phone: '+250 788 123 456',
-        email: 'dr.patricia@example.com',
-        isAvailable: true,
-        nextAvailableSlot: 'Today 2:00 PM'
-    },
-    {
-        id: 'vet_002',
-        name: 'Dr. Mutesi Hadidja',
-        location: 'Muhanga Center',
-        specialization: 'Livestock Vaccination & Treatment',
-        experience: '6 years',
-        rating: 4.6,
-        phone: '+250 788 234 567',
-        email: 'dr.mutesi@example.com',
-        isAvailable: true,
-        nextAvailableSlot: 'Tomorrow 9:00 AM'
-    },
-    {
-        id: 'vet_003',
-        name: 'Dr. Teta Liana',
-        location: 'Nyamirambo, Kigali',
-        specialization: 'Animal Nutrition & Feed Management',
-        experience: '10 years',
-        rating: 4.9,
-        phone: '+250 788 345 678',
-        email: 'dr.teta@example.com',
-        isAvailable: false,
-        nextAvailableSlot: 'Monday 10:00 AM'
-    },
-    {
-        id: 'vet_004',
-        name: 'Dr. Jean Baptiste',
-        location: 'Huye District',
-        specialization: 'Emergency Care & Surgery',
-        experience: '12 years',
-        rating: 4.7,
-        phone: '+250 788 456 789',
-        email: 'dr.jean@example.com',
-        isAvailable: true,
-        nextAvailableSlot: 'Today 4:00 PM'
-    }
-];
+ 
 
 export default function VeterinaryCareScreen() {
     const { currentUser } = useAuth();
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
+    const { farms } = useFarms();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedSpecialization, setSelectedSpecialization] = useState('All');
-    const [filteredVets, setFilteredVets] = useState(mockVets);
-    const [isEmergency, setIsEmergency] = useState(false);
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const headerAnim = useRef(new Animated.Value(-50)).current;
 
     const specializations = ['All', 'Poultry Health', 'Vaccination', 'Nutrition', 'Emergency Care'];
+
+    // Get unique veterinaries from farms
+    const veterinaries = React.useMemo(() => {
+        const vetMap = new Map<string, User>();
+
+        farms.forEach(farm => {
+            if (farm.assignedVeterinary) {
+                vetMap.set(farm.assignedVeterinary.id, farm.assignedVeterinary);
+            }
+        });
+
+        return Array.from(vetMap.values());
+    }, [farms]);
+
+    const [filteredVets, setFilteredVets] = useState<User[]>(veterinaries);
 
     useEffect(() => {
         Animated.parallel([
@@ -113,33 +65,24 @@ export default function VeterinaryCareScreen() {
     }, []);
 
     useEffect(() => {
-        let filtered = mockVets;
+        let filtered = veterinaries;
 
         // Filter by search query
         if (searchQuery.trim()) {
             filtered = filtered.filter(vet =>
                 vet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                vet.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                vet.specialization.toLowerCase().includes(searchQuery.toLowerCase())
+                vet.email.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
 
-        // Filter by specialization
-        if (selectedSpecialization !== 'All') {
-            filtered = filtered.filter(vet =>
-                vet.specialization.toLowerCase().includes(selectedSpecialization.toLowerCase())
-            );
-        }
+        // For now, we'll skip specialization filtering since User type doesn't have this field
+        // In a real app, you might want to extend the User type or add metadata
 
-        // Sort by availability and rating
-        filtered.sort((a, b) => {
-            if (a.isAvailable && !b.isAvailable) return -1;
-            if (!a.isAvailable && b.isAvailable) return 1;
-            return b.rating - a.rating;
-        });
+        // Sort by name for consistency
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
 
         setFilteredVets(filtered);
-    }, [searchQuery, selectedSpecialization]);
+    }, [searchQuery, veterinaries]);
 
     const handleCallVet = (phone: string) => {
         Alert.alert(
@@ -155,41 +98,27 @@ export default function VeterinaryCareScreen() {
         );
     };
 
-    const handleBookAppointment = (vet: Veterinary) => {
-        Alert.alert(
-            'Book Appointment',
-            `Book an appointment with ${vet.name}?`,
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Book',
-                    onPress: () => {
-                        // Here you would typically navigate to a booking screen
-                        Alert.alert('Success', 'Appointment request sent! You will be contacted shortly.');
-                    }
-                }
-            ]
-        );
-    };
+    const handleBookAppointment = (vet: User) => {
+        // Check if farmer has any farms registered
+        const farmerFarms = farms.filter(farm => currentUser && farm.owner.id === currentUser.id);
 
-    const handleEmergencyCall = () => {
-        Alert.alert(
-            'Emergency Veterinary Care',
-            'This will connect you to the nearest available veterinarian for emergency care.',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Call Emergency',
-                    style: 'destructive',
-                    onPress: () => {
-                        const emergencyVet = mockVets.find(vet => vet.isAvailable);
-                        if (emergencyVet) {
-                            Linking.openURL(`tel:${emergencyVet.phone}`);
-                        }
+        if (farmerFarms.length === 0) {
+            Alert.alert(
+                'No Farms Registered',
+                'You need to register at least one farm before booking a veterinary appointment.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Add Farm',
+                        onPress: () => router.push('/farm/create')
                     }
-                }
-            ]
-        );
+                ]
+            );
+            return;
+        }
+
+        // Navigate to schedule request screen for booking
+        router.push('/communication/schedule-request');
     };
 
     const getRatingStars = (rating: number) => {
@@ -234,37 +163,6 @@ export default function VeterinaryCareScreen() {
                             <DrawerButton />
                         </View>
 
-                        {/* Emergency Button */}
-                        <TouchableOpacity
-                            style={tw`bg-red-600 rounded-2xl p-4 mb-4 flex-row items-center justify-center`}
-                            onPress={handleEmergencyCall}
-                        >
-                            <Ionicons name="call-outline" size={24} color="white" style={tw`mr-2`} />
-                            <Text style={tw`text-white font-bold text-lg`}>Emergency Call</Text>
-                        </TouchableOpacity>
-
-                        {/* Stats */}
-                        <View style={tw`bg-white bg-opacity-15 rounded-2xl p-6`}>
-                            <Text style={tw`text-white font-bold text-lg mb-4`}>Available Now</Text>
-                            <View style={tw`flex-row justify-between`}>
-                                <View style={tw`items-center flex-1`}>
-                                    <Text style={tw`text-white text-3xl font-bold`}>
-                                        {mockVets.filter(v => v.isAvailable).length}
-                                    </Text>
-                                    <Text style={tw`text-red-100 text-xs font-medium`}>Available</Text>
-                                </View>
-                                <View style={tw`items-center flex-1`}>
-                                    <Text style={tw`text-white text-3xl font-bold`}>
-                                        {mockVets.length}
-                                    </Text>
-                                    <Text style={tw`text-red-100 text-xs font-medium`}>Total Vets</Text>
-                                </View>
-                                <View style={tw`items-center flex-1`}>
-                                    <Text style={tw`text-white text-3xl font-bold`}>4.8</Text>
-                                    <Text style={tw`text-red-100 text-xs font-medium`}>Avg Rating</Text>
-                                </View>
-                            </View>
-                        </View>
                     </LinearGradient>
                 </Animated.View>
 
@@ -319,7 +217,7 @@ export default function VeterinaryCareScreen() {
                             <Text style={tw`text-gray-500 text-lg mt-4`}>No veterinarians found</Text>
                         </View>
                     ) : (
-                        filteredVets.map((vet, index) => (
+                        filteredVets.map((vet: User, index: number) => (
                             <View
                                 key={vet.id}
                                 style={tw`bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4`}
@@ -331,54 +229,53 @@ export default function VeterinaryCareScreen() {
                                             <Text style={tw`text-lg font-bold text-gray-800 mr-2`}>
                                                 {vet.name}
                                             </Text>
-                                            {vet.isAvailable && (
-                                                <View style={tw`bg-green-100 px-2 py-1 rounded-full`}>
-                                                    <Text style={tw`text-green-700 text-xs font-semibold`}>Available</Text>
-                                                </View>
-                                            )}
+                                            <View style={tw`bg-green-100 px-2 py-1 rounded-full`}>
+                                                <Text style={tw`text-green-700 text-xs font-semibold`}>Available</Text>
+                                            </View>
                                         </View>
-                                        <Text style={tw`text-gray-600 text-sm`}>{vet.specialization}</Text>
-                                        <Text style={tw`text-gray-500 text-sm`}>{vet.location}</Text>
+                                        <Text style={tw`text-gray-600 text-sm`}>{vet.email}</Text>
+                                        <Text style={tw`text-gray-500 text-sm`}>Veterinarian</Text>
                                     </View>
                                     <View style={tw`items-end`}>
                                         <View style={tw`flex-row items-center mb-1`}>
-                                            {getRatingStars(vet.rating)}
-                                            <Text style={tw`text-gray-600 text-sm ml-1`}>{vet.rating}</Text>
+                                            <Ionicons name="star" size={16} color="#F59E0B" />
+                                            <Ionicons name="star" size={16} color="#F59E0B" />
+                                            <Ionicons name="star" size={16} color="#F59E0B" />
+                                            <Ionicons name="star" size={16} color="#F59E0B" />
+                                            <Ionicons name="star-half" size={16} color="#F59E0B" />
+                                            <Text style={tw`text-gray-600 text-sm ml-1`}>4.5</Text>
                                         </View>
-                                        <Text style={tw`text-gray-500 text-xs`}>{vet.experience}</Text>
+                                        <Text style={tw`text-gray-500 text-xs`}>Licensed Vet</Text>
                                     </View>
                                 </View>
 
                                 {/* Next Available */}
                                 <View style={tw`bg-gray-50 rounded-xl p-3 mb-4`}>
                                     <Text style={tw`text-gray-600 text-sm mb-1`}>Next Available:</Text>
-                                    <Text style={tw`text-gray-800 font-semibold`}>{vet.nextAvailableSlot}</Text>
+                                    <Text style={tw`text-gray-800 font-semibold`}>Today 2:00 PM</Text>
                                 </View>
 
                                 {/* Action Buttons */}
                                 <View style={tw`flex-row justify-between`}>
                                     <TouchableOpacity
                                         style={tw`bg-blue-100 rounded-xl py-3 px-4 flex-row items-center flex-1 mr-2`}
-                                        onPress={() => handleCallVet(vet.phone)}
+                                        onPress={() => handleCallVet('')} // User doesn't have phone, would need to add
                                     >
                                         <Ionicons name="call-outline" size={18} color="#3B82F6" style={tw`mr-2`} />
                                         <Text style={tw`text-blue-600 font-semibold`}>Call</Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
-                                        style={tw`${vet.isAvailable ? 'bg-red-500' : 'bg-gray-300'
-                                            } rounded-xl py-3 px-4 flex-row items-center flex-1 ml-2`}
+                                        style={tw`bg-red-500 rounded-xl py-3 px-4 flex-row items-center flex-1 ml-2`}
                                         onPress={() => handleBookAppointment(vet)}
-                                        disabled={!vet.isAvailable}
                                     >
                                         <Ionicons
                                             name="calendar-outline"
                                             size={18}
-                                            color={vet.isAvailable ? "white" : "#6B7280"}
+                                            color="white"
                                             style={tw`mr-2`}
                                         />
-                                        <Text style={tw`${vet.isAvailable ? 'text-white' : 'text-gray-500'
-                                            } font-semibold`}>
+                                        <Text style={tw`text-white font-semibold`}>
                                             Book
                                         </Text>
                                     </TouchableOpacity>

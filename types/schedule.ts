@@ -1,3 +1,4 @@
+import { Farm } from "./farm";
 import { User } from "./user";
 
 export enum ScheduleType {
@@ -57,23 +58,21 @@ export interface Schedule {
 
 // Request types
 export interface ScheduleCreateRequest {
-    farmId: string;
-    veterinaryId: string;
-    farmerId: string;
-    type: 'INSPECTION' | 'VACCINATION' | 'TREATMENT' | 'CONSULTATION' | 'EMERGENCY';
+    farm: Farm;
+    veterinary: User;
+    type: ScheduleType;
     title: string;
-    description?: string;
-    scheduledDate: string; // ISO date string
+    description: string;
+    scheduledDate: string;
     startTime: string;
     endTime: string;
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-    notes?: string;
+    priority: SchedulePriority;
 }
 
 export interface ScheduleUpdateRequest {
     farmId?: string;
     veterinaryId?: string;
-    type?: 'INSPECTION' | 'VACCINATION' | 'TREATMENT' | 'CONSULTATION' | 'EMERGENCY';
+    type?: ScheduleType;
     title?: string;
     description?: string;
     scheduledDate?: string; // ISO date string

@@ -81,10 +81,10 @@ export default function NewsScreen() {
       
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
         {/* Header */}
-        <View style={tw`px-4 pt-2 pb-4`}>
+        <View style={tw`pb-4`}>
           <LinearGradient
             colors={['#F59E0B', '#D97706']}
-            style={tw`rounded-3xl p-6 shadow-xl`}
+            style={tw` p-6 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between`}>
               <View style={tw`flex-1`}>
