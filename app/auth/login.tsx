@@ -106,7 +106,7 @@ export default function SignInScreen() {
                     {/* Header */}
                     <View className="mb-8 -mx-7">
                         <LinearGradient
-                            colors={['#3B82F6', '#3B82F6']}
+                            colors={['#F59E0B', '#D97706']}
                             className="rounded-b-1xl p-8 shadow-xl"
                         >
                             <View className="items-center mt-4">
@@ -126,13 +126,13 @@ export default function SignInScreen() {
                         <View className="mb-6">
                             <Text className="text-gray-700 font-medium mb-2 ml-1">Email</Text>
                             <View
-                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isEmailFocused ? 'border-blue-300' : 'border-gray-200'} ${emailError ? 'border-red-500' : ''}`}
+                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isEmailFocused ? 'border-amber-400' : 'border-gray-200'} ${emailError ? 'border-red-500' : ''}`}
                             >
                                 <View className="pl-4 pr-2">
                                     <Ionicons
                                         name="mail-outline"
                                         size={22}
-                                        color={emailError ? '#EF4444' : isEmailFocused ? '#3B82F6' : '#9CA3AF'}
+                                        color={emailError ? '#EF4444' : isEmailFocused ? '#F59E0B' : '#9CA3AF'}
                                     />
                                 </View>
                                 <TextInput
@@ -157,13 +157,13 @@ export default function SignInScreen() {
                         <View className="mb-4">
                             <Text className="text-gray-700 font-medium mb-2 ml-1">Password</Text>
                             <View
-                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isPasswordFocused ? 'border-blue-300' : 'border-gray-200'} ${passwordError ? 'border-red-500' : ''}`}
+                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isPasswordFocused ? 'border-amber-400' : 'border-gray-200'} ${passwordError ? 'border-red-500' : ''}`}
                             >
                                 <View className="pl-4 pr-2">
                                     <Ionicons
                                         name="lock-closed-outline"
                                         size={22}
-                                        color={passwordError ? '#EF4444' : isPasswordFocused ? '#3B82F6' : '#9CA3AF'}
+                                        color={passwordError ? '#EF4444' : isPasswordFocused ? '#F59E0B' : '#9CA3AF'}
                                     />
                                 </View>
                                 <TextInput
@@ -185,7 +185,7 @@ export default function SignInScreen() {
                                     className="px-4"
                                     activeOpacity={0.7}
                                 >
-                                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={isPasswordFocused ? '#3B82F6' : '#9CA3AF'} />
+                                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={isPasswordFocused ? '#F59E0B' : '#9CA3AF'} />
                                 </TouchableOpacity>
                             </View>
                             {passwordError && <Text className="text-orange-600 ml-1 mt-1 text-xs">{passwordError}</Text>}
@@ -193,7 +193,7 @@ export default function SignInScreen() {
 
                         {/* Forgot Password */}
                         <TouchableOpacity onPress={() => router.push('/auth/forgot-password')} className="items-end mb-7 mt-1" activeOpacity={0.7}>
-                            <Text className="text-blue-400 font-medium">Forgot Password?</Text>
+                            <Text className="text-amber-500 font-medium">Forgot Password?</Text>
                         </TouchableOpacity>
 
                         {/* Sign In */}
@@ -205,7 +205,7 @@ export default function SignInScreen() {
                                 disabled={isLoading}
                             >
                                 <LinearGradient
-                                    colors={['#3B82F6', '#3B82F6']}
+                                    colors={['#F59E0B', '#D97706']}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 0 }}
                                     className="w-full h-full items-center justify-center"
@@ -237,7 +237,7 @@ export default function SignInScreen() {
                                 activeOpacity={0.8}
                             >
                                 <View className="flex-row items-center">
-                                    <FontAwesome name="google" size={20} color="#3B82F6" />
+                                    <FontAwesome name="google" size={20} color="#D97706" />
                                     <Text className="ml-2 font-medium text-gray-700">Google</Text>
                                 </View>
                             </TouchableOpacity>
@@ -253,19 +253,12 @@ export default function SignInScreen() {
                         </View>
                     </Animated.View>
 
-                    {/* Demo Info */}
-                    <View className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                        <Text className="text-blue-800 text-sm font-medium mb-2 text-center">📋 Demo Credentials</Text>
-                        <Text className="text-blue-700 text-xs text-center mb-1">Admin: admin@poultix.rw / admin123</Text>
-                        <Text className="text-blue-700 text-xs text-center mb-1">Farmer: john@gmail.com / farmer123</Text>
-                        <Text className="text-blue-700 text-xs text-center">Vet: dr.patricia@vetcare.rw / vet123</Text>
-                    </View>
 
                     {/* Sign Up */}
                     <View className="flex-row justify-center mt-auto mb-6 pt-8">
                         <Text className="text-gray-500 text-base">Don't have an account? </Text>
                         <TouchableOpacity onPress={() => router.push('/auth/register')} activeOpacity={0.7}>
-                            <Text className="text-blue-500 font-semibold text-base">Sign Up</Text>
+                            <Text className="text-amber-500 font-semibold text-base">Sign Up</Text>
                         </TouchableOpacity>
                     </View>
                 </Animated.View>
