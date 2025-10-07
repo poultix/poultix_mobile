@@ -14,7 +14,6 @@ interface FarmContextType {
   error: string | null;
 
   // CRUD operations
-  createFarm: (ownerId: string, farmData: FarmCreateRequest) => Promise<void>;
   getFarmById: (id: string) => Promise<Farm | null>;
   getFarmsByOwner: (ownerId: string) => Promise<Farm[]>;
   getFarmsByVeterinary: (veterinaryId: string) => Promise<Farm[]>;
@@ -25,6 +24,7 @@ interface FarmContextType {
   deleteFarm: (id: string) => Promise<void>;
   setCurrentFarm: (farm: Farm | null) => void;
   refreshFarms: () => Promise<void>;
+  addFarm:(farm:Farm)=>void
 }
 
 // Create context
@@ -70,32 +70,11 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const addFarm=(farm:Farm)=>{
+    setFarms(prev=>[...prev,farm])
+  }
 
 
-  const createFarm = async (ownerId: string, farmData: FarmCreateRequest): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await farmService.createFarm(ownerId, farmData);
-
-      if (response.success && response.data) {
-        setFarms(prev => [...prev, response.data!]);
-      } else {
-        Alert.alert('Failed to create farm', response.message || 'Failed to create farm');
-      }
-    } catch (error: any) {
-      console.error('Failed to create farm:', error);
-
-      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
-        handleApiError(error);
-      } else {
-        Alert.alert('Failed to create farm', error.message || 'Failed to create farm');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getFarmById = async (id: string): Promise<Farm | null> => {
     try {
@@ -249,7 +228,7 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
     currentFarm,
     loading,
     error,
-    createFarm,
+    addFarm,
     getFarmById,
     getFarmsByOwner,
     getFarmsByVeterinary,

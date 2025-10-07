@@ -1,6 +1,6 @@
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { FarmStatus } from '@/types/farm';
+import { FarmCreateRequest, FarmStatus } from '@/types/farm';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -74,8 +74,8 @@ export default function CreateFarmScreen() {
     }
 
     try {
-      
-      await createFarm({
+
+      const newFarm:FarmCreateRequest={
         name: farmName.trim(),
         owner: currentUser,
         location: {
@@ -89,7 +89,6 @@ export default function CreateFarmScreen() {
           healthy,
           sick,
           atRisk,
-          breeds: ['Local Breed'] // Default breed
         },
         facilities: {
           coops: 1,
@@ -97,11 +96,10 @@ export default function CreateFarmScreen() {
           waterSystem: 'Manual',
           electricityAccess: false
         },
-        healthStatus: FarmStatus.GOOD, // Default status
-        certifications: [],
-        isActive: true
-      });
-
+        healthStatus: FarmStatus.GOOD,
+      }
+      
+      await createFarm(newFarm)
       Alert.alert(
         'Success!',
         'Your farm has been created successfully.',
@@ -129,7 +127,7 @@ export default function CreateFarmScreen() {
       
       <KeyboardAvoidingView 
         style={tw`flex-1`} 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={'padding' }
       >
         <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
           {/* Header */}

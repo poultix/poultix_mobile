@@ -47,7 +47,7 @@ export const API_ENDPOINTS = {
     // Farm Management
     FARMS: {
         BASE: '/farms',
-        CREATE: (ownerId: string) => `/farms?ownerId=${ownerId}`,
+        CREATE: '/farms',
         BY_ID: (id: string) => `/farms/${id}`,
         ALL: '/farms',
         BY_OWNER: (ownerId: string) => `/farms/owner/${ownerId}`,
@@ -64,7 +64,7 @@ export const API_ENDPOINTS = {
     // Veterinary Services
     VETERINARIES: {
         BASE: '/veterinaries',
-        CREATE: (userId: string) => `/veterinaries?userId=${userId}`,
+        CREATE: '/veterinaries',
         BY_ID: (id: string) => `/veterinaries/${id}`,
         BY_USER: (userId: string) => `/veterinaries/user/${userId}`,
         ALL: '/veterinaries',
@@ -80,7 +80,7 @@ export const API_ENDPOINTS = {
     // Scheduling
     SCHEDULES: {
         BASE: '/schedules',
-        CREATE: (createdBy: string) => `/schedules?createdBy=${createdBy}`,
+        CREATE: '/schedules',
         BY_ID: (id: string) => `/schedules/${id}`,
         ALL: '/schedules',
         BY_FARMER: (farmerId: string) => `/schedules/farmer/${farmerId}`,
@@ -111,25 +111,11 @@ export const API_ENDPOINTS = {
         DELETE: (id: string) => `/vaccines/${id}`,
     },
 
-    // Device Management
-    DEVICES: {
-        BASE: '/devices',
-        CREATE: '/devices',
-        BY_ID: (id: string) => `/devices/${id}`,
-        BY_DEVICE_ID: (deviceId: string) => `/devices/device-id/${deviceId}`,
-        ALL: '/devices',
-        BY_FARM: (farmId: string) => `/devices/farm/${farmId}`,
-        ACTIVE: '/devices/active',
-        UPDATE: (id: string) => `/devices/${id}`,
-        ACTIVATE: (id: string) => `/devices/${id}/activate`,
-        DEACTIVATE: (id: string) => `/devices/${id}/deactivate`,
-        DELETE: (id: string) => `/devices/${id}`,
-    },
 
     // News Management
     NEWS: {
         BASE: '/news',
-        CREATE: (authorId: string) => `/news?authorId=${authorId}`,
+        CREATE: '/news',
         BY_ID: (id: string) => `/news/${id}`,
         ALL: '/news',
         UPDATE: (id: string) => `/news/${id}`,
@@ -155,18 +141,11 @@ export const API_ENDPOINTS = {
         DELETE: (id: string) => `/pharmacies/${id}`,
     },
 
-    // Sensor Data
-    SENSOR_READINGS: {
-        BASE: '/sensor-readings',
-        CREATE: '/sensor-readings',
-        BY_DEVICE: (deviceId: string) => `/sensor-readings/device/${deviceId}`,
-        BY_FARM: (farmId: string) => `/sensor-readings/farm/${farmId}`,
-    },
 
     // Support
     SUPPORT: {
         BASE: '/support',
-        CREATE: (userId: string) => `/support?userId=${userId}`,
+        CREATE: '/support',
         BY_ID: (id: string) => `/support/${id}`,
         ALL: '/support',
         BY_USER: (userId: string) => `/support/user/${userId}`,

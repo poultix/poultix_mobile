@@ -6,8 +6,8 @@ import { API_ENDPOINTS } from '@/services/constants';
 
 export class FarmService {
     // Create Farm
-    async createFarm(ownerId: string, farmData: FarmCreateRequest): Promise<ApiResponse<Farm>> {
-        return await apiClient.post<Farm>(API_ENDPOINTS.FARMS.CREATE(ownerId), farmData);
+    async createFarm(farmData: FarmCreateRequest): Promise<ApiResponse<Farm>> {
+        return await apiClient.post<Farm>(API_ENDPOINTS.FARMS.CREATE, farmData);
     }
 
     // Get Farm by ID

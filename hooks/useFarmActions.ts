@@ -1,10 +1,11 @@
-import { Farm, FarmStatus } from '@/types/farm';
+import { Farm, FarmCreateRequest, FarmStatus } from '@/types/farm';
 import { farmService } from '@/services/api';
+import { useFarms } from '@/contexts/FarmContext';
 
 export interface FarmActionsType {
   loadFarms: () => Promise<Farm[]>;
-  createFarm: (farmData: Omit<Farm, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Farm>;
-  updateFarm: (id: string, farmData: Partial<Farm>) => Promise<Farm>;
+  createFarm: (farmData: FarmCreateRequest) => Promise<void>;
+  updateFarm: (id: string, farmData: Partial<Farm>) => Promise<void>;
   deleteFarm: (id: string) => Promise<void>;
   getFarmById: (farms: Farm[], id: string) => Farm | undefined;
   getFarmsByOwner: (farms: Farm[], ownerId: string) => Farm[];
@@ -14,38 +15,34 @@ export interface FarmActionsType {
 }
 
 export const useFarmActions = (): FarmActionsType => {
+  const { addFarm } = useFarms()
   const loadFarms = async (): Promise<Farm[]> => {
     const response = await farmService.getAllFarms();
     return response.success && response.data ? response.data : [];
   };
 
-  const createFarm = async (farmData: Omit<Farm, 'id' | 'createdAt' | 'updatedAt'>): Promise<Farm> => {
-    const newFarm: Farm = {
-      ...farmData,
-      id: `farm_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    // In a real app, this would make an API call
-    return newFarm;
+  const createFarm = async (farmData: FarmCreateRequest) => {
+    const response = await farmService.createFarm(farmData);
+    if (!response || !response.data) {
+      return
+    }
+    addFarm(response.data)
   };
 
   const updateFarm = async (id: string, farmData: Partial<Farm>): Promise<Farm> => {
-    // In a real app, this would make an API call
+   
     const farms = await loadFarms();
     const existingFarm = farms.find(farm => farm.id === id);
-    
+
     if (!existingFarm) {
       throw new Error('Farm not found');
     }
-    
+
     const updatedFarm = { ...existingFarm, ...farmData, updatedAt: new Date().toISOString() };
     return updatedFarm;
   };
 
   const deleteFarm = async (id: string): Promise<void> => {
-    // In a real app, this would make an API call
     console.log(`Deleting farm with id: ${id}`);
   };
 

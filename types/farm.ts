@@ -5,16 +5,10 @@ export interface Coords {
     longitude: number;
 }
 
-export interface LiveStock {
-    total: number;
-    healthy: number;
-    sick: number;
-    atRisk: number;
-    breeds: string[];
-}
 
 
-export interface Facility {
+
+export interface FarmFacility {
     coops: number;
     feedStorage: boolean;
     waterSystem: string;
@@ -37,8 +31,8 @@ export interface Farm {
     location: Coords;
     size: number;
     establishedDate: string;
-    livestock: LiveStock
-    facilities: Facility
+    livestock: FarmLiveStock
+    facilities: FarmFacility
     assignedVeterinary?: User;
     healthStatus: FarmStatus;
     lastInspection?: string;
@@ -48,36 +42,25 @@ export interface Farm {
     updatedAt: string;
 }
 
+export interface FarmLiveStock{
+    total: number;
+    healthy: number;
+    sick: number;
+    atRisk: number;
+}
+
 export interface FarmCreateRequest {
     name: string;
     location: Coords;
-    livestock: {
-        total: number;
-        healthy: number;
-        sick: number;
-        atRisk: number;
-    };
-    facilities: {
-        coops: number;
-        feeders: number;
-        waterers: number;
-    };
-    healthStatus: 'HEALTHY' | 'AT_RISK' | 'SICK' | 'QUARANTINE';
+    livestock: FarmLiveStock
+    facilities: FarmFacility;
+    healthStatus: FarmStatus;
 }
 
 export interface FarmUpdateRequest {
     name?: string;
     location?: Coords;
-    livestock?: {
-        total: number;
-        healthy: number;
-        sick: number;
-        atRisk: number;
-    };
-    facilities?: {
-        coops: number;
-        feeders: number;
-        waterers: number;
-    };
-    healthStatus?: 'HEALTHY' | 'AT_RISK' | 'SICK' | 'QUARANTINE';
+    livestock?: FarmLiveStock
+    facilities?: FarmFacility;
+    healthStatus?: FarmStatus;
 }
