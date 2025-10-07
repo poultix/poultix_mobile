@@ -22,6 +22,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import { useFarmActions } from '@/hooks/useFarmActions';
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 
 export default function CreateFarmScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
@@ -31,15 +32,12 @@ export default function CreateFarmScreen() {
   
   // Form state
   const [farmName, setFarmName] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [zipCode, setZipCode] = useState('');
   const [totalChickens, setTotalChickens] = useState('');
   const [healthyChickens, setHealthyChickens] = useState('');
   const [sickChickens, setSickChickens] = useState('');
   const [atRiskChickens, setAtRiskChickens] = useState('');
-  const [description, setDescription] = useState('');
+  const [location, setLocation] = useState<{latitude: number, longitude: number} | null>(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -52,9 +50,36 @@ export default function CreateFarmScreen() {
     }).start();
   }, []);
 
+  const getCurrentLocation = async () => {
+    try {
+      setIsGettingLocation(true);
+      
+      // Request location permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Location permission is required to set farm location');
+        return;
+      }
+
+      // Get current location
+      const currentLocation = await Location.getCurrentPositionAsync({});
+      setLocation({
+        latitude: currentLocation.coords.latitude,
+        longitude: currentLocation.coords.longitude,
+      });
+      
+      Alert.alert('Success', 'Location has been set successfully!');
+    } catch (error) {
+      console.error('Error getting location:', error);
+      Alert.alert('Error', 'Failed to get current location. Please try again.');
+    } finally {
+      setIsGettingLocation(false);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!farmName.trim() || !address.trim() || !totalChickens) {
-      Alert.alert('Error', 'Please fill in all required fields');
+    if (!farmName.trim() || !totalChickens || !location) {
+      Alert.alert('Error', 'Please fill in all required fields and set farm location');
       return;
     }
 
@@ -74,16 +99,11 @@ export default function CreateFarmScreen() {
     }
 
     try {
+      setIsSubmitting(true);
 
-      const newFarm:FarmCreateRequest={
+      const newFarm: FarmCreateRequest = {
         name: farmName.trim(),
-        owner: currentUser,
-        location: {
-          latitude: 0, // Default coordinates - should be updated with GPS
-          longitude: 0,
-        },
-        size: total, // Using total chickens as farm size
-        establishedDate: new Date().toISOString(),
+        location: location,
         livestock: {
           total,
           healthy,
@@ -154,13 +174,14 @@ export default function CreateFarmScreen() {
             </LinearGradient>
           </View>
 
-          <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
+          <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}
+          contentContainerClassName='pb-10'>
             {/* Basic Information */}
             <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
               <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
                 Basic Information
               </Text>
-              <View style={tw`mb-4`}>
+              <View>
                 <Text style={tw`text-gray-700 font-medium mb-2`}>Farm Name *</Text>
                 <TextInput
                   style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
@@ -169,62 +190,41 @@ export default function CreateFarmScreen() {
                   onChangeText={setFarmName}
                 />
               </View>
-              <View>
-                <Text style={tw`text-gray-700 font-medium mb-2`}>Description</Text>
-                <TextInput
-                  style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800 h-20`}
-                  placeholder="Brief description of your farm"
-                  value={description}
-                  onChangeText={setDescription}
-                  multiline
-                  textAlignVertical="top"
-                />
-              </View>
             </View>
 
             {/* Location */}
             <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
               <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                Location
+                Farm Location
               </Text>
               <View style={tw`mb-4`}>
-                <Text style={tw`text-gray-700 font-medium mb-2`}>Address *</Text>
-                <TextInput
-                  style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
-                  placeholder="Street address"
-                  value={address}
-                  onChangeText={setAddress}
-                />
-              </View>
-              <View style={tw`flex-row gap-3 mb-4`}>
-                <View style={tw`flex-1`}>
-                  <Text style={tw`text-gray-700 font-medium mb-2`}>City</Text>
-                  <TextInput
-                    style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
-                    placeholder="City"
-                    value={city}
-                    onChangeText={setCity}
-                  />
-                </View>
-                <View style={tw`flex-1`}>
-                  <Text style={tw`text-gray-700 font-medium mb-2`}>State</Text>
-                  <TextInput
-                    style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
-                    placeholder="State"
-                    value={state}
-                    onChangeText={setState}
-                  />
-                </View>
-              </View>
-              <View>
-                <Text style={tw`text-gray-700 font-medium mb-2`}>ZIP Code</Text>
-                <TextInput
-                  style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
-                  placeholder="ZIP Code"
-                  value={zipCode}
-                  onChangeText={setZipCode}
-                  keyboardType="numeric"
-                />
+                <Text style={tw`text-gray-700 font-medium mb-2`}>
+                  Current Location {location ? '✅' : '❌'}
+                </Text>
+                {location ? (
+                  <View style={tw`bg-green-50 border border-green-200 rounded-xl p-4`}>
+                    <Text style={tw`text-green-800 font-medium`}>Location Set Successfully</Text>
+                    <Text style={tw`text-green-600 text-sm mt-1`}>
+                      Lat: {location.latitude.toFixed(6)}, Lng: {location.longitude.toFixed(6)}
+                    </Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={tw`bg-blue-50 border border-blue-200 rounded-xl p-4 items-center ${
+                      isGettingLocation ? 'opacity-50' : ''
+                    }`}
+                    onPress={getCurrentLocation}
+                    disabled={isGettingLocation}
+                  >
+                    <Ionicons name="location-outline" size={24} color="#3B82F6" />
+                    <Text style={tw`text-blue-600 font-medium mt-2`}>
+                      {isGettingLocation ? 'Getting Location...' : 'Get Current Location'}
+                    </Text>
+                    <Text style={tw`text-blue-500 text-xs mt-1 text-center`}>
+                      We need access to your location to set the farm coordinates
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
 
@@ -279,7 +279,7 @@ export default function CreateFarmScreen() {
 
             {/* Submit Button */}
             <TouchableOpacity
-              style={tw`bg-green-500 rounded-2xl py-4 px-6 shadow-lg mb-6 ${
+              style={tw`bg-green-600 rounded-2xl py-4 px-6 shadow-lg mb-6 ${
                 isSubmitting ? 'opacity-50' : ''
               }`}
               onPress={handleSubmit}

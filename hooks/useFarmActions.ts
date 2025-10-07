@@ -29,8 +29,8 @@ export const useFarmActions = (): FarmActionsType => {
     addFarm(response.data)
   };
 
-  const updateFarm = async (id: string, farmData: Partial<Farm>): Promise<Farm> => {
-   
+  const updateFarm = async (id: string, farmData: Partial<Farm>): Promise<void> => {
+
     const farms = await loadFarms();
     const existingFarm = farms.find(farm => farm.id === id);
 
@@ -39,7 +39,7 @@ export const useFarmActions = (): FarmActionsType => {
     }
 
     const updatedFarm = { ...existingFarm, ...farmData, updatedAt: new Date().toISOString() };
-    return updatedFarm;
+    addFarm(updatedFarm)
   };
 
   const deleteFarm = async (id: string): Promise<void> => {
