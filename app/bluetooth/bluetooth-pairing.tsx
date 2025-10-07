@@ -81,12 +81,6 @@ export default function ConnectToDeviceScreen() {
         } catch (error) {
             console.warn('Failed to check Bluetooth permissions:', error);
             setPermissionsGranted(false);
-            // In case of permission check failure, assume we're in mock mode
-            if (!bleSupported) {
-                console.log('BLE not supported, permissions not required for mock mode');
-                setPermissionsGranted(true);
-                return true;
-            }
             return false;
         }
     };
@@ -96,17 +90,6 @@ export default function ConnectToDeviceScreen() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
         try {
-            // If BLE is not supported, skip permission request
-            if (!bleSupported) {
-                setPermissionsGranted(true);
-                Alert.alert(
-                    'Mock Mode Active',
-                    'BLE is not available on this device. Using mock mode for testing.',
-                    [{ text: 'OK' }]
-                );
-                return;
-            }
-
             const granted = await requestPermissions();
             setPermissionsGranted(granted);
 
@@ -128,25 +111,14 @@ export default function ConnectToDeviceScreen() {
             }
         } catch (error) {
             console.error('Permission request error:', error);
-
-            // If there's an error but BLE is not supported, enable mock mode
-            if (!bleSupported) {
-                setPermissionsGranted(true);
-                Alert.alert(
-                    'Mock Mode Enabled',
-                    'Permission check failed, but mock mode is available for testing.',
-                    [{ text: 'OK' }]
-                );
-            } else {
-                Alert.alert(
-                    'Permission Error',
-                    'Failed to request permissions. This might be due to device compatibility issues. Please try again or check Settings.',
-                    [
-                        { text: 'Cancel', style: 'cancel' },
-                        { text: 'Open Settings', onPress: () => Linking.openSettings() },
-                    ]
-                );
-            }
+            Alert.alert(
+                'Permission Error',
+                'Failed to request permissions. This might be due to device compatibility issues. Please try again or check Settings.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Open Settings', onPress: () => Linking.openSettings() },
+                ]
+            );
         } finally {
             setIsRequestingPermissions(false);
         }
@@ -155,13 +127,7 @@ export default function ConnectToDeviceScreen() {
     const handleStartScan = async () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-        // If BLE is not supported, allow scanning in mock mode
-        if (!bleSupported) {
-            scanForPeripherals();
-            return;
-        }
-
-        // Check permissions before scanning (only for real BLE)
+        // Check permissions before scanning
         if (!permissionsGranted) {
             Alert.alert(
                 'Permissions Required',
@@ -174,7 +140,7 @@ export default function ConnectToDeviceScreen() {
             return;
         }
 
-        // Check location services (only for real BLE)
+        // Check location services
         if (!isLocationOn) {
             Alert.alert(
                 'Location Services Required',
@@ -278,7 +244,7 @@ export default function ConnectToDeviceScreen() {
                                         ? isScanning
                                             ? 'Scanning for devices...'
                                             : `${devices.length} device${devices.length !== 1 ? 's' : ''} found`
-                                        : 'Using mock mode for testing'
+                                        : 'Bluetooth is not supported on this device'
                                     }
                                 </Text>
                             </View>
@@ -293,16 +259,15 @@ export default function ConnectToDeviceScreen() {
                         {/* Bluetooth State */}
                         <View style={tw`flex-row items-center mb-2`}>
                             <Ionicons
-                                name={bluetoothState === 'PoweredOn' || bluetoothState === 'MockMode' ? "checkmark-circle" : "alert-circle"}
+                                name={bluetoothState === 'PoweredOn' ? "checkmark-circle" : "alert-circle"}
                                 size={20}
-                                color={bluetoothState === 'PoweredOn' || bluetoothState === 'MockMode' ? "#10B981" : "#EF4444"}
+                                color={bluetoothState === 'PoweredOn' ? "#10B981" : "#EF4444"}
                                 style={tw`mr-2`}
                             />
                             <Text style={tw`text-sm font-medium text-gray-700 flex-1`}>
                                 Bluetooth: {bluetoothState === 'PoweredOn' ? 'Active' :
-                                    bluetoothState === 'MockMode' ? 'Mock Mode' :
-                                        bluetoothState === 'PoweredOff' ? 'Off' :
-                                            bluetoothState}
+                                    bluetoothState === 'PoweredOff' ? 'Off' :
+                                        bluetoothState}
                             </Text>
                         </View>
 

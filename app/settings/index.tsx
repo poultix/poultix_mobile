@@ -4,11 +4,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import {
-    Animated,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import tw from 'twrnc';
 
@@ -40,7 +40,7 @@ export default function SettingsScreen() {
         {/* Header */}
         <View style={tw`pb-4`}>
           <LinearGradient
-            colors={['#0B7A80', '#1A5D63']}
+            colors={['#F59E0B', '#D97706']}
             style={tw`p-8 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between mb-4`}>
@@ -91,3 +91,4 @@ export default function SettingsScreen() {
     </View>
   )
 }
+ 

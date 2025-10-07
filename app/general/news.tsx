@@ -15,6 +15,7 @@ import tw from 'twrnc';
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';
 import { useNews } from '@/contexts/NewsContext';
+import BottomTabs from '@/components/BottomTabs';
 
 export default function NewsScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
@@ -194,6 +195,7 @@ export default function NewsScreen() {
             )}
           </Animated.View>
         </ScrollView>
+        <BottomTabs/>
       </Animated.View>
     </View>
   );

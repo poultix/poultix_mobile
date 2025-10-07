@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import tw from 'twrnc';
+import BottomTabs from '@/components/BottomTabs';
 
 export default function ChatScreen() {
     const { currentUser } = useAuth();
@@ -153,7 +154,7 @@ export default function ChatScreen() {
                 {/* Header */}
                 <Animated.View style={[tw`pb-4`, { transform: [{ translateY: headerAnim }] }]}>
                     <LinearGradient
-                        colors={['#3B82F6', '#2563EB']}
+                        colors={['#F59E0B', '#D97706']}
                         style={tw`p-8 shadow-xl`}
                     >
                         <View style={tw`flex-row items-center justify-between `}>
@@ -200,7 +201,7 @@ export default function ChatScreen() {
                             <TouchableOpacity
                                 key={tab.key}
                                 style={tw`mr-3 px-4 py-2 rounded-2xl flex-row items-center ${selectedTab === tab.key
-                                    ? 'bg-blue-500'
+                                    ? 'bg-amber-500'
                                     : 'bg-white border border-gray-200'
                                     }`}
                                 onPress={() => setSelectedTab(tab.key)}
@@ -303,6 +304,7 @@ export default function ChatScreen() {
                     )}
                 </ScrollView>
             </Animated.View>
+            <BottomTabs/>
         </View>
     );
 }

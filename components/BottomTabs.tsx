@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     View,
     Text,
@@ -38,12 +38,12 @@ const tabItems: TabItem[] = [
         color: '#10B981'
     },
     {
-        key: 'farms',
-        label: 'Farms',
-        icon: 'leaf-outline',
-        activeIcon: 'leaf',
-        route: '/farm',
-        color: '#F59E0B'
+        key: 'news',
+        label: 'News',
+        icon: 'newspaper-outline',
+        activeIcon: 'newspaper',
+        route: '/general/news',
+        color: '#EF4444'
     },
     {
         key: 'profile',
@@ -56,23 +56,19 @@ const tabItems: TabItem[] = [
 ];
 
 interface BottomTabsProps {
-    currentRoute?: string;
     style?: any;
 }
 
 export default function BottomTabs({ style }: BottomTabsProps) {
     const { currentUser } = useAuth();
     const pathname = usePathname();
-    const [activeTab, setActiveTab] = useState('home');
 
     const handleTabPress = (tab: TabItem) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        setActiveTab(tab.key);
 
         // Handle different routing based on tab
         switch (tab.key) {
             case 'home':
-                
                 if (currentUser?.role === UserRole.ADMIN) {
                     router.push('/dashboard/admin-dashboard');
                 } else if (currentUser?.role === UserRole.VETERINARY) {
@@ -84,8 +80,8 @@ export default function BottomTabs({ style }: BottomTabsProps) {
             case 'chat':
                 router.push('/chat');
                 break;
-            case 'farms':
-                router.push('/farm');
+            case 'news':
+                router.push('/general/news');
                 break;
             case 'profile':
                 router.push('/user/profile');
@@ -99,9 +95,9 @@ export default function BottomTabs({ style }: BottomTabsProps) {
         // Determine active tab based on current pathname
         if (pathname.includes('/dashboard') || pathname === '/') return tabKey === 'home';
         if (pathname.includes('/communication/messages') || pathname.includes('/user/directory') || pathname === '/chat') return tabKey === 'chat';
-        if (pathname.includes('/farm/') || pathname === '/farm') return tabKey === 'farms';
-        if (pathname.includes('/user/profile') || pathname.includes('/settings/')) return tabKey === 'more';
-        return activeTab === tabKey;
+        if (pathname.includes('/general/news') || pathname === '/news') return tabKey === 'news';
+        if (pathname.includes('/user/profile') || pathname.includes('/settings/')) return tabKey === 'profile';
+        return false; // No default active tab, rely on pathname detection
     };
 
     return (
