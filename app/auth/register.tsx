@@ -115,7 +115,7 @@ export default function SignUpScreen() {
                 >
                     {/* Header */}
                     <View style={tw`-mx-7 mb-8`}>
-                        <LinearGradient colors={['#3B82F6', '#3B82F6']} style={tw`p-8 shadow-xl`}>
+                        <LinearGradient colors={['#F59E0B', '#D97706']} style={tw`p-8 shadow-xl`}>
                             <View style={tw`items-center`}>
                                 <View style={tw`w-20 h-20 bg-white bg-opacity-20 rounded-full items-center justify-center mb-4`}>
                                     <Ionicons name="person-add" size={32} color="white" />
@@ -134,13 +134,13 @@ export default function SignUpScreen() {
                         <View style={tw`mb-6`}>
                             <Text style={tw`text-gray-700 font-semibold mb-2`}>Full Name</Text>
                             <View
-                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isNameFocused ? 'border-blue-300' : 'border-gray-200'} ${nameError ? 'border-red-500' : ''}`}
+                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isNameFocused ? 'border-amber-400' : 'border-gray-200'} ${nameError ? 'border-red-500' : ''}`}
                             >
                                 <View className="pl-4 pr-2">
                                     <Ionicons
                                         name="person-outline"
                                         size={22}
-                                        color={nameError ? '#EF4444' : isNameFocused ? '#3B82F6' : '#9CA3AF'}
+                                        color={nameError ? '#EF4444' : isNameFocused ? '#D97706' : '#9CA3AF'}
                                     />
                                 </View>
                                 <TextInput
@@ -162,13 +162,13 @@ export default function SignUpScreen() {
                         <View style={tw`mb-6`}>
                             <Text style={tw`text-gray-700 font-semibold mb-2`}>Email Address</Text>
                             <View
-                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isEmailFocused ? 'border-blue-300' : 'border-gray-200'} ${emailError ? 'border-red-500' : ''}`}
+                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isEmailFocused ? 'border-amber-400' : 'border-gray-200'} ${emailError ? 'border-red-500' : ''}`}
                             >
                                 <View className="pl-4 pr-2">
                                     <Ionicons
                                         name="mail-outline"
                                         size={22}
-                                        color={emailError ? '#EF4444' : isEmailFocused ? '#3B82F6' : '#9CA3AF'}
+                                        color={emailError ? '#EF4444' : isEmailFocused ? '#D97706' : '#9CA3AF'}
                                     />
                                 </View>
                                 <TextInput
@@ -192,13 +192,13 @@ export default function SignUpScreen() {
                         <View style={tw`mb-6`}>
                             <Text style={tw`text-gray-700 font-semibold mb-2`}>Password</Text>
                             <View
-                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isPasswordFocused ? 'border-blue-300' : 'border-gray-200'} ${passwordError ? 'border-red-500' : ''}`}
+                                className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isPasswordFocused ? 'border-amber-300' : 'border-gray-200'} ${passwordError ? 'border-red-500' : ''}`}
                             >
                                 <View className="pl-4 pr-2">
                                     <Ionicons
                                         name="lock-closed-outline"
                                         size={22}
-                                        color={passwordError ? '#EF4444' : isPasswordFocused ? '#3B82F6' : '#9CA3AF'}
+                                        color={passwordError ? '#EF4444' : isPasswordFocused ? '#D97706' : '#9CA3AF'}
                                     />
                                 </View>
                                 <TextInput
@@ -228,32 +228,32 @@ export default function SignUpScreen() {
                             <Text style={tw`text-gray-700 font-semibold mb-4`}>Account Type</Text>
                             <View style={tw`flex-row gap-4 `}>
                                 <TouchableOpacity
-                                    style={tw`flex-1 px-4 py-2 items-center justify-center rounded-xl border ${!isVeterinary ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50'}`}
+                                    style={tw`flex-1 px-4 py-2 items-center justify-center rounded-xl border ${!isVeterinary ? 'border-amber-500 bg-amber-50' : 'border-gray-200 bg-gray-50'}`}
                                     onPress={() => setIsVeterinary(false)}
                                 >
                                     <View style={tw`items-center flex-row gap-4`}>
                                         <Ionicons
                                             name="home-outline"
                                             size={22}
-                                            color={!isVeterinary ? "#3B82F6" : "#9CA3AF"}
+                                            color={!isVeterinary ? "#D97706" : "#9CA3AF"}
                                         />
-                                        <Text style={tw` font-semibold ${!isVeterinary ? 'text-blue-500' : 'text-gray-600'}`}>
+                                        <Text style={tw` font-semibold ${!isVeterinary ? 'text-amber-600' : 'text-gray-600'}`}>
                                             Farmer
                                         </Text>
                                     </View>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
-                                    style={tw`flex-1 px-4 py-2 items-center justify-center rounded-xl border ${isVeterinary ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50'}`}
+                                    style={tw`flex-1 px-4 py-2 items-center justify-center rounded-xl border ${isVeterinary ? 'border-amber-500 bg-amber-50' : 'border-gray-200 bg-gray-50'}`}
                                     onPress={() => setIsVeterinary(true)}
                                 >
                                     <View style={tw`items-center flex-row gap-4`}>
                                         <Ionicons
                                             name="medical-outline"
                                             size={22}
-                                            color={isVeterinary ? "#3B82F6" : "#9CA3AF"}
+                                            color={isVeterinary ? "#D97706" : "#9CA3AF"}
                                         />
-                                        <Text style={tw` font-semibold ${isVeterinary ? 'text-blue-500' : 'text-gray-600'}`}>
+                                        <Text style={tw` font-semibold ${isVeterinary ? 'text-amber-500' : 'text-gray-600'}`}>
                                             Veterinary
                                         </Text>
                                     </View>
@@ -270,7 +270,7 @@ export default function SignUpScreen() {
                                 disabled={loading}
                             >
                                 <LinearGradient
-                                    colors={['#3B82F6', '#3B82F6']}
+                                    colors={['#F59E0B', '#D97706']}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 0 }}
                                     className="w-full h-full items-center justify-center"
@@ -292,7 +292,7 @@ export default function SignUpScreen() {
                         <View style={tw`flex-row justify-center mt-8`}>
                             <Text style={tw`text-gray-500 text-base`}>Already have an account? </Text>
                             <TouchableOpacity onPress={() => router.push('/auth/login')}>
-                                <Text style={tw`text-blue-500 font-semibold text-base`}>Sign In</Text>
+                                <Text style={tw`text-amber-500 font-semibold text-base`}>Sign In</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
