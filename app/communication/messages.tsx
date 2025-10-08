@@ -34,7 +34,7 @@ export default function MessagesScreen() {
 
     // Set current route for bottom tabs
     useEffect(() => {
-        setCurrentRoute('/communication/messages');
+        setCurrentRoute('/chat');
     }, []);
 
     // Use new contexts
@@ -213,7 +213,7 @@ export default function MessagesScreen() {
             </KeyboardAvoidingView>
 
             {/* Bottom Tabs */}
-            <BottomTabs currentRoute="/communication/messages" />
+            <BottomTabs/>
 
             <CustomDrawer
                 isVisible={isDrawerVisible}

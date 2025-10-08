@@ -71,12 +71,6 @@ export default function VetDashSchedules() {
                                         {new Date(schedule.scheduledDate).toLocaleDateString()}
                                     </Text>
                                 </View>
-                                <View style={tw`flex-row items-center`}>
-                                    <Ionicons name="time-outline" size={16} color="#6B7280" />
-                                    <Text style={tw`text-gray-600 ml-2`}>
-                                        {schedule.startTime} - {schedule.endTime}
-                                    </Text>
-                                </View>
                             </View>
 
                             <View style={tw`flex-row items-center`}>

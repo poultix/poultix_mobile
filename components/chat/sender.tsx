@@ -1,6 +1,5 @@
 import { TouchableOpacity, View, TextInput, Image, ScrollView, Text, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import tw from "twrnc";
 import { useChat } from "@/contexts/ChatContext";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,28 +29,93 @@ export default function ChatSender() {
             setMessageText(editMessage.content)
         }
     }, [editMessage])
+    
     const handleSendMessage = async () => {
-        if (!messageText.trim() || !currentChat || !currentUser) return;
+        if ((!messageText.trim() && attachedFiles.length === 0) || !currentChat || !currentUser) return;
 
-        await sendMessage(
-            messageText.trim(),
-            currentChat,
-            currentUser,
-            MessageType.TEXT
-        );
+        try {
+            // Send text message if there's text content
+            if (messageText.trim()) {
+                await sendMessage(
+                    messageText.trim(),
+                    currentChat,
+                    currentUser,
+                    MessageType.TEXT
+                );
+            }
 
-        setMessageText('');
-        setEditMessage(null);
+            // Send each attached file as separate messages
+            for (const file of attachedFiles) {
+                const messageType = getMessageTypeFromFile(file);
+                const fileName = file.name || `file_${Date.now()}`;
+                
+                // TODO: Upload file to your server/storage and get URL
+                const fileUrl = await uploadFile(file); // You'll implement this
+                
+                await sendMessage(
+                    fileUrl,
+                    currentChat,
+                    currentUser,
+                    messageType,
+                );
+            }
+
+            // Clear form
+            setMessageText('');
+            setAttachedFiles([]);
+            setEditMessage(null);
+            setShowAttachMenu(false);
+        } catch (error) {
+            Alert.alert('Error', 'Failed to send message. Please try again.');
+        }
+    };
+
+    const getMessageTypeFromFile = (file: AttachedFile): MessageType => {
+        if (file.type === 'image') return MessageType.IMAGE;
+        
+        const mimeType = file.mimeType?.toLowerCase() || '';
+        if (mimeType.startsWith('audio/')) return MessageType.AUDIO;
+        if (mimeType.startsWith('video/')) return MessageType.VIDEO;
+        
+        return MessageType.FILE;
+    };
+
+    // TODO: Implement your file upload logic here
+    const uploadFile = async (file: AttachedFile): Promise<string> => {
+        // This is a placeholder - replace with your actual upload logic
+        // Example:
+        // const formData = new FormData();
+        // formData.append('file', {
+        //     uri: file.uri,
+        //     name: file.name,
+        //     type: file.mimeType
+        // } as any);
+        // const response = await fetch('YOUR_UPLOAD_ENDPOINT', {
+        //     method: 'POST',
+        //     body: formData,
+        //     headers: { 'Content-Type': 'multipart/form-data' }
+        // });
+        // const result = await response.json();
+        // return result.url;
+        
+        // For now, return the local URI (replace this with actual upload)
+        return file.uri;
     };
     const handleEditMessage = async () => {
-        if (!messageText.trim() || !currentChat || !currentUser) return;
+        if (!messageText.trim() || !currentChat || !currentUser || !editMessage) return;
 
-        const newMessage = { ...editMessage, content: messageText.trim() }
-
-        // await editMessage(newMessage)
-
-        setMessageText('');
-        setEditMessage(null);
+        try {
+            // TODO: Implement edit message functionality
+            // const updatedMessage = { ...editMessage, content: messageText.trim() };
+            // await updateMessage(updatedMessage);
+            
+            Alert.alert('Info', 'Message editing will be implemented soon');
+            
+            setMessageText('');
+            setEditMessage(null);
+        } catch (error) {
+            Alert.alert('Error', 'Failed to edit message. Please try again.');
+        }
     };
 
     const handlePickImage = async () => {
@@ -137,41 +201,45 @@ export default function ChatSender() {
         return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     };
     return (
-        <View style={tw`bg-white border-t border-gray-200`}>
+        <View className="bg-white border-t border-gray-200">
             {/* Attached Files Preview */}
             {attachedFiles.length > 0 && (
                 <ScrollView 
                     horizontal 
                     showsHorizontalScrollIndicator={false}
-                    style={tw`px-4 pt-3 pb-2`}
+                    className="px-4 pt-3 pb-2"
                 >
                     {attachedFiles.map((file, index) => (
-                        <View key={index} style={tw`mr-3 relative`}>
+                        <View key={index} className="mr-3 relative">
                             {file.type === 'image' ? (
-                                <View style={tw`relative`}>
+                                <View className="relative">
                                     <Image 
                                         source={{ uri: file.uri }} 
-                                        style={tw`w-20 h-20 rounded-lg`}
+                                        className="w-20 h-20 rounded-lg"
                                         resizeMode="cover"
                                     />
                                     <TouchableOpacity
-                                        style={tw`absolute -top-2 -right-2 bg-red-500 rounded-full p-1`}
+                                        className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1"
                                         onPress={() => removeFile(index)}
                                     >
                                         <Ionicons name="close" size={14} color="white" />
                                     </TouchableOpacity>
                                 </View>
                             ) : (
-                                <View style={tw`w-20 h-20 bg-gray-100 rounded-lg justify-center items-center relative`}>
-                                    <Ionicons name="document-outline" size={32} color="#3B82F6" />
-                                    <Text style={tw`text-[10px] text-gray-600 mt-1 text-center px-1`} numberOfLines={1}>
+                                <View className="w-20 h-20 bg-gray-100 rounded-lg justify-center items-center relative">
+                                    <Ionicons name="document-outline" size={28} color="#D97706" />
+                                    <Text 
+                                        className="text-xs text-gray-600 mt-1 text-center px-1" 
+                                        numberOfLines={1}
+                                        style={{ fontSize: 10 }}
+                                    >
                                         {file.name}
                                     </Text>
-                                    <Text style={tw`text-[8px] text-gray-400`}>
+                                    <Text className="text-gray-400" style={{ fontSize: 8 }}>
                                         {formatFileSize(file.size)}
                                     </Text>
                                     <TouchableOpacity
-                                        style={tw`absolute -top-2 -right-2 bg-red-500 rounded-full p-1`}
+                                        className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1"
                                         onPress={() => removeFile(index)}
                                     >
                                         <Ionicons name="close" size={14} color="white" />
@@ -185,58 +253,59 @@ export default function ChatSender() {
 
             {/* Attach Menu */}
             {showAttachMenu && (
-                <View style={tw`px-4 pb-3`}>
-                    <View style={tw`bg-gray-50 rounded-2xl p-3`}>
+                <View className="px-4 pb-3">
+                    <View className="bg-gray-50 rounded-2xl p-3">
                         <TouchableOpacity 
-                            style={tw`flex-row items-center py-3 border-b border-gray-200`}
+                            className="flex-row items-center py-3 border-b border-gray-200"
                             onPress={handleTakePhoto}
                         >
-                            <View style={tw`bg-blue-100 p-2 rounded-full mr-3`}>
-                                <Ionicons name="camera-outline" size={20} color="#3B82F6" />
+                            <View className="bg-orange-100 p-2 rounded-full mr-3">
+                                <Ionicons name="camera-outline" size={20} color="#D97706" />
                             </View>
-                            <Text style={tw`text-gray-800 font-medium`}>Take Photo</Text>
+                            <Text className="text-gray-800 font-medium">Take Photo</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity 
-                            style={tw`flex-row items-center py-3 border-b border-gray-200`}
+                            className="flex-row items-center py-3 border-b border-gray-200"
                             onPress={handlePickImage}
                         >
-                            <View style={tw`bg-purple-100 p-2 rounded-full mr-3`}>
-                                <Ionicons name="image-outline" size={20} color="#9333EA" />
+                            <View className="bg-orange-100 p-2 rounded-full mr-3">
+                                <Ionicons name="image-outline" size={20} color="#D97706" />
                             </View>
-                            <Text style={tw`text-gray-800 font-medium`}>Photo Library</Text>
+                            <Text className="text-gray-800 font-medium">Photo Library</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity 
-                            style={tw`flex-row items-center py-3`}
+                            className="flex-row items-center py-3"
                             onPress={handlePickDocument}
                         >
-                            <View style={tw`bg-green-100 p-2 rounded-full mr-3`}>
-                                <Ionicons name="document-outline" size={20} color="#16A34A" />
+                            <View className="bg-orange-100 p-2 rounded-full mr-3">
+                                <Ionicons name="document-outline" size={20} color="#D97706" />
                             </View>
-                            <Text style={tw`text-gray-800 font-medium`}>Document</Text>
+                            <Text className="text-gray-800 font-medium">Document</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
             )}
 
             {/* Message Input */}
-            <View style={tw`flex-row items-end p-4`}>
+            <View className="flex-row items-end p-4">
                 <TouchableOpacity 
-                    style={tw`bg-blue-100 p-3 rounded-full mr-3`}
+                    className="bg-orange-100 p-3 rounded-full mr-3"
                     onPress={() => setShowAttachMenu(!showAttachMenu)}
                 >
                     <Ionicons 
                         name={showAttachMenu ? "close-outline" : "add-outline"} 
                         size={20} 
-                        color="#3B82F6" 
+                        color="#D97706" 
                     />
                 </TouchableOpacity>
 
-                <View style={tw`flex-1 bg-gray-100 rounded-2xl px-4 py-2 mr-3`}>
+                <View className="flex-1 bg-gray-100 rounded-2xl px-4 py-2 mr-3">
                     <TextInput
-                        style={tw`text-gray-800 text-base max-h-24`}
-                        placeholder="Type a message..."
+                        className="text-gray-800 text-base"
+                        style={{ maxHeight: 96 }}
+                        placeholder={editMessage ? "Edit message..." : "Type a message..."}
                         placeholderTextColor="#6B7280"
                         value={messageText}
                         onChangeText={setMessageText}
@@ -246,19 +315,27 @@ export default function ChatSender() {
                 </View>
 
                 <TouchableOpacity
-                    style={tw`bg-blue-500 p-3 rounded-full ${(!messageText.trim() && attachedFiles.length === 0) ? 'opacity-50' : ''}`}
+                    className="p-3 rounded-full"
+                    style={{
+                        backgroundColor: '#D97706',
+                        opacity: (!messageText.trim() && attachedFiles.length === 0) ? 0.5 : 1
+                    }}
                     onPress={editMessage ? handleEditMessage : handleSendMessage}
                     disabled={!messageText.trim() && attachedFiles.length === 0}
                 >
-                    <Ionicons name="send-outline" size={20} color="white" />
+                    <Ionicons 
+                        name={editMessage ? "checkmark-outline" : "send-outline"} 
+                        size={20} 
+                        color="white" 
+                    />
                 </TouchableOpacity>
             </View>
 
             {/* Files Counter */}
             {attachedFiles.length > 0 && (
-                <View style={tw`px-4 pb-2`}>
-                    <Text style={tw`text-xs text-gray-500`}>
-                        {attachedFiles.length} file{attachedFiles.length > 1 ? 's' : ''} attached
+                <View className="px-4 pb-2">
+                    <Text className="text-xs text-gray-500">
+                        {attachedFiles.length} file{attachedFiles.length > 1 ? 's' : ''} attached • Tap send to upload
                     </Text>
                 </View>
             )}

@@ -33,11 +33,30 @@ export default function VetDashboardFarms() {
                 </TouchableOpacity>
             </View>
 
-            {assignedFarms.map((farm) => {
-                const healthColors = getHealthStatusColor(farm.healthStatus);
-                const owner = farm.owner;
+            {assignedFarms.length === 0 ? (
+                <View style={tw`items-center py-12 px-6`}>
+                    <View style={tw`bg-amber-100 p-6 rounded-full mb-6`}>
+                        <Ionicons name="leaf-outline" size={64} color="#D97706" />
+                    </View>
+                    <Text style={tw`text-xl font-bold text-gray-800 mb-3 text-center`}>No Farms Assigned</Text>
+                    <Text style={tw`text-gray-600 text-center mb-6 leading-6`}>
+                        You don&apos;t have any farms assigned to your veterinary care yet.{'\n'}
+                        Contact your administrator to get farm assignments.
+                    </Text>
+                    <TouchableOpacity
+                        style={tw`bg-amber-600 px-8 py-3 rounded-xl flex-row items-center shadow-lg`}
+                        onPress={() => router.push('/farm')}
+                    >
+                        <Ionicons name="map-outline" size={20} color="white" />
+                        <Text style={tw`text-white font-semibold ml-2`}>Explore Available Farms</Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                assignedFarms.map((farm) => {
+                    const healthColors = getHealthStatusColor(farm.healthStatus);
+                    const owner = farm.owner;
 
-                return (
+                    return (
                     <TouchableOpacity
                         key={farm.id}
                         style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}
@@ -90,8 +109,9 @@ export default function VetDashboardFarms() {
                             </Text>
                         </View>
                     </TouchableOpacity>
-                );
-            })}
+                    );
+                })
+            )}
         </View>
-    )
+    );
 }

@@ -49,8 +49,11 @@ export default function VeterinaryDashboardScreen() {
   if (!currentUser || currentUser.role !== 'VETERINARY') {
     return (
       <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
-        <Ionicons name="lock-closed-outline" size={64} color="#6B7280" />
-        <Text style={tw`text-gray-600 text-lg mt-4`}>Access Denied</Text>
+        <View style={tw`bg-amber-100 p-6 rounded-2xl items-center shadow-lg`}>
+          <Ionicons name="medical-outline" size={56} color="#D97706" />
+          <Text style={tw`text-amber-600 text-base font-semibold mt-3`}>Access Denied</Text>
+          <Text style={tw`text-amber-700 text-sm mt-2 text-center`}>Veterinary credentials required</Text>
+        </View>
       </View>
     );
   }
@@ -60,24 +63,36 @@ export default function VeterinaryDashboardScreen() {
 
   return (
     <View style={tw`flex-1 bg-gray-50`}>
-      <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
+      <Animated.View style={[tw`flex-1 `, { opacity: fadeAnim }]}>
         {/* Header */}
         <View style={tw`pb-4`}>
           <LinearGradient
-            colors={['#EF4444', '#DC2626']}
-            style={tw` p-8 shadow-xl`}
+            colors={['#F59E0B', '#D97706']}
+            style={tw`p-7 shadow-xl`}
           >
-            <View style={tw`flex-row items-center justify-between mb-4`}>
+            <View style={tw`flex-row items-center justify-between mb-3`}>
               <View style={tw`flex-1`}>
-                <Text style={tw`text-white text-sm opacity-90`}>
-                  Veterinary Dashboard
+                <View style={tw`flex-row items-center mb-2`}>
+                  <View style={tw`bg-white bg-opacity-20 p-2 rounded-xl mr-3`}>
+                    <Ionicons name="medical-outline" size={20} color="white" />
+                  </View>
+                  <Text style={tw`text-white text-xs opacity-90 font-medium`}>
+                    Veterinary Dashboard
+                  </Text>
+                </View>
+                <Text style={tw`text-white text-2xl font-bold mb-1`}>
+                  Dr. {currentUser.name}
                 </Text>
-                <Text style={tw`text-white text-2xl font-bold`}>
-                  Dr. {currentUser.name} 🩺
-                </Text>
-                <Text style={tw`text-red-100 text-sm mt-1`}>
-                  Veterinary Professional • {assignedFarms.length} farms assigned
-                </Text>
+                <View style={tw`flex-row items-center`}>
+                  <View style={tw`bg-white bg-opacity-15 px-3 py-1 rounded-full mr-2`}>
+                    <Text style={tw`text-white text-xs font-semibold`}>
+                      VETERINARY
+                    </Text>
+                  </View>
+                  <Text style={tw`text-white text-xs opacity-80`}>
+                    {assignedFarms.length} farms assigned
+                  </Text>
+                </View>
               </View>
               <DrawerButton />
             </View>
@@ -85,8 +100,8 @@ export default function VeterinaryDashboardScreen() {
         </View>
 
         {/* Navigation Tabs */}
-        <View style={tw`px-4 mb-4`}>
-          <View style={tw`bg-white rounded-2xl p-2 flex-row shadow-sm`}>
+        <View style={tw`px-4 mb-4 -mt-3 z-10`}>
+          <View style={tw`bg-white rounded-2xl p-2 flex-row shadow-lg`}>
             {[
               { key: 'overview', label: 'Overview', icon: 'analytics-outline' },
               { key: 'farms', label: 'My Farms', icon: 'leaf-outline' },
@@ -95,8 +110,8 @@ export default function VeterinaryDashboardScreen() {
               <TouchableOpacity
                 key={tab.key}
                 style={[
-                  tw`flex-1 py-3 rounded-xl flex-row items-center justify-center`,
-                  selectedTab === tab.key ? tw`bg-red-500` : tw`bg-transparent`
+                  tw`flex-1 py-3 px-2 rounded-xl flex-row items-center justify-center`,
+                  selectedTab === tab.key ? tw`bg-amber-600 shadow-md` : tw`bg-transparent`
                 ]}
                 onPress={() => setSelectedTab(tab.key as any)}
               >
@@ -106,7 +121,7 @@ export default function VeterinaryDashboardScreen() {
                   color={selectedTab === tab.key ? 'white' : '#6B7280'}
                 />
                 <Text style={[
-                  tw`ml-2 font-medium`,
+                  tw`ml-2 font-medium text-sm`,
                   selectedTab === tab.key ? tw`text-white` : tw`text-gray-600`
                 ]}>
                   {tab.label}
@@ -117,8 +132,10 @@ export default function VeterinaryDashboardScreen() {
         </View>
 
         {/* Content */}
-        <ScrollView style={tw`flex-1`} showsVerticalScrollIndicator={false}
-          contentContainerClassName='pb-40'
+        <ScrollView 
+          style={tw`flex-1`} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 160 }}
         >
           {selectedTab === 'overview' && <VetOverview />}
           {selectedTab === 'farms' && <VetDashboardFarms />}

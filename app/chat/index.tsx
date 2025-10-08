@@ -18,7 +18,6 @@ import { User, UserRole } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import tw from 'twrnc';
 import BottomTabs from '@/components/BottomTabs';
 
 export default function ChatScreen() {
@@ -36,8 +35,8 @@ export default function ChatScreen() {
 
     const tabs = [
         { key: 'ALL', label: 'All Users', icon: 'people-outline', color: '#6B7280' },
-        { key: 'FARMER', label: 'Farmers', icon: 'leaf-outline', color: '#10B981' },
-        { key: 'VETERINARY', label: 'Veterinarians', icon: 'medical-outline', color: '#EF4444' },
+        { key: 'FARMER', label: 'Farmers', icon: 'leaf-outline', color: '#F59E0B' },
+        { key: 'VETERINARY', label: 'Veterinarians', icon: 'medical-outline', color: '#10B981' },
         { key: 'ADMIN', label: 'Admins', icon: 'shield-outline', color: '#7C3AED' },
     ];
 
@@ -54,7 +53,7 @@ export default function ChatScreen() {
                 useNativeDriver: true,
             }),
         ]).start();
-    }, []);
+    }, [fadeAnim, headerAnim]);
 
     useEffect(() => {
         let filtered = users;
@@ -63,8 +62,7 @@ export default function ChatScreen() {
         if (searchQuery.trim()) {
             filtered = filtered.filter(user =>
                 user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (user.location ? `${user.location.latitude}, ${user.location.longitude}` : '').toLowerCase().includes(searchQuery.toLowerCase())
+                user.email.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
 
@@ -97,8 +95,8 @@ export default function ChatScreen() {
     const getRoleColor = (role: UserRole) => {
         switch (role) {
             case UserRole.ADMIN: return '#7C3AED';
-            case UserRole.VETERINARY: return '#EF4444';
-            case UserRole.FARMER: return '#10B981';
+            case UserRole.VETERINARY: return '#10B981';
+            case UserRole.FARMER: return '#F59E0B';
             default: return '#6B7280';
         }
     };
@@ -123,16 +121,6 @@ export default function ChatScreen() {
         return onlineUsers.has(userId);
     };
 
-    const getLastSeen = (userId: string) => {
-        // Simulate last seen - in real app this would come from server
-        const lastSeenTimes: { [key: string]: string } = {
-            'farmer_001': 'Online',
-            'vet_001': 'Online',
-            'admin_001': 'Last seen 2 hours ago'
-        };
-        return lastSeenTimes[userId] || 'Last seen recently';
-    };
-
     const getTabCount = (tabKey: string) => {
         if (tabKey === 'ALL') return users.length;
         return users.filter(user => user.role === tabKey).length;
@@ -140,45 +128,50 @@ export default function ChatScreen() {
 
     if (loading) {
         return (
-            <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
-                <Text style={tw`text-gray-600 text-lg`}>Loading users...</Text>
+            <View className="flex-1 bg-gray-50 justify-center items-center">
+                <Text className="text-gray-600 text-lg">Loading users...</Text>
             </View>
         );
     }
 
     return (
-        <View style={tw`flex-1 bg-gray-50`}>
+        <View className="flex-1 bg-gray-50">
             <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
 
-            <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
+            <Animated.View style={{ opacity: fadeAnim }} className="flex-1">
                 {/* Header */}
-                <Animated.View style={[tw`pb-4`, { transform: [{ translateY: headerAnim }] }]}>
+                <Animated.View style={{ transform: [{ translateY: headerAnim }] }} className="pb-4">
                     <LinearGradient
                         colors={['#F59E0B', '#D97706']}
-                        style={tw`p-8 shadow-xl`}
+                        className="px-6 py-8 shadow-lg"
                     >
-                        <View style={tw`flex-row items-center justify-between `}>
+                        <View className="flex-row items-center justify-between">
                             <TouchableOpacity
-                                style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
+                                className="p-3 rounded-full"
+                                style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
                                 onPress={() => router.back()}
                             >
                                 <Ionicons name="arrow-back-outline" size={24} color="white" />
                             </TouchableOpacity>
 
-                            <Text style={tw`text-white text-xl font-bold`}>Contacts</Text>
+                            <Text className="text-white text-xl font-bold">Contacts</Text>
 
                             <DrawerButton />
                         </View>
                     </LinearGradient>
                 </Animated.View>
 
-                <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
+                <ScrollView 
+                    className="flex-1 px-4" 
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 20, paddingTop: 20 }}
+                >
                     {/* Search Bar */}
-                    <View style={tw`flex-row items-center bg-white rounded-3xl px-4 py-1 mb-4 shadow-sm border border-gray-200`}>
-                        <Ionicons name="search-outline" size={20} color="#6B7280" style={tw`mr-2`} />
+                    <View className="flex-row items-center bg-white rounded-3xl px-4 py-2 mb-6 shadow-sm border border-gray-200">
+                        <Ionicons name="search-outline" size={20} color="#6B7280" style={{ marginRight: 12 }} />
                         <TextInput
-                            style={tw`flex-1 text-gray-800 text-base`}
-                            placeholder="Search users..."
+                            className="flex-1 text-gray-800 text-base"
+                            placeholder="Search contacts..."
                             placeholderTextColor="#6B7280"
                             value={searchQuery}
                             onChangeText={setSearchQuery}
@@ -195,112 +188,150 @@ export default function ChatScreen() {
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        style={tw`mb-6`}
+                        className="mb-6"
+                        contentContainerStyle={{ paddingHorizontal: 4 }}
                     >
-                        {tabs.map((tab) => (
-                            <TouchableOpacity
-                                key={tab.key}
-                                style={tw`mr-3 px-4 py-2 rounded-2xl flex-row items-center ${selectedTab === tab.key
-                                    ? 'bg-amber-500'
-                                    : 'bg-white border border-gray-200'
+                        <View className="flex-row gap-3">
+                            {tabs.map((tab) => (
+                                <TouchableOpacity
+                                    key={tab.key}
+                                    className={`px-4 py-3 rounded-2xl flex-row items-center min-w-24 ${
+                                        selectedTab === tab.key
+                                            ? 'shadow-sm'
+                                            : 'bg-white border border-gray-200'
                                     }`}
-                                onPress={() => setSelectedTab(tab.key)}
-                            >
-                                <Ionicons
-                                    name={tab.icon as any}
-                                    size={18}
-                                    color={selectedTab === tab.key ? 'white' : tab.color}
-                                    style={tw`mr-2`}
-                                />
-                                <Text style={tw`${selectedTab === tab.key
-                                    ? 'text-white'
-                                    : 'text-gray-600'
-                                    } font-medium mr-1`}>
-                                    {tab.label}
-                                </Text>
-                                <View style={tw`${selectedTab === tab.key
-                                    ? 'bg-white bg-opacity-20'
-                                    : 'bg-gray-100'
-                                    } px-2 py-1 rounded-full`}>
-                                    <Text style={tw`${selectedTab === tab.key
+                                    style={{
+                                        backgroundColor: selectedTab === tab.key ? '#F59E0B' : '#FFFFFF',
+                                        shadowColor: selectedTab === tab.key ? '#F59E0B' : 'transparent',
+                                        shadowOffset: { width: 0, height: 2 },
+                                        shadowOpacity: 0.2,
+                                        shadowRadius: 4
+                                    }}
+                                    onPress={() => setSelectedTab(tab.key)}
+                                >
+                                    <Ionicons
+                                        name={tab.icon as any}
+                                        size={18}
+                                        color={selectedTab === tab.key ? 'white' : tab.color}
+                                        style={{ marginRight: 8 }}
+                                    />
+                                    <Text className={`${selectedTab === tab.key
                                         ? 'text-white'
                                         : 'text-gray-600'
-                                        } text-xs font-bold`}>
-                                        {getTabCount(tab.key)}
+                                    } font-medium mr-2`}>
+                                        {tab.label}
                                     </Text>
-                                </View>
-                            </TouchableOpacity>
-                        ))}
+                                    <View 
+                                        className="px-2 py-1 rounded-full"
+                                        style={{
+                                            backgroundColor: selectedTab === tab.key 
+                                                ? 'rgba(255, 255, 255, 0.2)' 
+                                                : '#F3F4F6'
+                                        }}
+                                    >
+                                        <Text className={`${selectedTab === tab.key
+                                            ? 'text-white'
+                                            : 'text-gray-600'
+                                        } text-xs font-bold`}>
+                                            {getTabCount(tab.key)}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
                     </ScrollView>
 
                     {/* Users List */}
                     {filteredUsers.length === 0 ? (
-                        <View style={tw`items-center py-10`}>
-                            <Ionicons name="people-outline" size={48} color="#6B7280" />
-                            <Text style={tw`text-gray-500 text-lg mt-4`}>No users found</Text>
+                        <View className="items-center py-16">
+                            <View className="w-16 h-16 rounded-full bg-gray-100 items-center justify-center mb-4">
+                                <Ionicons name="people-outline" size={32} color="#9CA3AF" />
+                            </View>
+                            <Text className="text-gray-500 text-lg font-medium">No contacts found</Text>
+                            <Text className="text-gray-400 text-sm mt-1">Try adjusting your search or filters</Text>
                         </View>
                     ) : (
-                        filteredUsers.map((user, index) => (
-                            <TouchableOpacity
-                                key={user.id}
-                                style={tw`bg-white rounded-2xl shadow-sm border border-gray-100 p-3 mb-4`}
-                                onPress={() => handleUserPress(user)}
-                                activeOpacity={0.7}
-                            >
-                                <View style={tw`flex-row items-center overflow-hidden relative`}>
-                                    {/* Avatar */}
-                                    <View style={[tw`w-16 h-16 rounded-full items-center justify-center mr-4`,
-                                    { backgroundColor: getRoleColor(user.role) + '20' }]}>
-                                        <Ionicons
-                                            name={getRoleIcon(user.role)}
-                                            size={24}
-                                            color={getRoleColor(user.role)}
-                                        />
-                                        {getOnlineStatus(user.id) && <View className='absolute bottom-4 -right-0 w-3 h-3 rounded-full bg-green-400' />}
-                                    </View>
+                        filteredUsers.map((user) => {
+                            const lastMsg = getLastMessage(user.id);
+                            const isOnline = getOnlineStatus(user.id);
+                            
+                            return (
+                                <TouchableOpacity
+                                    key={user.id}
+                                    className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4"
+                                    onPress={() => handleUserPress(user)}
+                                    activeOpacity={0.7}
+                                >
+                                    <View className="flex-row items-center">
+                                        {/* Avatar */}
+                                        <View className="relative mr-4">
+                                            <View 
+                                                className="w-14 h-14 rounded-full items-center justify-center"
+                                                style={{ backgroundColor: getRoleColor(user.role) + '20' }}
+                                            >
+                                                <Ionicons
+                                                    name={getRoleIcon(user.role)}
+                                                    size={22}
+                                                    color={getRoleColor(user.role)}
+                                                />
+                                            </View>
+                                            {isOnline && (
+                                                <View className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-white" />
+                                            )}
+                                        </View>
 
-                                    {/* User Info */}
-                                    <View style={tw`flex-1 `}>
-                                        <View style={tw`flex-row items-center justify-between mb-1`}>
-                                            <View style={tw`flex-row items-center `}>
-                                                <Text style={tw` font-bold text-gray-800 m-2`}>
+                                        {/* User Info */}
+                                        <View className="flex-1">
+                                            <View className="flex-row items-center mb-2">
+                                                <Text className="font-bold text-gray-800 mr-2 flex-1" numberOfLines={1}>
                                                     {user.name}
                                                 </Text>
-                                                <View style={[tw`px-2 py-1 rounded-full`,
-                                                { backgroundColor: getRoleColor(user.role) + '20' }]}>
-                                                    <Text style={[tw`text-xs font-semibold capitalize`,
-                                                    { color: getRoleColor(user.role) }]}>
+                                                <View 
+                                                    className="px-2 py-1 rounded-full"
+                                                    style={{ backgroundColor: getRoleColor(user.role) + '20' }}
+                                                >
+                                                    <Text 
+                                                        className="text-xs font-semibold capitalize"
+                                                        style={{ color: getRoleColor(user.role) }}
+                                                    >
                                                         {user.role.toLowerCase()}
                                                     </Text>
                                                 </View>
                                             </View>
 
-                                        </View>
-
-                                        {/* Last Message Preview */}
-                                        {(() => {
-                                            const lastMsg = getLastMessage(user.id);
-                                            return lastMsg ? (
-                                                <Text style={tw`text-gray-600 text-sm mb-1`} numberOfLines={1}>
-                                                    {lastMsg.sender.id === currentUser?.id ? '📤 ' : '📥 '}{lastMsg.content}
-                                                </Text>
+                                            {/* Last Message Preview */}
+                                            {lastMsg ? (
+                                                <View className="flex-row items-center mb-1">
+                                                    <Ionicons 
+                                                        name={lastMsg.sender.id === currentUser?.id ? "arrow-up-outline" : "arrow-down-outline"} 
+                                                        size={14} 
+                                                        color={lastMsg.sender.id === currentUser?.id ? "#3B82F6" : "#10B981"} 
+                                                    />
+                                                    <Text className="text-gray-600 text-sm ml-2 flex-1" numberOfLines={1}>
+                                                        {lastMsg.content}
+                                                    </Text>
+                                                </View>
                                             ) : (
-                                                <Text style={tw`text-gray-500 text-sm mb-1 italic`}>
-                                                    Tap to start chatting
-                                                </Text>
-                                            );
-                                        })()}
+                                                <View className="flex-row items-center mb-1">
+                                                    <Ionicons name="chatbubble-outline" size={14} color="#9CA3AF" />
+                                                    <Text className="text-gray-400 text-sm ml-2 italic">
+                                                        No messages yet
+                                                    </Text>
+                                                </View>
+                                            )}
 
-                                        <View style={tw`flex-row items-center`}>
-                                            <Ionicons name="location-outline" size={14} color="#6B7280" style={tw`mr-1`} />
-                                            <Text style={tw`text-gray-500 text-sm`}>
-                                                {user.location ? `${user.location.latitude}, ${user.location.longitude}` : 'N/A'}
-                                            </Text>
+                                            {/* Status */}
+                                            <View className="flex-row items-center">
+                                                <Ionicons name="time-outline" size={12} color="#9CA3AF" />
+                                                <Text className="text-gray-400 text-xs ml-1">
+                                                    {isOnline ? 'Online' : 'Offline'}
+                                                </Text>
+                                            </View>
                                         </View>
                                     </View>
-                                </View>
-                            </TouchableOpacity>
-                        ))
+                                </TouchableOpacity>
+                            );
+                        })
                     )}
                 </ScrollView>
             </Animated.View>

@@ -121,6 +121,7 @@ export class AuthService {
         try {
             await SecureStore.deleteItemAsync('access_token');
             await SecureStore.deleteItemAsync('refresh_token');
+            await SecureStore.deleteItemAsync('user');
         } catch (error) {
             console.error('Error clearing tokens:', error);
         }

@@ -63,4 +63,5 @@ export interface FarmUpdateRequest {
     livestock?: FarmLiveStock
     facilities?: FarmFacility;
     healthStatus?: FarmStatus;
+    assignedVeterinary?: User;
 }

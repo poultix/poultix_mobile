@@ -11,9 +11,14 @@ export default function ChatHeader() {
 
     const isOnline = (userId: string) => onlineUsers.has(userId);
 
+    const formatTime=(time: string)=>{
+        const date=new Date(time)
+        return date.toLocaleTimeString()
+    }
+
     return (
         <LinearGradient
-            colors={['#3B82F6', '#2563EB']}
+            colors={['#F59E0B', '#D97706']}
             style={tw`px-4 shadow-xl py-10`}
         >
             <View style={tw`flex-row items-center justify-between`}>
@@ -35,7 +40,7 @@ export default function ChatHeader() {
                                 }`} />
                             <Text style={tw`text-blue-100 text-sm`}>
                                 {isOnline(currentChat?.id || '')
-                                    ? 'Online' : 'Last seen recently'}
+                                    ? 'Online' :'Last seen'+ formatTime(currentChat?.createdAt || '')}
                             </Text>
                         </View>
                     </View>
@@ -44,9 +49,6 @@ export default function ChatHeader() {
                 <View style={tw`flex-row items-center`}>
                     <TouchableOpacity style={tw`bg-white bg-opacity-20 p-2 rounded-xl mr-2`}>
                         <Ionicons name="call-outline" size={20} color="white" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={tw`bg-white bg-opacity-20 p-2 rounded-xl mr-2`}>
-                        <Ionicons name="videocam-outline" size={20} color="white" />
                     </TouchableOpacity>
                     <DrawerButton />
                 </View>

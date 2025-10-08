@@ -134,7 +134,7 @@ export default function FarmerScreen() {
                             
                             <TouchableOpacity 
                                 style={tw`bg-white rounded-2xl p-4 flex-1 shadow-md border border-orange-100`}
-                                onPress={() => router.push('/communication/messages')}
+                                onPress={() => router.push('/chat')}
                             >
                                 <View style={tw`items-center`}>
                                     <Ionicons name="chatbubble-outline" size={24} color="#10B981" />

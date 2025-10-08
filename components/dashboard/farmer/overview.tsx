@@ -3,7 +3,7 @@ import { useSchedules } from "@/contexts/ScheduleContext";
 import { ScheduleStatus } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { View, Text, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function FarmerOverview() {
     const { farms, } = useFarms()
@@ -148,7 +148,7 @@ export default function FarmerOverview() {
 
                     <TouchableOpacity
                         className="flex-1 bg-purple-50 border border-purple-200 rounded-xl p-4 min-w-[45%] items-center"
-                        onPress={() => router.push('/communication/messages')}
+                        onPress={() => router.push('/chat')}
                     >
                         <Ionicons name="chatbubble-outline" size={24} color="#8B5CF6" />
                         <Text className="text-purple-500 font-semibold mt-2">Messages</Text>

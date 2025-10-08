@@ -95,7 +95,6 @@ export default function VetOverview() {
 
             {/* Today's Schedule */}
             <View style={tw`bg-white rounded-2xl p-5 shadow-sm mb-6`}>
-                <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>Today&apos;s Schedule</Text>
                 <View style={tw`flex-row justify-between items-center mb-4`}>
                     <Text style={tw`text-lg font-bold text-gray-800`}>Today&apos;s Schedule</Text>
                     <TouchableOpacity onPress={() => setSelectedTab('schedules')}>
@@ -126,9 +125,7 @@ export default function VetOverview() {
                                         <Text style={tw`text-gray-600 text-sm`}>{farm?.name}</Text>
                                         <Text style={tw`text-gray-500 text-xs`}>{schedule.farmer?.name}</Text>
                                     </View>
-                                    <Text style={tw`text-red-600 font-semibold`}>
-                                        {schedule.startTime} - {schedule.endTime}
-                                    </Text>
+
                                 </View>
 
                                 <View style={tw`flex-row items-center justify-between`}>
@@ -159,40 +156,42 @@ export default function VetOverview() {
             {/* Quick Actions */}
             <View style={tw`bg-white rounded-2xl p-5 shadow-sm mb-6`}>
                 <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>Quick Actions</Text>
-                <View style={tw`flex-row flex-wrap gap-3`}>
+
+                <View style={tw`flex-row flex-wrap justify-between`}>
                     <TouchableOpacity
-                        style={tw`flex-1 bg-red-50 border border-red-200 rounded-xl p-4 min-w-[45%]`}
+                        style={tw`w-[48%] bg-red-50 border border-red-200 rounded-xl p-4 mb-3 items-center`}
                         onPress={() => router.push('/communication/schedule-management')}
                     >
                         <Ionicons name="calendar-outline" size={24} color="#EF4444" />
-                        <Text style={tw`text-red-600 font-semibold mt-2`}>Manage Schedules</Text>
+                        <Text style={tw`text-red-600 font-semibold mt-2 text-center`}>Manage Schedules</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={tw`flex-1 bg-green-50 border border-green-200 rounded-xl p-4 min-w-[45%]`}
+                        style={tw`w-[48%] bg-green-50 border border-green-200 rounded-xl p-4 mb-3 items-center`}
                         onPress={() => router.push('/farm/nearby-farms')}
                     >
                         <Ionicons name="leaf-outline" size={24} color="#10B981" />
-                        <Text style={tw`text-green-600 font-semibold mt-2`}>View Farms</Text>
+                        <Text style={tw`text-green-600 font-semibold mt-2 text-center`}>View Farms</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={tw`flex-1 bg-blue-50 border border-blue-200 rounded-xl p-4 min-w-[45%]`}
-                        onPress={() => router.push('/communication/messages')}
+                        style={tw`w-[48%] bg-blue-50 border border-blue-200 rounded-xl p-4 items-center`}
+                        onPress={() => router.push('/chat')}
                     >
                         <Ionicons name="chatbubble-outline" size={24} color="#3B82F6" />
-                        <Text style={tw`text-blue-600 font-semibold mt-2`}>Messages</Text>
+                        <Text style={tw`text-blue-600 font-semibold mt-2 text-center`}>Messages</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={tw`flex-1 bg-purple-50 border border-purple-200 rounded-xl p-4 min-w-[45%]`}
+                        style={tw`w-[48%] bg-purple-50 border border-purple-200 rounded-xl p-4 items-center`}
                         onPress={() => router.push('/veterinary/vet-reports')}
                     >
                         <Ionicons name="document-text-outline" size={24} color="#8B5CF6" />
-                        <Text style={tw`text-purple-600 font-semibold mt-2`}>Reports</Text>
+                        <Text style={tw`text-purple-600 font-semibold mt-2 text-center`}>Reports</Text>
                     </TouchableOpacity>
                 </View>
             </View>
+
 
             {/* Farm Health Overview */}
             <View style={tw`bg-white rounded-2xl p-5 shadow-sm`}>
@@ -208,7 +207,10 @@ export default function VetOverview() {
                         <Text style={tw`text-gray-600 text-sm`}>Need Attention</Text>
                     </View>
                     <View style={tw`items-center flex-1`}>
-                        <Text style={tw`text-2xl font-bold text-blue-600`}>{((healthyFarms / totalFarms) * 100).toFixed(0)}%</Text>
+                        <Text style={tw`text-2xl font-bold text-blue-600`}>
+                            {totalFarms > 0 ? ((healthyFarms / totalFarms) * 100).toFixed(0) : 0}%
+                        </Text>
+
                         <Text style={tw`text-gray-600 text-sm`}>Success Rate</Text>
                     </View>
                 </View>

@@ -19,7 +19,8 @@ interface FarmContextType {
   getFarmsByVeterinary: (veterinaryId: string) => Promise<Farm[]>;
   getFarmsByStatus: (status: FarmStatus) => Promise<Farm[]>;
   updateFarm: (id: string, updates: FarmUpdateRequest) => Promise<void>;
-  assignVeterinary: (farmId: string, veterinaryId: string) => Promise<void>;
+  assignVeterinary: (farmId: string) => Promise<void>;
+  unassignVeterinary: (farmId: string) => Promise<void>;
   updateHealthStatus: (farmId: string, status: FarmStatus) => Promise<void>;
   deleteFarm: (id: string) => Promise<void>;
   setCurrentFarm: (farm: Farm | null) => void;
@@ -157,12 +158,12 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const assignVeterinary = async (farmId: string, veterinaryId: string): Promise<void> => {
+  const assignVeterinary = async (farmId: string): Promise<void> => {
     try {
       setLoading(true);
       setError('');
 
-      const response = await farmService.assignVeterinary(farmId, veterinaryId);
+      const response = await farmService.assignVeterinary(farmId);
 
       if (response.success && response.data) {
         setFarms(prev => prev.map(farm => farm.id === farmId ? response.data! : farm));
@@ -172,6 +173,35 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error: any) {
       console.error('Failed to assign veterinary:', error);
       setError(error.message || 'Failed to assign veterinary');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const unassignVeterinary = async (farmId: string): Promise<void> => {
+    try {
+      setLoading(true);
+      setError('');
+
+      // Find the farm and update it to remove assignedVeterinary
+      const farmToUpdate = farms.find(farm => farm.id === farmId);
+      if (!farmToUpdate) {
+        throw new Error('Farm not found');
+      }
+
+      const response = await farmService.updateFarm(farmId, {
+        assignedVeterinary: undefined
+      });
+
+      if (response.success && response.data) {
+        setFarms(prev => prev.map(farm => farm.id === farmId ? response.data! : farm));
+      } else {
+        throw new Error(response.message || 'Failed to unassign veterinary');
+      }
+    } catch (error: any) {
+      console.error('Failed to unassign veterinary:', error);
+      setError(error.message || 'Failed to unassign veterinary');
       throw error;
     } finally {
       setLoading(false);
@@ -235,6 +265,7 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
     getFarmsByStatus,
     updateFarm,
     assignVeterinary,
+    unassignVeterinary,
     updateHealthStatus,
     deleteFarm,
     setCurrentFarm,

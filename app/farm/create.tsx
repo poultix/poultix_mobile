@@ -15,9 +15,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import tw from 'twrnc';
 
-// New context imports
+// Context imports
 import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import { useFarmActions } from '@/hooks/useFarmActions';
@@ -48,7 +47,7 @@ export default function CreateFarmScreen() {
       duration: 800,
       useNativeDriver: true,
     }).start();
-  }, []);
+  }, [fadeAnim]);
 
   const getCurrentLocation = async () => {
     try {
@@ -135,57 +134,78 @@ export default function CreateFarmScreen() {
 
   if (loading || !currentUser) {
     return (
-      <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
-        <Text style={tw`text-gray-600 text-lg`}>Loading...</Text>
+      <View className="flex-1 bg-gray-50 justify-center items-center">
+        <Text className="text-gray-600 text-lg">Loading...</Text>
       </View>
     );
   }
 
   return (
-    <View style={tw`flex-1 bg-gray-50`}>
+    <View className="flex-1 bg-gray-50">
       <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
       
       <KeyboardAvoidingView 
-        style={tw`flex-1`} 
-        behavior={'padding' }
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
+        <Animated.View style={{ opacity: fadeAnim }} className="flex-1">
           {/* Header */}
-          <View style={tw` pb-4`}>
+          <View className="pb-4">
             <LinearGradient
-              colors={['#10B981', '#059669']}
-              style={tw`p-6 shadow-xl`}
+              colors={['#F59E0B', '#D97706']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              className="px-6 py-12 shadow-lg"
             >
-              <View style={tw`flex-row items-center justify-between`}>
+              <View className="flex-row items-center justify-between mb-6">
                 <TouchableOpacity
-                  style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
+                  className="p-3 rounded-full"
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
                   onPress={() => router.back()}
                 >
-                  <Ionicons name="arrow-back" size={24} color="white" />
+                  <Ionicons name="arrow-back-outline" size={24} color="white" />
                 </TouchableOpacity>
-                <View style={tw`flex-1 ml-4`}>
-                  <Text style={tw`text-white font-medium`}>Farm Management</Text>
-                  <Text style={tw`text-white text-2xl font-bold`}>Create New Farm 🏡</Text>
-                  <Text style={tw`text-green-100 text-sm`}>
-                    Set up your poultry farm
-                  </Text>
+                
+                <Text className="text-white text-xl font-bold">Create Farm</Text>
+                
+                <View className="w-12" />
+              </View>
+
+              {/* Header Content */}
+              <View className="items-center">
+                <View className="w-16 h-16 rounded-full bg-white bg-opacity-20 items-center justify-center mb-4">
+                  <Ionicons name="home-outline" size={32} color="white" />
                 </View>
+                <Text className="text-white text-2xl font-bold mb-2">New Poultry Farm</Text>
+                <Text className="text-orange-100 text-center text-sm">
+                  Set up your farm with livestock information and location
+                </Text>
               </View>
             </LinearGradient>
           </View>
 
-          <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}
-          contentContainerClassName='pb-10'>
+          <ScrollView 
+            className="flex-1 px-4" 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40, paddingTop: 20 }}
+          >
             {/* Basic Information */}
-            <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-              <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                Basic Information
-              </Text>
+            <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg -mt-6" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8 }}>
+              <View className="flex-row items-center mb-4">
+                <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mr-3">
+                  <Ionicons name="information-circle-outline" size={20} color="#3B82F6" />
+                </View>
+                <Text className="text-lg font-bold text-gray-800">
+                  Basic Information
+                </Text>
+              </View>
               <View>
-                <Text style={tw`text-gray-700 font-medium mb-2`}>Farm Name *</Text>
+                <Text className="text-gray-700 font-medium mb-2">Farm Name *</Text>
                 <TextInput
-                  style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
-                  placeholder="Enter farm name"
+                  className="bg-gray-50 rounded-xl px-4 py-4 text-gray-800 border border-gray-200"
+                  style={{ fontSize: 16 }}
+                  placeholder="Enter your farm name"
+                  placeholderTextColor="#9CA3AF"
                   value={farmName}
                   onChangeText={setFarmName}
                 />
@@ -193,35 +213,44 @@ export default function CreateFarmScreen() {
             </View>
 
             {/* Location */}
-            <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-              <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                Farm Location
-              </Text>
-              <View style={tw`mb-4`}>
-                <Text style={tw`text-gray-700 font-medium mb-2`}>
-                  Current Location {location ? '✅' : '❌'}
+            <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8 }}>
+              <View className="flex-row items-center mb-4">
+                <View className="w-10 h-10 rounded-full bg-orange-100 items-center justify-center mr-3">
+                  <Ionicons name="location-outline" size={20} color="#F59E0B" />
+                </View>
+                <Text className="text-lg font-bold text-gray-800">
+                  Farm Location
+                </Text>
+              </View>
+              <View className="mb-2">
+                <Text className="text-gray-700 font-medium mb-3">
+                  Current Location {location ? '✅' : '📍'}
                 </Text>
                 {location ? (
-                  <View style={tw`bg-green-50 border border-green-200 rounded-xl p-4`}>
-                    <Text style={tw`text-green-800 font-medium`}>Location Set Successfully</Text>
-                    <Text style={tw`text-green-600 text-sm mt-1`}>
-                      Lat: {location.latitude.toFixed(6)}, Lng: {location.longitude.toFixed(6)}
+                  <View className="bg-green-50 border-2 border-green-200 rounded-xl p-5">
+                    <View className="flex-row items-center mb-2">
+                      <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+                      <Text className="text-green-800 font-semibold ml-2">Location Set Successfully</Text>
+                    </View>
+                    <Text className="text-green-600 text-sm">
+                      Coordinates: {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
                     </Text>
                   </View>
                 ) : (
                   <TouchableOpacity
-                    style={tw`bg-blue-50 border border-blue-200 rounded-xl p-4 items-center ${
-                      isGettingLocation ? 'opacity-50' : ''
-                    }`}
+                    className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 items-center"
+                    style={{ opacity: isGettingLocation ? 0.6 : 1 }}
                     onPress={getCurrentLocation}
                     disabled={isGettingLocation}
                   >
-                    <Ionicons name="location-outline" size={24} color="#3B82F6" />
-                    <Text style={tw`text-blue-600 font-medium mt-2`}>
+                    <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center mb-3">
+                      <Ionicons name="location-outline" size={24} color="#3B82F6" />
+                    </View>
+                    <Text className="text-blue-700 font-semibold text-base">
                       {isGettingLocation ? 'Getting Location...' : 'Get Current Location'}
                     </Text>
-                    <Text style={tw`text-blue-500 text-xs mt-1 text-center`}>
-                      We need access to your location to set the farm coordinates
+                    <Text className="text-blue-500 text-sm mt-2 text-center leading-5">
+                      {isGettingLocation ? 'Please wait while we locate your position' : 'We need your location to set farm coordinates'}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -229,46 +258,71 @@ export default function CreateFarmScreen() {
             </View>
 
             {/* Livestock Information */}
-            <View style={tw`bg-white rounded-2xl p-5 mb-6 shadow-sm`}>
-              <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                Livestock Information
-              </Text>
-              <View style={tw`mb-4`}>
-                <Text style={tw`text-gray-700 font-medium mb-2`}>Total Chickens *</Text>
+            <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8 }}>
+              <View className="flex-row items-center mb-4">
+                <View className="w-10 h-10 rounded-full bg-orange-100 items-center justify-center mr-3">
+                  <Ionicons name="nutrition-outline" size={20} color="#D97706" />
+                </View>
+                <Text className="text-lg font-bold text-gray-800">
+                  Livestock Information
+                </Text>
+              </View>
+              
+              <View className="mb-5">
+                <Text className="text-gray-700 font-medium mb-2">Total Chickens *</Text>
                 <TextInput
-                  style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
+                  className="bg-gray-50 rounded-xl px-4 py-4 text-gray-800 border border-gray-200"
+                  style={{ fontSize: 16 }}
                   placeholder="Total number of chickens"
+                  placeholderTextColor="#9CA3AF"
                   value={totalChickens}
                   onChangeText={setTotalChickens}
                   keyboardType="numeric"
                 />
               </View>
-              <View style={tw`flex-row gap-3`}>
-                <View style={tw`flex-1`}>
-                  <Text style={tw`text-gray-700 font-medium mb-2`}>Healthy</Text>
+              
+              <Text className="text-gray-600 font-medium mb-3 text-sm">Health Distribution (Optional)</Text>
+              <View className="flex-row gap-3">
+                <View className="flex-1">
+                  <View className="flex-row items-center mb-2">
+                    <View className="w-3 h-3 rounded-full bg-green-500 mr-2" />
+                    <Text className="text-gray-700 font-medium text-sm">Healthy</Text>
+                  </View>
                   <TextInput
-                    style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
+                    className="bg-gray-50 rounded-xl px-3 py-3 text-gray-800 border border-gray-200"
+                    style={{ fontSize: 15 }}
                     placeholder="0"
+                    placeholderTextColor="#9CA3AF"
                     value={healthyChickens}
                     onChangeText={setHealthyChickens}
                     keyboardType="numeric"
                   />
                 </View>
-                <View style={tw`flex-1`}>
-                  <Text style={tw`text-gray-700 font-medium mb-2`}>At Risk</Text>
+                <View className="flex-1">
+                  <View className="flex-row items-center mb-2">
+                    <View className="w-3 h-3 rounded-full bg-yellow-500 mr-2" />
+                    <Text className="text-gray-700 font-medium text-sm">At Risk</Text>
+                  </View>
                   <TextInput
-                    style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
+                    className="bg-gray-50 rounded-xl px-3 py-3 text-gray-800 border border-gray-200"
+                    style={{ fontSize: 15 }}
                     placeholder="0"
+                    placeholderTextColor="#9CA3AF"
                     value={atRiskChickens}
                     onChangeText={setAtRiskChickens}
                     keyboardType="numeric"
                   />
                 </View>
-                <View style={tw`flex-1`}>
-                  <Text style={tw`text-gray-700 font-medium mb-2`}>Sick</Text>
+                <View className="flex-1">
+                  <View className="flex-row items-center mb-2">
+                    <View className="w-3 h-3 rounded-full bg-red-500 mr-2" />
+                    <Text className="text-gray-700 font-medium text-sm">Sick</Text>
+                  </View>
                   <TextInput
-                    style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
+                    className="bg-gray-50 rounded-xl px-3 py-3 text-gray-800 border border-gray-200"
+                    style={{ fontSize: 15 }}
                     placeholder="0"
+                    placeholderTextColor="#9CA3AF"
                     value={sickChickens}
                     onChangeText={setSickChickens}
                     keyboardType="numeric"
@@ -279,15 +333,31 @@ export default function CreateFarmScreen() {
 
             {/* Submit Button */}
             <TouchableOpacity
-              style={tw`bg-green-600 rounded-2xl py-4 px-6 shadow-lg mb-6 ${
-                isSubmitting ? 'opacity-50' : ''
-              }`}
+              className="rounded-2xl py-5 px-6 mb-8 shadow-lg"
+              style={{
+                backgroundColor: '#D97706',
+                opacity: isSubmitting ? 0.7 : 1,
+                shadowColor: '#D97706',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8
+              }}
               onPress={handleSubmit}
               disabled={isSubmitting}
             >
-              <Text style={tw`text-white font-bold text-lg text-center`}>
-                {isSubmitting ? 'Creating Farm...' : 'Create Farm'}
-              </Text>
+              <View className="flex-row items-center justify-center">
+                {isSubmitting && (
+                  <View className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-3" 
+                    style={{ 
+                      transform: [{ rotate: '0deg' }] // Animation would be added here
+                    }} 
+                  />
+                )}
+                <Ionicons name="home-outline" size={20} color="white" style={{ marginRight: 8 }} />
+                <Text className="text-white font-bold text-lg">
+                  {isSubmitting ? 'Creating Farm...' : 'Create Farm'}
+                </Text>
+              </View>
             </TouchableOpacity>
           </ScrollView>
         </Animated.View>

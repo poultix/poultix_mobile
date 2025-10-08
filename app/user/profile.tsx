@@ -1,30 +1,27 @@
 import DrawerButton from '@/components/DrawerButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    Animated,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Animated,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import tw from 'twrnc';
 
 export default function ProfileScreen() {
-  const { currentUser,logout } = useAuth();
+  const { currentUser, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(currentUser?.name || '');
-  // Phone property doesn't exist in User type - removing for now
-  // const [phone, setPhone] = useState(currentUser?.phone || '');
+
   const [location, setLocation] = useState(
     currentUser?.location ? `${currentUser.location.latitude}, ${currentUser.location.longitude}` : ''
   );
-  
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -37,7 +34,7 @@ export default function ProfileScreen() {
 
   const handleSave = async () => {
     if (!currentUser) return;
-    
+
     try {
       // For now, just simulate the update
       setIsEditing(false);
@@ -53,12 +50,11 @@ export default function ProfileScreen() {
       'Are you sure you want to logout?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
+        {
+          text: 'Logout',
           style: 'destructive',
           onPress: async () => {
             await logout();
-            router.replace('/auth/login');
           }
         }
       ]
@@ -67,10 +63,10 @@ export default function ProfileScreen() {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'ADMIN': return ['#7C3AED', '#6D28D9'];
-      case 'FARMER': return ['#F97316', '#EA580C'];
-      case 'VETERINARY': return ['#EF4444', '#DC2626'];
-      default: return ['#3B82F6', '#2563EB'];
+      case 'ADMIN': return { primary: '#7C3AED', secondary: '#6D28D9', light: '#EDE9FE', text: '#7C3AED' };
+      case 'FARMER': return { primary: '#F59E0B', secondary: '#D97706', light: '#FEF3C7', text: '#F59E0B' };
+      case 'VETERINARY': return { primary: '#10B981', secondary: '#059669', light: '#D1FAE5', text: '#10B981' };
+      default: return { primary: '#3B82F6', secondary: '#2563EB', light: '#DBEAFE', text: '#3B82F6' };
     }
   };
 
@@ -83,124 +79,202 @@ export default function ProfileScreen() {
     }
   };
 
+  const getRoleDescription = (role: string) => {
+    switch (role) {
+      case 'ADMIN': return 'System Administrator with full access to manage users and system settings';
+      case 'FARMER': return 'Poultry farm owner managing livestock and requesting veterinary services';
+      case 'VETERINARY': return 'Licensed veterinarian providing professional animal care services';
+      default: return 'Community member with basic access';
+    }
+  };
+
+  const getRoleFeatures = (role: string) => {
+    switch (role) {
+      case 'ADMIN':
+        return [
+          { icon: 'people-outline', title: 'User Management', description: 'Manage all system users' },
+          { icon: 'analytics-outline', title: 'System Analytics', description: 'View system statistics' },
+          { icon: 'server-outline', title: 'System Health', description: 'Monitor system status' },
+          { icon: 'newspaper-outline', title: 'Content Management', description: 'Manage news and announcements' }
+        ];
+      case 'FARMER':
+        return [
+          { icon: 'home-outline', title: 'Farm Management', description: 'Manage your poultry farms' },
+          { icon: 'calendar-outline', title: 'Schedule Visits', description: 'Book veterinary appointments' },
+          { icon: 'chatbubbles-outline', title: 'Communication', description: 'Chat with veterinarians' },
+          { icon: 'analytics-outline', title: 'Farm Analytics', description: 'View farm performance' }
+        ];
+      case 'VETERINARY':
+        return [
+          { icon: 'medical-outline', title: 'Medical Services', description: 'Provide veterinary care' },
+          { icon: 'calendar-outline', title: 'Appointment Management', description: 'Manage your schedule' },
+          { icon: 'chatbubbles-outline', title: 'Client Communication', description: 'Chat with farmers' },
+          { icon: 'document-text-outline', title: 'Medical Records', description: 'Maintain health records' }
+        ];
+      default: return [];
+    }
+  };
+
   if (!currentUser) {
     return (
-      <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
-        <Text style={tw`text-gray-600`}>Please log in to view profile</Text>
+      <View className="flex-1 bg-gray-50 justify-center items-center">
+        <Ionicons name="person-outline" size={64} color="#D1D5DB" />
+        <Text className="text-gray-600 text-lg mt-4">Please log in to view profile</Text>
       </View>
     );
   }
 
-  return (
-    <View style={tw`flex-1 bg-gray-50`}>
-      <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
-        {/* Header */}
-        <View style={tw` pb-4`}>
-          <LinearGradient
-            colors={getRoleColor(currentUser.role) as any}
-            style={tw` p-8 shadow-xl`}
-          >
-            <View style={tw`flex-row items-center justify-between mb-6`}>
-              <TouchableOpacity
-                style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
-                onPress={() => router.back()}
-              >
-                <Ionicons name="arrow-back-outline" size={24} color="white" />
-              </TouchableOpacity>
-              
-              <Text style={tw`text-white text-xl font-bold`}>My Profile</Text>
-              
-              <DrawerButton />
-            </View>
+  const roleColors = getRoleColor(currentUser.role);
+  const roleFeatures = getRoleFeatures(currentUser.role);
 
-            {/* Profile Avatar */}
-            <View style={tw`items-center mb-6`}>
-              <View style={tw`w-24 h-24 bg-white bg-opacity-20 rounded-full items-center justify-center mb-4`}>
-                <Ionicons name={getRoleIcon(currentUser.role)} size={40} color="white" />
-              </View>
-              <Text style={tw`text-white text-2xl font-bold`}>{currentUser.name}</Text>
-              <View style={tw`bg-white bg-opacity-20 px-4 py-2 rounded-full mt-2`}>
-                <Text style={tw`text-white font-semibold capitalize`}>
-                  {currentUser.role}
-                </Text>
-              </View>
-            </View>
-          </LinearGradient>
+  return (
+    <View className="flex-1 bg-gray-50">
+      <Animated.View style={{ opacity: fadeAnim }} className="flex-1">
+        {/* Compact Header */}
+        <View
+          className="px-6 py-8 shadow-lg"
+          style={{
+            backgroundColor: roleColors.primary,
+            backgroundImage: `linear-gradient(135deg, ${roleColors.primary} 0%, ${roleColors.secondary} 100%)`
+          }}
+        >
+          <View className="flex-row items-center justify-between">
+            <TouchableOpacity
+              className="bg-white/20 p-3 rounded-full"
+              onPress={() => router.back()}
+            >
+              <Ionicons name="arrow-back-outline" size={24} color="white" />
+            </TouchableOpacity>
+
+            <Text className="text-white text-xl font-bold">My Profile</Text>
+
+            <DrawerButton />
+          </View>
         </View>
 
-        <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
-          {/* Profile Information */}
-          <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-            <View style={tw`flex-row justify-between items-center mb-4`}>
-              <Text style={tw`text-lg font-bold text-gray-800`}>
-                Personal Information
+        <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}
+          contentContainerClassName='py-10'>
+          {/* Profile Header Card */}
+          <View className="bg-white rounded-2xl p-6 shadow-lg -mt-4 mb-6">
+            {/* Profile Avatar & Info */}
+            <View className="items-center mb-6">
+              <View
+                className="w-24 h-24 rounded-full items-center justify-center mb-4 border-4"
+                style={{
+                  backgroundColor: roleColors.light,
+                  borderColor: roleColors.primary
+                }}
+              >
+                <Ionicons name={getRoleIcon(currentUser.role)} size={40} color={roleColors.primary} />
+              </View>
+              <Text className="text-gray-800 text-2xl font-bold mb-2">{currentUser.name}</Text>
+              <View
+                className="px-4 py-2 rounded-full mb-3"
+                style={{ backgroundColor: roleColors.light }}
+              >
+                <Text className="font-semibold capitalize" style={{ color: roleColors.primary }}>
+                  {currentUser.role.toLowerCase()}
+                </Text>
+              </View>
+              <Text className="text-gray-600 text-sm text-center px-4 leading-5">
+                {getRoleDescription(currentUser.role)}
               </Text>
+            </View>
+          </View>
+
+          {/* Personal Information */}
+          <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+            <View className="flex-row justify-between items-center mb-4">
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 rounded-full bg-blue-100 items-center justify-center mr-3">
+                  <Ionicons name="person-outline" size={16} color="#3B82F6" />
+                </View>
+                <Text className="text-lg font-bold text-gray-800">
+                  Personal Information
+                </Text>
+              </View>
               <TouchableOpacity
                 onPress={() => setIsEditing(!isEditing)}
-                style={tw`px-4 py-2 rounded-xl ${isEditing ? 'bg-gray-500' : 'bg-blue-500'}`}
+                className={`px-4 py-2 rounded-xl ${isEditing ? 'border-2 border-gray-400' : 'border-2 border-transparent'}`}
+                style={{
+                  backgroundColor: isEditing ? '#F3F4F6' : roleColors.primary
+                }}
               >
-                <Text style={tw`text-white font-semibold`}>
+                <Text className={`font-semibold ${isEditing ? 'text-gray-700' : 'text-white'}`}>
                   {isEditing ? 'Cancel' : 'Edit'}
                 </Text>
               </TouchableOpacity>
             </View>
-            
-            <View style={tw`mb-4`}>
-              <Text style={tw`text-gray-600 text-sm mb-2`}>Full Name</Text>
+
+            <View className="mb-4">
+              <Text className="text-gray-600 text-sm mb-2 font-medium">Full Name</Text>
               {isEditing ? (
                 <TextInput
-                  style={tw`border border-gray-300 rounded-xl p-4 text-gray-800`}
+                  className="bg-gray-50 rounded-xl px-4 py-3 text-gray-800 border-2 border-transparent"
+                  style={{ borderColor: isEditing ? roleColors.primary : 'transparent' }}
                   value={name}
                   onChangeText={setName}
                   placeholder="Enter your name"
                 />
               ) : (
-                <Text style={tw`text-gray-800 font-medium text-base`}>{currentUser.name}</Text>
+                <Text className="text-gray-800 font-semibold text-base">{currentUser.name}</Text>
               )}
             </View>
 
-            <View style={tw`mb-4`}>
-              <Text style={tw`text-gray-600 text-sm mb-2`}>Email</Text>
-              <Text style={tw`text-gray-800 font-medium text-base`}>{currentUser.email}</Text>
+            <View className="mb-4">
+              <Text className="text-gray-600 text-sm mb-2 font-medium">Email Address</Text>
+              <View className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center">
+                <Ionicons name="mail-outline" size={18} color={roleColors.primary} />
+                <Text className="text-gray-800 font-semibold text-base ml-3">{currentUser.email}</Text>
+              </View>
             </View>
 
-            <View style={tw`mb-4`}>
-              <Text style={tw`text-gray-600 text-sm mb-2`}>Phone</Text>
+            <View className="mb-4">
+              <Text className="text-gray-600 text-sm mb-2 font-medium">Phone Number</Text>
               {isEditing ? (
                 <TextInput
-                  style={tw`border border-gray-300 rounded-xl p-4 text-gray-800`}
+                  className="bg-gray-50 rounded-xl px-4 py-3 text-gray-500"
                   value="N/A"
                   placeholder="Phone not available"
                   editable={false}
                   keyboardType="phone-pad"
                 />
               ) : (
-                <Text style={tw`text-gray-800 font-medium text-base`}>N/A</Text>
+                <View className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center">
+                  <Ionicons name="call-outline" size={18} color="#9CA3AF" />
+                  <Text className="text-gray-500 font-medium text-base ml-3">Not available</Text>
+                </View>
               )}
             </View>
 
-            <View style={tw`mb-4`}>
-              <Text style={tw`text-gray-600 text-sm mb-2`}>Location</Text>
+            <View className="mb-4">
+              <Text className="text-gray-600 text-sm mb-2 font-medium">Location</Text>
               {isEditing ? (
                 <TextInput
-                  style={tw`border border-gray-300 rounded-xl p-4 text-gray-800`}
+                  className="bg-gray-50 rounded-xl px-4 py-3 text-gray-800 border-2 border-transparent"
+                  style={{ borderColor: isEditing ? roleColors.primary : 'transparent' }}
                   value={location}
                   onChangeText={setLocation}
                   placeholder="Enter your location"
                 />
               ) : (
-                <Text style={tw`text-gray-800 font-medium text-base`}>
-                  {currentUser.location ? `${currentUser.location.latitude}, ${currentUser.location.longitude}` : 'N/A'}
-                </Text>
+                <View className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center">
+                  <Ionicons name="location-outline" size={18} color={roleColors.primary} />
+                  <Text className="text-gray-800 font-semibold text-base ml-3">
+                    {currentUser.location ? `${currentUser.location.latitude}, ${currentUser.location.longitude}` : 'Not specified'}
+                  </Text>
+                </View>
               )}
             </View>
 
             {isEditing && (
               <TouchableOpacity
-                style={tw`bg-green-500 rounded-xl p-4 mt-4`}
+                className="rounded-xl p-4 mt-4 flex-row items-center justify-center"
+                style={{ backgroundColor: roleColors.primary }}
                 onPress={handleSave}
               >
-                <Text style={tw`text-white text-center font-bold`}>
+                <Ionicons name="checkmark-outline" size={20} color="white" style={{ marginRight: 8 }} />
+                <Text className="text-white text-center font-bold">
                   Save Changes
                 </Text>
               </TouchableOpacity>
@@ -208,50 +282,139 @@ export default function ProfileScreen() {
           </View>
 
           {/* Role Information */}
-          <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-            <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-              Role Information
-            </Text>
-            <View style={tw`flex-row justify-between mb-2`}>
-              <Text style={tw`text-gray-600`}>Role</Text>
-              <Text style={tw`text-gray-800 font-medium capitalize`}>{currentUser.role.toLowerCase()}</Text>
+          <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+            <View className="flex-row items-center mb-4">
+              <View
+                className="w-8 h-8 rounded-full items-center justify-center mr-3"
+                style={{ backgroundColor: roleColors.light }}
+              >
+                <Ionicons name="shield-outline" size={16} color={roleColors.primary} />
+              </View>
+              <Text className="text-lg font-bold text-gray-800">
+                Role Information
+              </Text>
             </View>
-            <View style={tw`flex-row justify-between mb-2`}>
-              <Text style={tw`text-gray-600`}>Status</Text>
-              <Text style={tw`text-green-600 font-medium`}>{currentUser.isActive ? 'Active' : 'Inactive'}</Text>
+            <View
+              className="p-4 rounded-xl mb-4"
+              style={{ backgroundColor: roleColors.light }}
+            >
+              <View className="flex-row items-center mb-3">
+                <View
+                  className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                  style={{ backgroundColor: roleColors.primary }}
+                >
+                  <Ionicons name={getRoleIcon(currentUser.role)} size={24} color="white" />
+                </View>
+                <View className="flex-1">
+                  <Text className="font-bold text-lg" style={{ color: roleColors.text }}>
+                    {currentUser.role.toLowerCase().replace(/^\w/, c => c.toUpperCase())}
+                  </Text>
+                  <Text className="text-gray-600 text-sm">
+                    {getRoleDescription(currentUser.role)}
+                  </Text>
+                </View>
+              </View>
+              <View className="flex-row justify-between items-center">
+                <Text className="text-gray-600 font-medium">Account Status</Text>
+                <View className="flex-row items-center">
+                  <View className={`w-2 h-2 rounded-full mr-2 ${currentUser.isActive ? 'bg-green-500' : 'bg-red-500'}`} />
+                  <Text className={`font-semibold ${currentUser.isActive ? 'text-green-600' : 'text-red-600'}`}>
+                    {currentUser.isActive ? 'Active' : 'Inactive'}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
 
+          {/* Role Features */}
+          {roleFeatures.length > 0 && (
+            <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+              <View className="flex-row items-center mb-4">
+                <View
+                  className="w-8 h-8 rounded-full items-center justify-center mr-3"
+                  style={{ backgroundColor: roleColors.light }}
+                >
+                  <Ionicons name="flash-outline" size={16} color={roleColors.primary} />
+                </View>
+                <Text className="text-lg font-bold text-gray-800">
+                  Your Capabilities
+                </Text>
+              </View>
+              <View className="space-y-3">
+                {roleFeatures.map((feature, index) => (
+                  <View key={index} className="flex-row items-start p-3 bg-gray-50 rounded-xl">
+                    <View
+                      className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                      style={{ backgroundColor: roleColors.light }}
+                    >
+                      <Ionicons name={feature.icon as any} size={20} color={roleColors.primary} />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="font-semibold text-gray-800 mb-1">{feature.title}</Text>
+                      <Text className="text-gray-600 text-sm">{feature.description}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
           {/* Account Actions */}
-          <View style={tw`bg-white rounded-2xl p-5 mb-6 shadow-sm`}>
-            <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-              Account Actions
-            </Text>
-            
+          <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+            <View className="flex-row items-center mb-4">
+              <View className="w-8 h-8 rounded-full bg-gray-200 items-center justify-center mr-3">
+                <Ionicons name="settings-outline" size={16} color="#6B7280" />
+              </View>
+              <Text className="text-lg font-bold text-gray-800">
+                Account Actions
+              </Text>
+            </View>
+
             <TouchableOpacity
-              style={tw`flex-row items-center p-4 bg-gray-50 rounded-xl mb-3`}
+              className="flex-row items-center p-4 bg-gray-50 rounded-xl mb-3 border-2 border-transparent"
               onPress={() => router.push('/settings')}
             >
-              <Ionicons name="settings-outline" size={24} color="#6B7280" />
-              <Text style={tw`text-gray-800 font-medium ml-3 flex-1`}>Settings</Text>
+              <View
+                className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                style={{ backgroundColor: roleColors.light }}
+              >
+                <Ionicons name="settings-outline" size={20} color={roleColors.primary} />
+              </View>
+              <View className="flex-1">
+                <Text className="text-gray-800 font-semibold">Settings</Text>
+                <Text className="text-gray-500 text-sm">Manage your preferences</Text>
+              </View>
               <Ionicons name="chevron-forward-outline" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={tw`flex-row items-center p-4 bg-gray-50 rounded-xl mb-3`}
+              className="flex-row items-center p-4 bg-gray-50 rounded-xl mb-3 border-2 border-transparent"
               onPress={() => router.push('/user/history')}
             >
-              <Ionicons name="time-outline" size={24} color="#6B7280" />
-              <Text style={tw`text-gray-800 font-medium ml-3 flex-1`}>History</Text>
+              <View
+                className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                style={{ backgroundColor: roleColors.light }}
+              >
+                <Ionicons name="time-outline" size={20} color={roleColors.primary} />
+              </View>
+              <View className="flex-1">
+                <Text className="text-gray-800 font-semibold">Activity History</Text>
+                <Text className="text-gray-500 text-sm">View your recent activities</Text>
+              </View>
               <Ionicons name="chevron-forward-outline" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={tw`flex-row items-center p-4 bg-red-50 rounded-xl`}
+              className="flex-row items-center p-4 bg-red-50 rounded-xl border-2 border-red-100"
               onPress={handleLogout}
             >
-              <Ionicons name="log-out-outline" size={24} color="#EF4444" />
-              <Text style={tw`text-red-600 font-medium ml-3 flex-1`}>Logout</Text>
+              <View className="w-10 h-10 bg-red-100 rounded-full items-center justify-center mr-3">
+                <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-red-600 font-semibold">Sign Out</Text>
+                <Text className="text-red-400 text-sm">Logout from your account</Text>
+              </View>
               <Ionicons name="chevron-forward-outline" size={20} color="#EF4444" />
             </TouchableOpacity>
           </View>

@@ -46,8 +46,8 @@ export class FarmService {
     }
 
     // Assign Veterinary to Farm
-    async assignVeterinary(farmId: string, veterinaryId: string): Promise<ApiResponse<Farm>> {
-        return await apiClient.patch<Farm>(API_ENDPOINTS.FARMS.ASSIGN_VETERINARY(farmId, veterinaryId));
+    async assignVeterinary(farmId: string): Promise<ApiResponse<Farm>> {
+        return await apiClient.patch<Farm>(API_ENDPOINTS.FARMS.ASSIGN_VETERINARY(farmId));
     }
 
     // Update Farm Health Status

@@ -55,7 +55,7 @@ export const API_ENDPOINTS = {
         BY_STATUS: (status: string) => `/farms/status/${status}`,
         ACTIVE: '/farms/active',
         UPDATE: (id: string) => `/farms/${id}`,
-        ASSIGN_VETERINARY: (id: string, veterinaryId: string) => `/farms/${id}/assign-veterinary?veterinaryId=${veterinaryId}`,
+        ASSIGN_VETERINARY: (id: string) => `/farms/${id}/assign-veterinary`,
         UPDATE_HEALTH_STATUS: (id: string, status: string) => `/farms/${id}/health-status?status=${status}`,
         DEACTIVATE: (id: string) => `/farms/${id}/deactivate`,
         DELETE: (id: string) => `/farms/${id}`,

@@ -29,7 +29,7 @@ export default function ScheduleManagementScreen() {
     const { currentUser } = useAuth();
     const { schedules, currentSchedule, setCurrentSchedule, loading } = useSchedules();
     const { updateSchedule } = useScheduleActions();
-
+console.log(schedules)
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -44,9 +44,9 @@ export default function ScheduleManagementScreen() {
     const filteredSchedules = schedules.filter(schedule => {
         switch (selectedTab) {
             case 'pending':
-                return schedule.status === ScheduleStatus.IN_PROGRESS;
+                return schedule.status === ScheduleStatus.SCHEDULED;
             case 'approved':
-                return schedule.status === ScheduleStatus.COMPLETED;
+                return schedule.status === ScheduleStatus.IN_PROGRESS;
             case 'completed':
                 return schedule.status === ScheduleStatus.COMPLETED;
             default:
@@ -92,6 +92,11 @@ export default function ScheduleManagementScreen() {
         }
     };
 
+    const formatTime=(time:string)=>{
+        const [hours, minutes] = time.split(':');
+        return `${hours}:${minutes}`;
+    }
+
     if (loading || !currentUser) {
         return (
             <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
@@ -106,10 +111,10 @@ export default function ScheduleManagementScreen() {
             
             <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
                 {/* Header */}
-                <View style={tw`px-4 pt-2 pb-4`}>
+                <View style={tw`pb-4`}>
                     <LinearGradient
-                        colors={['#3B82F6', '#2563EB']}
-                        style={tw`rounded-3xl p-6 shadow-xl`}
+                        colors={['#F59E0B', '#D97706']}
+                        style={tw` p-6 shadow-xl`}
                     >
                         <View style={tw`flex-row items-center justify-between`}>
                             <TouchableOpacity
@@ -120,7 +125,7 @@ export default function ScheduleManagementScreen() {
                             </TouchableOpacity>
                             <View style={tw`flex-1 ml-4`}>
                                 <Text style={tw`text-white font-medium`}>Schedule Management</Text>
-                                <Text style={tw`text-white text-2xl font-bold`}>Appointments 📅</Text>
+                                <Text style={tw`text-white text-2xl font-bold`}>Appointments </Text>
                                 <Text style={tw`text-blue-100 text-sm`}>
                                     Manage your veterinary appointments
                                 </Text>
@@ -135,7 +140,7 @@ export default function ScheduleManagementScreen() {
                         {(['pending', 'approved', 'completed'] as const).map((tab) => (
                             <TouchableOpacity
                                 key={tab}
-                                style={tw`flex-1 py-3 px-4 rounded-xl ${selectedTab === tab ? 'bg-blue-500' : ''}`}
+                                style={tw`flex-1 py-3 px-4 rounded-xl ${selectedTab === tab ? 'bg-amber-500' : ''}`}
                                 onPress={() => setSelectedTab(tab)}
                             >
                                 <Text style={tw`text-center font-medium ${selectedTab === tab ? 'text-white' : 'text-gray-600'}`}>
@@ -192,7 +197,7 @@ export default function ScheduleManagementScreen() {
                                 <View style={tw`flex-row items-center justify-between pt-3 border-t border-gray-100`}>
                                     <View>
                                         <Text style={tw`text-blue-600 font-medium`}>{new Date(schedule.scheduledDate).toLocaleDateString()}</Text>
-                                        <Text style={tw`text-gray-500 text-sm`}>{schedule.scheduledDate.toLocaleDateString()|| 'TBD'}</Text>
+                                        <Text style={tw`text-gray-500 text-sm`}>{formatTime(schedule.scheduledDate)|| 'TBD'}</Text>
                                     </View>
                                     
                                     {selectedTab === 'pending' && (

@@ -11,7 +11,7 @@ export default function AdminDataList() {
     const { users } = useUsers();
     const { farms } = useFarms();
     const { schedules } = useSchedules();
-    const [selectedTab, setSelectedTab] = useState<'overview' | 'users' | 'farms' | 'schedules'>('overview');
+    const [selectedTab, setSelectedTab] = useState<'users' | 'farms' | 'schedules'>('users');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedFilter, setSelectedFilter] = useState<string>('all');
 
@@ -96,6 +96,52 @@ export default function AdminDataList() {
 
     return (
         <View style={tw`px-4`}>
+            {/* Tab Navigation */}
+            <View style={tw`bg-white rounded-2xl p-2 mb-4 shadow-sm`}>
+                <View style={tw`flex-row`}>
+                    {(['users', 'farms', 'schedules'] as const).map((tab) => (
+                        <TouchableOpacity
+                            key={tab}
+                            style={[
+                                tw`flex-1 py-3 px-4 rounded-xl`,
+                                selectedTab === tab ? tw`bg-amber-500` : tw`bg-transparent`
+                            ]}
+                            onPress={() => {
+                                setSelectedTab(tab);
+                                setSelectedFilter('all'); // Reset filter when changing tabs
+                            }}
+                        >
+                            <Text style={[
+                                tw`text-center font-semibold capitalize`,
+                                selectedTab === tab ? tw`text-white` : tw`text-gray-600`
+                            ]}>
+                                {tab}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            </View>
+
+            {/* Data Count Header */}
+            <View style={tw`bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4`}>
+                <View style={tw`flex-row items-center justify-between`}>
+                    <View>
+                        <Text style={tw`text-amber-800 font-bold text-lg capitalize`}>{selectedTab}</Text>
+                        <Text style={tw`text-amber-600 text-sm`}>{data.length} items found</Text>
+                    </View>
+                    <View style={tw`bg-amber-500 p-3 rounded-full`}>
+                        <Ionicons 
+                            name={
+                                selectedTab === 'users' ? 'people-outline' :
+                                selectedTab === 'farms' ? 'leaf-outline' : 'calendar-outline'
+                            } 
+                            size={24} 
+                            color="white" 
+                        />
+                    </View>
+                </View>
+            </View>
+
             {/* Search and Filter */}
             <View style={tw`bg-white rounded-2xl p-4 mb-4 shadow-sm`}>
                 <View style={tw`flex-row items-center mb-3`}>
@@ -107,7 +153,7 @@ export default function AdminDataList() {
                             onChangeText={setSearchQuery}
                         />
                     </View>
-                    <TouchableOpacity style={tw`bg-blue-500 p-3 rounded-xl`}>
+                    <TouchableOpacity style={tw`bg-amber-500 p-3 rounded-xl`}>
                         <Ionicons name="search-outline" size={20} color="white" />
                     </TouchableOpacity>
                 </View>
@@ -120,7 +166,7 @@ export default function AdminDataList() {
                                 style={[
                                     tw`px-4 py-2 rounded-full border`,
                                     selectedFilter === option.key
-                                        ? tw`bg-blue-500 border-blue-500`
+                                        ? tw`bg-amber-500 border-amber-500`
                                         : tw`bg-white border-gray-200`
                                 ]}
                                 onPress={() => setSelectedFilter(option.key)}
@@ -139,7 +185,28 @@ export default function AdminDataList() {
 
             {/* Data List */}
             <ScrollView showsVerticalScrollIndicator={false}>
-                {data.map((item: any) => (
+                {data.length === 0 ? (
+                    <View style={tw`bg-white rounded-2xl p-8 items-center`}>
+                        <View style={tw`bg-amber-100 p-6 rounded-full mb-4`}>
+                            <Ionicons 
+                                name={
+                                    selectedTab === 'users' ? 'people-outline' :
+                                    selectedTab === 'farms' ? 'leaf-outline' : 'calendar-outline'
+                                } 
+                                size={48} 
+                                color="#D97706" 
+                            />
+                        </View>
+                        <Text style={tw`text-gray-800 font-bold text-lg mb-2`}>No {selectedTab} found</Text>
+                        <Text style={tw`text-gray-600 text-center`}>
+                            {searchQuery ? 
+                                `No ${selectedTab} match your search criteria` : 
+                                `No ${selectedTab} available in the system`
+                            }
+                        </Text>
+                    </View>
+                ) : (
+                    data.map((item: any) => (
                     <TouchableOpacity
                         key={item.id}
                         style={tw`bg-white rounded-2xl p-4 mb-3 shadow-sm`}
@@ -210,7 +277,7 @@ export default function AdminDataList() {
                                     <Text style={tw`font-bold text-gray-800`}>{item.title}</Text>
                                     <Text style={tw`text-gray-600`}>{item.description}</Text>
                                     <Text style={tw`text-sm text-gray-500`}>
-                                        {item.scheduledDate.toLocaleDateString()} • {item.startTime}-{item.endTime}
+                                        {new Date(item.scheduledDate).toLocaleDateString()}
                                     </Text>
                                 </View>
                                 <View style={[
@@ -229,7 +296,8 @@ export default function AdminDataList() {
                             </View>
                         )}
                     </TouchableOpacity>
-                ))}
+                    ))
+                )}
             </ScrollView>
         </View>
     );

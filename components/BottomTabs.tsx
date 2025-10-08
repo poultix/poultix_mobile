@@ -1,15 +1,15 @@
-import React from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { router, usePathname } from 'expo-router';
-import tw from 'twrnc';
-import * as Haptics from 'expo-haptics';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { router, usePathname } from 'expo-router';
+import React from 'react';
+import {
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import tw from 'twrnc';
 
 interface TabItem {
     key: string;
@@ -94,7 +94,7 @@ export default function BottomTabs({ style }: BottomTabsProps) {
     const isTabActive = (tabKey: string) => {
         // Determine active tab based on current pathname
         if (pathname.includes('/dashboard') || pathname === '/') return tabKey === 'home';
-        if (pathname.includes('/communication/messages') || pathname.includes('/user/directory') || pathname === '/chat') return tabKey === 'chat';
+        if (pathname.includes('/chat') || pathname.includes('/user/directory') || pathname === '/chat') return tabKey === 'chat';
         if (pathname.includes('/general/news') || pathname === '/news') return tabKey === 'news';
         if (pathname.includes('/user/profile') || pathname.includes('/settings/')) return tabKey === 'profile';
         return false; // No default active tab, rely on pathname detection

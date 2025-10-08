@@ -22,7 +22,6 @@ import tw from 'twrnc';
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
-import { useSchedules } from '@/contexts/ScheduleContext';
 import BottomTabs from '@/components/BottomTabs';
 const { width } = Dimensions.get('window');
 const isLargePhone = width >= 428;
@@ -31,12 +30,11 @@ export default function FarmDataScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR'>('ALL');
+  const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR' | 'MY_FARMS'>('ALL');
   
   // Use new contexts
   const { currentUser } = useAuth();
-  const { farms, loading,setCurrentFarm } = useFarms();
-  const { schedules } = useSchedules();
+  const { farms, loading, setCurrentFarm, assignVeterinary, unassignVeterinary } = useFarms();
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -56,12 +54,14 @@ export default function FarmDataScreen() {
     }
     
     // Apply status filter
-    if (selectedFilter !== 'ALL') {
+    if (selectedFilter === 'MY_FARMS') {
+      filtered = filtered.filter(farm => farm.assignedVeterinary?.id === currentUser?.id);
+    } else if (selectedFilter !== 'ALL') {
       filtered = filtered.filter(farm => farm.healthStatus === selectedFilter);
     }
     
     return filtered;
-  }, [farms, searchQuery, selectedFilter]);
+  }, [farms, searchQuery, selectedFilter, currentUser?.id]);
 
   // Calculate overall stats
   const stats = useMemo(() => {
@@ -109,7 +109,33 @@ export default function FarmDataScreen() {
   const handleFarmPress = (farm: Farm) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     setCurrentFarm(farm)
-    router.push(`/farm/farm-detail`);
+    router.push(`/farm/farm-detail` );
+  };
+
+  const handleAssignFarm = async (farm: Farm) => {
+    if (!currentUser) return;
+    
+    try {
+      await assignVeterinary(farm.id);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    } catch (error) {
+      console.error('Error assigning farm:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+    }
+  };
+
+  const handleRemoveFarm = async (farm: Farm) => {
+    try {
+      await unassignVeterinary(farm.id);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    } catch (error) {
+      console.error('Error removing farm assignment:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+    }
+  };
+
+  const isAssignedToCurrentUser = (farm: Farm): boolean => {
+    return farm.assignedVeterinary?.id === currentUser?.id;
   };
 
   const getHealthStatusColor = (status: FarmStatus) => {
@@ -133,7 +159,7 @@ export default function FarmDataScreen() {
     return (
       <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <View style={tw`items-center`}>
-          <ActivityIndicator size="large" color="#10B981" />
+          <ActivityIndicator size="large" color="#D97706" />
           <Text style={tw`text-gray-600 text-lg mt-4`}>Loading farms...</Text>
         </View>
       </View>
@@ -144,9 +170,11 @@ export default function FarmDataScreen() {
     return (
       <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
         <View style={tw`items-center p-8`}>
-          <Ionicons name="home-outline" size={64} color="#9CA3AF" />
-          <Text style={tw`text-gray-600 text-lg mt-4`}>No farms available</Text>
-          <Text style={tw`text-gray-500 text-sm text-center mt-2`}>
+          <View style={tw`bg-amber-100 p-6 rounded-full mb-4`}>
+            <Ionicons name="home-outline" size={64} color="#D97706" />
+          </View>
+          <Text style={tw`text-gray-800 text-xl font-bold mb-2`}>No farms available</Text>
+          <Text style={tw`text-gray-600 text-sm text-center`}>
             Farms will appear here once they are registered in the system
           </Text>
         </View>
@@ -159,7 +187,7 @@ export default function FarmDataScreen() {
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
         {/* Header */}
         <LinearGradient
-          colors={['#10B981', '#059669']}
+          colors={['#F59E0B', '#D97706']}
           style={tw`p-6 shadow-xl`}
         >
           <View style={tw`flex-row items-center justify-between mb-4`}>
@@ -168,8 +196,18 @@ export default function FarmDataScreen() {
                 Farm Directory
               </Text>
               <Text style={tw`text-white text-2xl font-bold`}>
-                All Farms 🏡
+                {selectedFilter === 'MY_FARMS' ? 'My Assigned Farms' : 'All Farms'}
               </Text>
+              {currentUser?.role === 'VETERINARY' && (
+                <TouchableOpacity
+                  style={tw`bg-white bg-opacity-20 px-3 py-1 rounded-full mt-2 self-start`}
+                  onPress={() => setSelectedFilter(selectedFilter === 'MY_FARMS' ? 'ALL' : 'MY_FARMS')}
+                >
+                  <Text style={tw`text-white text-xs font-semibold`}>
+                    {selectedFilter === 'MY_FARMS' ? 'Show All Farms' : 'Show My Farms'}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
             <DrawerButton />
           </View>
@@ -179,15 +217,15 @@ export default function FarmDataScreen() {
             <View style={tw`flex-row justify-between`}>
               <View style={tw`items-center flex-1`}>
                 <Text style={tw`text-white text-2xl font-bold`}>{stats.totalFarms}</Text>
-                <Text style={tw`text-green-100 text-xs font-medium`}>Total Farms</Text>
+                <Text style={tw`text-amber-100 text-xs font-medium`}>Total Farms</Text>
               </View>
               <View style={tw`items-center flex-1`}>
-                <Text style={tw`text-green-200 text-2xl font-bold`}>{stats.totalLivestock}</Text>
-                <Text style={tw`text-green-100 text-xs font-medium`}>Total Birds</Text>
+                <Text style={tw`text-amber-200 text-2xl font-bold`}>{stats.totalLivestock}</Text>
+                <Text style={tw`text-amber-100 text-xs font-medium`}>Total Birds</Text>
               </View>
               <View style={tw`items-center flex-1`}>
-                <Text style={tw`text-green-200 text-2xl font-bold`}>{stats.healthPercentage}%</Text>
-                <Text style={tw`text-green-100 text-xs font-medium`}>Healthy</Text>
+                <Text style={tw`text-amber-200 text-2xl font-bold`}>{stats.healthPercentage}%</Text>
+                <Text style={tw`text-amber-100 text-xs font-medium`}>Healthy</Text>
               </View>
             </View>
           </View>
@@ -227,14 +265,21 @@ export default function FarmDataScreen() {
                   activeOpacity={0.7}
                 >
                   {/* Farm Icon */}
-                  <View style={tw`w-12 h-12 rounded-full bg-green-100 items-center justify-center mr-4`}>
-                    <Ionicons name="home" size={20} color="#10B981" />
+                  <View style={tw`w-12 h-12 rounded-full bg-amber-100 items-center justify-center mr-4`}>
+                    <Ionicons name="home" size={20} color="#D97706" />
                   </View>
 
                   {/* Farm Info */}
                   <View style={tw`flex-1`}>
                     <View style={tw`flex-row items-center justify-between mb-1`}>
-                      <Text style={tw`text-lg font-semibold text-gray-900`}>{farm.name}</Text>
+                      <View style={tw`flex-row items-center flex-1`}>
+                        <Text style={tw`text-lg font-semibold text-gray-900`}>{farm.name}</Text>
+                        {currentUser?.role === 'VETERINARY' && isAssignedToCurrentUser(farm) && (
+                          <View style={tw`bg-amber-100 px-2 py-1 rounded-full ml-2`}>
+                            <Text style={tw`text-amber-700 text-xs font-semibold`}>MY FARM</Text>
+                          </View>
+                        )}
+                      </View>
                       <View style={tw`${healthColor.bg} ${healthColor.border} border px-2 py-1 rounded-full`}>
                         <Text style={tw`${healthColor.text} text-xs font-medium`}>{farm.healthStatus}</Text>
                       </View>
@@ -252,8 +297,40 @@ export default function FarmDataScreen() {
                     </Text>
                   </View>
 
-                  {/* Arrow */}
-                  <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                  {/* Assignment Button for Veterinary Users */}
+                  {currentUser?.role === 'VETERINARY' ? (
+                    <TouchableOpacity
+                      style={[
+                        tw`px-4 py-2 rounded-xl flex-row items-center`,
+                        isAssignedToCurrentUser(farm) 
+                          ? tw`bg-red-100 border border-red-200` 
+                          : tw`bg-amber-100 border border-amber-200`
+                      ]}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        if (isAssignedToCurrentUser(farm)) {
+                          handleRemoveFarm(farm);
+                        } else {
+                          handleAssignFarm(farm);
+                        }
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons 
+                        name={isAssignedToCurrentUser(farm) ? "remove-circle-outline" : "add-circle-outline"} 
+                        size={16} 
+                        color={isAssignedToCurrentUser(farm) ? "#DC2626" : "#D97706"} 
+                      />
+                      <Text style={[
+                        tw`ml-1 text-xs font-semibold`,
+                        isAssignedToCurrentUser(farm) ? tw`text-red-600` : tw`text-amber-600`
+                      ]}>
+                        {isAssignedToCurrentUser(farm) ? 'Remove' : 'Assign'}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                  )}
                 </TouchableOpacity>
               </Animated.View>
             );

@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const isAuth = await authService.isAuthenticated();
             const isTokenValid = await authService.isTokenValid();
             const isTokeAvailable = await authService.getAccessToken();
-            console.log(isAuth && !isTokenValid && isTokeAvailable)
+            console.log(isAuth && isTokenValid && isTokeAvailable)
             if (isAuth && isTokenValid && isTokeAvailable) {
                 // Get user info from JWT token
                 const userInfo = await authService.getCurrentUser();
@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const loginData: UserLoginRequest = { email, password };
             const response = await authService.login(loginData);
 
-            console.log(response)
+            console.log(response.data)
 
             if (response.success && response.data) {
                 const authData = response.data;
@@ -163,7 +163,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setError('');
 
             // Navigate to login
-            router.push('/auth/login');
+            router.replace('/auth/login');
         } catch (error: any) {
             // Even if API call fails, clear local state
             setAuthenticated(false);

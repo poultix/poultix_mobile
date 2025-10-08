@@ -186,7 +186,7 @@ export default function UserDetailScreen() {
                 }}>
                     User Details
                 </Text>
-                <TouchableOpacity onPress={() => router.push('/communication/messages')}>
+                <TouchableOpacity onPress={() => router.push('/chat')}>
                     <Ionicons name="chatbubble-outline" size={24} color={IOSDesign.colors.systemBlue} />
                 </TouchableOpacity>
             </View>
@@ -409,7 +409,7 @@ export default function UserDetailScreen() {
                                 alignItems: 'center',
                                 ...IOSDesign.shadows.small,
                             }}
-                            onPress={() => router.push('/communication/messages')}
+                            onPress={() => router.push('/chat')}
                         >
                             <Text style={{
                                 ...IOSDesign.typography.bodyEmphasized,

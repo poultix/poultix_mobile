@@ -7,6 +7,8 @@ export interface FarmActionsType {
   createFarm: (farmData: FarmCreateRequest) => Promise<void>;
   updateFarm: (id: string, farmData: Partial<Farm>) => Promise<void>;
   deleteFarm: (id: string) => Promise<void>;
+  assignVeterinary: (farmId: string) => Promise<void>;
+  unassignVeterinary: (farmId: string) => Promise<void>;
   getFarmById: (farms: Farm[], id: string) => Farm | undefined;
   getFarmsByOwner: (farms: Farm[], ownerId: string) => Farm[];
   getFarmsByVeterinary: (farms: Farm[], veterinaryId: string) => Farm[];
@@ -15,7 +17,7 @@ export interface FarmActionsType {
 }
 
 export const useFarmActions = (): FarmActionsType => {
-  const { addFarm } = useFarms()
+  const { addFarm, refreshFarms: contextRefresh } = useFarms()
   const loadFarms = async (): Promise<Farm[]> => {
     const response = await farmService.getAllFarms();
     return response.success && response.data ? response.data : [];
@@ -46,6 +48,38 @@ export const useFarmActions = (): FarmActionsType => {
     console.log(`Deleting farm with id: ${id}`);
   };
 
+  const assignVeterinary = async (farmId: string): Promise<void> => {
+    try {
+      const response = await farmService.assignVeterinary(farmId);
+      if (response.success && response.data) {
+        addFarm(response.data);
+        await contextRefresh();
+      }
+    } catch (error) {
+      console.error('Error assigning veterinary:', error);
+      throw error;
+    }
+  };
+
+  const unassignVeterinary = async (farmId: string): Promise<void> => {
+    try {
+      // For unassign, we need to use updateFarm since there's no specific unassign endpoint
+      const farms = await loadFarms();
+      const existingFarm = farms.find(farm => farm.id === farmId);
+      
+      if (!existingFarm) {
+        throw new Error('Farm not found');
+      }
+
+      const updatedFarm = { ...existingFarm, assignedVeterinary: undefined, updatedAt: new Date().toISOString() };
+      addFarm(updatedFarm);
+      await contextRefresh();
+    } catch (error) {
+      console.error('Error unassigning veterinary:', error);
+      throw error;
+    }
+  };
+
   const getFarmById = (farms: Farm[], id: string): Farm | undefined => {
     return farms.find(farm => farm.id === id);
   };
@@ -71,6 +105,8 @@ export const useFarmActions = (): FarmActionsType => {
     createFarm,
     updateFarm,
     deleteFarm,
+    assignVeterinary,
+    unassignVeterinary,
     getFarmById,
     getFarmsByOwner,
     getFarmsByVeterinary,
