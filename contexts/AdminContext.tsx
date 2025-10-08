@@ -1,37 +1,34 @@
-import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Farm, Schedule, AdminState, FilterOptions, UserRole, ScheduleStatus } from '@/types';
-import { adminService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
 import { News } from '@/types/news';
 import { userService, farmService, scheduleService, newsService } from '@/services/api';
 import { useAuth } from './AuthContext';
 interface AdminContextType {
-    dashboardStats: AdminState['dashboardStats'];
-    systemHealth: AdminState['systemHealth'];
     loading: boolean;
-    error: string | null;
-}
+    users: User[];
+    farms: Farm[];
+    schedules: Schedule[];
+    news: News[];
+    dashboardStats: AdminState['dashboardStats'];
+    
 
-interface AdminActionsType {
     loadDashboardStats: () => Promise<void>;
     loadSystemHealth: () => Promise<void>;
     // User management
     getAllUsers: () => Promise<User[]>;
-    activateUser: (userId: string) => Promise<void>;
-    deactivateUser: (userId: string) => Promise<void>;
-    deleteUser: (userId: string) => Promise<void>;
-    // Farm management
-    getAllFarms: () => Promise<Farm[]>;
-    approveFarm: (farmId: string) => Promise<void>;
-    suspendFarm: (farmId: string) => Promise<void>;
+    removeUser: (user: User) => Promise<void>;
+    addUser: (user: User) => Promise<void>;
     // Schedule oversight
-    getAllSchedules: () => Promise<Schedule[]>;
-    approveSchedule: (scheduleId: string) => Promise<void>;
-    cancelSchedule: (scheduleId: string) => Promise<void>;
+    addSchedule: (schedule: Schedule) => Promise<void>;
+    removeSchedule: (schedule: Schedule) => Promise<void>;
     // News management
-    publishNews: (newsData: Omit<News, 'createdAt' | 'updatedAt'>) => Promise<void>;
-    unpublishNews: (newsTitle: string) => Promise<void>;
+    addNews: (data: News) => Promise<void>;
+    removeNews: (data: News) => Promise<void>;
+    //Farms management
+    addFarm: (farm: Farm) => Promise<void>;
+    removeFarm: (farm: Farm) => Promise<void>;
     // System management
     performBackup: () => Promise<void>;
     clearSystemLogs: () => Promise<void>;
@@ -49,11 +46,15 @@ interface AdminActionsType {
 
 // Create contexts
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
-const AdminActionsContext = createContext<AdminActionsType | undefined>(undefined);
 
 // Provider component
 export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
-    const {authenticated}=useAuth()
+    const [users, setUsers] = useState<User[]>([])
+    const [farms, setFarms] = useState<Farm[]>([])
+    const [schedules, setSchedules] = useState<Schedule[]>([])
+    const [news, setNews] = useState<News[]>([])
+
+    const { authenticated } = useAuth()
     const [dashboardStats, setDashboardStats] = useState<AdminState['dashboardStats']>({
         totalUsers: 0,
         totalFarms: 0,
@@ -73,7 +74,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Load dashboard data on mount
     useEffect(() => {
-        if(authenticated){
+        if (authenticated) {
             loadDashboardStats();
             loadSystemHealth();
         }
@@ -91,11 +92,16 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
                 scheduleService.getAllSchedules(),
                 newsService.getAllNews()
             ]);
-            
+
             const users = usersRes.success && usersRes.data ? usersRes.data : [];
             const farms = farmsRes.success && farmsRes.data ? farmsRes.data : [];
             const schedules = schedulesRes.success && schedulesRes.data ? schedulesRes.data : [];
             const news = newsRes.success && newsRes.data ? newsRes.data : [];
+
+            setUsers(users)
+            setFarms(farms)
+            setSchedules(schedules)
+            setNews(news)
 
             const stats = {
                 totalUsers: users.length,
@@ -106,10 +112,11 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
                 pendingSchedules: schedules.filter(s => s.status === ScheduleStatus.IN_PROGRESS).length,
             };
 
+
             setDashboardStats(stats);
         } catch (error: any) {
             console.error('Failed to load dashboard stats:', error);
-            
+
             // ✅ Check if it's a network/server error that needs routing
             if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
                 handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -133,7 +140,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
             setSystemHealth(health);
         } catch (error: any) {
             console.error('Failed to load system health:', error);
-            
+
             // ✅ Check if it's a network/server error that needs routing
             if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
                 handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -149,19 +156,14 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
         return response.success && response.data ? response.data : [];
     };
 
-    const activateUser = async (userId: string): Promise<void> => {
-        // Implementation for activating user
-        console.log('Activating user:', userId);
-    };
+    const addUser = async (user: User): Promise<void> => {
+        setUsers([...users, user])
+    }
 
-    const deactivateUser = async (userId: string): Promise<void> => {
-        // Implementation for deactivating user
-        console.log('Deactivating user:', userId);
-    };
 
-    const deleteUser = async (userId: string): Promise<void> => {
-        // Implementation for deleting user
-        console.log('Deleting user:', userId);
+    const removeUser = async (user: User): Promise<void> => {
+        setUsers(users.filter(u => u.id !== user.id))
+
     };
 
     // Farm management functions
@@ -170,41 +172,32 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
         return response.success && response.data ? response.data : [];
     };
 
-    const approveFarm = async (farmId: string): Promise<void> => {
-        // Implementation for approving farm
-        console.log('Approving farm:', farmId);
+    const addFarm = async (farm: Farm): Promise<void> => {
+        setFarms([...farms, farm])
     };
 
-    const suspendFarm = async (farmId: string): Promise<void> => {
-        // Implementation for suspending farm
-        console.log('Suspending farm:', farmId);
+    const removeFarm = async (farm: Farm): Promise<void> => {
+        setFarms(farms.filter(f => f.id !== farm.id))
     };
 
-    // Schedule oversight functions
-    const getAllSchedules = async (): Promise<Schedule[]> => {
-        const response = await scheduleService.getAllSchedules();
-        return response.success && response.data ? response.data : [];
+
+    const addSchedule = async (schedule: Schedule): Promise<void> => {
+        setSchedules([...schedules, schedule])
     };
 
-    const approveSchedule = async (scheduleId: string): Promise<void> => {
-        // Implementation for approving schedule
-        console.log('Approving schedule:', scheduleId);
+    const removeSchedule = async (schedule: Schedule): Promise<void> => {
+        setSchedules(schedules.filter(s => s.id !== schedule.id))
     };
 
-    const cancelSchedule = async (scheduleId: string): Promise<void> => {
-        // Implementation for canceling schedule
-        console.log('Canceling schedule:', scheduleId);
-    };
+
 
     // News management functions
-    const publishNews = async (newsData: Omit<News, 'createdAt' | 'updatedAt'>): Promise<void> => {
-        // Implementation for publishing news
-        console.log('Publishing news:', newsData.title);
+    const addNews = async (newsData: News): Promise<void> => {
+        setNews([...news, newsData])
     };
 
-    const unpublishNews = async (newsTitle: string): Promise<void> => {
-        // Implementation for unpublishing news
-        console.log('Unpublishing news:', newsTitle);
+    const removeNews = async (news: News): Promise<void> => {
+        setNews((prev) => prev.filter(n => n.id !== news.id))
     };
 
     // System management functions
@@ -221,7 +214,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
             setSystemHealth(newHealth);
         } catch (error: any) {
             console.error('Backup failed:', error);
-            
+
             // ✅ Check if it's a network/server error that needs routing
             if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
                 handleApiError(error); // ✅ Auto-route to appropriate error screen
@@ -262,7 +255,6 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const getScheduleAnalytics = async (dateRange?: { start: Date; end: Date }): Promise<any> => {
-        const schedules = await getAllSchedules();
         return {
             totalSchedules: schedules.length,
             pendingSchedules: schedules.filter((s: Schedule) => s.status === ScheduleStatus.IN_PROGRESS).length,
@@ -274,7 +266,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     const searchUsers = async (query: string, filters?: FilterOptions): Promise<User[]> => {
         const users = await getAllUsers();
         return users.filter((u: User) => u.name.toLowerCase().includes(query.toLowerCase()) ||
-                          u.email.toLowerCase().includes(query.toLowerCase()));
+            u.email.toLowerCase().includes(query.toLowerCase()));
     };
 
     const searchFarms = async (query: string, filters?: FilterOptions): Promise<Farm[]> => {
@@ -283,7 +275,6 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const searchSchedules = async (query: string, filters?: FilterOptions): Promise<Schedule[]> => {
-        const schedules = await getAllSchedules();
         return schedules.filter((s: Schedule) => s.title.toLowerCase().includes(query.toLowerCase()) ||
             s.description.toLowerCase().includes(query.toLowerCase())
         );
@@ -298,27 +289,23 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const contextValue: AdminContextType = {
-        dashboardStats,
-        systemHealth,
         loading,
-        error,
-    };
-
-    const actionsValue: AdminActionsType = {
+        dashboardStats,
+        users,
+        farms,
+        schedules,
+        news,
         loadDashboardStats,
         loadSystemHealth,
         getAllUsers,
-        activateUser,
-        deactivateUser,
-        deleteUser,
-        getAllFarms,
-        approveFarm,
-        suspendFarm,
-        getAllSchedules,
-        approveSchedule,
-        cancelSchedule,
-        publishNews,
-        unpublishNews,
+        addUser,
+        removeUser,
+        addFarm,
+        removeFarm,
+        addSchedule,
+        removeSchedule,
+        addNews,
+        removeNews,
         performBackup,
         clearSystemLogs,
         getUserAnalytics,
@@ -331,11 +318,12 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
         refreshDashboard,
     };
 
+
+
     return (
         <AdminContext.Provider value={contextValue}>
-            <AdminActionsContext.Provider value={actionsValue}>
-                {children}
-            </AdminActionsContext.Provider>
+
+            {children}
         </AdminContext.Provider>
     );
 };
@@ -345,14 +333,6 @@ export const useAdmin = () => {
     const context = useContext(AdminContext);
     if (!context) {
         throw new Error('useAdmin must be used within an AdminProvider');
-    }
-    return context;
-};
-
-export const useAdminActions = () => {
-    const context = useContext(AdminActionsContext);
-    if (!context) {
-        throw new Error('useAdminActions must be used within an AdminProvider');
     }
     return context;
 };

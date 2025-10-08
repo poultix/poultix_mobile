@@ -21,7 +21,7 @@ import { useUsers } from '@/contexts/UserContext';
 
 export default function AdminDashboard() {
     const { currentUser } = useAuth();
-    const { dashboardStats, systemHealth, loading } = useAdmin();
+    const { dashboardStats, loading } = useAdmin();
     const { farms } = useFarms();
     const { users } = useUsers();
     const { news } = useNews();

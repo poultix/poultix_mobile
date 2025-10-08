@@ -4,45 +4,14 @@ import { Schedule } from '@/types/schedule';
 import { News } from '@/types/news';
 import { FilterOptions } from '@/types/filter';
 import { AdminState, SystemHealth } from '@/types/admin';
+import { useAdmin } from '@/contexts/AdminContext';
 
-export interface AdminActionsType {
-  loadDashboardStats: () => Promise<AdminState['dashboardStats']>;
-  loadSystemHealth: () => Promise<SystemHealth>;
-  // User management
-  getAllUsers: () => Promise<User[]>;
-  activateUser: (userId: string) => Promise<void>;
-  deactivateUser: (userId: string) => Promise<void>;
-  deleteUser: (userId: string) => Promise<void>;
-  // Farm management
-  getAllFarms: () => Promise<Farm[]>;
-  approveFarm: (farmId: string) => Promise<void>;
-  suspendFarm: (farmId: string) => Promise<void>;
-  // Schedule oversight
-  getAllSchedules: () => Promise<Schedule[]>;
-  approveSchedule: (scheduleId: string) => Promise<void>;
-  cancelSchedule: (scheduleId: string) => Promise<void>;
-  // News management
-  publishNews: (newsData: Omit<News, 'createdAt' | 'updatedAt'>) => Promise<void>;
-  unpublishNews: (newsTitle: string) => Promise<void>;
-  // System management
-  performBackup: () => Promise<SystemHealth>;
-  clearSystemLogs: () => Promise<void>;
-  // Analytics
-  getUserAnalytics: (dateRange?: { start: Date; end: Date }) => Promise<any>;
-  getFarmAnalytics: (dateRange?: { start: Date; end: Date }) => Promise<any>;
-  getScheduleAnalytics: (dateRange?: { start: Date; end: Date }) => Promise<any>;
-  // Search and filter
-  searchUsers: (query: string, filters?: FilterOptions) => Promise<User[]>;
-  searchFarms: (query: string, filters?: FilterOptions) => Promise<Farm[]>;
-  searchSchedules: (query: string, filters?: FilterOptions) => Promise<Schedule[]>;
-  refreshDashboard: () => Promise<{ stats: AdminState['dashboardStats']; health: SystemHealth }>;
-}
-
-export const useAdminActions = (): AdminActionsType => {
+export const useAdminActions = () => {
+  const { addUser, addFarm, removeFarm, addSchedule, removeSchedule, addNews, removeNews,removeUser } = useAdmin()
   const loadDashboardStats = async (): Promise<AdminState['dashboardStats']> => {
     // Simulate loading dashboard stats
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     return {
       totalUsers: 150,
       totalFarms: 45,
@@ -128,7 +97,7 @@ export const useAdminActions = (): AdminActionsType => {
   const performBackup = async (): Promise<SystemHealth> => {
     // Simulate backup process
     await new Promise(resolve => setTimeout(resolve, 3000));
-    
+
     return {
       status: 'healthy' as const,
       uptime: Math.floor(Math.random() * 100000),

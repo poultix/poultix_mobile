@@ -1,6 +1,8 @@
 import { Farm, FarmCreateRequest, FarmStatus } from '@/types/farm';
 import { farmService } from '@/services/api';
 import { useFarms } from '@/contexts/FarmContext';
+import { Alert } from 'react-native';
+import { useState } from 'react';
 
 export interface FarmActionsType {
   loadFarms: () => Promise<Farm[]>;
@@ -18,6 +20,7 @@ export interface FarmActionsType {
 
 export const useFarmActions = (): FarmActionsType => {
   const { addFarm, refreshFarms: contextRefresh } = useFarms()
+  const [loading, setLoading] = useState(false)
   const loadFarms = async (): Promise<Farm[]> => {
     const response = await farmService.getAllFarms();
     return response.success && response.data ? response.data : [];
@@ -45,9 +48,22 @@ export const useFarmActions = (): FarmActionsType => {
   };
 
   const deleteFarm = async (id: string): Promise<void> => {
-    console.log(`Deleting farm with id: ${id}`);
-  };
+    try {
+      setLoading(true);
 
+      const response = await farmService.deleteFarm(id);
+
+      if (!response || !response.data) {
+        return
+      }
+      addFarm(response.data)
+    } catch (error: any) {
+      console.error('Failed to delete farm:', error);
+      Alert.alert('Failed to delete farm', error.message || 'Failed to delete farm');
+    } finally {
+      setLoading(false);
+    }
+  };
   const assignVeterinary = async (farmId: string): Promise<void> => {
     try {
       const response = await farmService.assignVeterinary(farmId);
@@ -66,7 +82,7 @@ export const useFarmActions = (): FarmActionsType => {
       // For unassign, we need to use updateFarm since there's no specific unassign endpoint
       const farms = await loadFarms();
       const existingFarm = farms.find(farm => farm.id === farmId);
-      
+
       if (!existingFarm) {
         throw new Error('Farm not found');
       }
