@@ -1,8 +1,10 @@
-import { News, NewsPriority } from '@/types/news';
+import { useNews } from '@/contexts/NewsContext';
+import { newsService } from '@/services/api';
+import { News, NewsCreateRequest, NewsPriority } from '@/types/news';
 
 export interface NewsActionsType {
   loadNews: () => Promise<News[]>;
-  createNews: (newsData: Omit<News, 'createdAt' | 'updatedAt'>) => Promise<News>;
+  createNews: (newsData: NewsCreateRequest) => Promise<void>;
   updateNews: (title: string, newsData: Partial<News>) => Promise<News>;
   deleteNews: (title: string) => Promise<void>;
   getNewsByTitle: (news: News[], title: string) => News | undefined;
@@ -13,19 +15,21 @@ export interface NewsActionsType {
 }
 
 export const useNewsActions = (): NewsActionsType => {
+
+  const { addNews } = useNews()
+
   const loadNews = async (): Promise<News[]> => {
-    return []; // News not implemented in mock database yet
+    return [];
   };
 
-  const createNews = async (newsData: Omit<News, 'createdAt' | 'updatedAt'>): Promise<News> => {
-    const newNews: News = {
-      ...newsData,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    // In a real app, this would make an API call
-    return newNews;
+  const createNews = async (newsData: NewsCreateRequest) => {
+    try {
+      const response = await newsService.createNews(newsData)
+      if (!response.data) return
+      addNews(response.data)
+    } catch (error) {
+      console.error(error)
+    }
   };
 
   const updateNews = async (title: string, newsData: Partial<News>): Promise<News> => {

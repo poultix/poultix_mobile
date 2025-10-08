@@ -131,7 +131,7 @@ export default function AIScreen() {
                         { borderBottomLeftRadius: 8 }
                     ]}>
                         <View style={tw`flex-row items-center`}>
-                            <ActivityIndicator size="small" color={IOSDesign.colors.systemBlue} />
+                            <ActivityIndicator size="small" color={IOSDesign.colors.systemOrange} />
                             <Text style={[
                                 tw`ml-2`,
                                 {
@@ -154,7 +154,7 @@ export default function AIScreen() {
                     tw`rounded-2xl px-4 py-3 max-w-xs`,
                     message.isUser 
                         ? {
-                            backgroundColor: IOSDesign.colors.systemBlue,
+                            backgroundColor: IOSDesign.colors.systemOrange,
                             borderBottomRightRadius: 8,
                         }
                         : {
@@ -209,7 +209,7 @@ export default function AIScreen() {
                         <View style={[
                             tw` p-6`,
                             {
-                                backgroundColor: IOSDesign.colors.systemBlue,
+                                backgroundColor: IOSDesign.colors.systemOrange,
                                 minHeight: 140,
                             },
                             IOSDesign.shadows.medium,
@@ -233,7 +233,7 @@ export default function AIScreen() {
                                             color: IOSDesign.colors.text.inverse,
                                         }
                                     ]}>
-                                        Ask Me Anything 🤖
+                                        Ask Me Anything 
                                     </Text>
                                     <Text style={[
                                         {
@@ -340,7 +340,7 @@ export default function AIScreen() {
                                     multiline
                                     maxLength={500}
                                     onSubmitEditing={handleAskQuestion}
-                                    blurOnSubmit={false}
+                                   
                                 />
                             </View>
                             <TouchableOpacity
@@ -348,7 +348,7 @@ export default function AIScreen() {
                                     tw`w-12 h-12 rounded-full items-center justify-center`,
                                     {
                                         backgroundColor: question.trim() && !isLoading 
-                                            ? IOSDesign.colors.systemBlue 
+                                            ? IOSDesign.colors.systemOrange 
                                             : IOSDesign.colors.gray[500],
                                     }
                                 ]}

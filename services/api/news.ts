@@ -5,8 +5,8 @@ import { API_ENDPOINTS } from '@/services/constants';
 
 export class NewsService {
     // Create News Article
-    async createNews(authorId: string, newsData: NewsCreateRequest): Promise<ApiResponse<News>> {
-        return await apiClient.post<News>(API_ENDPOINTS.NEWS.CREATE(authorId), newsData);
+    async createNews( newsData: NewsCreateRequest): Promise<ApiResponse<News>> {
+        return await apiClient.post<News>(API_ENDPOINTS.NEWS.CREATE, newsData);
     }
 
     // Get News by ID

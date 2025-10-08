@@ -53,7 +53,7 @@ const allDrawerItems: DrawerItem[] = [
     adminOnly: true,
     color: '#10B981'
   },
-  
+
   // Secondary features
   {
     label: 'Veterinary Care',
@@ -91,22 +91,22 @@ const allDrawerItems: DrawerItem[] = [
     badge: 'BETA',
     color: '#06B6D4'
   },
-  
+
   // Device features
   {
     label: 'Bluetooth Devices',
     route: '/bluetooth/bluetooth-pairing',
     icon: 'bluetooth-outline',
     description: 'Connect to devices',
-    badge: 'NEW',
+    badge: 'BETA',
     color: '#0EA5E9'
   },
   {
-    label: 'pH Analyzer',
+    label: 'PH Analyzer',
     route: '/bluetooth/ph-reader',
     icon: 'flask-outline',
     description: 'Analyze stool samples',
-    badge: 'NEW',
+    badge: 'BETA',
     color: '#F59E0B'
   },
   {
@@ -124,7 +124,7 @@ interface CustomDrawerProps {
 }
 
 export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) {
-  const { currentUser,logout } = useAuth();
+  const { currentUser, logout } = useAuth();
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const drawerWidth = screenWidth * 0.85; // 85% of screen width
   const slideAnim = useRef(new Animated.Value(-drawerWidth)).current;
@@ -222,7 +222,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
     onClose();
     try {
       await logout();
-     
+
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -250,7 +250,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
     <Modal
       visible={isVisible}
       transparent
-      animationType="none"
+      animationType="slide"
       onRequestClose={onClose}
       statusBarTranslucent
     >
@@ -399,31 +399,10 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
                   <View style={tw`w-10 h-10 bg-blue-100 rounded-full items-center justify-center mb-2`}>
                     <Ionicons name="flask-outline" size={20} color="#3B82F6" />
                   </View>
-                  <Text style={tw`text-blue-600 text-xs font-medium text-center`}>pH Scan</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={tw`bg-green-50 rounded-2xl p-4 flex-1 ml-2 items-center`}
-                  onPress={() => handleItemPress('/farm')}
-                  activeOpacity={0.7}
-                >
-                  <View style={tw`w-10 h-10 bg-green-100 rounded-full items-center justify-center mb-2`}>
-                    <Ionicons name="add-circle-outline" size={20} color="#10B981" />
-                  </View>
-                  <Text style={tw`text-green-600 text-xs font-medium text-center`}>Add Record</Text>
+                  <Text style={tw`text-blue-600 text-xs font-medium text-center`}>PH Scan</Text>
                 </TouchableOpacity>
               </View>
-              <View style={tw`flex-row justify-center`}>
-                <TouchableOpacity
-                  style={tw`bg-red-50 rounded-2xl p-4 flex-1 items-center`}
-                  onPress={() => handleItemPress('/farm/veterinary')}
-                  activeOpacity={0.7}
-                >
-                  <View style={tw`w-10 h-10 bg-red-100 rounded-full items-center justify-center mb-2`}>
-                    <Ionicons name="medical-outline" size={20} color="#EF4444" />
-                  </View>
-                  <Text style={tw`text-red-600 text-xs font-medium text-center`}>Emergency</Text>
-                </TouchableOpacity>
-              </View>
+
             </View>
           </ScrollView>
 

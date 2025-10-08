@@ -114,15 +114,11 @@ export default function AddNewsScreen() {
 
       // Create news article using context action
       await createNews({
-        id: `news_${Date.now()}`,
         title: article.title!,
         content: article.content!,
         category: article.category || NewsCategory.GENERAL,
         priority: article.priority || NewsPriority.MEDIUM,
         tags: article.tags || [],
-        image: '',
-        location: { latitude: 0, longitude: 0 },
-        author: currentUser
       })
 
       Alert.alert(
@@ -190,8 +186,10 @@ export default function AddNewsScreen() {
                 colors={['#3B82F6', '#2563EB']}
                 style={tw` p-8 shadow-xl`}
               >
-                <View style={tw`flex-row items-center justify-between mb-4`}>
+                <View style={tw`flex-row items-center justify-between m-4`}>
+                  
                   <View style={tw`flex-1`}>
+
                     <Text style={tw`text-white text-sm opacity-90`}>
                       Content Management
                     </Text>

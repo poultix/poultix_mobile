@@ -5,15 +5,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    Animated,
-    Dimensions,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    Vibration,
-    View,
+  Alert,
+  Animated,
+  Dimensions,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Vibration,
+  View,
 } from 'react-native';
 import tw from 'twrnc';
 
@@ -297,12 +297,20 @@ export default function PoultryPHInputScreen() {
             style={tw` p-8 mb-6 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between mb-4`}>
-              <View style={tw`flex-1`}>
+              <TouchableOpacity
+                className="p-3 rounded-2xl"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                onPress={() => router.back()}
+              >
+                <Ionicons name="arrow-back-outline" size={24} color="white" />
+              </TouchableOpacity>
+              <View style={tw``}>
+
                 <Text style={tw`text-white text-sm opacity-90`}>
                   Smart Analysis Tool
                 </Text>
                 <Text style={tw`text-white text-2xl font-bold`}>
-                  pH Analyzer 🧪
+                  PH Analyzer
                 </Text>
                 <Text style={tw`text-amber-100 text-sm mt-1`}>
                   Advanced poultry health monitoring
@@ -340,7 +348,7 @@ export default function PoultryPHInputScreen() {
               disabled={isScanning}
             >
               <LinearGradient
-                colors={isScanning ? ['#9CA3AF', '#6B7280'] : ['#10B981', '#059669']}
+                colors={isScanning ? ['#9CA3AF', '#6B7280'] : ['#F59E0B', '#D97706']}
                 style={tw`rounded-2xl p-4 shadow-lg`}
               >
                 <View style={tw`flex-row items-center justify-center`}>
@@ -398,25 +406,11 @@ export default function PoultryPHInputScreen() {
             <View style={tw`bg-white rounded-2xl p-6 mb-6 shadow-sm`}>
               <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>Manual pH Entry</Text>
 
-              {/* Chicken ID Input */}
-              <View style={tw`mb-4`}>
-                <Text style={tw`text-gray-600 text-sm font-medium mb-2`}>Chicken ID (Optional)</Text>
-                <View style={tw`bg-gray-50 rounded-xl p-4 flex-row items-center border border-gray-200`}>
-                  <Ionicons name="pricetag-outline" size={20} color="#6B7280" style={tw`mr-3`} />
-                  <TextInput
-                    style={tw`flex-1 text-base text-gray-800`}
-                    placeholder="e.g., CH001, Hen-A"
-                    placeholderTextColor="#9CA3AF"
-                    value={chickenId}
-                    onChangeText={setChickenId}
-                  />
-                </View>
-              </View>
 
               {/* pH Input */}
               <View style={tw`mb-6`}>
                 <Text style={tw`text-gray-600 text-sm font-medium mb-2`}>pH Reading</Text>
-                <View style={tw`bg-gray-50 rounded-xl p-4 flex-row items-center border border-gray-200`}>
+                <View style={tw`bg-gray-50 rounded-2xl p-4 py-1 flex-row items-center border border-gray-200`}>
                   <Ionicons name="water-outline" size={20} color="#EF4444" style={tw`mr-3`} />
                   <TextInput
                     style={tw`flex-1 text-base text-gray-800`}
@@ -431,7 +425,7 @@ export default function PoultryPHInputScreen() {
 
               <TouchableOpacity
                 onPress={() => handleSubmit()}
-                style={tw`bg-orange-600 rounded-2xl p-4 shadow-lg`}
+                style={tw`bg-amber-600 rounded-2xl p-4 py-3 shadow-lg`}
               >
                 <Text style={tw`text-white font-semibold text-center text-lg`}>
                   Analyze pH Reading
@@ -473,7 +467,7 @@ export default function PoultryPHInputScreen() {
 
           {/* Results Section */}
           {feedback && (
-            <>
+            <View className='px-4'>
               <Card
                 icon={feedback.isSick ? "alert-circle-outline" : "checkmark-circle-outline"}
                 iconColor={feedback.color}
@@ -510,7 +504,7 @@ export default function PoultryPHInputScreen() {
                 <Card
                   icon="warning-outline"
                   iconColor="#EF4444"
-                  title="pH-Related Disease Risks"
+                  title="PH-Related Disease Risks"
                 >
                   {feedback.diseases.slice(0, 3).map((disease, index) => (
                     <View key={index} style={tw`mb-4 p-3 bg-red-50 rounded-xl border border-red-200`}>
@@ -557,14 +551,15 @@ export default function PoultryPHInputScreen() {
                   iconColor="#3B82F6"
                   title="Next Steps"
                 >
-                  <View style={tw`space-y-3`}>
-                    <TouchableOpacity style={tw`bg-blue-50 p-4 rounded-xl border border-blue-200`}>
-                      <Text style={tw`text-blue-800 font-semibold mb-1`}>🏥 Find Veterinarian</Text>
+                  <View style={tw`gap-y-3`}>
+                    <TouchableOpacity style={tw`bg-blue-50 p-4 rounded-xl border border-blue-200`}
+                      onPress={() => router.push('/farm/veterinary-care')}>
+                      <Text style={tw`text-blue-800 font-semibold mb-1`}> Find Veterinarian</Text>
                       <Text style={tw`text-blue-600 text-sm`}>Locate nearby veterinary services</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={tw`bg-green-50 p-4 rounded-xl border border-green-200`}
                       onPress={() => router.push('/pharmacy')}>
-                      <Text style={tw`text-green-800 font-semibold mb-1`}>💊 Find Pharmacy</Text>
+                      <Text style={tw`text-green-800 font-semibold mb-1`}> Find Pharmacy</Text>
                       <Text style={tw`text-green-600 text-sm`}>Get medications and supplements</Text>
                     </TouchableOpacity>
                   </View>
@@ -585,7 +580,7 @@ export default function PoultryPHInputScreen() {
                   <Text style={tw`text-blue-700 font-semibold text-center`}>View History</Text>
                 </TouchableOpacity>
               </View>
-            </>
+            </View>
           )}
 
         </Animated.View>

@@ -147,7 +147,7 @@ export default function VeterinaryCareScreen() {
                 {/* Header */}
                 <Animated.View style={[tw`pb-4`, { transform: [{ translateY: headerAnim }] }]}>
                     <LinearGradient
-                        colors={['#EF4444', '#DC2626']}
+                        colors={['#F59E0B', '#D97706']}
                         style={tw`p-8 shadow-xl`}
                     >
                         <View style={tw`flex-row items-center justify-between mb-6`}>
@@ -195,7 +195,7 @@ export default function VeterinaryCareScreen() {
                             <TouchableOpacity
                                 key={spec}
                                 style={tw`mr-3 px-4 py-2 rounded-full ${selectedSpecialization === spec
-                                        ? 'bg-red-500'
+                                        ? 'bg-amber-500'
                                         : 'bg-white border border-gray-200'
                                     }`}
                                 onPress={() => setSelectedSpecialization(spec)}
@@ -266,7 +266,7 @@ export default function VeterinaryCareScreen() {
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
-                                        style={tw`bg-red-500 rounded-xl py-3 px-4 flex-row items-center flex-1 ml-2`}
+                                        style={tw`bg-amber-500 rounded-xl py-3 px-4 flex-row items-center flex-1 ml-2`}
                                         onPress={() => handleBookAppointment(vet)}
                                     >
                                         <Ionicons

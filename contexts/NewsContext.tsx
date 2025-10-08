@@ -1,6 +1,6 @@
 import { newsService } from '@/services/api';
 import { HTTP_STATUS } from '@/services/constants';
-import { News, NewsCreateRequest, NewsUpdateRequest } from '@/types';
+import { News, NewsUpdateRequest } from '@/types';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useError } from './ErrorContext';
 import { useAuth } from './AuthContext';
@@ -15,7 +15,7 @@ interface NewsContextType {
   error: string | null;
 
   // API operations
-  createNews: (authorId: string, newsData: NewsCreateRequest) => Promise<void>;
+  addNews: (newsData: News) => Promise<void>;
   getNewsById: (id: string) => Promise<News | null>;
   updateNews: (id: string, updates: NewsUpdateRequest) => Promise<void>;
   deleteNews: (id: string) => Promise<void>;
@@ -69,30 +69,10 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
 
-  const createNews = async (authorId: string, newsData: NewsCreateRequest): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
+  const addNews = async (newsData: News): Promise<void> => {
 
-      const response = await newsService.createNews(authorId, newsData);
-
-      if (response.success && response.data) {
-        setNews(prev => [...prev, response.data!]);
-      } else {
-        Alert.alert('Failed to create news', response.message || 'Failed to create news');
-      }
-    } catch (error: any) {
-      console.error('Failed to create news:', error);
-
-      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
-        handleApiError(error); // ✅ Auto-route to appropriate error screen
-      } else {
-        Alert.alert('Failed to create news', error.message || 'Failed to create news'); // ✅ Show inline error for minor issues
-      }
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+        setNews(prev => [...prev, newsData]);
+    
   };
 
   const getNewsById = async (id: string): Promise<News | null> => {
@@ -179,7 +159,7 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
     currentNews,
     loading,
     error,
-    createNews,
+    addNews,
     getNewsById,
     updateNews,
     deleteNews,

@@ -50,7 +50,7 @@ class ApiClient {
                     apiError.status === HTTP_STATUS.FORBIDDEN
                 ) {
                     try {
-                        await this.handleUnauthorized();
+                        // await this.handleUnauthorized();
                         return this.axiosInstance.request(error.config);
                     } catch (refreshError) {
                         return Promise.reject(this.normalizeError(refreshError));
