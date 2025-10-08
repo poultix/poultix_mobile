@@ -2,7 +2,6 @@ import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
 import { SchedulePriority, ScheduleType } from '@/types/schedule';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -15,7 +14,6 @@ import {
     View,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import tw from 'twrnc';
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';
@@ -143,51 +141,52 @@ export default function ScheduleRequestScreen() {
 
     if (loading || !currentUser) {
         return (
-            <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
-                <Text style={tw`text-gray-600 text-lg`}>Loading...</Text>
+            <View className="flex-1 bg-gray-50 justify-center items-center">
+                <Ionicons name="calendar-outline" size={64} color="#D1D5DB" />
+                <Text className="text-gray-600 text-lg mt-4">Loading schedule request...</Text>
             </View>
         );
     }
 
     return (
-        <View style={tw`flex-1 bg-gray-50`}>
+        <View className="flex-1 bg-gray-50">
             <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
             
-            <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
+            <Animated.View style={{ opacity: fadeAnim }} className="flex-1">
                 {/* Header */}
-                <View style={tw`pb-4`}>
-                    <LinearGradient
-                        colors={['#10B981', '#059669']}
-                        style={tw` p-6 shadow-xl`}
-                    >
-                        <View style={tw`flex-row items-center justify-between`}>
-                            <TouchableOpacity
-                                style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
-                                onPress={() => router.back()}
-                            >
-                                <Ionicons name="arrow-back" size={24} color="white" />
-                            </TouchableOpacity>
-                            <View style={tw`flex-1 ml-4`}>
-                                <Text style={tw`text-white font-medium`}>Schedule Request</Text>
-                                <Text style={tw`text-white text-2xl font-bold`}>Book Veterinary Visit 🏥</Text>
-                                <Text style={tw`text-green-100 text-sm`}>
-                                    Request professional veterinary care
-                                </Text>
-                            </View>
+                <View 
+                    className="px-6 py-12 shadow-lg"
+                    style={{
+                        backgroundColor: '#F59E0B',
+                        backgroundImage: `linear-gradient(135deg, #F59E0B 0%, #D97706 100%)`
+                    }}
+                >
+                    <View className="flex-row items-center justify-between">
+                        <TouchableOpacity
+                            className="bg-white/20 p-3 rounded-2xl"
+                            onPress={() => router.back()}
+                        >
+                            <Ionicons name="arrow-back" size={24} color="white" />
+                        </TouchableOpacity>
+                        <View className="flex-1 ml-4">
+                            <Text className="text-white font-medium text-sm">Schedule Request</Text>
+                            <Text className="text-white text-2xl font-bold">Book Veterinary Visit 🏥</Text>
+                            <Text className="text-orange-100 text-sm">
+                                Request professional veterinary care
+                            </Text>
                         </View>
-                    </LinearGradient>
+                    </View> 
                 </View>
 
-                <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}
-                contentContainerClassName='pb-10'>
+                <ScrollView className="flex-1 px-4 pt-10" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
                     {/* Farm Selection */}
-                    <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-                        <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                            Select Farm *
+                    <View className="bg-white rounded-2xl p-5 shadow-sm -mt-6 mb-6">
+                        <Text className="text-lg font-bold text-gray-800 mb-4">
+                            🏠 Select Farm *
                         </Text>
                         {farmerFarms.length === 0 ? (
-                            <View style={tw`bg-yellow-50 rounded-xl p-4 border border-yellow-200`}>
-                                <Text style={tw`text-yellow-800 font-medium text-center`}>
+                            <View className="bg-orange-50 rounded-xl p-4 border border-orange-200">
+                                <Text className="text-orange-800 font-medium text-center">
                                     No farms registered. Please register a farm first.
                                 </Text>
                             </View>
@@ -195,25 +194,28 @@ export default function ScheduleRequestScreen() {
                             farmerFarms.map((farm, index) => (
                                 <TouchableOpacity
                                     key={farm.id}
-                                    style={tw`flex-row items-center p-4 rounded-xl mb-2 ${
-                                        selectedFarm?.id === farm.id ? 'bg-green-50 border-2 border-green-500' : 'bg-gray-50'
+                                    className={`flex-row items-center p-4 rounded-xl mb-3 ${
+                                        selectedFarm?.id === farm.id ? 'bg-orange-50 border-2 border-orange-500' : 'bg-gray-50'
                                     }`}
                                     onPress={() => setSelectedFarm(farm)}
                                 >
-                                    <View style={tw`w-12 h-12 rounded-full bg-green-500 items-center justify-center mr-4`}>
+                                    <View 
+                                        className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                                        style={{ backgroundColor: '#F59E0B' }}
+                                    >
                                         <Ionicons name="home" size={20} color="white" />
                                     </View>
-                                    <View style={tw`flex-1`}>
-                                        <Text style={tw`font-semibold text-gray-800`}>{farm.name}</Text>
-                                        <Text style={tw`text-gray-600 text-sm`}>
+                                    <View className="flex-1">
+                                        <Text className="font-semibold text-gray-800">{farm.name}</Text>
+                                        <Text className="text-gray-600 text-sm">
                                             {farm.location.latitude.toFixed(4)}, {farm.location.longitude.toFixed(4)}
                                         </Text>
-                                        <Text style={tw`text-gray-500 text-xs`}>
+                                        <Text className="text-gray-500 text-xs">
                                             {farm.livestock.total} chickens • {farm.facilities.coops} coops
                                         </Text>
                                     </View>
                                     {selectedFarm?.id === farm.id && (
-                                        <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+                                        <Ionicons name="checkmark-circle" size={24} color="#F59E0B" />
                                     )}
                                 </TouchableOpacity>
                             ))
@@ -221,13 +223,13 @@ export default function ScheduleRequestScreen() {
                     </View>
 
                     {/* Veterinary Selection */}
-                    <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-                        <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                            Select Veterinary *
+                    <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+                        <Text className="text-lg font-bold text-gray-800 mb-4">
+                            👩‍⚕️ Select Veterinary *
                         </Text>
                         {veterinaries.length === 0 ? (
-                            <View style={tw`bg-yellow-50 rounded-xl p-4 border border-yellow-200`}>
-                                <Text style={tw`text-yellow-800 font-medium text-center`}>
+                            <View className="bg-orange-50 rounded-xl p-4 border border-orange-200">
+                                <Text className="text-orange-800 font-medium text-center">
                                     No veterinaries available at the moment. Please try again later.
                                 </Text>
                             </View>
@@ -235,22 +237,25 @@ export default function ScheduleRequestScreen() {
                             veterinaries.map((vet, index) => (
                                 <TouchableOpacity
                                     key={vet.id}
-                                    style={tw`flex-row items-center p-4 rounded-xl mb-2 ${
-                                        selectedVet?.id === vet.id ? 'bg-green-50 border-2 border-green-500' : 'bg-gray-50'
+                                    className={`flex-row items-center p-4 rounded-xl mb-3 ${
+                                        selectedVet?.id === vet.id ? 'bg-orange-50 border-2 border-orange-500' : 'bg-gray-50'
                                     }`}
                                     onPress={() => setSelectedVet(vet)}
                                 >
-                                    <View style={tw`w-12 h-12 rounded-full bg-green-500 items-center justify-center mr-4`}>
-                                        <Text style={tw`text-white font-bold text-lg`}>
+                                    <View 
+                                        className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                                        style={{ backgroundColor: '#D97706' }}
+                                    >
+                                        <Text className="text-white font-bold text-lg">
                                             {vet.name.charAt(0)}
                                         </Text>
                                     </View>
-                                    <View style={tw`flex-1`}>
-                                        <Text style={tw`font-semibold text-gray-800`}>{vet.name}</Text>
-                                        <Text style={tw`text-gray-600 text-sm`}>{vet.email}</Text>
+                                    <View className="flex-1">
+                                        <Text className="font-semibold text-gray-800">{vet.name}</Text>
+                                        <Text className="text-gray-600 text-sm">{vet.email}</Text>
                                     </View>
                                     {selectedVet?.id === vet.id && (
-                                        <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+                                        <Ionicons name="checkmark-circle" size={24} color="#F59E0B" />
                                     )}
                                 </TouchableOpacity>
                             ))
@@ -258,63 +263,67 @@ export default function ScheduleRequestScreen() {
                     </View>
 
                     {/* Date & Time */}
-                    <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-                        <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                            Preferred Date & Time *
+                    <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+                        <Text className="text-lg font-bold text-gray-800 mb-4">
+                            📅 Preferred Date & Time *
                         </Text>
-                        <View style={tw`mb-4`}>
-                            <Text style={tw`text-gray-700 font-medium mb-2`}>Date</Text>
+                        <View className="mb-4">
+                            <Text className="text-gray-700 font-medium mb-2">Date</Text>
                             <TouchableOpacity
-                                style={tw`bg-gray-50 rounded-xl px-4 py-3 flex-row items-center justify-between`}
+                                className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center justify-between border-2 border-transparent"
                                 onPress={() => setShowDatePicker(true)}
                             >
-                                <Text style={tw`text-gray-800`}>{formatDate(requestedDate)}</Text>
-                                <Ionicons name="calendar-outline" size={20} color="#6B7280" />
+                                <Text className="text-gray-800 font-medium">{formatDate(requestedDate)}</Text>
+                                <Ionicons name="calendar-outline" size={20} color="#F59E0B" />
                             </TouchableOpacity>
                         </View>
                         <View>
-                            <Text style={tw`text-gray-700 font-medium mb-2`}>Preferred Time</Text>
+                            <Text className="text-gray-700 font-medium mb-2">Preferred Time</Text>
                             <TouchableOpacity
-                                style={tw`bg-gray-50 rounded-xl px-4 py-3 flex-row items-center justify-between`}
+                                className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center justify-between border-2 border-transparent"
                                 onPress={() => setShowTimePicker(true)}
                             >
-                                <Text style={tw`text-gray-800`}>{formatTime(preferredTime)}</Text>
-                                <Ionicons name="time-outline" size={20} color="#6B7280" />
+                                <Text className="text-gray-800 font-medium">{formatTime(preferredTime)}</Text>
+                                <Ionicons name="time-outline" size={20} color="#D97706" />
                             </TouchableOpacity>
                         </View>
                     </View>
 
                     {/* Reason & Priority */}
-                    <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-                        <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>
-                            Visit Details *
+                    <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+                        <Text className="text-lg font-bold text-gray-800 mb-4">
+                            📝 Visit Details *
                         </Text>
-                        <View style={tw`mb-4`}>
-                            <Text style={tw`text-gray-700 font-medium mb-2`}>Reason for Visit</Text>
+                        <View className="mb-4">
+                            <Text className="text-gray-700 font-medium mb-2">Reason for Visit</Text>
                             <TextInput
-                                style={tw`bg-gray-50 rounded-xl px-4 py-3 text-gray-800`}
+                                className="bg-gray-50 rounded-xl px-4 py-3 text-gray-800"
                                 placeholder="e.g., Routine checkup, Disease outbreak, Vaccination"
                                 value={reason}
                                 onChangeText={setReason}
                                 multiline
                                 numberOfLines={3}
+                                textAlignVertical="top"
                             />
                         </View>
                         <View>
-                            <Text style={tw`text-gray-700 font-medium mb-2`}>Priority Level</Text>
-                            <View style={tw`flex-row gap-2`}>
+                            <Text className="text-gray-700 font-medium mb-2">Priority Level</Text>
+                            <View className="flex-row flex-wrap gap-2">
                                 {Object.values(SchedulePriority).map((priority) => (
                                     <TouchableOpacity
                                         key={priority}
-                                        style={tw`py-2 px-4 rounded-xl ${
-                                            urgency === priority ? 'bg-green-500' : 'bg-gray-100'
+                                        className={`py-3 px-4 rounded-xl border-2 ${
+                                            urgency === priority ? 'border-orange-500' : 'border-gray-200'
                                         }`}
+                                        style={{
+                                            backgroundColor: urgency === priority ? '#FEF3C7' : '#F9FAFB'
+                                        }}
                                         onPress={() => setUrgency(priority)}
                                     >
-                                        <Text style={tw`text-center font-medium text-xs ${
-                                            urgency === priority ? 'text-white' : 'text-gray-700'
+                                        <Text className={`text-center font-medium text-sm capitalize ${
+                                            urgency === priority ? 'text-orange-600' : 'text-gray-700'
                                         }`}>
-                                            {priority}
+                                            {priority.toLowerCase()}
                                         </Text>
                                     </TouchableOpacity>
                                 ))}
@@ -324,14 +333,25 @@ export default function ScheduleRequestScreen() {
 
                     {/* Submit Button */}
                     <TouchableOpacity
-                        style={tw`bg-green-600 rounded-2xl py-4 px-6 shadow-lg mb-6 ${
+                        className={`rounded-2xl py-4 px-6 shadow-lg mb-6 flex-row items-center justify-center ${
                             isSubmitting ? 'opacity-50' : ''
                         }`}
+                        style={{
+                            backgroundColor: '#F59E0B',
+                            shadowColor: '#D97706',
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 8,
+                            elevation: 8,
+                        }}
                         onPress={handleSubmit}
                         disabled={isSubmitting}
                     >
-                        <Text style={tw`text-white font-bold text-lg text-center`}>
-                            {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                        {!isSubmitting && (
+                            <Ionicons name="paper-plane" size={20} color="white" style={{ marginRight: 8 }} />
+                        )}
+                        <Text className="text-white font-bold text-lg text-center">
+                            {isSubmitting ? 'Submitting Request...' : 'Submit Request'}
                         </Text>
                     </TouchableOpacity>
                 </ScrollView>

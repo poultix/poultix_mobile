@@ -54,6 +54,7 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
 
       if (response.success && response.data) {
         setSchedules(response.data);
+        console.log(response.data)
       } else {
         throw new Error(response.message || 'Failed to load schedules');
       }

@@ -47,8 +47,6 @@ export interface Schedule {
     farmer: User;
     veterinary: User;
     scheduledDate: string;
-    startTime: string; 
-    endTime: string;
     status: ScheduleStatus;
     priority: SchedulePriority;
     createdAt: string;

@@ -116,8 +116,8 @@ export default function FarmDetailScreen() {
     }
 
     const healthClasses = getHealthStatusClasses(currentFarm.healthStatus);
-    const healthPercentage = currentFarm.livestock.total > 0 
-        ? Math.round((currentFarm.livestock.healthy / currentFarm.livestock.total) * 100) 
+    const healthPercentage = currentFarm.livestock.total > 0
+        ? Math.round((currentFarm.livestock.healthy / currentFarm.livestock.total) * 100)
         : 0;
 
 
@@ -135,7 +135,7 @@ export default function FarmDetailScreen() {
                     <View className="flex-1 ml-4">
                         <Text className="text-white font-medium text-sm">My Farm</Text>
                         <Text className="text-white text-2xl font-bold">{currentFarm.name}</Text>
-                        <Text className="text-green-100 text-sm"> 
+                        <Text className="text-green-100 text-sm">
                             {isOwner ? 'Owner Dashboard' : 'Farm Details'}
                         </Text>
                     </View>
@@ -248,45 +248,7 @@ export default function FarmDetailScreen() {
                     </View>
                 </View>
 
-                {/* Quick Actions */}
-                <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
-                    <Text className="text-lg font-bold text-gray-800 mb-4">Quick Actions</Text>
-                    <View className="flex-row flex-wrap gap-3">
-                        <TouchableOpacity
-                            className="flex-1 bg-blue-50 border border-blue-200 rounded-xl p-4 min-w-[45%] items-center"
-                            onPress={() => router.push('/communication/schedule-request')}
-                        >
-                            <Ionicons name="calendar-outline" size={24} color="#3B82F6" />
-                            <Text className="text-blue-500 font-semibold mt-2">Request Visit</Text>
-                        </TouchableOpacity>
 
-                        <TouchableOpacity
-                            className="flex-1 bg-green-50 border border-green-200 rounded-xl p-4 min-w-[45%] items-center"
-                            onPress={() => router.push('/communication/messages')}
-                        >
-                            <Ionicons name="chatbubble-outline" size={24} color="#10B981" />
-                            <Text className="text-green-500 font-semibold mt-2">Messages</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            className="flex-1 bg-purple-50 border border-purple-200 rounded-xl p-4 min-w-[45%] items-center"
-                            onPress={() => router.push('/farm/farm-reports')}
-                        >
-                            <Ionicons name="document-text-outline" size={24} color="#8B5CF6" />
-                            <Text className="text-purple-500 font-semibold mt-2">Reports</Text>
-                        </TouchableOpacity>
-
-                        {isOwner && (
-                            <TouchableOpacity
-                                className="flex-1 bg-orange-50 border border-orange-200 rounded-xl p-4 min-w-[45%] items-center"
-                                onPress={() => {/* TODO: Add edit farm functionality */}}
-                            >
-                                <Ionicons name="settings-outline" size={24} color="#F59E0B" />
-                                <Text className="text-orange-500 font-semibold mt-2">Settings</Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                </View>
 
                 {/* Farm Details */}
                 <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
@@ -318,7 +280,7 @@ export default function FarmDetailScreen() {
 
             {/* Edit Farm Modal */}
             <Modal
-            className='h-full bg-white'
+                className='h-full bg-white'
                 visible={isEditModalVisible}
                 animationType="slide"
                 presentationStyle="pageSheet"
