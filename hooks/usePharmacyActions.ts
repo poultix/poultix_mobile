@@ -1,100 +1,114 @@
-import { Pharmacy } from '@/types/pharmacy';
+import { useError } from '@/contexts/ErrorContext';
+import { usePharmacies } from '@/contexts/PharmacyContext';
+import { pharmacyService } from '@/services/api';
+import { HTTP_STATUS } from '@/services/constants';
+import {PharmacyCreateRequest, PharmacyUpdateRequest } from '@/types/pharmacy';
+import { useState } from 'react';
 // Pharmacy data - using mock data
 
-export interface PharmacyActionsType {
-  loadPharmacies: () => Promise<Pharmacy[]>;
-  createPharmacy: (pharmacyData: Omit<Pharmacy, 'id'>) => Promise<Pharmacy>;
-  updatePharmacy: (id: string, pharmacyData: Partial<Pharmacy>) => Promise<Pharmacy>;
-  deletePharmacy: (id: string) => Promise<void>;
-  getPharmacyById: (pharmacies: Pharmacy[], id: string) => Pharmacy | undefined;
-  getPharmaciesByDistance: (pharmacies: Pharmacy[], maxDistance: number) => Pharmacy[];
-  getOpenPharmacies: (pharmacies: Pharmacy[]) => Pharmacy[];
-  getNearbyPharmacies: (pharmacies: Pharmacy[], latitude: number, longitude: number, radius: number) => Pharmacy[];
-  calculateDistance: (lat1: number, lon1: number, lat2: number, lon2: number) => number;
-  refreshPharmacies: () => Promise<Pharmacy[]>;
-}
+export const usePharmacyActions = () => {
+  const [loading, setLoading] = useState(false)
+  const { addPharmacy, editPharmacy, removePharmacy } = usePharmacies()
+  const { handleApiError } = useError()
 
-export const usePharmacyActions = (): PharmacyActionsType => {
-  const loadPharmacies = async (): Promise<Pharmacy[]> => {
-    return []; // Pharmacy mock data not implemented yet
-  };
+  const createPharmacy = async (pharmacyData: PharmacyCreateRequest): Promise<void> => {
+    try {
+      setLoading(true);
 
-  const createPharmacy = async (pharmacyData: Omit<Pharmacy, 'id'>): Promise<Pharmacy> => {
-    const newPharmacy: Pharmacy = {
-      ...pharmacyData,
-      id: `pharmacy_${Date.now()}`,
-    };
-    
-    // In a real app, this would make an API call
-    return newPharmacy;
-  };
 
-  const updatePharmacy = async (id: string, pharmacyData: Partial<Pharmacy>): Promise<Pharmacy> => {
-    // In a real app, this would make an API call
-    const pharmacies = await loadPharmacies();
-    const existingPharmacy = pharmacies.find(pharmacy => pharmacy.id === id);
-    
-    if (!existingPharmacy) {
-      throw new Error('Pharmacy not found');
+      const response = await pharmacyService.createPharmacy(pharmacyData);
+
+      if (response.success && response.data) {
+        addPharmacy(response.data)
+      } else {
+        throw new Error(response.message || 'Failed to create pharmacy');
+      }
+    } catch (error: any) {
+      console.error('Failed to create pharmacy:', error);
+
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+
+      }
+
+    } finally {
+      setLoading(false);
     }
-    
-    const updatedPharmacy = { ...existingPharmacy, ...pharmacyData };
-    return updatedPharmacy;
   };
+
+
+  const updatePharmacy = async (id: string, updates: PharmacyUpdateRequest): Promise<void> => {
+    try {
+      setLoading(true);
+
+      const response = await pharmacyService.updatePharmacy(id, updates);
+
+      if (response.success && response.data) {
+        editPharmacy(response.data)
+      } else {
+        throw new Error(response.message || 'Failed to update pharmacy');
+      }
+    } catch (error: any) {
+      console.error('Failed to update pharmacy:', error);
+
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const deletePharmacy = async (id: string): Promise<void> => {
-    // In a real app, this would make an API call
-    console.log(`Deleting pharmacy with id: ${id}`);
+    try {
+      setLoading(true);
+
+      const response = await pharmacyService.deletePharmacy(id);
+
+      if (response.success && response.data) {
+        removePharmacy(response.data)
+      } else {
+        throw new Error(response.message || 'Failed to delete pharmacy');
+      }
+    } catch (error: any) {
+      console.error('Failed to delete pharmacy:', error);
+
+      // ✅ Check if it's a network/server error that needs routing
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error); // ✅ Auto-route to appropriate error screen
+      } else {
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getPharmacyById = (pharmacies: Pharmacy[], id: string): Pharmacy | undefined => {
-    return pharmacies.find(pharmacy => pharmacy.id === id);
-  };
 
-  const getPharmaciesByDistance = (pharmacies: Pharmacy[], maxDistance: number): Pharmacy[] => {
-    return pharmacies.filter(pharmacy => pharmacy.distance <= maxDistance);
-  };
 
-  const getOpenPharmacies = (pharmacies: Pharmacy[]): Pharmacy[] => {
-    return pharmacies.filter(pharmacy => pharmacy.isOpen);
-  };
-
-  const getNearbyPharmacies = (pharmacies: Pharmacy[], latitude: number, longitude: number, radius: number): Pharmacy[] => {
-    return pharmacies.filter(pharmacy => {
-      const distance = calculateDistance(
-        latitude, longitude,
-        pharmacy.location.latitude, pharmacy.location.longitude
-      );
-      return distance <= radius;
-    });
-  };
 
   // Helper function to calculate distance between two points
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371; // Earth's radius in kilometers
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
-  const refreshPharmacies = async (): Promise<Pharmacy[]> => {
-    return await loadPharmacies();
-  };
 
   return {
-    loadPharmacies,
+    loading,
     createPharmacy,
     updatePharmacy,
     deletePharmacy,
-    getPharmacyById,
-    getPharmaciesByDistance,
-    getOpenPharmacies,
-    getNearbyPharmacies,
     calculateDistance,
-    refreshPharmacies,
   };
 };
