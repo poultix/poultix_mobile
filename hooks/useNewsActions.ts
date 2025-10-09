@@ -1,26 +1,17 @@
+import { useError } from '@/contexts/ErrorContext';
 import { useNews } from '@/contexts/NewsContext';
 import { newsService } from '@/services/api';
-import { News, NewsCreateRequest, NewsPriority } from '@/types/news';
+import { HTTP_STATUS } from '@/services/constants';
+import { NewsCreateRequest, NewsUpdateRequest } from '@/types/news';
+import { useState } from 'react';
+import { Alert } from 'react-native';
 
-export interface NewsActionsType {
-  loadNews: () => Promise<News[]>;
-  createNews: (newsData: NewsCreateRequest) => Promise<void>;
-  updateNews: (title: string, newsData: Partial<News>) => Promise<News>;
-  deleteNews: (title: string) => Promise<void>;
-  getNewsByTitle: (news: News[], title: string) => News | undefined;
-  getNewsByCategory: (news: News[], category: string) => News[];
-  getNewsByPriority: (news: News[], priority: NewsPriority) => News[];
-  getNewsByAuthor: (news: News[], authorId: string) => News[];
-  refreshNews: () => Promise<News[]>;
-}
 
-export const useNewsActions = (): NewsActionsType => {
+export const useNewsActions = () => {
+  const { handleApiError } = useError()
+  const [loading, setLoading] = useState(false)
+  const { addNews, editNews, removeNews } = useNews()
 
-  const { addNews } = useNews()
-
-  const loadNews = async (): Promise<News[]> => {
-    return [];
-  };
 
   const createNews = async (newsData: NewsCreateRequest) => {
     try {
@@ -31,54 +22,63 @@ export const useNewsActions = (): NewsActionsType => {
       console.error(error)
     }
   };
+  const updateNews = async (id: string, updates: NewsUpdateRequest): Promise<void> => {
+    try {
+      setLoading(true);
 
-  const updateNews = async (title: string, newsData: Partial<News>): Promise<News> => {
-    // In a real app, this would make an API call
-    const news = await loadNews();
-    const existingNews = news.find(newsItem => newsItem.title === title);
 
-    if (!existingNews) {
-      throw new Error('News not found');
+      const response = await newsService.updateNews(id, updates);
+
+      if (response.success && response.data) {
+        editNews(response.data)
+      } else {
+        Alert.alert('Failed to update news', response.message || 'Failed to update news');
+      }
+    } catch (error: any) {
+      console.error('Failed to update news:', error);
+
+
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error);
+      } else {
+        Alert.alert('Failed to update news', error.message || 'Failed to update news');
+      }
+      throw error;
+    } finally {
+      setLoading(false);
     }
-
-    const updatedNews = { ...existingNews, ...newsData, updatedAt: new Date() };
-    return updatedNews;
   };
 
-  const deleteNews = async (title: string): Promise<void> => {
-    // In a real app, this would make an API call
-    console.log(`Deleting news with title: ${title}`);
+  const deleteNews = async (id: string): Promise<void> => {
+    try {
+      setLoading(true);
+
+      const response = await newsService.deleteNews(id);
+
+      if (response.success && response.data) {
+        removeNews(response.data)
+      } else {
+        Alert.alert('Failed to delete news', response.message || 'Failed to delete news');
+      }
+    } catch (error: any) {
+      console.error('Failed to delete news:', error);
+
+      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
+        handleApiError(error);
+      } else {
+        Alert.alert('Failed to delete news', error.message || 'Failed to delete news');
+      }
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getNewsByTitle = (news: News[], title: string): News | undefined => {
-    return news.find(newsItem => newsItem.title === title);
-  };
-
-  const getNewsByCategory = (news: News[], category: string): News[] => {
-    return news.filter(newsItem => newsItem.category === category);
-  };
-
-  const getNewsByPriority = (news: News[], priority: NewsPriority): News[] => {
-    return news.filter(newsItem => newsItem.priority === priority);
-  };
-
-  const getNewsByAuthor = (news: News[], authorId: string): News[] => {
-    return news.filter(newsItem => newsItem.author.id === authorId);
-  };
-
-  const refreshNews = async (): Promise<News[]> => {
-    return await loadNews();
-  };
 
   return {
-    loadNews,
+    loading,
     createNews,
     updateNews,
     deleteNews,
-    getNewsByTitle,
-    getNewsByCategory,
-    getNewsByPriority,
-    getNewsByAuthor,
-    refreshNews,
   };
 };
