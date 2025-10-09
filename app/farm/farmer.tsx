@@ -21,7 +21,6 @@ import { useDrawer } from '@/contexts/DrawerContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import { useSchedules } from '@/contexts/ScheduleContext';
-import { useUserActions } from '@/hooks/useUserActions';
 
 export default function FarmerScreen() {
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
@@ -31,7 +30,6 @@ export default function FarmerScreen() {
     const { currentUser } = useAuth();
     const { farms, currentFarm, setCurrentFarm, loading: farmsLoading } = useFarms();
     const { schedules, loading: schedulesLoading } = useSchedules();
-    const { getUsersByRole } = useUserActions();
     
     const [isLoading, setIsLoading] = useState(true);
 

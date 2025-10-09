@@ -5,8 +5,8 @@ import { API_ENDPOINTS } from '@/services/constants';
 
 export class VeterinaryService {
     // Create Veterinary Profile
-    async createVeterinary(userId: string, veterinaryData: VeterinaryCreateRequest): Promise<ApiResponse<VeterinaryResponse>> {
-        return await apiClient.post<VeterinaryResponse>(API_ENDPOINTS.VETERINARIES.CREATE(userId), veterinaryData);
+    async createVeterinary(veterinaryData: VeterinaryCreateRequest): Promise<ApiResponse<VeterinaryResponse>> {
+        return await apiClient.post<VeterinaryResponse>(API_ENDPOINTS.VETERINARIES.CREATE, veterinaryData);
     }
 
     // Get Veterinary by ID

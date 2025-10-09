@@ -27,9 +27,6 @@ import { Pharmacy } from '@/types/pharmacy';
 import { usePharmacies } from '@/contexts/PharmacyContext';
 import { usePharmacyActions } from '@/hooks/usePharmacyActions';
 
-
-const GOOGLE_API_KEY = 'YOUR_GOOGLE_API_KEY'; // Replace with your API key
-
 const PharmaciesScreen = () => {
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
     const [searchQuery, setSearchQuery] = useState('');
@@ -41,8 +38,8 @@ const PharmaciesScreen = () => {
     const mapRef = useRef<MapView>(null);
 
     // Use new contexts
-    const { pharmacies, currentPharmacy, setCurrentPharmacy, loading } = usePharmacies();
-    const { getPharmaciesByDistance, getNearbyPharmacies, calculateDistance } = usePharmacyActions();
+    const { pharmacies, setCurrentPharmacy, loading } = usePharmacies();
+    const {  calculateDistance } = usePharmacyActions();
 
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;

@@ -5,8 +5,8 @@ import { API_ENDPOINTS } from '@/services/constants';
 
 export class SupportService {
     // Create Support Ticket
-    async createTicket(userId: string, ticketData: HelpSupportCreateRequest): Promise<ApiResponse<HelpSupportResponse>> {
-        return await apiClient.post<HelpSupportResponse>(API_ENDPOINTS.SUPPORT.CREATE(userId), ticketData);
+    async createTicket( ticketData: HelpSupportCreateRequest): Promise<ApiResponse<HelpSupportResponse>> {
+        return await apiClient.post<HelpSupportResponse>(API_ENDPOINTS.SUPPORT.CREATE, ticketData);
     }
 
     // Get Ticket by ID

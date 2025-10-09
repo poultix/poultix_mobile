@@ -4,12 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View, Modal, Alert, TextInput } from 'react-native';
 import React, { useState } from 'react';
+import { useFarmActions } from '@/hooks';
 
 
 
 export default function FarmDetailScreen() {
     const { currentUser } = useAuth();
-    const { loading, currentFarm, updateFarm } = useFarms();
+    const { loading, currentFarm } = useFarms();
+    const {updateFarm}=useFarmActions()
 
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [editFormData, setEditFormData] = useState({

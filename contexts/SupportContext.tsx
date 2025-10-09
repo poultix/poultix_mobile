@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState} from 'react';
 import { HelpSupportResponse, HelpSupportCreateRequest } from '@/types';
 import { supportService } from '@/services/api';
 import { useError } from './ErrorContext';
@@ -12,7 +12,7 @@ interface SupportContextType {
   error: string | null;
 
   // API operations
-  createTicket: (userId: string, ticketData: HelpSupportCreateRequest) => Promise<void>;
+  createTicket: (ticketData: HelpSupportCreateRequest) => Promise<void>;
   getTicketById: (id: string) => Promise<HelpSupportResponse | null>;
   getTicketsByUser: (userId: string) => Promise<HelpSupportResponse[]>;
   deleteTicket: (id: string) => Promise<void>;
@@ -64,12 +64,12 @@ export const SupportProvider = ({ children }: { children: React.ReactNode }) => 
     }
   };
 
-  const createTicket = async (userId: string, ticketData: HelpSupportCreateRequest): Promise<void> => {
+  const createTicket = async ( ticketData: HelpSupportCreateRequest): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await supportService.createTicket(userId, ticketData);
+      const response = await supportService.createTicket(ticketData);
 
       if (response.success && response.data) {
         setTickets(prev => [...prev, response.data!]);

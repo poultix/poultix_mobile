@@ -14,7 +14,7 @@ import tw from 'twrnc';
 
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { Schedule, ScheduleStatus } from '@/types/schedule';
+import { Schedule, ScheduleUpdateRequest, ScheduleStatus } from '@/types/schedule';
 
 // New context imports
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,12 +24,12 @@ import { useScheduleActions } from '@/hooks/useScheduleActions';
 export default function ScheduleManagementScreen() {
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
     const [selectedTab, setSelectedTab] = useState<'pending' | 'approved' | 'completed'>('pending');
-    
+
     // Use new contexts
     const { currentUser } = useAuth();
     const { schedules, currentSchedule, setCurrentSchedule, loading } = useSchedules();
     const { updateSchedule } = useScheduleActions();
-console.log(schedules)
+    console.log(schedules)
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -56,9 +56,10 @@ console.log(schedules)
 
     const handleApprove = async (schedule: Schedule) => {
         try {
-            await updateSchedule(schedule.id, {
-                status: ScheduleStatus.COMPLETED
-            });
+            const updateRequest: ScheduleUpdateRequest = {
+                status: ScheduleStatus.IN_PROGRESS
+            }
+            await updateSchedule(schedule.id, updateRequest);
             Alert.alert('Success', 'Schedule request approved!');
         } catch (error) {
             console.error('Error approving request:', error);
@@ -92,7 +93,7 @@ console.log(schedules)
         }
     };
 
-    const formatTime=(time:string)=>{
+    const formatTime = (time: string) => {
         const [hours, minutes] = time.split(':');
         return `${hours}:${minutes}`;
     }
@@ -108,7 +109,7 @@ console.log(schedules)
     return (
         <View style={tw`flex-1 bg-gray-50`}>
             <CustomDrawer isVisible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} />
-            
+
             <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
                 {/* Header */}
                 <View style={tw`pb-4`}>
@@ -160,7 +161,7 @@ console.log(schedules)
                                 No {selectedTab} appointments
                             </Text>
                             <Text style={tw`text-gray-400 text-center mt-2`}>
-                                {selectedTab === 'pending' 
+                                {selectedTab === 'pending'
                                     ? 'New appointment requests will appear here'
                                     : `No ${selectedTab} appointments found`
                                 }
@@ -197,9 +198,9 @@ console.log(schedules)
                                 <View style={tw`flex-row items-center justify-between pt-3 border-t border-gray-100`}>
                                     <View>
                                         <Text style={tw`text-blue-600 font-medium`}>{new Date(schedule.scheduledDate).toLocaleDateString()}</Text>
-                                        <Text style={tw`text-gray-500 text-sm`}>{formatTime(schedule.scheduledDate)|| 'TBD'}</Text>
+                                        <Text style={tw`text-gray-500 text-sm`}>{formatTime(schedule.scheduledDate) || 'TBD'}</Text>
                                     </View>
-                                    
+
                                     {selectedTab === 'pending' && (
                                         <View style={tw`flex-row gap-2`}>
                                             <TouchableOpacity

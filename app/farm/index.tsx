@@ -23,6 +23,7 @@ import tw from 'twrnc';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import BottomTabs from '@/components/BottomTabs';
+import { useFarmActions } from '@/hooks';
 const { width } = Dimensions.get('window');
 const isLargePhone = width >= 428;
 
@@ -34,7 +35,8 @@ export default function FarmDataScreen() {
   
   // Use new contexts
   const { currentUser } = useAuth();
-  const { farms, loading, setCurrentFarm, assignVeterinary, unassignVeterinary } = useFarms();
+  const { farms, loading, setCurrentFarm } = useFarms();
+  const {assignVeterinary, unassignVeterinary}=useFarmActions()
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;

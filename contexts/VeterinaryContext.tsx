@@ -12,7 +12,7 @@ interface VeterinaryContextType {
   error: string | null;
 
   // API operations
-  createVeterinary: (userId: string, veterinaryData: VeterinaryCreateRequest) => Promise<void>;
+  createVeterinary: (veterinaryData: VeterinaryCreateRequest) => Promise<void>;
   getVeterinaryById: (id: string) => Promise<VeterinaryResponse | null>;
   getVeterinaryByUserId: (userId: string) => Promise<VeterinaryResponse | null>;
   getActiveVeterinaries: () => Promise<VeterinaryResponse[]>;
@@ -70,12 +70,12 @@ export const VeterinaryProvider = ({ children }: { children: React.ReactNode }) 
     }
   };
 
-  const createVeterinary = async (userId: string, veterinaryData: VeterinaryCreateRequest): Promise<void> => {
+  const createVeterinary = async (veterinaryData: VeterinaryCreateRequest): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await veterinaryService.createVeterinary(userId, veterinaryData);
+      const response = await veterinaryService.createVeterinary(veterinaryData);
 
       if (response.success && response.data) {
         setVeterinaries(prev => [...prev, response.data!]);

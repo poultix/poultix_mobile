@@ -118,9 +118,7 @@ export function useBLE() {
         }
     };
 
-    const isDuplicateDevice = (devices: Device[], nextDevice: Device) =>
-        devices.findIndex((device) => nextDevice.id === device.id) > -1;
-
+ 
     // Check Bluetooth state
     const checkBluetoothState = async () => {
         const manager = initializeBleManager();
@@ -247,7 +245,8 @@ export function useBLE() {
                 const name = Buffer.from(characteristic.value, "base64").toString("utf8");
                 console.log(`Fetched name for ${device.id}:`, name);
                 await manager.cancelDeviceConnection(device.id);
-                return { ...device, name };
+                device.name=name;
+                return device
             }
 
             await manager.cancelDeviceConnection(device.id);

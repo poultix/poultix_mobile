@@ -16,7 +16,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useSchedules } from '@/contexts/ScheduleContext';
 import { useScheduleActions } from '@/hooks/useScheduleActions';
-import { SchedulePriority, ScheduleStatus } from '@/types/schedule';
+import { SchedulePriority, ScheduleStatus, ScheduleUpdateRequest } from '@/types/schedule';
 
 export default function ScheduleDetailScreen() {
     const { currentUser } = useAuth();
@@ -44,7 +44,10 @@ export default function ScheduleDetailScreen() {
         if (!currentSchedule) return;
 
         try {
-            await updateSchedule(currentSchedule.id, { ...currentSchedule, status });
+            const updateRequest: ScheduleUpdateRequest = {
+                status
+            }
+            await updateSchedule(currentSchedule.id, updateRequest);
             Alert.alert('Success', `Schedule ${status.toLowerCase()} successfully!`);
         } catch (error) {
             console.error('Error updating schedule:', error);
@@ -77,12 +80,12 @@ export default function ScheduleDetailScreen() {
         if (!dateString) {
             return 'N/A';
         }
-        
+
         const date = new Date(dateString);
         if (isNaN(date.getTime())) {
             return 'Invalid date';
         }
-        
+
         return date.toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
@@ -109,13 +112,13 @@ export default function ScheduleDetailScreen() {
         if (!currentSchedule) return;
 
         try {
-            await updateSchedule(currentSchedule.id, {
-                ...currentSchedule,
+            const updateRequest: ScheduleUpdateRequest = {
                 title: editFormData.title,
                 description: editFormData.description,
                 priority: editFormData.priority,
                 scheduledDate: editFormData.scheduledDate,
-            });
+            }
+            await updateSchedule(currentSchedule.id, updateRequest);
             setIsEditModalVisible(false);
             Alert.alert('Success', 'Schedule updated successfully!');
         } catch (error) {
@@ -146,7 +149,7 @@ export default function ScheduleDetailScreen() {
         <View className="flex-1 bg-gray-50">
             <Animated.View style={{ opacity: fadeAnim }} className="flex-1">
                 {/* Header */}
-                <View 
+                <View
                     className="px-6 py-12 shadow-lg"
                     style={{
                         backgroundColor: '#F59E0B',
@@ -193,7 +196,7 @@ export default function ScheduleDetailScreen() {
                                         {formatDate(currentSchedule.scheduledDate)}
                                     </Text>
                                     <View className="mt-3">
-                                        <View 
+                                        <View
                                             className="px-4 py-3 rounded-xl flex-row items-center justify-center self-start"
                                             style={{ backgroundColor: '#F59E0B' }}
                                         >
@@ -342,7 +345,7 @@ export default function ScheduleDetailScreen() {
             >
                 <View className="flex-1 bg-gray-50">
                     {/* Modal Header */}
-                    <View 
+                    <View
                         className="px-6 py-12 shadow-lg"
                         style={{
                             backgroundColor: '#F59E0B',
@@ -419,11 +422,11 @@ export default function ScheduleDetailScreen() {
                         {/* Priority Selection */}
                         <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
                             <Text className="text-lg font-bold text-gray-800 mb-4">🎯 Priority Level</Text>
-                            
+
                             <View className="flex-row flex-wrap gap-2">
                                 {Object.values(SchedulePriority).map((priority) => {
                                     const isSelected = editFormData.priority === priority;
-                                    
+
                                     return (
                                         <TouchableOpacity
                                             key={priority}
@@ -433,7 +436,7 @@ export default function ScheduleDetailScreen() {
                                             }}
                                             onPress={() => setEditFormData(prev => ({ ...prev, priority }))}
                                         >
-                                            <Text 
+                                            <Text
                                                 className={`font-medium capitalize ${isSelected ? 'text-orange-600' : 'text-gray-600'}`}
                                             >
                                                 {priority.toLowerCase()}

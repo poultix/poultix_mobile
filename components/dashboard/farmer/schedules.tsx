@@ -29,7 +29,7 @@ export default function FarmerSchedulesDashboard() {
                         <TouchableOpacity
                             key={schedule.id}
                             className="bg-white rounded-2xl p-5 mb-4 shadow-sm"
-                            onPress={() => {setCurrentSchedule(schedule);router.push(`/communication/schedule-detail`)}}
+                            onPress={() => { setCurrentSchedule(schedule); router.push(`/communication/schedule-detail`) }}
                         >
                             <View className="flex-row items-start justify-between mb-3">
                                 <View className="flex-1">
@@ -52,12 +52,6 @@ export default function FarmerSchedulesDashboard() {
                                         <Ionicons name="calendar-outline" size={16} color="#6B7280" />
                                         <Text className="text-gray-600 ml-2">
                                             {new Date(schedule.scheduledDate).toLocaleDateString()}
-                                        </Text>
-                                    </View>
-                                    <View className="flex-row items-center">
-                                        <Ionicons name="time-outline" size={16} color="#6B7280" />
-                                        <Text className="text-gray-600 ml-2">
-                                            {schedule.startTime} - {schedule.endTime}
                                         </Text>
                                     </View>
                                 </View>

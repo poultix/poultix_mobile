@@ -1,5 +1,5 @@
 import { Farm } from "./farm";
-import { User } from "./user";
+import { User, Veterinary } from "./user";
 
 export enum ScheduleType {
     INSPECTION = 'INSPECTION',
@@ -66,14 +66,12 @@ export interface ScheduleCreateRequest {
 }
 
 export interface ScheduleUpdateRequest {
-    farmId?: string;
-    veterinaryId?: string;
+    farm?: Farm;
+    veterinary?: Veterinary;
     type?: ScheduleType;
     title?: string;
     description?: string;
-    scheduledDate?: string; // ISO date string
-    startTime?: string;
-    endTime?: string;
-    priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-    notes?: string;
+    scheduledDate?: string; 
+    priority?: SchedulePriority
+    status?: ScheduleStatus;
 }
