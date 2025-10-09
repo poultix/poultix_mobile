@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { Farm, FarmStatus, FarmCreateRequest, FarmUpdateRequest } from '@/types';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Farm, FarmStatus } from '@/types';
 import { farmService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
@@ -18,14 +18,10 @@ interface FarmContextType {
   getFarmsByOwner: (ownerId: string) => Promise<Farm[]>;
   getFarmsByVeterinary: (veterinaryId: string) => Promise<Farm[]>;
   getFarmsByStatus: (status: FarmStatus) => Promise<Farm[]>;
-  updateFarm: (id: string, updates: FarmUpdateRequest) => Promise<void>;
-  assignVeterinary: (farmId: string) => Promise<void>;
-  unassignVeterinary: (farmId: string) => Promise<void>;
-  updateHealthStatus: (farmId: string, status: FarmStatus) => Promise<void>;
-  deleteFarm: (id: string) => Promise<void>;
+  editFarm: (data: Farm) => void;
+  removeFarm: (data: Farm) => void
   setCurrentFarm: (farm: Farm | null) => void;
-  refreshFarms: () => Promise<void>;
-  addFarm:(farm:Farm)=>void
+  addFarm: (farm: Farm) => void
 }
 
 // Create context
@@ -70,10 +66,6 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     }
   };
-
-  const addFarm=(farm:Farm)=>{
-    setFarms(prev=>[...prev,farm])
-  }
 
 
 
@@ -137,121 +129,20 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const updateFarm = async (id: string, updates: FarmUpdateRequest): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
 
-      const response = await farmService.updateFarm(id, updates);
+  const addFarm = (farm: Farm) => {
+    setFarms(prev => [...prev, farm])
+  }
 
-      if (response.success && response.data) {
-        setFarms(prev => prev.map(farm => farm.id === id ? response.data! : farm));
-      } else {
-        throw new Error(response.message || 'Failed to update farm');
-      }
-    } catch (error: any) {
-      console.error('Failed to update farm:', error);
-      setError(error.message || 'Failed to update farm');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const editFarm = (farm: Farm) => {
+    setFarms((prev) => prev.map(f => f.id === farm.id ? farm : f))
+  }
 
-  const assignVeterinary = async (farmId: string): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await farmService.assignVeterinary(farmId);
-
-      if (response.success && response.data) {
-        setFarms(prev => prev.map(farm => farm.id === farmId ? response.data! : farm));
-      } else {
-        throw new Error(response.message || 'Failed to assign veterinary');
-      }
-    } catch (error: any) {
-      console.error('Failed to assign veterinary:', error);
-      setError(error.message || 'Failed to assign veterinary');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const unassignVeterinary = async (farmId: string): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      // Find the farm and update it to remove assignedVeterinary
-      const farmToUpdate = farms.find(farm => farm.id === farmId);
-      if (!farmToUpdate) {
-        throw new Error('Farm not found');
-      }
-
-      const response = await farmService.updateFarm(farmId, {
-        assignedVeterinary: undefined
-      });
-
-      if (response.success && response.data) {
-        setFarms(prev => prev.map(farm => farm.id === farmId ? response.data! : farm));
-      } else {
-        throw new Error(response.message || 'Failed to unassign veterinary');
-      }
-    } catch (error: any) {
-      console.error('Failed to unassign veterinary:', error);
-      setError(error.message || 'Failed to unassign veterinary');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateHealthStatus = async (farmId: string, status: FarmStatus): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await farmService.updateHealthStatus(farmId, status);
-
-      if (response.success && response.data) {
-        setFarms(prev => prev.map(farm => farm.id === farmId ? response.data! : farm));
-      } else {
-        Alert.alert('Failed to update health status', response.message || 'Failed to update health status');
-      }
-    } catch (error: any) {
-      console.error('Failed to update health status:', error);
-      Alert.alert('Failed to update health status', error.message || 'Failed to update health status');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteFarm = async (id: string): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await farmService.deleteFarm(id);
-
-      if (response.success) {
-        setFarms(prev => prev.filter(farm => farm.id !== id));
-      } else {
-        Alert.alert('Failed to delete farm', response.message || 'Failed to delete farm');
-      }
-    } catch (error: any) {
-      console.error('Failed to delete farm:', error);
-      Alert.alert('Failed to delete farm', error.message || 'Failed to delete farm');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const removeFarm = (farm: Farm) => {
+    setFarms((prev) => prev.filter(f => f.id !== farm.id))
+  }
 
 
-  const refreshFarms = async (): Promise<void> => {
-    await loadFarms();
-  };
 
   const contextValue: FarmContextType = {
     farms,
@@ -263,13 +154,9 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
     getFarmsByOwner,
     getFarmsByVeterinary,
     getFarmsByStatus,
-    updateFarm,
-    assignVeterinary,
-    unassignVeterinary,
-    updateHealthStatus,
-    deleteFarm,
     setCurrentFarm,
-    refreshFarms,
+    editFarm,
+    removeFarm
   };
 
   return (
