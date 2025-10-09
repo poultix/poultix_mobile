@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, UserRole, UserUpdateRequest } from '@/types';
+import { User, UserRole} from '@/types';
 import { userService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
@@ -14,11 +14,9 @@ interface UserContextType {
   // CRUD functions
   getUserById: (id: string) => Promise<User | null>;
   getUsersByRole: (role: UserRole) => User[];
-  updateUser: (id: string, updates: UserUpdateRequest) => Promise<void>;
-  activateUser: (id: string) => Promise<void>;
-  deactivateUser: (id: string) => Promise<void>;
-  deleteUser: (id: string) => Promise<void>;
-  refreshUsers: () => Promise<void>;
+  addUser: (data:User) => void;
+  editUser: (data:User) => void;
+  removeUser: (data:User) => void;
 }
 
 
@@ -56,12 +54,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           password: '', // Not provided by API for security
           emailVerified: true,
           recoverMode: false,
-          location: {
-            latitude: 0,
-            longitude: 0
-          },
+          location: apiUser.location,
           createdAt: new Date(apiUser.createdAt || Date.now()).toISOString(),
-          updatedAt: new Date().toISOString(),
+          updatedAt: new Date(apiUser.updatedAt || Date.now()).toISOString(),
           isActive: apiUser.isActive,
         }));
 
@@ -98,12 +93,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           password: '', // Not provided by API for security
           emailVerified: true,
           recoverMode: false,
-          location: {
-            latitude: 0,
-            longitude: 0
-          },
+          location: response.data.location,
           createdAt: new Date(response.data.createdAt || Date.now()).toISOString(),
-          updatedAt: new Date().toISOString(),
+          updatedAt: new Date(response.data.updatedAt || Date.now()).toISOString(),
           isActive: response.data.isActive,
         };
       }
@@ -125,144 +117,17 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     return users.filter(user => user.role === role);
   };
 
-  const updateUser = async (id: string, updates: UserUpdateRequest): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
+  const addUser = (data: User) => {
+    setUsers(prev => [...prev, data])
+  }
 
-      const response = await userService.updateUser(id, updates);
+  const editUser = (data: User) => {
+    setUsers(prev => prev.map(user => user.id === data.id ? data : user))
+  }
 
-      if (response.success && response.data) {
-        const updatedUser: User = {
-          id: response.data.id,
-          email: response.data.email,
-          name: response.data.name,
-          role: response.data.role,
-          password: '', // Not provided by API for security
-          emailVerified: true,
-          recoverMode: false,
-          location: {
-            latitude: 0,
-            longitude: 0
-          },
-          createdAt: new Date(response.data.createdAt || Date.now()).toISOString(),
-          updatedAt: new Date().toISOString(),
-          isActive: response.data.isActive,
-        };
-
-        // Update local state
-        setUsers(prev => prev.map(user => user.id === id ? updatedUser : user));
-      } else {
-        throw new Error(response.message || 'Failed to update user');
-      }
-    } catch (error: any) {
-      console.error('Failed to update user:', error);
-
-      // ✅ Check if it's a network/server error that needs routing
-      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
-        handleApiError(error); // ✅ Auto-route to appropriate error screen
-      } else {
-        setError(error.message || 'Failed to update user'); // ✅ Show inline error for minor issues
-      }
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const activateUser = async (id: string): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await userService.activateUser(id);
-
-      if (response.success) {
-        // Update local state
-        setUsers(prev => prev.map(user =>
-          user.id === id ? { ...user, isActive: true } : user
-        ));
-      } else {
-        throw new Error(response.message || 'Failed to activate user');
-      }
-    } catch (error: any) {
-      console.error('Failed to activate user:', error);
-
-      // ✅ Check if it's a network/server error that needs routing
-      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
-        handleApiError(error); // ✅ Auto-route to appropriate error screen
-      } else {
-        setError(error.message || 'Failed to activate user'); // ✅ Show inline error for minor issues
-      }
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deactivateUser = async (id: string): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await userService.deactivateUser(id);
-
-      if (response.success) {
-        // Update local state
-        setUsers(prev => prev.map(user =>
-          user.id === id ? { ...user, isActive: false } : user
-        ));
-      } else {
-        throw new Error(response.message || 'Failed to deactivate user');
-      }
-    } catch (error: any) {
-      console.error('Failed to deactivate user:', error);
-
-      // ✅ Check if it's a network/server error that needs routing
-      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
-        handleApiError(error); // ✅ Auto-route to appropriate error screen
-      } else {
-        setError(error.message || 'Failed to deactivate user'); // ✅ Show inline error for minor issues
-      }
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteUser = async (id: string): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await userService.deleteUser(id);
-
-      if (response.success) {
-        // Remove from local state
-        setUsers(prev => prev.filter(user => user.id !== id));
-      } else {
-        throw new Error(response.message || 'Failed to delete user');
-      }
-    } catch (error: any) {
-      console.error('Failed to delete user:', error);
-
-      // ✅ Check if it's a network/server error that needs routing
-      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
-        handleApiError(error); // ✅ Auto-route to appropriate error screen
-      } else {
-        setError(error.message || 'Failed to delete user'); // ✅ Show inline error for minor issues
-      }
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-
-  const refreshUsers = async (): Promise<void> => {
-    await loadUsers();
-  };
+  const removeUser = (data: User) => {
+    setUsers(prev => prev.filter(user => user.id !== data.id))
+  }
 
   const contextValue: UserContextType = {
     users,
@@ -271,11 +136,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     error,
     getUserById,
     getUsersByRole,
-    updateUser,
-    activateUser,
-    deactivateUser,
-    deleteUser,
-    refreshUsers,
+    addUser,
+    editUser,
+    removeUser
   };
 
   return (
