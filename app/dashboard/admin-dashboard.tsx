@@ -24,15 +24,14 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function AdminDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const { currentUser } = useAuth();
-
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'users' | 'farms' | 'schedules'>('overview');
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'data'>('overview');
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (!currentUser || currentUser.role !== 'ADMIN') {
       Alert.alert('Access Denied', 'Admin privileges required', [
-        { text: 'OK', onPress: () => router.back() }
+        { text: 'OK' }
       ]);
       return;
     }
@@ -53,7 +52,7 @@ export default function AdminDashboardScreen() {
     );
   }
 
- 
+
 
   return (
     <View style={tw`flex-1 bg-gray-50`}>
@@ -83,14 +82,12 @@ export default function AdminDashboardScreen() {
         </View>
 
         {/* Navigation Tabs */}
-        <View style={tw`px-4 mb-4`}>
+        <View style={tw`px-4 mb-4 w-full`}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={tw`flex-row gap-2`}>
+            <View style={tw`flex-row justify-between items-center`}>
               {[
                 { key: 'overview', label: 'Overview', icon: 'analytics-outline' },
-                { key: 'users', label: 'Users', icon: 'people-outline' },
-                { key: 'farms', label: 'Farms', icon: 'leaf-outline' },
-                { key: 'schedules', label: 'Schedules', icon: 'calendar-outline' },
+                { key: 'data', label: 'Data', icon: 'cloudy-outline' },
               ].map((tab) => (
                 <TouchableOpacity
                   key={tab.key}
@@ -119,7 +116,7 @@ export default function AdminDashboardScreen() {
 
         {/* Content */}
         <ScrollView style={tw`flex-1`} showsVerticalScrollIndicator={false}>
-          {selectedTab === 'overview' ? <AdminOverview /> : <AdminDataList/>}
+          {selectedTab === 'overview' ? <AdminOverview /> : <AdminDataList />}
         </ScrollView>
       </Animated.View>
 

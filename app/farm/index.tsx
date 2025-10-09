@@ -10,7 +10,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Animated,
-    Dimensions,
     FlatList,
     Text,
     TouchableOpacity,
@@ -24,8 +23,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import BottomTabs from '@/components/BottomTabs';
 import { useFarmActions } from '@/hooks';
-const { width } = Dimensions.get('window');
-const isLargePhone = width >= 428;
 
 export default function FarmDataScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();

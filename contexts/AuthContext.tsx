@@ -38,8 +38,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [error, setError] = useState('')
     const [authenticated, setAuthenticated] = useState(false)
 
-
-
     const checkAuthStatus = async () => {
         try {
             setLoading(true)
@@ -48,21 +46,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const isAuth = await authService.isAuthenticated();
             const isTokenValid = await authService.isTokenValid();
             const isTokeAvailable = await authService.getAccessToken();
-            console.log(isAuth && isTokenValid && isTokeAvailable)
             if (isAuth && isTokenValid && isTokeAvailable) {
                 // Get user info from JWT token
                 const userInfo = await authService.getCurrentUser();
 
                 if (userInfo) {
-
-
                     setAuthenticated(true)
                     setCurrentUser(userInfo)
-
-                    // Navigate based on role
                     navigateByRole(userInfo.role);
                 } else {
-                    // Token invalid, clear and redirect
                     await authService.logout();
                     setAuthenticated(false);
                     setCurrentUser(null);
@@ -83,7 +75,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     router.push('/auth/login');
                 }
             } else {
-                // Not authenticated
                 setAuthenticated(false);
                 setCurrentUser(null);
                 router.push('/auth/login');

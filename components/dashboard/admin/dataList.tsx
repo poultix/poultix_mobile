@@ -6,6 +6,91 @@ import { useSchedules } from '@/contexts/ScheduleContext';
 import { useState } from 'react';
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { User, Farm, Schedule } from "@/types";
+
+// Separate component for User List Item
+function UserListItem({ user }: { user: User }) {
+    return (
+        <View style={tw`flex-row items-center justify-between`}>
+            <View style={tw`flex-1`}>
+                <Text style={tw`font-bold text-gray-800`}>{user.name}</Text>
+                <Text style={tw`text-gray-600`}>{user.email}</Text>
+                <Text style={tw`text-sm text-gray-500`}>{user.location?.latitude}, {user.location?.longitude}</Text>
+            </View>
+            <View style={[
+                tw`px-3 py-1 rounded-full`,
+                user.role === 'ADMIN' ? tw`bg-purple-100` :
+                    user.role === 'FARMER' ? tw`bg-green-100` : tw`bg-blue-100`
+            ]}>
+                <Text style={[
+                    tw`text-xs font-bold capitalize`,
+                    user.role === 'ADMIN' ? tw`text-purple-600` :
+                        user.role === 'FARMER' ? tw`text-green-600` : tw`text-blue-600`
+                ]}>
+                    {user.role}
+                </Text>
+            </View>
+        </View>
+    );
+}
+
+// Separate component for Farm List Item
+function FarmListItem({ farm }: { farm: Farm }) {
+    return (
+        <View style={tw`flex-row items-center justify-between`}>
+            <View style={tw`flex-1`}>
+                <Text style={tw`font-bold text-gray-800`}>{farm.name}</Text>
+                <Text style={tw`text-gray-600`}>{farm.location.latitude}, {farm.location.longitude}</Text>
+                <Text style={tw`text-sm text-gray-500`}>
+                    {farm.livestock.total} chickens • {farm.size} hectares
+                </Text>
+            </View>
+            <View style={[
+                tw`px-3 py-1 rounded-full`,
+                farm.healthStatus === 'EXCELLENT' ? tw`bg-green-100` :
+                    farm.healthStatus === 'GOOD' ? tw`bg-blue-100` :
+                        farm.healthStatus === 'FAIR' ? tw`bg-yellow-100` : tw`bg-red-100`
+            ]}>
+                <Text style={[
+                    tw`text-xs font-bold capitalize`,
+                    farm.healthStatus === 'EXCELLENT' ? tw`text-green-600` :
+                        farm.healthStatus === 'GOOD' ? tw`text-blue-600` :
+                            farm.healthStatus === 'FAIR' ? tw`text-yellow-600` : tw`text-red-600`
+                ]}>
+                    {farm.healthStatus}
+                </Text>
+            </View>
+        </View>
+    );
+}
+
+// Separate component for Schedule List Item
+function ScheduleListItem({ schedule }: { schedule: Schedule }) {
+    return (
+        <View style={tw`flex-row items-center justify-between`}>
+            <View style={tw`flex-1`}>
+                <Text style={tw`font-bold text-gray-800`}>{schedule.title}</Text>
+                <Text style={tw`text-gray-600`}>{schedule.description}</Text>
+                <Text style={tw`text-sm text-gray-500`}>
+                    {new Date(schedule.scheduledDate).toLocaleDateString()}
+                </Text>
+            </View>
+            <View style={[
+                tw`px-3 py-1 rounded-full`,
+                schedule.status === 'COMPLETED' ? tw`bg-green-100` :
+                    schedule.status === 'SCHEDULED' ? tw`bg-blue-100` : tw`bg-gray-100`
+            ]}>
+                <Text style={[
+                    tw`text-xs font-bold capitalize`,
+                    schedule.status === 'COMPLETED' ? tw`text-green-600` :
+                        schedule.status === 'SCHEDULED' ? tw`text-blue-600` : tw`text-gray-600`
+                ]}>
+                    {schedule.status}
+                </Text>
+            </View>
+        </View>
+    );
+}
 
 export default function AdminDataList() {
     const { users } = useUsers();
@@ -15,48 +100,46 @@ export default function AdminDataList() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedFilter, setSelectedFilter] = useState<string>('all');
 
+    // Filter functions
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = !searchQuery ||
+            user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter = selectedFilter === 'all' || user.role === selectedFilter;
+        return matchesSearch && matchesFilter;
+    });
 
-    const getFilteredData = () => {
-        let filteredData: any[] = [];
+    const filteredFarms = farms.filter(farm => {
+        const matchesSearch = !searchQuery ||
+            farm.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            `${farm.location.latitude}, ${farm.location.longitude}`.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter = selectedFilter === 'all' || farm.healthStatus === selectedFilter;
+        return matchesSearch && matchesFilter;
+    });
 
+    const filteredSchedules = schedules.filter(schedule => {
+        const matchesSearch = !searchQuery ||
+            schedule.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            schedule.description.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter = selectedFilter === 'all' || schedule.status === selectedFilter;
+        return matchesSearch && matchesFilter;
+    });
+
+    // Get current data based on selected tab
+    const getCurrentData = (): User[] | Farm[] | Schedule[] => {
         switch (selectedTab) {
             case 'users':
-                filteredData = users.filter(user => {
-                    const matchesSearch = !searchQuery ||
-                        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        user.email.toLowerCase().includes(searchQuery.toLowerCase());
-                    const matchesFilter = selectedFilter === 'all' || user.role === selectedFilter;
-                    return matchesSearch && matchesFilter;
-                });
-                break;
-
+                return filteredUsers;
             case 'farms':
-                filteredData = farms.filter(farm => {
-                    const matchesSearch = !searchQuery ||
-                        farm.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        `${farm.location.latitude}, ${farm.location.longitude}`.toLowerCase().includes(searchQuery.toLowerCase());
-                    const matchesFilter = selectedFilter === 'all' || farm.healthStatus === selectedFilter;
-                    return matchesSearch && matchesFilter;
-                });
-                break;
-
+                return filteredFarms;
             case 'schedules':
-                filteredData = schedules.filter(schedule => {
-                    const matchesSearch = !searchQuery ||
-                        schedule.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        schedule.description.toLowerCase().includes(searchQuery.toLowerCase());
-                    const matchesFilter = selectedFilter === 'all' || schedule.status === selectedFilter;
-                    return matchesSearch && matchesFilter;
-                });
-                break;
-
+                return filteredSchedules;
             default:
-                filteredData = [];
+                return [];
         }
-
-        return filteredData;
     };
 
+    const currentData = getCurrentData();
 
     const getFilterOptions = () => {
         switch (selectedTab) {
@@ -92,7 +175,6 @@ export default function AdminDataList() {
 
 
 
-    const data = getFilteredData();
 
     return (
         <View style={tw`px-4`}>
@@ -127,16 +209,16 @@ export default function AdminDataList() {
                 <View style={tw`flex-row items-center justify-between`}>
                     <View>
                         <Text style={tw`text-amber-800 font-bold text-lg capitalize`}>{selectedTab}</Text>
-                        <Text style={tw`text-amber-600 text-sm`}>{data.length} items found</Text>
+                        <Text style={tw`text-amber-600 text-sm`}>{currentData.length} items found</Text>
                     </View>
                     <View style={tw`bg-amber-500 p-3 rounded-full`}>
-                        <Ionicons 
+                        <Ionicons
                             name={
                                 selectedTab === 'users' ? 'people-outline' :
-                                selectedTab === 'farms' ? 'leaf-outline' : 'calendar-outline'
-                            } 
-                            size={24} 
-                            color="white" 
+                                    selectedTab === 'farms' ? 'leaf-outline' : 'calendar-outline'
+                            }
+                            size={24}
+                            color="white"
                         />
                     </View>
                 </View>
@@ -185,117 +267,46 @@ export default function AdminDataList() {
 
             {/* Data List */}
             <ScrollView showsVerticalScrollIndicator={false}>
-                {data.length === 0 ? (
+                {currentData.length === 0 ? (
                     <View style={tw`bg-white rounded-2xl p-8 items-center`}>
                         <View style={tw`bg-amber-100 p-6 rounded-full mb-4`}>
-                            <Ionicons 
+                            <Ionicons
                                 name={
                                     selectedTab === 'users' ? 'people-outline' :
-                                    selectedTab === 'farms' ? 'leaf-outline' : 'calendar-outline'
-                                } 
-                                size={48} 
-                                color="#D97706" 
+                                        selectedTab === 'farms' ? 'leaf-outline' : 'calendar-outline'
+                                }
+                                size={48}
+                                color="#D97706"
                             />
                         </View>
                         <Text style={tw`text-gray-800 font-bold text-lg mb-2`}>No {selectedTab} found</Text>
                         <Text style={tw`text-gray-600 text-center`}>
-                            {searchQuery ? 
-                                `No ${selectedTab} match your search criteria` : 
+                            {searchQuery ?
+                                `No ${selectedTab} match your search criteria` :
                                 `No ${selectedTab} available in the system`
                             }
                         </Text>
                     </View>
                 ) : (
-                    data.map((item: any) => (
-                    <TouchableOpacity
-                        key={item.id}
-                        style={tw`bg-white rounded-2xl p-4 mb-3 shadow-sm`}
-                        onPress={() => {
-                            // Navigate to detail screen based on type
-                            if (selectedTab === 'users') {
-                                router.push(`/user/user-detail`);
-                            } else if (selectedTab === 'farms') {
-                                router.push(`/farm/farm-detail`);
-                            } else if (selectedTab === 'schedules') {
-                                router.push(`/communication/schedule-detail`);
-                            }
-                        }}
-                    >
-                        {selectedTab === 'users' && (
-                            <View style={tw`flex-row items-center justify-between`}>
-                                <View style={tw`flex-1`}>
-                                    <Text style={tw`font-bold text-gray-800`}>{item.name}</Text>
-                                    <Text style={tw`text-gray-600`}>{item.email}</Text>
-                                    <Text style={tw`text-sm text-gray-500`}>{item.location}</Text>
-                                </View>
-                                <View style={[
-                                    tw`px-3 py-1 rounded-full`,
-                                    item.role === 'admin' ? tw`bg-purple-100` :
-                                        item.role === 'farmer' ? tw`bg-green-100` : tw`bg-blue-100`
-                                ]}>
-                                    <Text style={[
-                                        tw`text-xs font-bold capitalize`,
-                                        item.role === 'admin' ? tw`text-purple-600` :
-                                            item.role === 'farmer' ? tw`text-green-600` : tw`text-blue-600`
-                                    ]}>
-                                        {item.role}
-                                    </Text>
-                                </View>
-                            </View>
-                        )}
-
-                        {selectedTab === 'farms' && (
-                            <View style={tw`flex-row items-center justify-between`}>
-                                <View style={tw`flex-1`}>
-                                    <Text style={tw`font-bold text-gray-800`}>{item.name}</Text>
-                                    <Text style={tw`text-gray-600`}>{item.location.latitude}, {item.location.longitude}</Text>
-                                    <Text style={tw`text-sm text-gray-500`}>
-                                        {item.livestock.total} chickens • {item.size} hectares
-                                    </Text>
-                                </View>
-                                <View style={[
-                                    tw`px-3 py-1 rounded-full`,
-                                    item.healthStatus === 'excellent' ? tw`bg-green-100` :
-                                        item.healthStatus === 'good' ? tw`bg-blue-100` :
-                                            item.healthStatus === 'fair' ? tw`bg-yellow-100` : tw`bg-red-100`
-                                ]}>
-                                    <Text style={[
-                                        tw`text-xs font-bold capitalize`,
-                                        item.healthStatus === 'excellent' ? tw`text-green-600` :
-                                            item.healthStatus === 'good' ? tw`text-blue-600` :
-                                                item.healthStatus === 'fair' ? tw`text-yellow-600` : tw`text-red-600`
-                                    ]}>
-                                        {item.healthStatus}
-                                    </Text>
-                                </View>
-                            </View>
-                        )}
-
-                        {selectedTab === 'schedules' && (
-                            <View style={tw`flex-row items-center justify-between`}>
-                                <View style={tw`flex-1`}>
-                                    <Text style={tw`font-bold text-gray-800`}>{item.title}</Text>
-                                    <Text style={tw`text-gray-600`}>{item.description}</Text>
-                                    <Text style={tw`text-sm text-gray-500`}>
-                                        {new Date(item.scheduledDate).toLocaleDateString()}
-                                    </Text>
-                                </View>
-                                <View style={[
-                                    tw`px-3 py-1 rounded-full`,
-                                    item.status === 'completed' ? tw`bg-green-100` :
-                                        item.status === 'scheduled' ? tw`bg-blue-100` : tw`bg-gray-100`
-                                ]}>
-                                    <Text style={[
-                                        tw`text-xs font-bold capitalize`,
-                                        item.status === 'completed' ? tw`text-green-600` :
-                                            item.status === 'scheduled' ? tw`text-blue-600` : tw`text-gray-600`
-                                    ]}>
-                                        {item.status}
-                                    </Text>
-                                </View>
-                            </View>
-                        )}
-                    </TouchableOpacity>
+                    currentData.map((item) => (
+                        <TouchableOpacity
+                            key={item.id}
+                            style={tw`bg-white rounded-2xl p-4 mb-3 shadow-sm`}
+                            onPress={() => {
+                                // Navigate to detail screen based on type
+                                if (selectedTab === 'users') {
+                                    router.push(`/user/user-detail`);
+                                } else if (selectedTab === 'farms') {
+                                    router.push(`/farm/farm-detail`);
+                                } else if (selectedTab === 'schedules') {
+                                    router.push(`/communication/schedule-detail`);
+                                }
+                            }}
+                        >
+                            {selectedTab === 'users' && <UserListItem user={item as User} />}
+                            {selectedTab === 'farms' && <FarmListItem farm={item as Farm} />}
+                            {selectedTab === 'schedules' && <ScheduleListItem schedule={item as Schedule} />}
+                        </TouchableOpacity>
                     ))
                 )}
             </ScrollView>

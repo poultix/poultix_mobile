@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFarms } from "@/contexts/FarmContext";
 
 export default function VetDashSchedules() {
-    const { schedules } = useSchedules();
+    const { schedules, setCurrentSchedule } = useSchedules();
     const { currentUser } = useAuth();
     const { farms } = useFarms();
     const assignedFarms = farms.filter(farm => farm.assignedVeterinary?.id === currentUser?.id);
@@ -29,12 +29,12 @@ export default function VetDashSchedules() {
             {mySchedules.map((schedule) => {
                 // For now, we'll show the first farm or a default message
                 const farm = assignedFarms[0];
-
+console.log(schedule)
                 return (
                     <TouchableOpacity
                         key={schedule.id}
                         style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}
-                        onPress={() => router.push('/communication/schedule-detail')}
+                        onPress={() => { setCurrentSchedule(schedule); router.push('/communication/schedule-detail') }}
                     >
                         <View style={tw`flex-row items-start justify-between mb-3`}>
                             <View style={tw`flex-1`}>
