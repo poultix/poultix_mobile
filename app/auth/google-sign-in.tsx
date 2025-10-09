@@ -7,8 +7,8 @@ import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 import { IOSDesign } from '../../constants/iosDesign';
-import { GoogleAuthConfig, getConfigurationStatus } from './googleAuthConfig';
- ;
+import { GoogleAuthConfig, getConfigurationStatus } from '@/services/constants';
+
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -86,10 +86,10 @@ export default function SignInWithGoogleScreen() {
     const getUserInfo = async (accessToken: string) => {
         try {
             setLoading(true);
-            
+
             // Use Google's userinfo endpoint
             const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-                headers: { 
+                headers: {
                     Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
@@ -98,7 +98,7 @@ export default function SignInWithGoogleScreen() {
             if (userInfoResponse.ok) {
                 const userInfo: GoogleUser = await userInfoResponse.json();
                 setUser(userInfo);
-                
+
                 // Save user data to AsyncStorage with expiration
                 const userData = {
                     ...userInfo,
@@ -106,9 +106,9 @@ export default function SignInWithGoogleScreen() {
                     timestamp: Date.now(),
                 };
                 await AsyncStorage.setItem('googleUser', JSON.stringify(userData));
-                
+
                 Alert.alert(
-                    'Welcome! 🎉', 
+                    'Welcome! 🎉',
                     `Successfully signed in as ${userInfo.name}`,
                     [{ text: 'Continue', onPress: () => router.replace('/') }]
                 );
@@ -141,10 +141,10 @@ export default function SignInWithGoogleScreen() {
 
             setLoading(true);
             const result = await promptAsync();
-            
+
             // The result will be handled in the useEffect above
             console.log('Auth result:', result.type);
-            
+
         } catch (error) {
             console.error('Sign in error:', error);
             Alert.alert(
@@ -162,7 +162,7 @@ export default function SignInWithGoogleScreen() {
             // Clear local storage
             await AsyncStorage.removeItem('googleUser');
             setUser(null);
-            
+
             Alert.alert(
                 'Signed Out',
                 'You have been successfully signed out.',
@@ -188,8 +188,8 @@ export default function SignInWithGoogleScreen() {
                 paddingHorizontal: IOSDesign.layout.screenPadding,
                 paddingTop: IOSDesign.spacing.xl,
             }}>
-                <TouchableOpacity 
-                    onPress={() => router.back()} 
+                <TouchableOpacity
+                    onPress={() => router.back()}
                     style={{
                         marginBottom: IOSDesign.spacing.lg,
                         padding: IOSDesign.spacing.sm,
@@ -227,16 +227,16 @@ export default function SignInWithGoogleScreen() {
                         }}
                     >
                         {loading ? (
-                            <ActivityIndicator 
-                                size="small" 
-                                color={IOSDesign.colors.systemBlue} 
+                            <ActivityIndicator
+                                size="small"
+                                color={IOSDesign.colors.systemBlue}
                                 style={{ marginRight: IOSDesign.spacing.sm }}
                             />
                         ) : (
-                            <Ionicons 
-                                name="logo-google" 
-                                size={24} 
-                                color="#EA4335" 
+                            <Ionicons
+                                name="logo-google"
+                                size={24}
+                                color="#EA4335"
                                 style={{ marginRight: IOSDesign.spacing.sm }}
                             />
                         )}
@@ -254,8 +254,8 @@ export default function SignInWithGoogleScreen() {
                         ...IOSDesign.components.card,
                         marginBottom: IOSDesign.spacing.lg,
                     }}>
-                        <Image 
-                            source={{ uri: user.picture }} 
+                        <Image
+                            source={{ uri: user.picture }}
                             style={{
                                 width: 80,
                                 height: 80,
@@ -290,10 +290,10 @@ export default function SignInWithGoogleScreen() {
                                 ...IOSDesign.shadows.small,
                             }}
                         >
-                            <Ionicons 
-                                name="exit-outline" 
-                                size={20} 
-                                color={IOSDesign.colors.text.inverse} 
+                            <Ionicons
+                                name="exit-outline"
+                                size={20}
+                                color={IOSDesign.colors.text.inverse}
                                 style={{ marginRight: IOSDesign.spacing.sm }}
                             />
                             <Text style={{
