@@ -198,7 +198,7 @@ export default function HistoryScreen() {
                     style={{ borderLeftColor: roleColors.primary }}
                     onPress={() => {
                       setCurrentSchedule(schedule)
-                      router.push(`/communication/schedule-detail`)
+                      router.push(`/schedule/schedule-detail`)
                     }}
                   >
                     <View className="flex-row items-start justify-between mb-3">

@@ -19,7 +19,7 @@ export default function VetDashSchedules() {
                 <Text style={tw`text-xl font-bold text-gray-800`}>My Schedule</Text>
                 <TouchableOpacity
                     style={tw`bg-red-500 px-4 py-2 rounded-xl flex-row items-center`}
-                    onPress={() => router.push('/communication/schedule-management')}
+                    onPress={() => router.push('/schedule/schedule-management')}
                 >
                     <Ionicons name="settings-outline" size={16} color="white" />
                     <Text style={tw`text-white font-semibold ml-1`}>Manage</Text>
@@ -34,7 +34,7 @@ console.log(schedule)
                     <TouchableOpacity
                         key={schedule.id}
                         style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}
-                        onPress={() => { setCurrentSchedule(schedule); router.push('/communication/schedule-detail') }}
+                        onPress={() => { setCurrentSchedule(schedule); router.push('/schedule/schedule-detail') }}
                     >
                         <View style={tw`flex-row items-start justify-between mb-3`}>
                             <View style={tw`flex-1`}>

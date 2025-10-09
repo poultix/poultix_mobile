@@ -90,7 +90,7 @@ export default function AdminDashboard() {
                         <View style={tw`flex-row flex-wrap justify-between mb-6`}>
                             <TouchableOpacity 
                                 style={tw`bg-white rounded-2xl p-4 w-[48%] mb-4 shadow-md border border-purple-100`}
-                                onPress={() => router.push('/admin/add-news')}
+                                onPress={() => router.push('/news/add-news')}
                             >
                                 <View style={tw`items-center`}>
                                     <Ionicons name="newspaper-outline" size={24} color="#7C3AED" />

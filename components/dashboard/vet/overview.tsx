@@ -117,7 +117,7 @@ export default function VetOverview() {
                             <TouchableOpacity
                                 key={schedule.id}
                                 style={tw`bg-red-50 border border-red-100 rounded-xl p-4 mb-3 last:mb-0`}
-                                onPress={() => router.push('/communication/schedule-detail')}
+                                onPress={() => router.push('/schedule/schedule-detail')}
                             >
                                 <View style={tw`flex-row items-start justify-between mb-2`}>
                                     <View style={tw`flex-1`}>
@@ -160,7 +160,7 @@ export default function VetOverview() {
                 <View style={tw`flex-row flex-wrap justify-between`}>
                     <TouchableOpacity
                         style={tw`w-[48%] bg-red-50 border border-red-200 rounded-xl p-4 mb-3 items-center`}
-                        onPress={() => router.push('/communication/schedule-management')}
+                        onPress={() => router.push('/schedule/schedule-management')}
                     >
                         <Ionicons name="calendar-outline" size={24} color="#EF4444" />
                         <Text style={tw`text-red-600 font-semibold mt-2 text-center`}>Manage Schedules</Text>

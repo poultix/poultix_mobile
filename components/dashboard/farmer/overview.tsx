@@ -140,7 +140,7 @@ export default function FarmerOverview() {
 
                     <TouchableOpacity
                         className="flex-1 bg-green-50 border border-green-200 rounded-xl p-4 min-w-[45%] items-center"
-                        onPress={() => router.push('/communication/schedule-request')}
+                        onPress={() => router.push('/schedule/schedule-request')}
                     >
                         <Ionicons name="calendar-outline" size={24} color="#10B981" />
                         <Text className="text-green-500 font-semibold mt-2">Request Visit</Text>
@@ -200,7 +200,7 @@ export default function FarmerOverview() {
                         </Text>
                         <TouchableOpacity
                             className="bg-green-500 px-6 py-3 rounded-xl mt-4"
-                            onPress={() => router.push('/communication/schedule-request')}
+                            onPress={() => router.push('/schedule/schedule-request')}
                         >
                             <Text className="text-white font-semibold">Request a Visit</Text>
                         </TouchableOpacity>

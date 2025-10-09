@@ -1,7 +1,6 @@
 import BottomTabs from '@/components/BottomTabs';
 import CustomDrawer from '@/components/CustomDrawer';
 import DrawerButton from '@/components/DrawerButton';
-import { useBottomTabsContext } from '@/contexts/BottomTabsContext';
 import { useDrawer } from '@/contexts/DrawerContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -25,14 +24,10 @@ import { useFarms } from '@/contexts/FarmContext';
 
 export default function FarmerDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
-  const { setCurrentRoute } = useBottomTabsContext();
   const { currentUser } = useAuth();
   const { farms } = useFarms();
 
-  // Set current route for bottom tabs
-  useEffect(() => {
-    setCurrentRoute('/dashboard/farmer-dashboard');
-  }, []);
+;
 
   const [selectedTab, setSelectedTab] = useState<'overview' | 'farms' | 'schedules'>('overview');
 

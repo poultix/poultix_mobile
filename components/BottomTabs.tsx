@@ -81,7 +81,7 @@ export default function BottomTabs({ style }: BottomTabsProps) {
                 router.push('/chat');
                 break;
             case 'news':
-                router.push('/general/news');
+                router.push('/news');
                 break;
             case 'profile':
                 router.push('/user/profile');

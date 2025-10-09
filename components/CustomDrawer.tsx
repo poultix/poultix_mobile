@@ -64,7 +64,7 @@ const allDrawerItems: DrawerItem[] = [
   },
   {
     label: 'Contacts',
-    route: '/user/directory',
+    route: '/chat',
     icon: 'people-outline',
     description: 'User directory',
     color: '#6B7280'
@@ -78,14 +78,14 @@ const allDrawerItems: DrawerItem[] = [
   },
   {
     label: 'Health News',
-    route: '/general/news',
+    route: '/news',
     icon: 'newspaper-outline',
     description: 'Latest updates',
     color: '#8B5CF6'
   },
   {
     label: 'AI Assistant',
-    route: '/general/ai',
+    route: '/ai',
     icon: 'chatbubble-ellipses-outline',
     description: 'Get AI-powered advice',
     badge: 'BETA',
@@ -95,7 +95,7 @@ const allDrawerItems: DrawerItem[] = [
   // Device features
   {
     label: 'Bluetooth Devices',
-    route: '/bluetooth/bluetooth-pairing',
+    route: '/device/pairing',
     icon: 'bluetooth-outline',
     description: 'Connect to devices',
     badge: 'BETA',
@@ -103,7 +103,7 @@ const allDrawerItems: DrawerItem[] = [
   },
   {
     label: 'PH Analyzer',
-    route: '/bluetooth/ph-reader',
+    route: '/device/reading',
     icon: 'flask-outline',
     description: 'Analyze stool samples',
     badge: 'BETA',
@@ -383,7 +383,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
               <View style={tw`flex-row justify-between mb-3`}>
                 <TouchableOpacity
                   style={tw`bg-sky-50 rounded-2xl p-4 flex-1 mr-2 items-center`}
-                  onPress={() => handleItemPress('/bluetooth/bluetooth-pairing')}
+                  onPress={() => handleItemPress('/device/pairing')}
                   activeOpacity={0.7}
                 >
                   <View style={tw`w-10 h-10 bg-sky-100 rounded-full items-center justify-center mb-2`}>
@@ -393,7 +393,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={tw`bg-blue-50 rounded-2xl p-4 flex-1 mx-1 items-center`}
-                  onPress={() => handleItemPress('/bluetooth/ph-reader')}
+                  onPress={() => handleItemPress('/device/reading')}
                   activeOpacity={0.7}
                 >
                   <View style={tw`w-10 h-10 bg-blue-100 rounded-full items-center justify-center mb-2`}>

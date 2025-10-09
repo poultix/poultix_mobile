@@ -13,7 +13,7 @@ export default function FarmerSchedulesDashboard() {
                 <Text className="text-xl font-bold text-gray-800">My Schedules</Text>
                 <TouchableOpacity
                     className="bg-amber-500 px-4 py-2 rounded-xl flex-row items-center"
-                    onPress={() => router.push('/communication/schedule-request')}
+                    onPress={() => router.push('/schedule/schedule-request')}
                 >
                     <Ionicons name="add-outline" size={16} color="white" />
                     <Text className="text-white font-semibold ml-1">Request Visit</Text>
@@ -29,7 +29,7 @@ export default function FarmerSchedulesDashboard() {
                         <TouchableOpacity
                             key={schedule.id}
                             className="bg-white rounded-2xl p-5 mb-4 shadow-sm"
-                            onPress={() => { setCurrentSchedule(schedule); router.push(`/communication/schedule-detail`) }}
+                            onPress={() => { setCurrentSchedule(schedule); router.push(`/schedule/schedule-detail`) }}
                         >
                             <View className="flex-row items-start justify-between mb-3">
                                 <View className="flex-1">
@@ -84,7 +84,7 @@ export default function FarmerSchedulesDashboard() {
                     </Text>
                     <TouchableOpacity
                         className="bg-blue-500 px-8 py-4 rounded-xl mt-6 flex-row items-center"
-                        onPress={() => router.push('/communication/schedule-request')}
+                        onPress={() => router.push('/schedule/schedule-request')}
                     >
                         <Ionicons name="add-outline" size={20} color="white" />
                         <Text className="text-white font-semibold ml-2">Request Your First Visit</Text>

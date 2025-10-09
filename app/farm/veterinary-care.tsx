@@ -118,7 +118,7 @@ export default function VeterinaryCareScreen() {
         }
 
         // Navigate to schedule request screen for booking
-        router.push('/communication/schedule-request');
+        router.push('/schedule/schedule-request');
     };
 
     const getRatingStars = (rating: number) => {

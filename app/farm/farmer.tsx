@@ -61,7 +61,7 @@ export default function FarmerScreen() {
     };
     
     const navigateToScheduleDetails = (schedule: Schedule) => {
-        router.push('/communication/schedule-detail');
+        router.push('/schedule/schedule-detail');
     };
 
     if (isLoading) {
@@ -152,7 +152,7 @@ export default function FarmerScreen() {
                                 <Text style={tw`text-xl font-bold text-gray-800`}>
                                     Recent Appointments
                                 </Text>
-                                <TouchableOpacity onPress={() => router.push('/communication/schedule-management')}>
+                                <TouchableOpacity onPress={() => router.push('/schedule/schedule-management')}>
                                     <Text style={tw`text-orange-500 font-semibold`}>View All</Text>
                                 </TouchableOpacity>
                             </View>

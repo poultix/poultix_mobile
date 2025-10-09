@@ -299,7 +299,7 @@ export default function AdminDataList() {
                                 } else if (selectedTab === 'farms') {
                                     router.push(`/farm/farm-detail`);
                                 } else if (selectedTab === 'schedules') {
-                                    router.push(`/communication/schedule-detail`);
+                                    router.push(`/schedule/schedule-detail`);
                                 }
                             }}
                         >

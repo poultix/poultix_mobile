@@ -24,7 +24,7 @@ const CustomDrawerContent = () => {
     try {
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('role');
-      router.replace('/(auth)/sign-in' as any)
+      router.replace('/auth/login')
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -51,9 +51,9 @@ const CustomDrawerContent = () => {
           { name: 'Home', icon: 'home-outline', route: '/' },
           { name: 'Farmer Profile', icon: 'person-outline', route: '/farm/farmer' },
           { name: 'Farm Management', icon: 'leaf-outline', route: '/farm' },
-          { name: 'AI Assistant', icon: 'chatbox-ellipses-outline', route: '/general/ai' },
+          { name: 'AI Assistant', icon: 'chatbox-ellipses-outline', route: '/ai' },
           { name: 'Pharmacies', icon: 'medical-outline', route: '/pharmacy' },
-          { name: 'News & Updates', icon: 'newspaper-outline', route: '/general/news' },
+          { name: 'News & Updates', icon: 'newspaper-outline', route: '/news' },
           { name: 'Admin Panel', icon: 'shield-outline', route: '/admin' },
           { name: 'Settings', icon: 'settings-outline', route: '/settings' },
         ].map((item) => (
@@ -76,7 +76,7 @@ const CustomDrawerContent = () => {
             style={tw`flex-row items-center p-4`}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
-              router.push('/bluetooth/ph-reader' );
+              router.push('/device/readings' );
             }}
           >
             <Ionicons name="analytics-outline" size={24} color="#6B7280" style={tw`mr-4`} />
@@ -87,7 +87,7 @@ const CustomDrawerContent = () => {
             style={tw`flex-row items-center p-4`}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => { });
-              router.push('/bluetooth/bluetooth-pairing' );
+              router.push('/device/pairing' );
             }}
           >
             <Ionicons name="bluetooth-outline" size={24} color="#6B7280" style={tw`mr-4`} />

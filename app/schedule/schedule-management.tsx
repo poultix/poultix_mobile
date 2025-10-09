@@ -81,7 +81,7 @@ export default function ScheduleManagementScreen() {
 
     const handleSchedulePress = (schedule: Schedule) => {
         setCurrentSchedule(schedule);
-        router.push('/communication/schedule-detail');
+        router.push('/schedule/schedule-detail');
     };
 
     const getStatusColor = (status: string) => {

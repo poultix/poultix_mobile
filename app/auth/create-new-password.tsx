@@ -14,7 +14,7 @@ import {
   View,
 } from 'react-native';
 import tw from 'twrnc';
- ;
+ 
 
 export default function CreateNewPasswordScreen() {
   const [newPassword, setNewPassword] = useState('');
