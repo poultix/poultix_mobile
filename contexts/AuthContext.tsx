@@ -21,10 +21,6 @@ interface AuthContextType {
     resetPassword: (resetCode: string, newPassword: string) => Promise<void>
     resendVerification: (email: string) => Promise<void>
     refreshToken: () => Promise<void>
-    // Dev helpers
-    loginAsFarmer: () => Promise<void>
-    loginAsVeterinary: () => Promise<void>
-    loginAsAdmin: () => Promise<void>
     checkAuthStatus: () => Promise<void>
 }
 
@@ -44,9 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setError('');
 
             const isAuth = await authService.isAuthenticated();
-            const isTokenValid = await authService.isTokenValid();
-            const isTokeAvailable = await authService.getAccessToken();
-            if (isAuth && isTokenValid && isTokeAvailable) {
+            if (isAuth ) {
                 // Get user info from JWT token
                 const userInfo = await authService.getCurrentUser();
 
@@ -60,7 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setCurrentUser(null);
                     router.push('/auth/login');
                 }
-            } else if (isAuth && !isTokenValid && isTokeAvailable) {
+            } else {
                 // Try to refresh token
                 try {
                     await authService.refreshToken();
@@ -74,10 +68,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setCurrentUser(null);
                     router.push('/auth/login');
                 }
-            } else {
-                setAuthenticated(false);
-                setCurrentUser(null);
-                router.push('/auth/login');
             }
         } catch (error) {
             console.error('Auth status check failed:', error);
@@ -113,9 +103,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             const loginData: UserLoginRequest = { email, password };
             const response = await authService.login(loginData);
-
-            console.log(response.data)
-
             if (response.success && response.data) {
                 const authData = response.data;
 
@@ -128,7 +115,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 // Navigate based on role
                 navigateByRole(user.role);
 
-                Alert.alert('Success', 'Login successful!');
             } else {
                 throw new Error(response.message || 'Login failed');
             }
@@ -145,15 +131,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             setLoading(true);
 
-            // Call API logout (this clears server-side tokens)
             await authService.logout();
 
-            // Clear local state
             setAuthenticated(false);
             setCurrentUser(null);
             setError('');
 
-            // Navigate to login
             router.replace('/auth/login');
         } catch (error: any) {
             // Even if API call fails, clear local state
@@ -311,19 +294,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 
 
-    // Quick dev methods (for testing)
-    const loginAsFarmer = async (): Promise<void> => {
-        await login('farmer@test.com', 'password123');
-    };
-
-    const loginAsVeterinary = async (): Promise<void> => {
-        await login('vet@test.com', 'password123');
-    };
-
-    const loginAsAdmin = async (): Promise<void> => {
-        await login('admin@test.com', 'password123');
-    };
-
     const contextValue: AuthContextType = {
         currentUser,
         authenticated,
@@ -336,11 +306,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         verifyCode,
         resetPassword,
         resendVerification,
-        refreshToken,
-        loginAsFarmer,
-        loginAsVeterinary,
-        loginAsAdmin,
-        checkAuthStatus
+        checkAuthStatus,
+        refreshToken
     };
 
 

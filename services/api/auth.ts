@@ -26,7 +26,6 @@ export class AuthService {
 
             // Store tokens securely
             if (response.success && response.data) {
-                
                 await this.storeTokens(response.data.accessToken, response.data.refreshToken);
             }
 

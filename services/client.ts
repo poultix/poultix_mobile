@@ -23,13 +23,11 @@ class ApiClient {
             async (config) => {
                 try {
                     const token = await this.getAuthToken();
-                    console.log('Token in interceptor:', token, 'For URL:', config.url);
                     if (token) {
                         config.headers.Authorization = `Bearer ${token}`;
                     }
                     return config;
                 } catch (error) {
-                    console.error('Error in request interceptor:', error);
                     return Promise.reject(error);
                 }
             },
@@ -67,7 +65,7 @@ class ApiClient {
         if (error.response) {
             const status = error.response.status;
             
-            // Server errors (5xx)
+            
             if (status >= 500) {
                 return {
                     status: HTTP_STATUS.SERVICE_UNAVAILABLE,
@@ -82,7 +80,7 @@ class ApiClient {
             };
         }
 
-        // Network-related errors (no response from server)
+       
         if (error.request) {
             // Request timeout
             if (error.code === 'ECONNABORTED') {
@@ -205,28 +203,12 @@ class ApiClient {
         }
     }
 
-    public onLogout(callback: () => void) {
-        try {
-            this.logoutListeners.push(callback);
-        } catch (error) {
-            console.error('Error adding logout listener:', (error as Error).message || 'Unknown error');
-        }
-    }
-
-    public removeLogoutListener(callback: () => void) {
-        try {
-            this.logoutListeners = this.logoutListeners.filter(cb => cb !== callback);
-        } catch (error) {
-            console.error('Error removing logout listener:', (error as Error).message || 'Unknown error');
-        }
-    }
 
     async get<T>(endpoint: string, params?: Record<string, unknown>): Promise<ApiResponse<T>> {
         try {
             const response = await this.axiosInstance.get<ApiResponse<T>>(endpoint, { params });
             return response.data;
         } catch (error) {
-            console.error(`GET ${endpoint} failed:`, (error as Error).message || 'Unknown error');
             if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.get<T>(endpoint, params); // Retry
@@ -238,10 +220,8 @@ class ApiClient {
     async post<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
         try {
             const response = await this.axiosInstance.post<ApiResponse<T>>(endpoint, data);
-            console.log("This is the response", response, "endpoint", endpoint)
             return response.data;
         } catch (error) {
-            console.error(`POST ${endpoint} failed:`, (error as any).request || 'Unknown error');
             if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.post<T>(endpoint, data); // Retry
@@ -255,7 +235,6 @@ class ApiClient {
             const response = await this.axiosInstance.put<ApiResponse<T>>(endpoint, data);
             return response.data;
         } catch (error) {
-            console.error(`PUT ${endpoint} failed:`, (error as Error).message || 'Unknown error');
             if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.put<T>(endpoint, data); // Retry
@@ -269,7 +248,6 @@ class ApiClient {
             const response = await this.axiosInstance.patch<ApiResponse<T>>(endpoint, data);
             return response.data;
         } catch (error) {
-            console.error(`PATCH ${endpoint} failed:`, (error as Error).message || 'Unknown error');
             if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.patch<T>(endpoint, data); // Retry
@@ -283,7 +261,6 @@ class ApiClient {
             const response = await this.axiosInstance.delete<ApiResponse<T>>(endpoint);
             return response.data;
         } catch (error) {
-            console.error(`DELETE ${endpoint} failed:`, (error as Error).message || 'Unknown error');
             if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.delete<T>(endpoint); // Retry
@@ -311,7 +288,6 @@ class ApiClient {
             });
             return response.data;
         } catch (error) {
-            console.error(`UPLOAD ${endpoint} failed:`, (error as Error).message || 'Unknown error');
             if ((error as any).status === HTTP_STATUS.UNAUTHORIZED) {
                 await this.handleUnauthorized();
                 return this.uploadFile<T>(endpoint, formData, onUploadProgress, cancelToken, timeout); // Retry

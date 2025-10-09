@@ -68,7 +68,7 @@ export const VaccineProvider = ({ children }: { children: React.ReactNode }) => 
     if (authenticated) {
       loadVaccines();
     }
-  }, [loadVaccines, authenticated]);
+  }, [ authenticated]);
 
   const createVaccine = async (vaccineData: VaccineCreateRequest): Promise<void> => {
     try {
