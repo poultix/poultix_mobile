@@ -1,24 +1,13 @@
-import { Schedule, ScheduleType, ScheduleStatus, SchedulePriority, ScheduleCreateRequest } from '@/types/schedule';
+import { Schedule, ScheduleStatus,ScheduleCreateRequest, ScheduleUpdateRequest } from '@/types/schedule';
 import { scheduleService } from '@/services/api';
 import { useSchedules } from '@/contexts/ScheduleContext';
+import { useState } from 'react';
 
-export interface ScheduleActionsType {
-  loadSchedules: () => Promise<Schedule[]>;
-  createSchedule: (scheduleData: ScheduleCreateRequest) => Promise<void>;
-  updateSchedule: (id: string, scheduleData: Partial<Schedule>) => Promise<void>;
-  deleteSchedule: (id: string) => Promise<void>;
-  getScheduleById: (schedules: Schedule[], id: string) => Schedule | undefined;
-  getSchedulesByFarmer: (schedules: Schedule[], farmerId: string) => Schedule[];
-  getSchedulesByVeterinary: (schedules: Schedule[], veterinaryId: string) => Schedule[];
-  getSchedulesByStatus: (schedules: Schedule[], status: ScheduleStatus) => Schedule[];
-  getSchedulesByType: (schedules: Schedule[], type: ScheduleType) => Schedule[];
-  getSchedulesByPriority: (schedules: Schedule[], priority: SchedulePriority) => Schedule[];
-  refreshSchedules: () => Promise<Schedule[]>;
-}
 
-export const useScheduleActions = (): ScheduleActionsType => {
 
-  const { schedules, addSchedule } = useSchedules()
+export const useScheduleActions = () => {
+  const [loading, setLoading] = useState(false)
+  const { editSchedule, removeSchedule, addSchedule } = useSchedules()
 
   const loadSchedules = async (): Promise<Schedule[]> => {
     const response = await scheduleService.getAllSchedules();
@@ -33,63 +22,110 @@ export const useScheduleActions = (): ScheduleActionsType => {
 
   };
 
-  const updateSchedule = async (id: string, scheduleData: Partial<Schedule>) => {
-    const schedules = await loadSchedules();
-    const existingSchedule = schedules.find(schedule => schedule.id === id);
+  const updateSchedule = async (id: string, updates: ScheduleUpdateRequest): Promise<void> => {
+    try {
+      setLoading(true);
+      const response = await scheduleService.updateSchedule(id, updates);
 
-    if (!existingSchedule) {
-      throw new Error('Schedule not found');
+      if (response.success && response.data) {
+        editSchedule(response.data)
+      } else {
+        throw new Error(response.message || 'Failed to update schedule');
+      }
+    } catch (error: any) {
+      console.error('Failed to update schedule:', error);
+
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const updatedSchedule = { ...existingSchedule, ...scheduleData, updatedAt: new Date() };
+
+  const updateScheduleStatus = async (id: string, status: ScheduleStatus): Promise<void> => {
+    try {
+      setLoading(true);
+
+      // Convert ScheduleStatus to service expected format
+      const serviceStatus = status === ScheduleStatus.SCHEDULED ? 'PENDING' :
+        status === ScheduleStatus.IN_PROGRESS ? 'CONFIRMED' :
+          status === ScheduleStatus.COMPLETED ? 'COMPLETED' :
+            status === ScheduleStatus.CANCELLED ? 'CANCELLED' : 'PENDING';
+      const response = await scheduleService.updateScheduleStatus(id, serviceStatus as 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED');
+
+      if (response.success && response.data) {
+        editSchedule(response.data)
+      }
+    } catch (error: any) {
+      console.error('Failed to update schedule status:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
+
+  const completeSchedule = async (id: string): Promise<void> => {
+    try {
+      setLoading(true);
+      const response = await scheduleService.completeSchedule(id);
+
+      if (response.success && response.data) {
+        editSchedule(response.data)
+      }
+    } catch (error: any) {
+      console.error('Failed to complete schedule:', error);
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cancelSchedule = async (id: string): Promise<void> => {
+    try {
+      setLoading(true);
+      const response = await scheduleService.cancelSchedule(id);
+
+      if (response.success && response.data) {
+        editSchedule(response.data)
+      }
+    } catch (error: any) {
+      console.error('Failed to cancel schedule:', error);
+
+    } finally {
+      setLoading(false);
+    }
   };
 
   const deleteSchedule = async (id: string): Promise<void> => {
-    // In a real app, this would make an API call
-    console.log(`Deleting schedule with id: ${id}`);
+    try {
+      setLoading(true);
+
+
+      const response = await scheduleService.deleteSchedule(id);
+
+      if (response.success && response.data) {
+        removeSchedule(response.data)
+      }
+    } catch (error: any) {
+      console.error('Failed to delete schedule:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getScheduleById = (schedules: Schedule[], id: string): Schedule | undefined => {
-    return schedules.find(schedule => schedule.id === id);
-  };
 
-  const getSchedulesByFarmer = (schedules: Schedule[], farmerId: string): Schedule[] => {
-    return schedules.filter(schedule => schedule.farmer.id === farmerId);
-  };
 
-  const getSchedulesByVeterinary = (schedules: Schedule[], veterinaryId: string): Schedule[] => {
-    return schedules.filter(schedule => schedule.veterinary.id === veterinaryId);
-  };
 
-  const getSchedulesByStatus = (schedules: Schedule[], status: ScheduleStatus): Schedule[] => {
-    return schedules.filter(schedule => schedule.status === status);
-  };
-
-  const getSchedulesByType = (schedules: Schedule[], type: ScheduleType): Schedule[] => {
-    return schedules.filter(schedule => schedule.type === type);
-  };
-
-  const getSchedulesByPriority = (schedules: Schedule[], priority: SchedulePriority): Schedule[] => {
-    return schedules.filter(schedule => schedule.priority === priority);
-  };
-
-  const refreshSchedules = async (): Promise<Schedule[]> => {
-    return await loadSchedules();
-  };
 
   return {
     loadSchedules,
     createSchedule,
     updateSchedule,
     deleteSchedule,
-    getScheduleById,
-    getSchedulesByFarmer,
-    getSchedulesByVeterinary,
-    getSchedulesByStatus,
-    getSchedulesByType,
-    getSchedulesByPriority,
-    refreshSchedules,
+    loading,
+    updateScheduleStatus,
+    completeSchedule,
+    cancelSchedule,
+    
   };
 };

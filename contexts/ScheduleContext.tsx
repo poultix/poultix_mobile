@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { Schedule, ScheduleType, ScheduleStatus, ScheduleCreateRequest, ScheduleUpdateRequest } from '@/types';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Schedule, ScheduleStatus } from '@/types';
 import { scheduleService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
@@ -18,13 +18,9 @@ interface ScheduleContextType {
   getSchedulesByStatus: (status: ScheduleStatus) => Promise<Schedule[]>;
   getSchedulesByDate: (date: string) => Promise<Schedule[]>;
   getSchedulesByDateRange: (startDate: string, endDate: string) => Promise<Schedule[]>;
-  updateSchedule: (id: string, updates: ScheduleUpdateRequest) => Promise<void>;
-  updateScheduleStatus: (id: string, status: ScheduleStatus) => Promise<void>;
-  completeSchedule: (id: string) => Promise<void>;
-  cancelSchedule: (id: string) => Promise<void>;
-  deleteSchedule: (id: string) => Promise<void>;
+  editSchedule: (data: Schedule) => void;
+  removeSchedule: (data: Schedule) => void
   setCurrentSchedule: (schedule: Schedule | null) => void;
-  refreshSchedules: () => Promise<void>;
 }
 
 
@@ -72,12 +68,6 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-  const addSchedule = (scheduleData: Schedule) => {
-
-
-    setSchedules(prev => [...prev, scheduleData]);
-
-  };
 
   const getScheduleById = async (id: string): Promise<Schedule | null> => {
     try {
@@ -174,121 +164,23 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-  const updateSchedule = async (id: string, updates: ScheduleUpdateRequest): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await scheduleService.updateSchedule(id, updates);
-
-      if (response.success && response.data) {
-        setSchedules(prev => prev.map(schedule => schedule.id === id ? response.data! : schedule));
-      } else {
-        throw new Error(response.message || 'Failed to update schedule');
-      }
-    } catch (error: any) {
-      console.error('Failed to update schedule:', error);
-      setError(error.message || 'Failed to update schedule');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+  const addSchedule = (scheduleData: Schedule) => {
+    setSchedules(prev => [...prev, scheduleData]);
   };
 
-  const updateScheduleStatus = async (id: string, status: ScheduleStatus): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
+  const editSchedule = (data: Schedule) => {
+    setSchedules(prev => prev.map(s => s.id === data.id ? data : s))
+  }
 
-      // Convert ScheduleStatus to service expected format
-      const serviceStatus = status === ScheduleStatus.SCHEDULED ? 'PENDING' :
-        status === ScheduleStatus.IN_PROGRESS ? 'CONFIRMED' :
-          status === ScheduleStatus.COMPLETED ? 'COMPLETED' :
-            status === ScheduleStatus.CANCELLED ? 'CANCELLED' : 'PENDING';
-      const response = await scheduleService.updateScheduleStatus(id, serviceStatus as 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED');
-
-      if (response.success && response.data) {
-        setSchedules(prev => prev.map(schedule => schedule.id === id ? response.data! : schedule));
-      } else {
-        throw new Error(response.message || 'Failed to update schedule status');
-      }
-    } catch (error: any) {
-      console.error('Failed to update schedule status:', error);
-      setError(error.message || 'Failed to update schedule status');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const completeSchedule = async (id: string): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await scheduleService.completeSchedule(id);
-
-      if (response.success && response.data) {
-        setSchedules(prev => prev.map(schedule => schedule.id === id ? response.data! : schedule));
-      } else {
-        throw new Error(response.message || 'Failed to complete schedule');
-      }
-    } catch (error: any) {
-      console.error('Failed to complete schedule:', error);
-      setError(error.message || 'Failed to complete schedule');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const cancelSchedule = async (id: string): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await scheduleService.cancelSchedule(id);
-
-      if (response.success && response.data) {
-        setSchedules(prev => prev.map(schedule => schedule.id === id ? response.data! : schedule));
-      } else {
-        throw new Error(response.message || 'Failed to cancel schedule');
-      }
-    } catch (error: any) {
-      console.error('Failed to cancel schedule:', error);
-      setError(error.message || 'Failed to cancel schedule');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteSchedule = async (id: string): Promise<void> => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await scheduleService.deleteSchedule(id);
-
-      if (response.success) {
-        setSchedules(prev => prev.filter(schedule => schedule.id !== id));
-      } else {
-        throw new Error(response.message || 'Failed to delete schedule');
-      }
-    } catch (error: any) {
-      console.error('Failed to delete schedule:', error);
-      setError(error.message || 'Failed to delete schedule');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const removeSchedule = (data: Schedule) => {
+    setSchedules(prev => prev.filter(s => s.id !== data.id))
+  }
 
 
 
-  const refreshSchedules = async (): Promise<void> => {
-    await loadSchedules();
-  };
+
+
+
 
   const contextValue: ScheduleContextType = {
     schedules,
@@ -302,13 +194,9 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
     getSchedulesByStatus,
     getSchedulesByDate,
     getSchedulesByDateRange,
-    updateSchedule,
-    updateScheduleStatus,
-    completeSchedule,
-    cancelSchedule,
-    deleteSchedule,
     setCurrentSchedule,
-    refreshSchedules,
+    editSchedule,
+    removeSchedule
   };
 
   return (
