@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setError('');
 
             const isAuth = await authService.isAuthenticated();
+            console.log("Checking if it ia uth",isAuth)
             if (isAuth) {
                 // Get user info from JWT token
                 const userInfo = await authService.getCurrentUser();
@@ -172,15 +173,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             if (response.success && response.data) {
                 const authData = response.data;
-
                 const user: User = authData.user
 
                 setAuthenticated(true);
                 setCurrentUser(user);
-                await SecureStore.setItemAsync('user', JSON.stringify(user));
-                await SecureStore.setItemAsync('token', authData.accessToken);
-                await SecureStore.setItemAsync('refreshToken', authData.refreshToken);
-                // Navigate based on role (registration includes auto-login)
                 navigateByRole(user.role);
 
                 Alert.alert('Success', 'Registration successful! You are now logged in.');

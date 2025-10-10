@@ -20,7 +20,7 @@ export default function HistoryScreen() {
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
+  useEffect(() => { 
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 800,

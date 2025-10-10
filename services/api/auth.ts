@@ -1,4 +1,4 @@
-import { User, ApiResponse, UserRole, UserRegistrationRequest, AuthResponse, UserLoginRequest, ForgotPasswordRequest, PasswordResetRequest, EmailVerificationRequest } from '@/types';
+import { User, ApiResponse,  UserRegistrationRequest, AuthResponse, UserLoginRequest, ForgotPasswordRequest, PasswordResetRequest, EmailVerificationRequest } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
 import * as SecureStore from 'expo-secure-store';
@@ -10,7 +10,7 @@ export class AuthService {
 
             // Store tokens securely (registration includes tokens)
             if (response.success && response.data) {
-                await this.storeTokens(response.data.accessToken, response.data.refreshToken);
+                await this.storeTokens(response.data.accessToken, response.data.refreshToken, response.data.user);
             }
 
             return response;
@@ -26,7 +26,7 @@ export class AuthService {
 
             // Store tokens securely
             if (response.success && response.data) {
-                await this.storeTokens(response.data.accessToken, response.data.refreshToken);
+                await this.storeTokens(response.data.accessToken, response.data.refreshToken, response.data.user);
             }
 
             return response;
@@ -50,7 +50,7 @@ export class AuthService {
 
             // Store new tokens securely
             if (response.success && response.data) {
-                await this.storeTokens(response.data.accessToken, response.data.refreshToken);
+                await this.storeTokens(response.data.accessToken, response.data.refreshToken, response.data.user);
             }
 
             return response;
@@ -106,10 +106,11 @@ export class AuthService {
     }
 
     // Token management utilities
-    private async storeTokens(accessToken: string, refreshToken: string): Promise<void> {
+    private async storeTokens(accessToken: string, refreshToken: string, user: User): Promise<void> {
         try {
             await SecureStore.setItemAsync('access_token', accessToken);
             await SecureStore.setItemAsync('refresh_token', refreshToken);
+            await SecureStore.setItemAsync('user', JSON.stringify(user));
         } catch (error) {
             console.error('Error storing tokens:', error);
             throw new Error('Failed to store authentication tokens');
