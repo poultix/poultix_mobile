@@ -25,11 +25,11 @@ export default function VetDashboardFarms() {
             <View style={tw`flex-row justify-between items-center mb-4`}>
                 <Text style={tw`text-xl font-bold text-gray-800`}>Assigned Farms</Text>
                 <TouchableOpacity
-                    style={tw`bg-green-500 px-4 py-2 rounded-xl flex-row items-center`}
+                    style={tw`bg-amber-500 px-4 py-2 rounded-xl flex-row items-center`}
                     onPress={() => router.push('/farm')}
                 >
                     <Ionicons name="map-outline" size={16} color="white" />
-                    <Text style={tw`text-white font-semibold ml-1`}>View Map</Text>
+                    <Text style={tw`text-white font-semibold ml-1`}>View all farms</Text>
                 </TouchableOpacity>
             </View>
 
@@ -105,7 +105,7 @@ export default function VetDashboardFarms() {
                                 <Text style={tw`text-gray-500 text-sm ml-1`}>{owner?.email}</Text>
                             </View>
                             <Text style={tw`text-gray-500 text-sm`}>
-                                Last visit: {farm.lastInspection ? new Date(farm.lastInspection).toLocaleDateString() : 'Never'}
+                                Last visit:  Never
                             </Text>
                         </View>
                     </TouchableOpacity>

@@ -187,7 +187,7 @@ const PharmaciesScreen = () => {
                     {/* Enhanced Header */}
                     <View style={tw`pb-4`}>
                         <LinearGradient
-                            colors={['#EF4444', '#DC2626']}
+                            colors={['#F59E0B', '#D97706']}
                             style={tw` p-8 shadow-xl`}
                         >
                             <View style={tw`flex-row items-center justify-between mb-4`}>
@@ -238,12 +238,17 @@ const PharmaciesScreen = () => {
                                 ref={mapRef}
                                 style={tw`flex-1`}
                                 initialRegion={{
-                                    latitude: userLocation?.latitude || -1.9441, // Default to Kigali
+                                    latitude: userLocation?.latitude || -1.9441,
                                     longitude: userLocation?.longitude || 30.0619,
                                     latitudeDelta: 0.05,
                                     longitudeDelta: 0.05,
                                 }}
                                 showsUserLocation={true}
+                                showsCompass={true}
+                                showsPointsOfInterest={true}
+                                showsBuildings={true}
+                                showsIndoors={true}
+                                mapType='satellite'
                             >
                                 {filteredPharmacies.map((pharmacy) => (
                                     <Marker

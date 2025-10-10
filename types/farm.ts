@@ -30,13 +30,10 @@ export interface Farm {
     owner: User
     location: Coords;
     size: number;
-    establishedDate: string;
     livestock: FarmLiveStock
     facilities: FarmFacility
     assignedVeterinary?: User;
     healthStatus: FarmStatus;
-    lastInspection?: string;
-    certifications: string[];
     isActive: boolean;
     createdAt: string;
     updatedAt: string;

@@ -11,7 +11,7 @@ import { useFarmActions } from '@/hooks';
 export default function FarmDetailScreen() {
     const { currentUser } = useAuth();
     const { loading, currentFarm } = useFarms();
-    const {updateFarm}=useFarmActions()
+    const { updateFarm } = useFarmActions()
 
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [editFormData, setEditFormData] = useState({
@@ -225,19 +225,6 @@ export default function FarmDetailScreen() {
 
                     <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]">
                         <View className="flex-row items-center justify-between mb-2">
-                            <Ionicons name="calendar-outline" size={24} color="#F59E0B" />
-                            <Text className="text-2xl font-bold text-gray-800">
-                                {currentFarm.lastInspection ? new Date(currentFarm.lastInspection).toLocaleDateString() : 'Never'}
-                            </Text>
-                        </View>
-                        <Text className="text-gray-600 font-medium">Last Inspection</Text>
-                        <Text className="text-xs text-gray-500 mt-1">
-                            {currentFarm.isActive ? 'Active farm' : 'Inactive farm'}
-                        </Text>
-                    </View>
-
-                    <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]">
-                        <View className="flex-row items-center justify-between mb-2">
                             <Ionicons name="location-outline" size={24} color="#8B5CF6" />
                             <Text className="text-2xl font-bold text-gray-800">
                                 {currentFarm.location.latitude.toFixed(2)}
@@ -260,10 +247,7 @@ export default function FarmDetailScreen() {
                             <Text className="text-gray-600">Owner</Text>
                             <Text className="font-semibold text-gray-800">{currentFarm.owner.name}</Text>
                         </View>
-                        <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
-                            <Text className="text-gray-600">Established</Text>
-                            <Text className="font-semibold text-gray-800">{new Date(currentFarm.establishedDate).toLocaleDateString()}</Text>
-                        </View>
+
                         <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
                             <Text className="text-gray-600">Water System</Text>
                             <Text className="font-semibold text-gray-800">{currentFarm.facilities.waterSystem}</Text>
@@ -272,10 +256,7 @@ export default function FarmDetailScreen() {
                             <Text className="text-gray-600">Electricity</Text>
                             <Text className="font-semibold text-gray-800">{currentFarm.facilities.electricityAccess ? 'Available' : 'Not Available'}</Text>
                         </View>
-                        <View className="flex-row justify-between items-center py-2">
-                            <Text className="text-gray-600">Certifications</Text>
-                            <Text className="font-semibold text-gray-800">{currentFarm.certifications.length > 0 ? currentFarm.certifications.join(', ') : 'None'}</Text>
-                        </View>
+
                     </View>
                 </View>
             </ScrollView>
