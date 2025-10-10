@@ -22,12 +22,12 @@ export interface VaccineCreateRequest {
 }
 
 export interface VaccineUpdateRequest {
-    name?: string;
-    type?: string;
-    targetDisease?: string;
-    dosage?: string;
-    administration?: string;
-    storage?: string;
-    prescriptionRequired?: boolean;
+    name: string;
+    type: string;
+    targetDisease: string;
+    dosage: string;
+    administration: string;
+    storage: string;
+    prescriptionRequired: boolean;
 }
 

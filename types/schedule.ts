@@ -66,12 +66,9 @@ export interface ScheduleCreateRequest {
 }
 
 export interface ScheduleUpdateRequest {
-    farm?: Farm;
-    veterinary?: Veterinary;
-    type?: ScheduleType;
-    title?: string;
-    description?: string;
-    scheduledDate?: string; 
-    priority?: SchedulePriority
-    status?: ScheduleStatus;
+    type: ScheduleType;
+    title: string;
+    description: string;
+    scheduledDate: string; 
+    priority: SchedulePriority
 }

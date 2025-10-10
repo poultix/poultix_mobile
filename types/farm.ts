@@ -42,7 +42,7 @@ export interface Farm {
     updatedAt: string;
 }
 
-export interface FarmLiveStock{
+export interface FarmLiveStock {
     total: number;
     healthy: number;
     sick: number;
@@ -54,14 +54,12 @@ export interface FarmCreateRequest {
     location: Coords;
     livestock: FarmLiveStock
     facilities: FarmFacility;
-    healthStatus: FarmStatus;
 }
 
 export interface FarmUpdateRequest {
-    name?: string;
-    location?: Coords;
-    livestock?: FarmLiveStock
-    facilities?: FarmFacility;
-    healthStatus?: FarmStatus;
-    assignedVeterinary?: User;
+    name: string;
+    location: Coords;
+    livestock: FarmLiveStock
+    facilities: FarmFacility;
+    isActive: boolean;
 }

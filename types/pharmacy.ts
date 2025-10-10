@@ -1,4 +1,4 @@
-import { Coords  } from "./farm";
+import { Coords } from "./farm";
 import { Vaccine } from "./vaccine";
 
 export interface PharmacySchedule {
@@ -26,51 +26,19 @@ export interface Pharmacy {
 export interface PharmacyCreateRequest {
     name: string;
     address: string;
+    phone: string
     location: Coords
-    phone: string;
-    email?: string;
-    website?: string;
-    operatingHours: {
-        [key: string]: {
-            open: string;
-            close: string;
-            isOpen: boolean;
-        };
-    };
     services: string[];
-    medications: {
-        name: string;
-        category: string;
-        inStock: boolean;
-        price?: number;
-    }[];
-    licenseNumber: string;
-    rating?: number;
-    description?: string;
+    vaccines: Vaccine[];
+    schedule: PharmacySchedule
 }
 
 export interface PharmacyUpdateRequest {
-    name?: string;
-    address?: string;
-    location?: Coords;
-    phone?: string;
-    email?: string;
-    website?: string;
-    operatingHours?: {
-        [key: string]: {
-            open: string;
-            close: string;
-            isOpen: boolean;
-        };
-    };
-    services?: string[];
-    medications?: {
-        name: string;
-        category: string;
-        inStock: boolean;
-        price?: number;
-    }[];
-    licenseNumber?: string;
-    rating?: number;
-    description?: string;
+    name: string;
+    address: string;
+    phone: string
+    location: Coords
+    services: string[];
+    vaccines: Vaccine[];
+    schedule: PharmacySchedule
 }

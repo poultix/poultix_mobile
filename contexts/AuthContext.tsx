@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setError('');
 
             const isAuth = await authService.isAuthenticated();
-            if (isAuth ) {
+            if (isAuth) {
                 // Get user info from JWT token
                 const userInfo = await authService.getCurrentUser();
 
@@ -221,7 +221,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setLoading(true);
             setError('');
 
-            const response = await authService.verifyEmail({ verificationToken });
+            const response = await authService.verifyEmail({ token: verificationToken });
 
             if (response.success) {
                 Alert.alert('Success', 'Email verified successfully!');

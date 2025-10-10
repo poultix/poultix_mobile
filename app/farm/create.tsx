@@ -1,6 +1,6 @@
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { FarmCreateRequest, FarmStatus } from '@/types/farm';
+import { FarmCreateRequest } from '@/types/farm';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -115,7 +115,6 @@ export default function CreateFarmScreen() {
           waterSystem: 'Manual',
           electricityAccess: false
         },
-        healthStatus: FarmStatus.GOOD,
       }
       
       await createFarm(newFarm)

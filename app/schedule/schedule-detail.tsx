@@ -16,7 +16,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useSchedules } from '@/contexts/ScheduleContext';
 import { useScheduleActions } from '@/hooks/useScheduleActions';
-import { SchedulePriority, ScheduleStatus, ScheduleUpdateRequest } from '@/types/schedule';
+import { SchedulePriority, ScheduleStatus, ScheduleType, ScheduleUpdateRequest } from '@/types/schedule';
 
 export default function ScheduleDetailScreen() {
     const { currentUser } = useAuth();
@@ -45,7 +45,11 @@ export default function ScheduleDetailScreen() {
 
         try {
             const updateRequest: ScheduleUpdateRequest = {
-                status
+                // type: ScheduleType;
+                // title: string;
+                // description: string;
+                // scheduledDate: string;
+                // priority: SchedulePriority
             }
             await updateSchedule(currentSchedule.id, updateRequest);
             Alert.alert('Success', `Schedule ${status.toLowerCase()} successfully!`);

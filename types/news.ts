@@ -36,21 +36,19 @@ export interface News {
 export interface NewsCreateRequest {
     title: string;
     content: string;
-    category: 'HEALTH' | 'NUTRITION' | 'MANAGEMENT' | 'TECHNOLOGY' | 'MARKET' | 'GENERAL';
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-    excerpt?: string;
-    imageUrl?: string;
-    tags?: string[];
-    isPublished?: boolean;
+    category: NewsCategory;
+    priority: NewsPriority;
+    image: string;
+    tags: string[];
+    location: string
 }
 
 export interface NewsUpdateRequest {
-    title?: string;
-    content?: string;
-    category?: 'HEALTH' | 'NUTRITION' | 'MANAGEMENT' | 'TECHNOLOGY' | 'MARKET' | 'GENERAL';
-    priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-    excerpt?: string;
-    imageUrl?: string;
-    tags?: string[];
-    isPublished?: boolean;
+    title: string;
+    content: string;
+    category: NewsCategory;
+    priority: NewsPriority;
+    image: string;
+    tags: string[];
+    location: string;
 }

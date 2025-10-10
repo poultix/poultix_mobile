@@ -78,16 +78,10 @@ export interface HelpSupportResponse {
 
 // Request types
 export interface HelpSupportCreateRequest {
-  subject: string;
-  description: string;
-  category: 'TECHNICAL' | 'BILLING' | 'FEATURE_REQUEST' | 'BUG_REPORT' | 'GENERAL';
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-  attachments?: {
-    url: string;
-    type: string;
-    name: string;
-    size: number;
-  }[];
+  title: string
+  body: string
+  type: SupportType
+  priority: SupportPriority
 }
 
 export interface FileUploadResponse {

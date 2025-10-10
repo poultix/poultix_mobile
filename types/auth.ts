@@ -9,7 +9,7 @@ export interface UserRegistrationRequest {
     role: UserRole;
     location: Coords;
 }
- 
+
 export interface UserLoginRequest {
     email: string;
     password: string;
@@ -29,7 +29,7 @@ export interface PasswordResetRequest {
 }
 
 export interface EmailVerificationRequest {
-    verificationToken: string;
+    token: string;
 }
 
 // Response types (matching backend DTOs)
@@ -38,5 +38,5 @@ export interface AuthResponse {
     refreshToken: string;
     tokenType: 'Bearer';
     expiresAt: string; // ISO date string
-    user:User;
+    user: User;
 }

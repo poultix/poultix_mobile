@@ -119,6 +119,8 @@ export default function AddNewsScreen() {
         category: article.category || NewsCategory.GENERAL,
         priority: article.priority || NewsPriority.MEDIUM,
         tags: article.tags || [],
+        image: '',
+        location: ''
       })
 
       Alert.alert(
@@ -187,7 +189,7 @@ export default function AddNewsScreen() {
                 style={tw` p-8 shadow-xl`}
               >
                 <View style={tw`flex-row items-center justify-between m-4`}>
-                  
+
                   <View style={tw`flex-1`}>
 
                     <Text style={tw`text-white text-sm opacity-90`}>
