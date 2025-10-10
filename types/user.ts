@@ -3,7 +3,8 @@ import { Coords } from "./farm";
 export enum UserRole {
     ADMIN = 'ADMIN',
     FARMER = 'FARMER',
-    VETERINARY = 'VETERINARY'
+    VETERINARY = 'VETERINARY',
+    PHARMACY = 'PHARMACY'
 }
 
 export interface User {
@@ -12,7 +13,7 @@ export interface User {
     email: string;
     password: string;
     avatar?: string;
-    location?: Coords;
+    location: Coords;
     role: UserRole;
     isActive: boolean;
     emailVerified: boolean;

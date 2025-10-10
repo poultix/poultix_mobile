@@ -6,12 +6,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    Animated,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Animated,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 // Context and hook imports
@@ -25,9 +25,9 @@ import { useFarms } from '@/contexts/FarmContext';
 export default function FarmerDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const { currentUser } = useAuth();
-  const { farms } = useFarms();
+  const { farms, loading } = useFarms();
 
-;
+  ;
 
   const [selectedTab, setSelectedTab] = useState<'overview' | 'farms' | 'schedules'>('overview');
 
@@ -126,7 +126,7 @@ export default function FarmerDashboardScreen() {
       </Animated.View>
 
       {/* Bottom Tabs */}
-      <BottomTabs  />
+      <BottomTabs />
 
       <CustomDrawer
         isVisible={isDrawerVisible}

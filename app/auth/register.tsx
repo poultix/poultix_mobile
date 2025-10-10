@@ -22,7 +22,7 @@ export default function SignUpScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [isVeterinary, setIsVeterinary] = useState(false);
+    const [role, setRole] = useState<UserRole>(UserRole.FARMER)
     const buttonScale = useRef(new Animated.Value(1)).current
     const inputRefs = {
         name: useRef<TextInput>(null),
@@ -91,11 +91,11 @@ export default function SignUpScreen() {
                 email.trim(),
                 password.trim(),
                 name.trim(),
-                isVeterinary ? UserRole.VETERINARY : UserRole.FARMER,
+                role,
                 location
             );
 
-          
+
         } catch (error) {
             console.error('Sign up error:', error);
             Alert.alert('Error', 'Sign up failed. Please try again.');
@@ -224,42 +224,52 @@ export default function SignUpScreen() {
                         </View>
 
                         {/* Account Type Selection */}
-                        <View style={tw`mb-8`}>
+                        {/* Account Type Selection */}
+                        <View className='mb-8'>
                             <Text style={tw`text-gray-700 font-semibold mb-4`}>Account Type</Text>
-                            <View style={tw`flex-row gap-4 `}>
-                                <TouchableOpacity
-                                    style={tw`flex-1 px-4 py-2 items-center justify-center rounded-xl border ${!isVeterinary ? 'border-amber-500 bg-amber-50' : 'border-gray-200 bg-gray-50'}`}
-                                    onPress={() => setIsVeterinary(false)}
-                                >
-                                    <View style={tw`items-center flex-row gap-4`}>
-                                        <Ionicons
-                                            name="home-outline"
-                                            size={22}
-                                            color={!isVeterinary ? "#D97706" : "#9CA3AF"}
-                                        />
-                                        <Text style={tw` font-semibold ${!isVeterinary ? 'text-amber-600' : 'text-gray-600'}`}>
-                                            Farmer
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
+                            <ScrollView style={tw`mb-8`}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                            >
 
-                                <TouchableOpacity
-                                    style={tw`flex-1 px-4 py-2 items-center justify-center rounded-xl border ${isVeterinary ? 'border-amber-500 bg-amber-50' : 'border-gray-200 bg-gray-50'}`}
-                                    onPress={() => setIsVeterinary(true)}
-                                >
-                                    <View style={tw`items-center flex-row gap-4`}>
-                                        <Ionicons
-                                            name="medical-outline"
-                                            size={22}
-                                            color={isVeterinary ? "#D97706" : "#9CA3AF"}
-                                        />
-                                        <Text style={tw` font-semibold ${isVeterinary ? 'text-amber-500' : 'text-gray-600'}`}>
-                                            Veterinary
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            </View>
+                                <View style={tw`flex-row flex-wrap gap-4`}>
+                                    {[
+                                        { label: 'Farmer', value: UserRole.FARMER, icon: 'home-outline' },
+                                        { label: 'Veterinary', value: UserRole.VETERINARY, icon: 'medical-outline' },
+                                        { label: 'Pharmacy', value: UserRole.PHARMACY, icon: 'medkit-outline' },
+                                    ].map((item) => {
+                                        const isSelected = role === item.value;
+                                        return (
+                                            <TouchableOpacity
+                                                key={item.value}
+                                                style={tw.style(
+                                                    `flex-1 px-4 py-3 items-center justify-center rounded-xl border`,
+                                                    isSelected ? `border-amber-500 bg-amber-50` : `border-gray-200 bg-gray-50`
+                                                )}
+                                                onPress={() => setRole(item.value)}
+                                            >
+                                                <View style={tw`items-center flex-row gap-3`}>
+                                                    <Ionicons
+                                                        name={item.icon as any}
+                                                        size={22}
+                                                        color={isSelected ? '#D97706' : '#9CA3AF'}
+                                                    />
+                                                    <Text
+                                                        style={tw.style(
+                                                            'font-semibold',
+                                                            isSelected ? 'text-amber-600' : 'text-gray-600'
+                                                        )}
+                                                    >
+                                                        {item.label}
+                                                    </Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        );
+                                    })}
+                                </View>
+                            </ScrollView>
                         </View>
+
 
                         {/* Sign Up Button */}
                         <Animated.View style={{ transform: [{ scale: buttonScale }] }}>

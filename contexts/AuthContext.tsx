@@ -92,6 +92,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             case 'VETERINARY':
                 router.replace('/dashboard/veterinary-dashboard');
                 break;
+            case 'PHARMACY':
+                router.replace('/dashboard/pharmacy-dashboard');
+                break;
             default:
                 router.replace('/');
         }
