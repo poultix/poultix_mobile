@@ -350,13 +350,13 @@ export default function UserDetailScreen() {
                         
                         <View style={{ marginBottom: IOSDesign.spacing.sm }}>
                             <Text style={{ ...IOSDesign.typography.callout, color: IOSDesign.colors.text.secondary }}>
-                                Joined: {new Date(user.joinDate).toLocaleDateString()}
+                                Joined: {user.joinDate ? new Date(user.joinDate).toLocaleDateString() : 'N/A'}
                             </Text>
                         </View>
                         
                         <View>
                             <Text style={{ ...IOSDesign.typography.callout, color: IOSDesign.colors.text.secondary }}>
-                                Last Active: {new Date(user.lastActive).toLocaleDateString()}
+                                Last Active: {user.lastActive ? new Date(user.lastActive).toLocaleDateString() : 'N/A'}
                             </Text>
                         </View>
                     </View>

@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 
 export const useFarmActions = () => {
-  const { addFarm, editFarm, removeFarm } = useFarms()
+  const { farms, addFarm, editFarm, removeFarm } = useFarms()
   const [loading, setLoading] = useState(false)
   const loadFarms = async (): Promise<Farm[]> => {
     const response = await farmService.getAllFarms();
@@ -40,10 +40,13 @@ export const useFarmActions = () => {
 
       const response = await farmService.deleteFarm(id);
 
-      if (!response || !response.data) {
-        return
+      if (response.success) {
+        // Find the farm to remove
+        const farmToRemove = farms.find(f => f.id === id);
+        if (farmToRemove) {
+          removeFarm(farmToRemove);
+        }
       }
-      removeFarm(response.data)
     } catch (error: any) {
       console.error('Failed to delete farm:', error);
       Alert.alert('Failed to delete farm', error.message || 'Failed to delete farm');

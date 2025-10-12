@@ -7,6 +7,7 @@ import { ErrorProvider } from './ErrorContext';
 import { FarmProvider } from './FarmContext';
 import { NewsProvider } from './NewsContext';
 import { PharmacyProvider } from './PharmacyContext';
+import { PharmacyVerificationProvider } from './PharmacyVerificationContext';
 import { ScheduleProvider } from './ScheduleContext';
 import { UserProvider } from './UserContext';
 import { VeterinaryProvider } from './VeterinaryContext';
@@ -29,15 +30,17 @@ export const RootProvider: React.FC<RootProviderProps> = ({ children }) => {
                   <ChatProvider>
                     <NewsProvider>
                       <PharmacyProvider>
-                        <VeterinaryProvider>
-                          <VaccineProvider>
-                            <SupportProvider>
-                              <BottomTabsProvider>
-                                {children}
-                              </BottomTabsProvider>
-                            </SupportProvider>
-                          </VaccineProvider>
-                        </VeterinaryProvider>
+                        <PharmacyVerificationProvider>
+                          <VeterinaryProvider>
+                            <VaccineProvider>
+                              <SupportProvider>
+                                <BottomTabsProvider>
+                                  {children}
+                                </BottomTabsProvider>
+                              </SupportProvider>
+                            </VaccineProvider>
+                          </VeterinaryProvider>
+                        </PharmacyVerificationProvider>
                       </PharmacyProvider>
                     </NewsProvider>
                   </ChatProvider>

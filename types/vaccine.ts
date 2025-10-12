@@ -1,7 +1,8 @@
 // Vaccine Types based on OpenAPI specification
 
+// Vaccine interface - matches backend VaccineDTO exactly
 export interface Vaccine {
-    id: string;
+    id: string; // UUID
     name: string;
     type: string;
     targetDisease: string;

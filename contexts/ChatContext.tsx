@@ -1,10 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Message, MessageCreateRequest, TypingStatus, User } from '@/types';
+import { Message, User, TypingStatus, MessageCreateRequest, MessageType } from '@/types';
 import { messageService } from '@/services/api';
 import { useError } from './ErrorContext';
 import { HTTP_STATUS } from '@/services/constants';
 import { useAuth } from './AuthContext';
-
 
 interface ChatContextType {
     messages: Message[]
@@ -15,18 +14,24 @@ interface ChatContextType {
     onlineUsers: Set<string>
     loading: boolean
     error: string | null
+    unreadCount: number
     unreadTotal: number
-    // API methods
-    sendMessage: (receiverId: string, content: string, messageType?: 'TEXT' | 'IMAGE' | 'FILE' | 'VOICE') => Promise<void>
-    getConversation: (user1Id: string, user2Id: string) => Promise<void>
-    getMessagesBySender: (senderId: string) => Promise<void>
-    deleteMessage: (messageId: string) => Promise<void>
-    // UI state methods
-    addMessage: (data: Message) => void
-    updateMessage: (data: Message) => void
+    isConnected: boolean
+    connectionState: string
+    fetchMessages: (user1Id: string, user2Id: string) => Promise<void>
+    sendMessage: (content: string) => Promise<void>
     setCurrentChat: (user: User | null) => void
-    setCurrentMessage: (message: Message | null) => void
+    clearError: () => void
+    updateCurrentMessage: (message: Message | null) => void
+    updateEditMessage: (message: Message | null) => void
+    startTyping: (conversationId: string) => void
+    stopTyping: (conversationId: string) => void
+    markMessageAsRead: (messageId: string) => void
+    addMessage: (message: Message) => void
+    updateMessage: (messageId: string, updates: Partial<Message>) => void
+    deleteMessage: (messageId: string) => void
     setEditMessage: (message: Message | null) => void
+    setCurrentMessage: (message: Message | null) => void
 }
 
 
@@ -117,15 +122,17 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
 
     // API Methods
-    const sendMessage = async (receiverId: string, content: string, messageType: 'TEXT' | 'IMAGE' | 'FILE' | 'VOICE' = 'TEXT'): Promise<void> => {
+    const sendMessage = async (content: string): Promise<void> => {
+        if (!currentChat) return;
+        
         try {
             setLoading(true)
             setError(null)
 
             const messageData: MessageCreateRequest = {
-                receiverId,
+                receiverId: currentChat.id,
                 content,
-                messageType,
+                type: MessageType.TEXT,
             }
 
             const response = await messageService.sendMessage(messageData)
@@ -283,15 +290,27 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         unreadTotal,
         // API methods
         sendMessage,
-        getConversation,
-        getMessagesBySender,
-        deleteMessage,
+        fetchMessages: getConversation,
+        clearError: () => setError(null),
+        updateCurrentMessage: setCurrentMessage,
+        updateEditMessage: setEditMessage,
+        startTyping: () => {},
+        stopTyping: () => {},
+        markMessageAsRead: () => {},
         // UI state methods
-        addMessage,
-        updateMessage,
+        addMessage: (message: Message) => setMessages(prev => [...prev, message]),
+        updateMessage: (messageId: string, updates: Partial<Message>) => {
+            setMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, ...updates } : msg));
+        },
+        deleteMessage: (messageId: string) => {
+            setMessages(prev => prev.filter(msg => msg.id !== messageId));
+        },
         setCurrentChat,
         setEditMessage,
-        setCurrentMessage
+        setCurrentMessage,
+        isConnected: true,
+        connectionState: 'connected',
+        unreadCount: 0
     }
 
     return (

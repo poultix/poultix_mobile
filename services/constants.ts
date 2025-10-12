@@ -135,10 +135,19 @@ export const API_ENDPOINTS = {
     PHARMACIES: {
         BASE: '/pharmacies',
         CREATE: '/pharmacies',
+        REGISTER: '/pharmacies/register',
+        VERIFY: '/pharmacies/verify',
         BY_ID: (id: string) => `/pharmacies/${id}`,
         ALL: '/pharmacies',
         UPDATE: (id: string) => `/pharmacies/${id}`,
         DELETE: (id: string) => `/pharmacies/${id}`,
+        VERIFICATION_STATUS: (id: string) => `/pharmacies/${id}/verification-status`,
+        MISSING_DOCUMENTS: (id: string) => `/pharmacies/${id}/missing-documents`,
+        REQUIRED_DOCUMENTS: '/pharmacies/required-documents',
+        PROVINCES: '/pharmacies/provinces',
+        DISTRICTS: (province: string) => `/pharmacies/districts/${province}`,
+        PENDING_VERIFICATIONS: '/pharmacies/pending-verifications',
+        UPLOAD_DOCUMENT: (pharmacyId: string, documentType: string) => `/pharmacies/${pharmacyId}/documents/${documentType}`,
     },
 
 

@@ -8,7 +8,7 @@ import { useState } from 'react';
 
 export const usePharmacyActions = () => {
   const [loading, setLoading] = useState(false)
-  const { addPharmacy, editPharmacy, removePharmacy } = usePharmacies()
+  const { pharmacies, addPharmacy, editPharmacy, removePharmacy } = usePharmacies()
   const { handleApiError } = useError()
 
   const createPharmacy = async (pharmacyData: PharmacyCreateRequest): Promise<void> => {
@@ -70,8 +70,12 @@ export const usePharmacyActions = () => {
 
       const response = await pharmacyService.deletePharmacy(id);
 
-      if (response.success && response.data) {
-        removePharmacy(response.data)
+      if (response.success) {
+        // Find and remove the pharmacy by id
+        const pharmacyToRemove = pharmacies.find(p => p.id === id);
+        if (pharmacyToRemove) {
+          removePharmacy(pharmacyToRemove);
+        }
       } else {
         throw new Error(response.message || 'Failed to delete pharmacy');
       }

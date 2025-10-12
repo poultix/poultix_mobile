@@ -1,4 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
+import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { HTTP_STATUS } from '@/services/constants';
 
@@ -6,6 +7,7 @@ interface ErrorContextType {
     handleApiError: (error: any) => void;
     routeToErrorScreen: (errorStatus: number) => void;
     getErrorMessage: (errorStatus: number) => string;
+    showError: (message: string) => void;
 }
 
 const ErrorContext = createContext<ErrorContextType | undefined>(undefined);
@@ -73,11 +75,16 @@ export function ErrorProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const showError = (message: string) => {
+        Alert.alert('Error', message);
+    };
+
     return (
         <ErrorContext.Provider value={{
             handleApiError,
             routeToErrorScreen,
-            getErrorMessage
+            getErrorMessage,
+            showError
         }}>
             {children}
         </ErrorContext.Provider>

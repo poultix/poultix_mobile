@@ -64,17 +64,16 @@ class ApiClient {
         // Server responded with an error status
         if (error.response) {
             const status = error.response.status;
-            
-            
             if (status >= 500) {
                 return {
-                    status: HTTP_STATUS.SERVICE_UNAVAILABLE,
-                    message: 'Server is temporarily unavailable',
-                    errors: {},
+                    success: false,
+                    message: 'Request timeout',
+                    error: 'Request timeout',
+                    status: HTTP_STATUS.REQUEST_TIMEOUT,
                 };
             }
-            
             return {
+                success: false,
                 status: status,
                 message: error.response.data?.message || 'An error occurred',
             };
@@ -85,9 +84,10 @@ class ApiClient {
             // Request timeout
             if (error.code === 'ECONNABORTED') {
                 return {
+                    success: false,
                     status: HTTP_STATUS.REQUEST_TIMEOUT,
                     message: 'Request timeout - please check your connection and try again',
-                    errors: {},
+                    error: 'Request timeout',
                 };
             }
             
@@ -97,9 +97,10 @@ class ApiClient {
                 error.message?.includes('fetch'))
             {
                 return {
+                    success: false,
                     status: HTTP_STATUS.NETWORK_ERROR,
                     message: 'No internet connection - please check your network settings',
-                    errors: {},
+                    error: 'Network error',
                 };
             }
             
@@ -111,18 +112,20 @@ class ApiClient {
                 error.message?.includes('getaddrinfo ENOTFOUND'))
             {
                 return {
+                    success: false,
                     status: HTTP_STATUS.SERVER_UNREACHABLE,
                     message: 'Cannot reach server - please try again later',
-                    errors: {},
+                    error: 'Server unreachable',
                 };
             }
         }
 
         // Generic connection failure
         return {
+            success: false,
+            message: 'Connection failed',
+            error: 'Connection failed',
             status: HTTP_STATUS.CONNECTION_FAILED,
-            message: 'Connection failed - please check your internet and try again',
-            errors: {},
         };
     }
 

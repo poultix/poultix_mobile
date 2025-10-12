@@ -74,7 +74,12 @@ export default function ChatScreen() {
         // Sort by role and name
         filtered.sort((a, b) => {
             if (a.role !== b.role) {
-                const roleOrder = { 'ADMIN': 0, 'VETERINARY': 1, 'FARMER': 2 };
+                const roleOrder = {
+                    [UserRole.ADMIN]: 1,
+                    [UserRole.VETERINARY]: 2,
+                    [UserRole.FARMER]: 3,
+                    [UserRole.PHARMACY]: 4,
+                };
                 return roleOrder[a.role] - roleOrder[b.role];
             }
             return a.name.localeCompare(b.name);

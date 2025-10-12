@@ -1,77 +1,92 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Alert, ScrollView, Text, TouchableOpacity, View, RefreshControl, ActivityIndicator } from 'react-native';
 import { IOSDesign } from '../../constants/iosDesign';
-
-interface Report {
-    id: string; 
-    title: string;
-    type: 'health' | 'production' | 'financial' | 'maintenance';
-    date: string;
-    status: 'completed' | 'pending' | 'in_progress';
-    summary: string;
-    farmName: string;
-    generatedBy: string;
-}
+import { useReports } from '@/hooks/useReports';
+import { Report, ReportType, ReportStatus } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function FarmReportsScreen() {
+    const { currentUser } = useAuth();
+    const {
+        reports,
+        reportSummary,
+        loading,
+        refreshing,
+        error,
+        activeFilter,
+        refreshReports,
+        updateFilter,
+        clearFilters,
+        generateAutomatedReport,
+        downloadReport,
+        shareReport,
+        getReportsByStatus,
+        getReportsByType,
+    } = useReports();
    
-    const [selectedFilter, setSelectedFilter] = useState<'all' | 'health' | 'production' | 'financial' | 'maintenance'>('all');
+    const [selectedFilter, setSelectedFilter] = useState<'all' | ReportType>('all');
 
-    // Mock reports data
-    const mockReports: Report[] = [
-        {
-            id: '1',
-            title: 'Monthly Health Assessment',
-            type: 'health',
-            date: '2024-01-20',
-            status: 'completed',
-            summary: 'Overall flock health is good. Minor respiratory issues detected in Block C.',
-            farmName: 'Green Valley Poultry Farm',
-            generatedBy: 'Dr. Sarah Wanjiku'
-        },
-        {
-            id: '2',
-            title: 'Egg Production Report',
-            type: 'production',
-            date: '2024-01-19',
-            status: 'completed',
-            summary: 'Production increased by 12% this month. Peak laying rate achieved.',
-            farmName: 'Green Valley Poultry Farm',
-            generatedBy: 'John Kamau'
-        },
-        {
-            id: '3',
-            title: 'Feed Cost Analysis',
-            type: 'financial',
-            date: '2024-01-18',
-            status: 'in_progress',
-            summary: 'Analyzing feed costs and ROI for Q1 2024.',
-            farmName: 'Green Valley Poultry Farm',
-            generatedBy: 'John Kamau'
-        },
-        {
-            id: '4',
-            title: 'Equipment Maintenance Log',
-            type: 'maintenance',
-            date: '2024-01-17',
-            status: 'completed',
-            summary: 'All equipment serviced and functioning properly.',
-            farmName: 'Green Valley Poultry Farm',
-            generatedBy: 'Maintenance Team'
-        },
-        {
-            id: '5',
-            title: 'Vaccination Schedule Report',
-            type: 'health',
-            date: '2024-01-15',
-            status: 'pending',
-            summary: 'Upcoming vaccination schedule for February 2024.',
-            farmName: 'Green Valley Poultry Farm',
-            generatedBy: 'Dr. Sarah Wanjiku'
+    // Handle filter changes
+    useEffect(() => {
+        if (selectedFilter === 'all') {
+            updateFilter({ type: undefined });
+        } else {
+            updateFilter({ type: selectedFilter as ReportType });
         }
-    ];
+    }, [selectedFilter, updateFilter]);
+
+    // Get filtered reports based on current selection
+    const getDisplayReports = () => {
+        return reports;
+    };
+
+    // Handle report actions
+    const handleDownloadReport = async (reportId: string) => {
+        const success = await downloadReport(reportId);
+        if (success) {
+            Alert.alert('Success', 'Report downloaded successfully');
+        }
+    };
+
+    const handleShareReport = async (reportId: string) => {
+        Alert.prompt(
+            'Share Report',
+            'Enter email addresses (comma separated):',
+            async (emails: string) => {
+                if (emails) {
+                    const emailList = emails.split(',').map(e => e.trim());
+                    const success = await shareReport(reportId, emailList);
+                    if (success) {
+                        Alert.alert('Success', 'Report shared successfully');
+                    }
+                }
+            }
+        );
+    };
+
+    const handleGenerateReport = async (type: ReportType) => {
+        if (!currentUser) return;
+        
+        const now = new Date();
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+        
+        // For demo purposes, we'll use a placeholder farm ID
+        const farmId = 'demo-farm-id';
+        
+        const report = await generateAutomatedReport(
+            farmId,
+            type,
+            lastMonth.toISOString().split('T')[0],
+            endOfLastMonth.toISOString().split('T')[0]
+        );
+        
+        if (report) {
+            Alert.alert('Success', 'Report generated successfully');
+        }
+    };
 
     const getTypeColor = (type: string) => {
         switch (type) {
@@ -112,8 +127,8 @@ export default function FarmReportsScreen() {
     };
 
     const filteredReports = selectedFilter === 'all' 
-        ? mockReports 
-        : mockReports.filter(report => report.type === selectedFilter);
+        ? reports 
+        : reports.filter((report: Report) => report.type === selectedFilter);
 
     const filterOptions = [
         { key: 'all', label: 'All Reports', icon: 'document-text-outline' },
@@ -123,7 +138,7 @@ export default function FarmReportsScreen() {
         { key: 'maintenance', label: 'Maintenance', icon: 'construct-outline' }
     ];
 
-    const handleGenerateReport = () => {
+    const handleGenerateReportDialog = () => {
         Alert.alert(
             'Generate New Report',
             'What type of report would you like to generate?',
@@ -160,7 +175,7 @@ export default function FarmReportsScreen() {
                 }}>
                     Farm Reports
                 </Text>
-                <TouchableOpacity onPress={handleGenerateReport}>
+                <TouchableOpacity onPress={handleGenerateReportDialog}>
                     <Ionicons name="add-circle-outline" size={24} color={IOSDesign.colors.systemBlue} />
                 </TouchableOpacity>
             </View>
@@ -226,7 +241,7 @@ export default function FarmReportsScreen() {
                             minWidth: '45%',
                         }}>
                             <Text style={{ ...IOSDesign.typography.title2, color: IOSDesign.colors.systemGreen }}>
-                                {mockReports.filter(r => r.status === 'completed').length}
+                                {reports.filter((r: Report) => r.status === ReportStatus.COMPLETED).length}
                             </Text>
                             <Text style={{ ...IOSDesign.typography.footnote, color: IOSDesign.colors.text.secondary }}>
                                 Completed
@@ -240,7 +255,7 @@ export default function FarmReportsScreen() {
                             minWidth: '45%',
                         }}>
                             <Text style={{ ...IOSDesign.typography.title2, color: IOSDesign.colors.systemOrange }}>
-                                {mockReports.filter(r => r.status === 'in_progress').length}
+                                {reports.filter((r: Report) => r.status === ReportStatus.IN_PROGRESS).length}
                             </Text>
                             <Text style={{ ...IOSDesign.typography.footnote, color: IOSDesign.colors.text.secondary }}>
                                 In Progress
@@ -254,7 +269,7 @@ export default function FarmReportsScreen() {
                             minWidth: '45%',
                         }}>
                             <Text style={{ ...IOSDesign.typography.title2, color: IOSDesign.colors.systemBlue }}>
-                                {mockReports.filter(r => r.status === 'pending').length}
+                                {reports.filter((r: Report) => r.status === ReportStatus.PENDING).length}
                             </Text>
                             <Text style={{ ...IOSDesign.typography.footnote, color: IOSDesign.colors.text.secondary }}>
                                 Pending
@@ -268,7 +283,7 @@ export default function FarmReportsScreen() {
                             minWidth: '45%',
                         }}>
                             <Text style={{ ...IOSDesign.typography.title2, color: IOSDesign.colors.text.primary }}>
-                                {mockReports.length}
+                                {reports.length}
                             </Text>
                             <Text style={{ ...IOSDesign.typography.footnote, color: IOSDesign.colors.text.secondary }}>
                                 Total Reports
@@ -285,7 +300,7 @@ export default function FarmReportsScreen() {
                         {selectedFilter === 'all' ? 'All Reports' : `${filterOptions.find(o => o.key === selectedFilter)?.label} Reports`}
                     </Text>
 
-                    {filteredReports.map((report) => (
+                    {reports.map((report: Report) => (
                         <TouchableOpacity
                             key={report.id}
                             style={{
@@ -340,7 +355,7 @@ export default function FarmReportsScreen() {
                                         color: IOSDesign.colors.text.secondary,
                                         marginBottom: IOSDesign.spacing.xs,
                                     }}>
-                                        {report.summary}
+                                        {report.description || 'No description available'}
                                     </Text>
                                     
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -348,13 +363,13 @@ export default function FarmReportsScreen() {
                                             ...IOSDesign.typography.footnote,
                                             color: IOSDesign.colors.text.tertiary,
                                         }}>
-                                            By {report.generatedBy}
+                                            By {report.generatedBy.name}
                                         </Text>
                                         <Text style={{
                                             ...IOSDesign.typography.footnote,
                                             color: IOSDesign.colors.text.tertiary,
                                         }}>
-                                            {new Date(report.date).toLocaleDateString()}
+                                            {new Date(report.reportDate).toLocaleDateString()}
                                         </Text>
                                     </View>
                                 </View>
@@ -391,7 +406,7 @@ export default function FarmReportsScreen() {
                             marginBottom: IOSDesign.spacing.xl,
                             ...IOSDesign.shadows.medium,
                         }}
-                        onPress={handleGenerateReport}
+                        onPress={() => handleGenerateReport(ReportType.HEALTH)}
                     >
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Ionicons name="add-outline" size={20} color={IOSDesign.colors.text.inverse} />

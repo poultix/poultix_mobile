@@ -104,10 +104,11 @@ export default function CreateFarmScreen() {
         name: farmName.trim(),
         location: location,
         livestock: {
-          total,
-          healthy,
-          sick,
-          atRisk,
+          total: 50,
+          healthy: 48,
+          sick: 1,
+          atRisk: 1,
+          breeds: ['Holstein', 'Jersey'],
         },
         facilities: {
           coops: 1,

@@ -1,5 +1,14 @@
-import { Coords } from "./farm";
-import { User } from "./user";
+import { User } from './user';
+
+// News enums - matches backend
+export enum NewsCategory {
+    HEALTH = 'HEALTH',
+    NUTRITION = 'NUTRITION', 
+    MANAGEMENT = 'MANAGEMENT',
+    TECHNOLOGY = 'TECHNOLOGY',
+    MARKET = 'MARKET',
+    GENERAL = 'GENERAL'
+}
 
 export enum NewsPriority {
     LOW = 'LOW',
@@ -8,27 +17,19 @@ export enum NewsPriority {
     URGENT = 'URGENT'
 }
 
-export enum NewsCategory {
-    HEALTH = 'HEALTH',
-    NUTRITION = 'NUTRITION',
-    MANAGEMENT = 'MANAGEMENT',
-    TECHNOLOGY = 'TECHNOLOGY',
-    MARKET = 'MARKET',
-    GENERAL = 'GENERAL'
-}
-
+// News interface - matches backend NewsDTO exactly
 export interface News {
-    id: string
+    id: string; // UUID
     title: string;
     content: string;
-    category: NewsCategory;
+    category: string; // Can be NewsCategory enum value
     priority: NewsPriority;
     tags: string[];
-    image: string
-    location: Coords
     author: User;
-    createdAt: Date;
-    updatedAt: Date;
+    image?: string;
+    location?: string;
+    createdAt: string; // ISO date-time
+    updatedAt: string; // ISO date-time
 }
 
 

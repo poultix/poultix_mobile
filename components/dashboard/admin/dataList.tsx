@@ -120,7 +120,7 @@ export default function AdminDataList() {
     const filteredSchedules = schedules.filter(schedule => {
         const matchesSearch = !searchQuery ||
             schedule.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            schedule.description.toLowerCase().includes(searchQuery.toLowerCase());
+            schedule.description?.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesFilter = selectedFilter === 'all' || schedule.status === selectedFilter;
         return matchesSearch && matchesFilter;
     });

@@ -72,15 +72,14 @@ export class UploadService {
 
         try {
             const results = await Promise.all(uploadPromises);
-            const uploadedFiles = results
+            const mockUploadResponse = results
                 .filter(result => result.success && result.data)
                 .map(result => result.data!);
 
             return {
                 success: true,
-                message: `Successfully uploaded ${uploadedFiles.length} files`,
-                data: uploadedFiles,
-                status: 200
+                message: 'Files uploaded successfully',
+                data: mockUploadResponse
             };
         } catch (error) {
             throw error;

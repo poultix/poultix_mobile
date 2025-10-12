@@ -76,11 +76,12 @@ export default function FarmDetailScreen() {
             await updateFarm(currentFarm.id, {
                 name: editFormData.name,
                 livestock: {
-                    total,
-                    healthy,
-                    sick,
-                    atRisk,
-                }
+                    total: total + 1,
+                    healthy: healthy,
+                    sick: sick,
+                    atRisk: atRisk + 1,
+                    breeds: currentFarm.livestock.breeds || [],
+                },
             });
             setIsEditModalVisible(false);
             Alert.alert('Success', 'Farm updated successfully!');

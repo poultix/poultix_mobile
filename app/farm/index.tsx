@@ -239,7 +239,7 @@ export default function FarmDataScreen() {
           refreshing={refreshing}
           onRefresh={handleRefresh}
           renderItem={({ item: farm, index }) => {
-            const healthColor = getHealthStatusColor(farm.healthStatus);
+            const healthColor = getHealthStatusColor(farm.status);
 
             return (
               <Animated.View

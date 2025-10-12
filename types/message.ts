@@ -1,12 +1,6 @@
 import { User } from './user';
 
-export interface TypingStatus {
-    chatId: string;
-    userId: string;
-    userName: string;
-    isTyping: boolean;
-}
-
+// Message enums - matches backend
 export enum MessageType {
     TEXT = 'TEXT',
     IMAGE = 'IMAGE',
@@ -22,14 +16,10 @@ export enum MessageStatus {
     FAILED = 'FAILED'
 }
 
+// Reaction interface - matches backend
 export interface Reaction {
-    userId: string;
+    userId: string; // UUID
     emoji: string;
-}
-
-export interface ChatReaction {
-    messageId: number;
-    reactions: Reaction[];
 }
 
 // Message interface - matches backend MessageDTO exactly
@@ -56,16 +46,6 @@ export interface MessageCreateRequest {
     type?: MessageType;
     fileName?: string;
     replyToId?: string; // UUID
-}
-
-// Legacy request type for backward compatibility
-export interface SendMessageRequest {
-    content: string;
-    receiverId: number;
-    senderId: number;
-    type: MessageType;
-    fileName?: string;
-    replyToId?: number;
 }
 
 // WebSocket message types for real-time features

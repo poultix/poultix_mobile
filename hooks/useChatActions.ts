@@ -41,7 +41,7 @@ export const useChatActions = () => {
                 content: newContent,
                 edited: true
             };
-            updateMessage(updatedMessage);
+            updateMessage(updatedMessage.id, { content: newContent, edited: true });
         }
     };
 
@@ -82,7 +82,7 @@ export const useChatActions = () => {
                 ...existingMessage,
                 reactions: updatedReactions
             };
-            updateMessage(updatedMessage);
+            updateMessage(updatedMessage.id, { reactions: updatedReactions });
         }
     };
 
@@ -94,7 +94,7 @@ export const useChatActions = () => {
                 ...existingMessage,
                 reactions: updatedReactions
             };
-            updateMessage(updatedMessage);
+            updateMessage(updatedMessage.id, { reactions: updatedReactions });
         }
     };
 

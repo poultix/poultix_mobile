@@ -248,7 +248,6 @@ export default function ChatMessage({ message, chatMessages }: ChatMProp) {
 
     return (
         <View key={message.id} className="mb-4">
-            {/* Reply indicator */}
             {message.replyTo && (
                 <View className={`${isOwnMessage ? 'items-end' : 'items-start'} mb-1`}>
                     <View className="bg-gray-200 rounded-lg p-2 max-w-xs">
@@ -260,7 +259,7 @@ export default function ChatMessage({ message, chatMessages }: ChatMProp) {
                         </View>
                         {message.replyTo && (
                             <Text className="text-gray-600 text-xs">
-                                {chatMessages.find(m => m.id === message?.replyTo?.id)?.content.substring(0, 30)}...
+                                {message.replyTo.content.substring(0, 30)}...
                             </Text>
                         )}
                     </View>

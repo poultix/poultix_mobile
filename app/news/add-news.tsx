@@ -116,7 +116,7 @@ export default function AddNewsScreen() {
       await createNews({
         title: article.title!,
         content: article.content!,
-        category: article.category || NewsCategory.GENERAL,
+        category: (article.category as NewsCategory) || NewsCategory.GENERAL,
         priority: article.priority || NewsPriority.MEDIUM,
         tags: article.tags || [],
         image: '',

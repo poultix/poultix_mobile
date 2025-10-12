@@ -276,7 +276,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
     const searchSchedules = async (query: string, filters?: FilterOptions): Promise<Schedule[]> => {
         return schedules.filter((s: Schedule) => s.title.toLowerCase().includes(query.toLowerCase()) ||
-            s.description.toLowerCase().includes(query.toLowerCase())
+            s.description?.toLowerCase().includes(query.toLowerCase())
         );
     };
 

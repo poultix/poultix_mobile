@@ -104,7 +104,7 @@ export default function ScheduleDetailScreen() {
         if (currentSchedule) {
             setEditFormData({
                 title: currentSchedule.title,
-                description: currentSchedule.description,
+                description: currentSchedule.description || '',
                 priority: currentSchedule.priority,
                 scheduledDate: currentSchedule.scheduledDate,
             });

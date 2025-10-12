@@ -1,5 +1,14 @@
-import { Farm } from "./farm";
-import { User, Veterinary } from "./user";
+import { User } from './user';
+import { Farm } from './farm';
+
+// Schedule enums - matches backend
+export enum ScheduleStatus {
+    SCHEDULED = 'SCHEDULED',
+    IN_PROGRESS = 'IN_PROGRESS',
+    COMPLETED = 'COMPLETED',
+    CANCELLED = 'CANCELLED',
+    RESCHEDULED = 'RESCHEDULED'
+}
 
 export enum ScheduleType {
     INSPECTION = 'INSPECTION',
@@ -8,14 +17,6 @@ export enum ScheduleType {
     CONSULTATION = 'CONSULTATION',
     EMERGENCY = 'EMERGENCY',
     ROUTINE_CHECKUP = 'ROUTINE_CHECKUP'
-}
-
-export enum ScheduleStatus {
-    SCHEDULED = 'SCHEDULED',
-    IN_PROGRESS = 'IN_PROGRESS',
-    COMPLETED = 'COMPLETED',
-    CANCELLED = 'CANCELLED',
-    RESCHEDULED = 'RESCHEDULED'
 }
 
 export enum SchedulePriority {
@@ -40,35 +41,35 @@ export interface ScheduleResults {
 }
 
 export interface Schedule {
-    id: string;
+    id: string; // UUID
     title: string;
-    description: string;
+    description?: string;
     type: ScheduleType;
     farmer: User;
     veterinary: User;
-    scheduledDate: string;
+    scheduledDate: string; // ISO date
     status: ScheduleStatus;
     priority: SchedulePriority;
-    createdAt: string;
-    updatedAt:string;
     createdBy: User;
+    createdAt: string; // ISO date-time
+    updatedAt: string; // ISO date-time
 }
 
-// Request types
+// Request types - matches backend
 export interface ScheduleCreateRequest {
-    farm: Farm;
-    veterinary: User;
-    type: ScheduleType;
     title: string;
-    description: string;
-    scheduledDate: string;
+    description?: string;
+    type: ScheduleType;
+    veterinary: User;
+    scheduledDate: string; // ISO date
     priority: SchedulePriority;
+    farm: Farm;
 }
 
 export interface ScheduleUpdateRequest {
-    type: ScheduleType;
-    title: string;
-    description: string;
-    scheduledDate: string; 
-    priority: SchedulePriority
+    title?: string;
+    description?: string;
+    scheduledDate?: string; // ISO date
+    status?: ScheduleStatus;
+    priority?: SchedulePriority;
 }

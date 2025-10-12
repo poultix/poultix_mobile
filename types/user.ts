@@ -1,5 +1,10 @@
-import { Coords } from "./farm";
+// Location interface - matches backend LocationDTO
+export interface Location {
+    latitude: number;
+    longitude: number;
+}
 
+// User roles enum - matches backend
 export enum UserRole {
     ADMIN = 'ADMIN',
     FARMER = 'FARMER',
@@ -7,19 +12,34 @@ export enum UserRole {
     PHARMACY = 'PHARMACY'
 }
 
+// User interface - matches backend UserDTO exactly
 export interface User {
-    id: string; // UUID
+    id: string; // UUID format
     name: string;
     email: string;
     password: string;
     avatar?: string;
-    location: Coords;
+    phone?: string;
+    location: Location;
     role: UserRole;
     isActive: boolean;
     emailVerified: boolean;
     recoverMode: boolean;
-    createdAt: string; // ISO date string
-    updatedAt: string; // ISO date string
+    privateKey?: string;
+    publicKey?: string;
+    
+    // Extended properties for display
+    specialization?: string;
+    licenseNumber?: string;
+    experience?: number;
+    farmsCount?: number;
+    schedulesCount?: number;
+    joinDate?: string;
+    lastActive?: string;
+    status?: string;
+    
+    createdAt: string; // ISO date-time
+    updatedAt: string; // ISO date-time
 }
 
 export interface Farmer {
@@ -31,40 +51,87 @@ export interface Farmer {
 
 
 
+// Veterinary rates - matches backend
+export interface VeterinaryRates {
+    consultation: number;
+    inspection: number;
+    emergency: number;
+    vaccination: number;
+}
+
+// Veterinary interface - matches backend VeterinaryDTO exactly
 export interface Veterinary {
-    id: string;
+    id: string; // UUID
     user: User;
-    licenseNumber: string;
-    specializations: string[];
-    serviceRadius: number; // km
-    availability: {
-        [key: string]: {
-            start: string;
-            end: string;
-            available: boolean;
-        };
-    };
-    rates: {
-        consultation: number;
-        inspection: number;
-        emergency: number;
-        vaccination: number;
-    };
-    equipment: string[];
-    certifications: string[];
+    serviceRadius: number;
+    rates: VeterinaryRates;
     rating: number;
     totalVisits: number;
-    joinDate: Date;
+    joinDate: string; // ISO date-time
     isActive: boolean;
+    farmManaged: string[]; // Array of farm IDs
+    createdAt: string; // ISO date-time
+    updatedAt: string; // ISO date-time
 }
 
 
 
+// User registration request - matches backend
+export interface UserRegistrationRequest {
+    name: string;
+    email: string;
+    password: string;
+    avatar?: string;
+    location: Location;
+    role: UserRole;
+}
+
+// User update request - matches backend
 export interface UserUpdateRequest {
     name?: string;
-    email?: string;
+    avatar?: string;
     phone?: string;
-    location?: Coords;
+    location?: Location;
+}
+
+// Auth related types
+export interface AuthResponse {
+    accessToken: string;
+    refreshToken: string;
+    tokenType: string;
+    expiresAt: string; // ISO date-time
+    user: User;
+}
+
+export interface UserLoginRequest {
+    email: string;
+    password: string;
+}
+
+export interface RefreshTokenRequest {
+    refreshToken: string;
+}
+
+export interface ForgotPasswordRequest {
+    email: string;
+}
+
+export interface PasswordResetRequest {
+    resetCode: string;
+    newPassword: string;
+}
+
+export interface EmailVerificationRequest {
+    token: string;
+}
+
+// Veterinary request types - matches backend
+export interface VeterinaryCreateRequest {
+    serviceRadius: number;
+}
+
+export interface VeterinaryUpdateRequest {
+    serviceRadius?: number;
 }
 
 
@@ -78,7 +145,7 @@ export interface VeterinaryResponse {
         name: string;
         email: string;
         phone?: string;
-        location?: Coords;
+        location?: Location;
     };
     specialization: string[];
     experience: number;
@@ -91,22 +158,4 @@ export interface VeterinaryResponse {
     isActive: boolean;
     createdAt: string;
     updatedAt: string;
-}
-
-// Request types
-export interface VeterinaryCreateRequest {
-    specialization: string[];
-    experience: number;
-    licenseNumber: string;
-    education: string;
-    certifications?: string[];
-}
-
-export interface VeterinaryUpdateRequest {
-    specialization?: string[];
-    experience?: number;
-    licenseNumber?: string;
-    education?: string;
-    certifications?: string[];
-    isAvailable?: boolean;
 }
