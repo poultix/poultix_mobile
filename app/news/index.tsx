@@ -16,14 +16,16 @@ import tw from 'twrnc';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNews } from '@/contexts/NewsContext';
 import BottomTabs from '@/components/BottomTabs';
+import { getRoleTheme } from '@/utils/theme';
 
 export default function NewsScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const [selectedCategory, setSelectedCategory] = useState('All');
   
   // Use new contexts
-  const { news, currentNews, setCurrentNews, loading } = useNews();
+  const { news, setCurrentNews, loading } = useNews();
   const { currentUser } = useAuth();
+  const theme = getRoleTheme(currentUser?.role);
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-20)).current;
@@ -84,7 +86,7 @@ export default function NewsScreen() {
         {/* Header */}
         <View style={tw`pb-4`}>
           <LinearGradient
-            colors={['#F59E0B', '#D97706']}
+            colors={[theme.primary, theme.primary + 'CC']}
             style={tw` p-6 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between`}>
@@ -106,9 +108,12 @@ export default function NewsScreen() {
               {categories.map((category) => (
                 <TouchableOpacity
                   key={category}
-                  style={tw`px-4 py-2 rounded-full ${
-                    selectedCategory === category ? 'bg-orange-500' : 'bg-white'
-                  } shadow-sm`}
+                  style={[
+                    tw`px-4 py-2 rounded-full shadow-sm`,
+                    {
+                      backgroundColor: selectedCategory === category ? theme.primary : 'white'
+                    }
+                  ]}
                   onPress={() => setSelectedCategory(category)}
                 >
                   <Text style={tw`font-medium ${
@@ -177,7 +182,7 @@ export default function NewsScreen() {
                   
                   <View style={tw`pt-3 border-t border-gray-100 mt-3`}>
                     <View style={tw`flex-row items-center justify-between`}>
-                      <Text style={tw`text-orange-600 font-medium text-xs`}>
+                      <Text style={[tw`font-medium text-xs`, { color: theme.primary }]}>
                         {article.author?.name || 'Admin'}
                       </Text>
                       <View style={tw`flex-row items-center`}>

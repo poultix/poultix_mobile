@@ -10,6 +10,7 @@ import {
     View,
 } from 'react-native';
 import tw from 'twrnc';
+import { getRoleTheme } from '@/utils/theme';
 
 interface TabItem {
     key: string;
@@ -62,6 +63,7 @@ interface BottomTabsProps {
 export default function BottomTabs({ style }: BottomTabsProps) {
     const { currentUser } = useAuth();
     const pathname = usePathname();
+    const theme = getRoleTheme(currentUser?.role);
 
     const handleTabPress = (tab: TabItem) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -114,16 +116,19 @@ export default function BottomTabs({ style }: BottomTabsProps) {
                                 onPress={() => handleTabPress(tab)}
                                 activeOpacity={0.7}
                             >
-                                <View style={tw`items-center justify-center ${isActive ? 'bg-orange-50' : ''} rounded-xl px-4 py-2`}>
+                                <View style={[
+                                    tw`items-center justify-center rounded-xl px-4 py-2`,
+                                    isActive && { backgroundColor: theme.primary + '15' }
+                                ]}>
                                     <Ionicons
                                         name={isActive ? tab.activeIcon : tab.icon}
                                         size={24}
-                                        color={isActive ? '#F59E0B' : '#F59E0B'}
+                                        color={isActive ? theme.primary : '#9CA3AF'}
                                     />
-                                    <Text style={tw`text-xs font-semibold mt-1 ${isActive
-                                            ? 'text-orange-600'
-                                            : 'text-gray-500'
-                                        }`}>
+                                    <Text style={[
+                                        tw`text-xs font-semibold mt-1`,
+                                        { color: isActive ? theme.primary : '#9CA3AF' }
+                                    ]}>
                                         {tab.label}
                                     </Text>
                                 </View>

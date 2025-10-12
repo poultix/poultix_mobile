@@ -65,9 +65,10 @@ export default function ProfileScreen() {
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'ADMIN': return { primary: '#7C3AED', secondary: '#6D28D9', light: '#EDE9FE', text: '#7C3AED' };
-      case 'FARMER': return { primary: '#F59E0B', secondary: '#D97706', light: '#FEF3C7', text: '#F59E0B' };
-      case 'VETERINARY': return { primary: '#10B981', secondary: '#059669', light: '#D1FAE5', text: '#10B981' };
-      default: return { primary: '#3B82F6', secondary: '#2563EB', light: '#DBEAFE', text: '#3B82F6' };
+      case 'FARMER': return { primary: '#FF8C00', secondary: '#FF7F00', light: '#FFF4E6', text: '#FF8C00' };
+      case 'VETERINARY': return { primary: '#DC2626', secondary: '#B91C1C', light: '#FEF2F2', text: '#DC2626' };
+      case 'PHARMACY': return { primary: '#2563EB', secondary: '#1D4ED8', light: '#EFF6FF', text: '#2563EB' };
+      default: return { primary: '#6B7280', secondary: '#4B5563', light: '#F9FAFB', text: '#6B7280' };
     }
   };
 
@@ -76,6 +77,7 @@ export default function ProfileScreen() {
       case 'ADMIN': return 'shield-outline';
       case 'FARMER': return 'leaf-outline';
       case 'VETERINARY': return 'medical-outline';
+      case 'PHARMACY': return 'medical-outline';
       default: return 'person-outline';
     }
   };
@@ -85,6 +87,7 @@ export default function ProfileScreen() {
       case 'ADMIN': return 'System Administrator with full access to manage users and system settings';
       case 'FARMER': return 'Poultry farm owner managing livestock and requesting veterinary services';
       case 'VETERINARY': return 'Licensed veterinarian providing professional animal care services';
+      case 'PHARMACY': return 'Licensed veterinary pharmacy providing medications and health products';
       default: return 'Community member with basic access';
     }
   };
@@ -111,6 +114,13 @@ export default function ProfileScreen() {
           { icon: 'calendar-outline', title: 'Appointment Management', description: 'Manage your schedule' },
           { icon: 'chatbubbles-outline', title: 'Client Communication', description: 'Chat with farmers' },
           { icon: 'document-text-outline', title: 'Medical Records', description: 'Maintain health records' }
+        ];
+      case 'PHARMACY':
+        return [
+          { icon: 'medical-outline', title: 'Inventory Management', description: 'Manage pharmaceutical inventory' },
+          { icon: 'shield-checkmark-outline', title: 'Verification Status', description: 'Track compliance status' },
+          { icon: 'document-text-outline', title: 'Regulatory Docs', description: 'Manage licenses and certificates' },
+          { icon: 'storefront-outline', title: 'Pharmacy Profile', description: 'Manage business information' }
         ];
       default: return [];
     }
@@ -180,6 +190,31 @@ export default function ProfileScreen() {
               <Text className="text-gray-600 text-sm text-center px-4 leading-5">
                 {getRoleDescription(currentUser.role)}
               </Text>
+              
+              {/* Verification Badge */}
+              <View className="mt-4">
+                {currentUser.role === 'PHARMACY' ? (
+                  <View className="flex-row items-center justify-center bg-green-50 px-4 py-2 rounded-full border border-green-200">
+                    <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                    <Text className="text-green-700 font-semibold ml-2 text-sm">✅ Verified Pharmacy</Text>
+                  </View>
+                ) : currentUser.role === 'VETERINARY' ? (
+                  <View className="flex-row items-center justify-center bg-blue-50 px-4 py-2 rounded-full border border-blue-200">
+                    <Ionicons name="shield-checkmark" size={16} color="#3B82F6" />
+                    <Text className="text-blue-700 font-semibold ml-2 text-sm">🩺 Licensed Veterinarian</Text>
+                  </View>
+                ) : currentUser.role === 'FARMER' ? (
+                  <View className="flex-row items-center justify-center bg-orange-50 px-4 py-2 rounded-full border border-orange-200">
+                    <Ionicons name="leaf" size={16} color="#FF8C00" />
+                    <Text className="text-orange-700 font-semibold ml-2 text-sm">🌾 Registered Farmer</Text>
+                  </View>
+                ) : (
+                  <View className="flex-row items-center justify-center bg-purple-50 px-4 py-2 rounded-full border border-purple-200">
+                    <Ionicons name="shield" size={16} color="#7C3AED" />
+                    <Text className="text-purple-700 font-semibold ml-2 text-sm">👑 System Admin</Text>
+                  </View>
+                )}
+              </View>
             </View>
           </View>
 

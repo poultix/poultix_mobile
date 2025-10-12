@@ -108,8 +108,8 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
                 totalFarms: farms.length,
                 totalSchedules: schedules.length,
                 totalNews: news.length,
-                activeUsers: users.filter(u => u.isActive).length,
-                pendingSchedules: schedules.filter(s => s.status === ScheduleStatus.IN_PROGRESS).length,
+                activeUsers: users.filter((u:User) => u.isActive).length,
+                pendingSchedules: schedules.filter((s:Schedule) => s.status === ScheduleStatus.IN_PROGRESS).length,
             };
 
 

@@ -22,11 +22,13 @@ import VetOverview from '@/components/dashboard/vet/overview';
 import VetDashSchedules from '@/components/dashboard/vet/schedules';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
+import { getRoleTheme } from '@/utils/theme';
 
 export default function VeterinaryDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const { currentUser } = useAuth();
   const { farms } = useFarms();
+  const theme = getRoleTheme(currentUser?.role);
   const [selectedTab, setSelectedTab] = useState<'overview' | 'farms' | 'schedules'>('overview');
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -67,7 +69,7 @@ export default function VeterinaryDashboardScreen() {
         {/* Header */}
         <View style={tw`pb-4`}>
           <LinearGradient
-            colors={['#F59E0B', '#D97706']}
+            colors={[theme.primary, theme.primary + 'CC']}
             style={tw`p-7 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between mb-3`}>
@@ -111,7 +113,7 @@ export default function VeterinaryDashboardScreen() {
                 key={tab.key}
                 style={[
                   tw`flex-1 py-3 px-2 rounded-xl flex-row items-center justify-center`,
-                  selectedTab === tab.key ? tw`bg-amber-600 shadow-md` : tw`bg-transparent`
+                  selectedTab === tab.key ? [tw`shadow-md`, { backgroundColor: theme.primary }] : tw`bg-transparent`
                 ]}
                 onPress={() => setSelectedTab(tab.key as any)}
               >

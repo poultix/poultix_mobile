@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Farm, FarmStatus } from '@/types';
-import { farmService } from '@/services/api';
-import { useError } from './ErrorContext';
-import { HTTP_STATUS } from '@/services/constants';
+import { Farm } from '@/types/farm';
+import { farmApi } from '@/services/api/farm';
 import { useAuth } from './AuthContext';
 import { Alert } from 'react-native';
 
@@ -15,13 +13,12 @@ interface FarmContextType {
 
   // CRUD operations
   getFarmById: (id: string) => Promise<Farm | null>;
-  getFarmsByOwner: (ownerId: string) => Promise<Farm[]>;
-  getFarmsByVeterinary: (veterinaryId: string) => Promise<Farm[]>;
-  getFarmsByStatus: (status: FarmStatus) => Promise<Farm[]>;
+  getFarmsByUser: (userId: string) => Promise<Farm[]>;
   editFarm: (data: Farm) => void;
   removeFarm: (data: Farm) => void
   setCurrentFarm: (farm: Farm | null) => void;
   addFarm: (farm: Farm) => void
+  refreshFarms: () => Promise<void>;
 }
 
 // Create context
@@ -29,12 +26,11 @@ const FarmContext = createContext<FarmContextType | undefined>(undefined);
 
 // Provider component
 export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
-  const { authenticated } = useAuth()
+  const { authenticated, currentUser } = useAuth()
   const [farms, setFarms] = useState<Farm[]>([])
   const [currentFarm, setCurrentFarm] = useState<Farm | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { handleApiError } = useError();
 
   useEffect(() => {
     if (authenticated) {
@@ -47,83 +43,40 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(true);
       setError('');
 
-      const response = await farmService.getAllFarms();
-
-      if (response.success && response.data) {
-        setFarms(response.data);
-      } else {
-        Alert.alert('Failed to load farms', response.message || 'Failed to load farms');
-      }
+      const farmsData = await farmApi.getAllFarms();
+      setFarms(farmsData);
     } catch (error: any) {
       console.error('Failed to load farms:', error);
-
-      if (error?.status >= HTTP_STATUS.NETWORK_ERROR) {
-        handleApiError(error);
-      } else {
-        setError(error.message || 'Failed to load farms');
-      }
+      setError(error.message || 'Failed to load farms');
+      Alert.alert('Error', 'Failed to load farms');
     } finally {
       setLoading(false);
     }
+  };
+
+  const refreshFarms = async () => {
+    await loadFarms();
   };
 
 
 
   const getFarmById = async (id: string): Promise<Farm | null> => {
     try {
-      const response = await farmService.getFarmById(id);
-
-      if (response.success && response.data) {
-        return response.data;
-      }
-      return null;
+      const farm = await farmApi.getFarmById(id);
+      return farm;
     } catch (error: any) {
       console.error('Failed to get farm by ID:', error);
-      Alert.alert('Failed to get farm by ID', error.message || 'Failed to get farm by ID');
+      Alert.alert('Error', error.message || 'Failed to get farm by ID');
       return null;
     }
   };
 
-  const getFarmsByOwner = async (ownerId: string): Promise<Farm[]> => {
+  const getFarmsByUser = async (userId: string): Promise<Farm[]> => {
     try {
-      const response = await farmService.getFarmsByOwner(ownerId);
-
-      if (response.success && response.data) {
-        return response.data;
-      }
-      return [];
+      const farmsData = await farmApi.getFarmsByUser(userId);
+      return farmsData;
     } catch (error: any) {
-      console.error('Failed to get farms by owner:', error);
-      setError(error.message || 'Failed to get farms');
-      return [];
-    }
-  };
-
-  const getFarmsByVeterinary = async (veterinaryId: string): Promise<Farm[]> => {
-    try {
-      const response = await farmService.getFarmsByVeterinary(veterinaryId);
-
-      if (response.success && response.data) {
-        return response.data;
-      }
-      return [];
-    } catch (error: any) {
-      console.error('Failed to get farms by veterinary:', error);
-      setError(error.message || 'Failed to get farms');
-      return [];
-    }
-  };
-
-  const getFarmsByStatus = async (status: FarmStatus): Promise<Farm[]> => {
-    try {
-      const response = await farmService.getFarmsByStatus(status);
-
-      if (response.success && response.data) {
-        return response.data;
-      }
-      return [];
-    } catch (error: any) {
-      console.error('Failed to get farms by status:', error);
+      console.error('Failed to get farms by user:', error);
       setError(error.message || 'Failed to get farms');
       return [];
     }
@@ -151,12 +104,11 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
     error,
     addFarm,
     getFarmById,
-    getFarmsByOwner,
-    getFarmsByVeterinary,
-    getFarmsByStatus,
+    getFarmsByUser,
     setCurrentFarm,
     editFarm,
-    removeFarm
+    removeFarm,
+    refreshFarms
   };
 
   return (

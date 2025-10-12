@@ -24,6 +24,7 @@ export interface User {
     role: UserRole;
     isActive: boolean;
     emailVerified: boolean;
+    isVerified: boolean; // For role-specific verification (pharmacy, veterinary, etc.)
     recoverMode: boolean;
     privateKey?: string;
     publicKey?: string;

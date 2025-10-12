@@ -13,6 +13,7 @@ import { UserProvider } from './UserContext';
 import { VeterinaryProvider } from './VeterinaryContext';
 import { VaccineProvider } from './VaccineContext';
 import { SupportProvider } from './SupportContext';
+import { ThemeProvider } from './ThemeContext';
 
 interface RootProviderProps {
   children: React.ReactNode;
@@ -23,31 +24,33 @@ export const RootProvider: React.FC<RootProviderProps> = ({ children }) => {
   return (
     <ErrorProvider>
       <AuthProvider>
-        <AdminProvider>
-          <UserProvider>
-            <FarmProvider>
-              <ScheduleProvider>
-                  <ChatProvider>
-                    <NewsProvider>
-                      <PharmacyProvider>
-                        <PharmacyVerificationProvider>
-                          <VeterinaryProvider>
-                            <VaccineProvider>
-                              <SupportProvider>
-                                <BottomTabsProvider>
-                                  {children}
-                                </BottomTabsProvider>
-                              </SupportProvider>
-                            </VaccineProvider>
-                          </VeterinaryProvider>
-                        </PharmacyVerificationProvider>
-                      </PharmacyProvider>
-                    </NewsProvider>
-                  </ChatProvider>
-              </ScheduleProvider>
-            </FarmProvider>
-          </UserProvider>
-        </AdminProvider>
+        <ThemeProvider>
+          <AdminProvider>
+            <UserProvider>
+              <FarmProvider>
+                <ScheduleProvider>
+                    <ChatProvider>
+                      <NewsProvider>
+                        <PharmacyProvider>
+                          <PharmacyVerificationProvider>
+                            <VeterinaryProvider>
+                              <VaccineProvider>
+                                <SupportProvider>
+                                  <BottomTabsProvider>
+                                    {children}
+                                  </BottomTabsProvider>
+                                </SupportProvider>
+                              </VaccineProvider>
+                            </VeterinaryProvider>
+                          </PharmacyVerificationProvider>
+                        </PharmacyProvider>
+                      </NewsProvider>
+                    </ChatProvider>
+                </ScheduleProvider>
+              </FarmProvider>
+            </UserProvider>
+          </AdminProvider>
+        </ThemeProvider>
       </AuthProvider>
     </ErrorProvider>
   );

@@ -21,10 +21,13 @@ import PharmacyOverview from '@/components/dashboard/pharmacy/overview'
 import PharmacyInventory from '@/components/dashboard/pharmacy/inventory'
 import PharmacyOrders from '@/components/dashboard/pharmacy/orders'
 import { useAuth } from '@/contexts/AuthContext'
+import { getRoleTheme } from '@/utils/theme'
+import { VerificationStatus } from '@/types/pharmacy'
 
 export default function PharmacyDashboardScreen() {
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer()
     const { currentUser } = useAuth()
+    const theme = getRoleTheme(currentUser?.role)
     const [selectedTab, setSelectedTab] = useState<'overview' | 'inventory' | 'orders'>('overview')
 
     const fadeAnim = useRef(new Animated.Value(0)).current
@@ -62,7 +65,7 @@ export default function PharmacyDashboardScreen() {
                 {/* Header */}
                 <View style={tw`pb-4`}>
                     <LinearGradient
-                        colors={['#059669', '#047857']}
+                        colors={[theme.primary, theme.primary + 'CC']}
                         style={tw`p-7 shadow-xl`}
                     >
                         <View style={tw`flex-row items-center justify-between mb-3`}>
@@ -84,13 +87,43 @@ export default function PharmacyDashboardScreen() {
                                             PHARMACY
                                         </Text>
                                     </View>
-                                    <Text style={tw`text-white text-xs opacity-80`}>
-                                        Licensed Pharmacy
-                                    </Text>
+                                    {currentUser.isVerified ? (
+                                        <View style={tw`flex-row items-center`}>
+                                            <Ionicons name="checkmark-circle" size={16} color="white" />
+                                            <Text style={tw`text-white text-xs opacity-80 ml-1`}>
+                                                Verified
+                                            </Text>
+                                        </View>
+                                    ) : (
+                                        <View style={tw`flex-row items-center`}>
+                                            <Ionicons name="time-outline" size={16} color="#FEF3C7" />
+                                            <Text style={tw`text-yellow-100 text-xs ml-1`}>
+                                                Pending Verification
+                                            </Text>
+                                        </View>
+                                    )}
                                 </View>
                             </View>
                             <DrawerButton />
                         </View>
+                        
+                        {/* Verification Status Banner for Unverified Pharmacies */}
+                        {!currentUser.isVerified && (
+                            <View style={tw`bg-yellow-100 border border-yellow-300 rounded-xl p-3 mt-4 mx-4`}>
+                                <View style={tw`flex-row items-center`}>
+                                    <Ionicons name="warning-outline" size={20} color="#D97706" />
+                                    <Text style={tw`text-yellow-800 font-medium ml-2 flex-1`}>
+                                        Complete verification to access all features
+                                    </Text>
+                                    <TouchableOpacity 
+                                        style={[tw`px-3 py-1 rounded-lg`, { backgroundColor: theme.primary }]}
+                                        onPress={() => router.push('/pharmacy/verification-dashboard')}
+                                    >
+                                        <Text style={tw`text-white text-xs font-semibold`}>Verify Now</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        )}
                     </LinearGradient>
                 </View>
 
@@ -106,7 +139,7 @@ export default function PharmacyDashboardScreen() {
                                 key={tab.key}
                                 style={[
                                     tw`flex-1 py-3 px-2 rounded-xl flex-row items-center justify-center`,
-                                    selectedTab === tab.key ? tw`bg-green-600 shadow-md` : tw`bg-transparent`
+                                    selectedTab === tab.key ? [tw`shadow-md`, { backgroundColor: theme.primary }] : tw`bg-transparent`
                                 ]}
                                 onPress={() => setSelectedTab(tab.key as any)}
                             >

@@ -1,6 +1,6 @@
-import { News, ApiResponse, NewsCreateRequest, NewsUpdateRequest } from '@/types';
 import { apiClient } from '@/services/client';
 import { API_ENDPOINTS } from '@/services/constants';
+import { ApiResponse, News, NewsCreateRequest, NewsUpdateRequest } from '@/types';
 
 
 export class NewsService {
