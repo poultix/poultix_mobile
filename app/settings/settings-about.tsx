@@ -2,16 +2,58 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React from 'react';
-import { Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import tw from 'twrnc';
 
 export default function AboutSettingsScreen() {
+  const handlePrivacyPolicy = () => {
+    Alert.alert(
+      'Privacy Policy',
+      'View our privacy policy to understand how we protect your data.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'View Online', onPress: () => {
+          // For now, show a placeholder message
+          Alert.alert('Feature Coming Soon', 'Privacy policy will be available online soon.');
+          // Future: Linking.openURL('https://poultix.rw/privacy');
+        }}
+      ]
+    );
+  };
+
+  const handleTermsOfService = () => {
+    Alert.alert(
+      'Terms of Service',
+      'Read our terms and conditions for using Poultix.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'View Online', onPress: () => {
+          // For now, show a placeholder message
+          Alert.alert('Feature Coming Soon', 'Terms of service will be available online soon.');
+          // Future: Linking.openURL('https://poultix.rw/terms');
+        }}
+      ]
+    );
+  };
+
+  const handleOpenSourceLicenses = () => {
+    Alert.alert(
+      'Open Source Licenses',
+      'View the licenses of open source libraries used in this app.',
+      [
+        { text: 'OK', onPress: () => {
+          Alert.alert('Feature Coming Soon', 'Open source licenses will be available soon.');
+        }}
+      ]
+    );
+  };
+
   const aboutOptions = [
     { title: 'Version', value: '1.0.0', icon: 'information-circle-outline' },
     { title: 'Build', value: '2024.01.15', icon: 'construct-outline' },
-    { title: 'Privacy Policy', action: () => {}, icon: 'shield-outline' },
-    { title: 'Terms of Service', action: () => {}, icon: 'document-text-outline' },
-    { title: 'Open Source Licenses', action: () => {}, icon: 'code-outline' },
+    { title: 'Privacy Policy', action: handlePrivacyPolicy, icon: 'shield-outline' },
+    { title: 'Terms of Service', action: handleTermsOfService, icon: 'document-text-outline' },
+    { title: 'Open Source Licenses', action: handleOpenSourceLicenses, icon: 'code-outline' },
     { title: 'Contact Us', action: () => Linking.openURL('mailto:info@poultix.rw'), icon: 'mail-outline' },
   ];
 

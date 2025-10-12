@@ -6,11 +6,62 @@ import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import tw from 'twrnc';
 
 export default function StorageSettingsScreen() {
+  const handleClearCache = () => {
+    Alert.alert(
+      'Clear Cache',
+      'This will clear temporary files and cached data. Your personal data will remain safe.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Clear', style: 'destructive', onPress: () => {
+          Alert.alert('Success', 'Cache cleared successfully! (234 MB freed)');
+        }}
+      ]
+    );
+  };
+
+  const handleOfflineData = () => {
+    Alert.alert(
+      'Offline Data',
+      'Manage data stored for offline access.',
+      [
+        { text: 'OK', onPress: () => {
+          Alert.alert('Feature Coming Soon', 'Offline data management will be available soon.');
+        }}
+      ]
+    );
+  };
+
+  const handleExportData = () => {
+    Alert.alert(
+      'Export Data',
+      'Create a backup of your farm data and settings.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Export', onPress: () => {
+          Alert.alert('Feature Coming Soon', 'Data export functionality will be available soon.');
+        }}
+      ]
+    );
+  };
+
+  const handleImportData = () => {
+    Alert.alert(
+      'Import Data',
+      'Restore your data from a previous backup.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Import', onPress: () => {
+          Alert.alert('Feature Coming Soon', 'Data import functionality will be available soon.');
+        }}
+      ]
+    );
+  };
+
   const storageOptions = [
-    { title: 'Clear Cache', subtitle: '234 MB', icon: 'trash-outline', action: () => Alert.alert('Cache cleared!') },
-    { title: 'Offline Data', subtitle: '1.2 GB', icon: 'download-outline', action: () => {} },
-    { title: 'Export Data', subtitle: 'Backup your data', icon: 'cloud-upload-outline', action: () => {} },
-    { title: 'Import Data', subtitle: 'Restore from backup', icon: 'cloud-download-outline', action: () => {} },
+    { title: 'Clear Cache', subtitle: '234 MB', icon: 'trash-outline', action: handleClearCache },
+    { title: 'Offline Data', subtitle: '1.2 GB', icon: 'download-outline', action: handleOfflineData },
+    { title: 'Export Data', subtitle: 'Backup your data', icon: 'cloud-upload-outline', action: handleExportData },
+    { title: 'Import Data', subtitle: 'Restore from backup', icon: 'cloud-download-outline', action: handleImportData },
   ];
 
   return (

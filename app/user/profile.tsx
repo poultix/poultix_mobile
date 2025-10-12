@@ -1,3 +1,4 @@
+import BottomTabs from '@/components/BottomTabs';
 import DrawerButton from '@/components/DrawerButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -152,8 +153,8 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}
-          contentContainerClassName='py-10'>
+        <ScrollView className="flex-1 px-4 pb-40" showsVerticalScrollIndicator={false}
+          contentContainerClassName='py-10 pb-40'>
           {/* Profile Header Card */}
           <View className="bg-white rounded-2xl p-6 shadow-lg -mt-4 mb-6">
             {/* Profile Avatar & Info */}
@@ -420,6 +421,8 @@ export default function ProfileScreen() {
           </View>
         </ScrollView>
       </Animated.View>
+             <BottomTabs/>
+      
     </View>
   );
 }

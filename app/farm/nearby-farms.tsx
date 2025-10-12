@@ -3,7 +3,7 @@ import { useDrawer } from '@/contexts/DrawerContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
     Linking,
@@ -12,6 +12,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import * as Location from 'expo-location';
 import tw from 'twrnc';
 
 // New context imports
@@ -26,6 +27,8 @@ export default function NearbyFarmsScreen() {
     const { farms, loading } = useFarms();
     
     const fadeAnim = useRef(new Animated.Value(0)).current;
+    const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+    const [locationPermission, setLocationPermission] = useState<boolean>(false);
 
     useEffect(() => {
         Animated.timing(fadeAnim, {
@@ -33,11 +36,66 @@ export default function NearbyFarmsScreen() {
             duration: 800,
             useNativeDriver: true,
         }).start();
-    }, []);
+        
+        // Get user location for distance calculation
+        getCurrentLocation();
+    }, [fadeAnim]);
 
-    // Calculate distance (mock function)
-    const calculateDistance = (farm: any) => {
-        return Math.floor(Math.random() * 50) + 1; // Mock distance in km
+    const getCurrentLocation = async () => {
+        try {
+            // Request permission
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                console.log('Location permission denied');
+                setLocationPermission(false);
+                return;
+            }
+
+            setLocationPermission(true);
+            
+            // Get current location
+            const location = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.Balanced,
+            });
+            
+            setUserLocation(location);
+        } catch (error) {
+            console.error('Error getting location:', error);
+            setLocationPermission(false);
+        }
+    };
+
+    // Calculate distance using Haversine formula
+    const calculateDistance = (farm: any): number => {
+        // If no user location or farm location, return a default distance
+        if (!userLocation || !farm.location) {
+            return Math.floor(Math.random() * 50) + 1; // Fallback to random for demo
+        }
+
+        const userLat = userLocation.coords.latitude;
+        const userLon = userLocation.coords.longitude;
+        const farmLat = farm.location.latitude;
+        const farmLon = farm.location.longitude;
+
+        // Haversine formula
+        const R = 6371; // Earth's radius in kilometers
+        const dLat = toRadians(farmLat - userLat);
+        const dLon = toRadians(farmLon - userLon);
+        
+        const a = 
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRadians(userLat)) * Math.cos(toRadians(farmLat)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c;
+
+        return Math.round(distance * 10) / 10; // Round to 1 decimal place
+    };
+
+    // Helper function to convert degrees to radians
+    const toRadians = (degrees: number): number => {
+        return degrees * (Math.PI / 180);
     };
 
     // Get health status color

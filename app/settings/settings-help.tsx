@@ -2,17 +2,80 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React from 'react';
-import { Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import tw from 'twrnc';
 
 export default function HelpSettingsScreen() {
+  const handleFAQ = () => {
+    Alert.alert(
+      'Frequently Asked Questions',
+      'Browse common questions and answers about Poultix.',
+      [
+        { text: 'OK', onPress: () => {
+          Alert.alert('Feature Coming Soon', 'FAQ section will be available soon.');
+        }}
+      ]
+    );
+  };
+
+  const handleUserGuide = () => {
+    Alert.alert(
+      'User Guide',
+      'Access the complete user manual and documentation.',
+      [
+        { text: 'OK', onPress: () => {
+          Alert.alert('Feature Coming Soon', 'User guide will be available soon.');
+        }}
+      ]
+    );
+  };
+
+  const handleVideoTutorials = () => {
+    Alert.alert(
+      'Video Tutorials',
+      'Watch step-by-step video guides to learn Poultix features.',
+      [
+        { text: 'OK', onPress: () => {
+          Alert.alert('Feature Coming Soon', 'Video tutorials will be available soon.');
+        }}
+      ]
+    );
+  };
+
+  const handleCommunityForum = () => {
+    Alert.alert(
+      'Community Forum',
+      'Join discussions with other Poultix users and experts.',
+      [
+        { text: 'OK', onPress: () => {
+          Alert.alert('Feature Coming Soon', 'Community forum will be available soon.');
+        }}
+      ]
+    );
+  };
+
+  const handleReportBug = () => {
+    Alert.alert(
+      'Report a Bug',
+      'Help us improve Poultix by reporting issues you encounter.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Report', onPress: () => {
+          const subject = encodeURIComponent('Bug Report - Poultix Mobile App');
+          const body = encodeURIComponent('Please describe the bug you encountered:\n\n1. What were you trying to do?\n\n2. What happened instead?\n\n3. Steps to reproduce:\n\n4. Device information:\n\nThank you for helping us improve Poultix!');
+          Linking.openURL(`mailto:support@poultix.rw?subject=${subject}&body=${body}`);
+        }}
+      ]
+    );
+  };
+
   const helpOptions = [
-    { title: 'FAQ', icon: 'help-circle-outline', action: () => {} },
+    { title: 'FAQ', icon: 'help-circle-outline', action: handleFAQ },
     { title: 'Contact Support', icon: 'mail-outline', action: () => Linking.openURL('mailto:support@poultix.rw') },
-    { title: 'User Guide', icon: 'book-outline', action: () => {} },
-    { title: 'Video Tutorials', icon: 'play-circle-outline', action: () => {} },
-    { title: 'Community Forum', icon: 'people-outline', action: () => {} },
-    { title: 'Report a Bug', icon: 'bug-outline', action: () => {} },
+    { title: 'User Guide', icon: 'book-outline', action: handleUserGuide },
+    { title: 'Video Tutorials', icon: 'play-circle-outline', action: handleVideoTutorials },
+    { title: 'Community Forum', icon: 'people-outline', action: handleCommunityForum },
+    { title: 'Report a Bug', icon: 'bug-outline', action: handleReportBug },
   ];
 
   return (

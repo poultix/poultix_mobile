@@ -1,91 +1,48 @@
+import { IOSDesign, getRoleColor } from '@/constants/iosDesign';
+import { User, UserRole } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { IOSDesign, getRoleColor } from '../../constants/iosDesign';
-
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    role: 'farmer' | 'veterinary' | 'admin';
-    location: string;
-    joinDate: string;
-    lastActive: string;
-    status: 'active' | 'inactive' | 'suspended';
-    farmsCount?: number;
-    schedulesCount?: number;
-    specialization?: string;
-    licenseNumber?: string;
-    experience?: string;
-    profilePicture?: string;
-}
+import { useAuth } from '@/contexts/AuthContext';
+import { useUsers } from '@/contexts/UserContext';
 
 export default function UserDetailScreen() {
-    const { id } = useLocalSearchParams();
+    const { id } = useLocalSearchParams<{ id: string }>();
+    const { currentUser } = useAuth();
+    const { users } = useUsers();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadUserDetails();
-    }, [id]);
-
-    const loadUserDetails = async () => {
+    const loadUserDetails = useCallback(async () => {
         try {
             setLoading(true);
-            // Mock user data based on ID
-            const mockUsers: User[] = [
-                {
-                    id: '1',
-                    name: 'John Kamau',
-                    email: 'john.kamau@gmail.com',
-                    phone: '+254 712 345 678',
-                    role: 'farmer',
-                    location: 'Nakuru County, Kenya',
-                    joinDate: '2023-01-15',
-                    lastActive: '2024-01-20',
-                    status: 'active',
-                    farmsCount: 3,
-                    schedulesCount: 12,
-                },
-                {
-                    id: '2',
-                    name: 'Dr. Sarah Wanjiku',
-                    email: 'dr.sarah@vetclinic.co.ke',
-                    phone: '+254 722 456 789',
-                    role: 'veterinary',
-                    location: 'Nairobi, Kenya',
-                    joinDate: '2022-08-10',
-                    lastActive: '2024-01-21',
-                    status: 'active',
-                    specialization: 'Poultry Medicine',
-                    licenseNumber: 'VET/2019/0234',
-                    experience: '8 years',
-                    schedulesCount: 45,
-                },
-                {
-                    id: '3',
-                    name: 'Admin User',
-                    email: 'admin@poultix.com',
-                    phone: '+254 700 123 456',
-                    role: 'admin',
-                    location: 'Nairobi, Kenya',
-                    joinDate: '2022-01-01',
-                    lastActive: '2024-01-21',
-                    status: 'active',
-                },
-            ];
             
-            const foundUser = mockUsers.find(u => u.id === id) || mockUsers[0];
-            setUser(foundUser);
+            // If no ID provided or ID matches current user, show current user
+            if (!id || id === currentUser?.id) {
+                setUser(currentUser);
+            } else {
+                // Look for user in users context (from UserContext)
+                const foundUser = users.find(u => u.id === id);
+                if (foundUser) {
+                    setUser(foundUser);
+                } else {
+                    // Fallback to current user if not found
+                    setUser(currentUser);
+                }
+            }
         } catch (error) {
             console.error('Error loading user details:', error);
-            Alert.alert('Error', 'Failed to load user details');
+            // Fallback to current user on error
+            setUser(currentUser);
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, currentUser, users]);
+
+    useEffect(() => {
+        loadUserDetails();
+    }, [loadUserDetails]);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -211,18 +168,18 @@ export default function UserDetailScreen() {
                             marginBottom: IOSDesign.spacing.md,
                         }}>
                             <Ionicons 
-                                name={user.role === 'farmer' ? 'leaf' : user.role === 'veterinary' ? 'medical' : 'shield'} 
+                                name={user.role === 'FARMER' ? 'leaf' : user.role === 'VETERINARY' ? 'medical' : 'shield'} 
                                 size={32} 
                                 color={getRoleColor(user.role)} 
                             />
                         </View>
                         
                         <Text style={{
-                            ...IOSDesign.typography.title2,
-                            color: IOSDesign.colors.text.primary,
-                            marginBottom: IOSDesign.spacing.xs,
+                            ...IOSDesign.typography.title3,
+                            color: user.role === 'FARMER' ? IOSDesign.colors.systemBlue : user.role === 'VETERINARY' ? IOSDesign.colors.systemGreen : IOSDesign.colors.systemPurple,
+                            textAlign: 'center',
                         }}>
-                            {user.name}
+                            {user.role.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
                         </Text>
                         
                         <View style={{
@@ -235,23 +192,29 @@ export default function UserDetailScreen() {
                             <Text style={{
                                 ...IOSDesign.typography.calloutEmphasized,
                                 color: getRoleColor(user.role),
-                                textTransform: 'capitalize',
                             }}>
                                 {user.role}
                             </Text>
                         </View>
                         
                         <View style={{
-                            backgroundColor: getStatusColor(user.status) + '20',
-                            paddingHorizontal: IOSDesign.spacing.sm,
-                            paddingVertical: IOSDesign.spacing.xs,
-                            borderRadius: IOSDesign.borderRadius.sm,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginTop: IOSDesign.spacing.sm,
                         }}>
+                            <View style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: 4,
+                                backgroundColor: user.isActive ? IOSDesign.colors.systemGreen : IOSDesign.colors.systemRed,
+                                marginRight: IOSDesign.spacing.xs,
+                            }} />
                             <Text style={{
-                                ...IOSDesign.typography.footnoteEmphasized,
-                                color: getStatusColor(user.status),
+                                ...IOSDesign.typography.caption1,
+                                color: user.isActive ? IOSDesign.colors.systemGreen : IOSDesign.colors.systemRed,
                             }}>
-                                {getStatusText(user.status)}
+                                {user.isActive ? 'Active' : 'Inactive'}
                             </Text>
                         </View>
                     </View>
@@ -277,19 +240,19 @@ export default function UserDetailScreen() {
                         
                         <View style={{ marginBottom: IOSDesign.spacing.sm }}>
                             <Text style={{ ...IOSDesign.typography.callout, color: IOSDesign.colors.text.secondary }}>
-                                📞 {user.phone}
+                                📞 {user.phone || 'Not provided'}
                             </Text>
                         </View>
                         
                         <View>
                             <Text style={{ ...IOSDesign.typography.callout, color: IOSDesign.colors.text.secondary }}>
-                                📍 {user.location}
+                                📍 {user.location.latitude}
                             </Text>
                         </View>
                     </View>
 
                     {/* Professional Information (for veterinary) */}
-                    {user.role === 'veterinary' && (
+                    {user.role === 'VETERINARY' && (
                         <View style={{
                             ...IOSDesign.components.card,
                             marginBottom: IOSDesign.spacing.lg,
@@ -432,8 +395,8 @@ export default function UserDetailScreen() {
                                 onPress={handleSuspendUser}
                             >
                                 <Text style={{
-                                    ...IOSDesign.typography.bodyEmphasized,
-                                    color: IOSDesign.colors.text.inverse,
+                                    ...IOSDesign.typography.body,
+                                    color: IOSDesign.colors.gray[600],
                                 }}>
                                     Suspend User
                                 </Text>
@@ -451,8 +414,8 @@ export default function UserDetailScreen() {
                                 onPress={handleActivateUser}
                             >
                                 <Text style={{
-                                    ...IOSDesign.typography.bodyEmphasized,
-                                    color: IOSDesign.colors.text.inverse,
+                                    ...IOSDesign.typography.body,
+                                    color: IOSDesign.colors.gray[600],
                                 }}>
                                     Activate User
                                 </Text>

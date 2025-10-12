@@ -1,3 +1,4 @@
+import BottomTabs from '@/components/BottomTabs';
 import DrawerButton from '@/components/DrawerButton';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -87,7 +88,9 @@ export default function SettingsScreen() {
             ))}
           </View>
         </ScrollView>
-      </Animated.View>
+
+      
+      </Animated.View> 
     </View>
   )
 }
