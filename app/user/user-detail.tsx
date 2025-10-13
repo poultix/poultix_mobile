@@ -156,6 +156,9 @@ export default function UserDetailScreen() {
                         ...IOSDesign.components.card,
                         marginBottom: IOSDesign.spacing.lg,
                         alignItems: 'center',
+                        backgroundColor: getRoleColor(user.role) + '05',
+                        borderWidth: 2,
+                        borderColor: getRoleColor(user.role) + '20',
                     }}>
                         {/* Profile Picture Placeholder */}
                         <View style={{
@@ -302,10 +305,12 @@ export default function UserDetailScreen() {
                             {user.farmsCount !== undefined && (
                                 <View style={{
                                     flex: 1,
-                                    backgroundColor: IOSDesign.colors.systemGreen + '10',
+                                    backgroundColor: `linear-gradient(135deg, ${IOSDesign.colors.systemGreen}20, ${IOSDesign.colors.systemGreen}10)`,
                                     padding: IOSDesign.spacing.md,
                                     borderRadius: IOSDesign.borderRadius.md,
                                     minWidth: '45%',
+                                    borderWidth: 1,
+                                    borderColor: IOSDesign.colors.systemGreen + '30',
                                 }}>
                                     <Text style={{ ...IOSDesign.typography.title2, color: IOSDesign.colors.systemGreen }}>
                                         {user.farmsCount}
@@ -319,10 +324,12 @@ export default function UserDetailScreen() {
                             {user.schedulesCount !== undefined && (
                                 <View style={{
                                     flex: 1,
-                                    backgroundColor: IOSDesign.colors.systemBlue + '10',
+                                    backgroundColor: `linear-gradient(135deg, ${IOSDesign.colors.systemBlue}20, ${IOSDesign.colors.systemBlue}10)`,
                                     padding: IOSDesign.spacing.md,
                                     borderRadius: IOSDesign.borderRadius.md,
                                     minWidth: '45%',
+                                    borderWidth: 1,
+                                    borderColor: IOSDesign.colors.systemBlue + '30',
                                 }}>
                                     <Text style={{ ...IOSDesign.typography.title2, color: IOSDesign.colors.systemBlue }}>
                                         {user.schedulesCount}
@@ -366,7 +373,7 @@ export default function UserDetailScreen() {
                         <TouchableOpacity
                             style={{
                                 flex: 1,
-                                backgroundColor: IOSDesign.colors.systemBlue,
+                                backgroundColor: `linear-gradient(135deg, ${IOSDesign.colors.systemBlue}, ${IOSDesign.colors.systemBlue}CC)`,
                                 paddingVertical: IOSDesign.spacing.md,
                                 borderRadius: IOSDesign.borderRadius.lg,
                                 alignItems: 'center',
@@ -386,7 +393,7 @@ export default function UserDetailScreen() {
                             <TouchableOpacity
                                 style={{
                                     flex: 1,
-                                    backgroundColor: IOSDesign.colors.systemRed,
+                                    backgroundColor: `linear-gradient(135deg, ${IOSDesign.colors.systemRed}, ${IOSDesign.colors.systemRed}CC)`,
                                     paddingVertical: IOSDesign.spacing.md,
                                     borderRadius: IOSDesign.borderRadius.lg,
                                     alignItems: 'center',
@@ -405,7 +412,7 @@ export default function UserDetailScreen() {
                             <TouchableOpacity
                                 style={{
                                     flex: 1,
-                                    backgroundColor: IOSDesign.colors.systemGreen,
+                                    backgroundColor: `linear-gradient(135deg, ${IOSDesign.colors.systemGreen}, ${IOSDesign.colors.systemGreen}CC)`,
                                     paddingVertical: IOSDesign.spacing.md,
                                     borderRadius: IOSDesign.borderRadius.lg,
                                     alignItems: 'center',

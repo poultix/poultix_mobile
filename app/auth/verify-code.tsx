@@ -25,7 +25,7 @@ export default function VerifyCodeScreen() {
     const [timer, setTimer] = useState(60);
 
     // Use new contexts
-    const { currentUser,verifyCode, forgotPassword } = useAuth();
+    const { currentUser, verifyCode, forgotPassword } = useAuth();
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(20)).current;
@@ -37,6 +37,7 @@ export default function VerifyCodeScreen() {
                 case 'ADMIN': router.replace('/dashboard/admin-dashboard'); break
                 case 'FARMER': router.replace('/dashboard/farmer-dashboard'); break
                 case 'VETERINARY': router.replace('/dashboard/veterinary-dashboard'); break
+                case 'PHARMACY': router.replace('/dashboard/pharmacy-dashboard'); break
                 default: router.replace('/')
             }
         }
@@ -68,7 +69,7 @@ export default function VerifyCodeScreen() {
 
         try {
             setIsLoading(true);
-             await verifyCode(code.trim());
+            await verifyCode(code.trim());
 
         } catch (error) {
             console.error('Verify code error:', error);
@@ -81,10 +82,10 @@ export default function VerifyCodeScreen() {
     const handleResendCode = async () => {
         try {
             const result = await forgotPassword('demo@example.com');
-           
-                setTimer(60);
-                Alert.alert('Success', 'Verification code sent again!');
-         
+
+            setTimer(60);
+            Alert.alert('Success', 'Verification code sent again!');
+
         } catch (error) {
             console.error('Resend code error:', error);
             Alert.alert('Error', 'Failed to resend code');

@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 
-export const SERVER_URL = "http://10.12.74.8:8080"
+export const SERVER_URL = "http://10.12.75.125:8080"
 
 export const API_CONFIG = {
     BASE_URL: SERVER_URL,
@@ -50,7 +50,7 @@ export const API_ENDPOINTS = {
         CREATE: '/farms',
         BY_ID: (id: string) => `/farms/${id}`,
         ALL: '/farms',
-        BY_OWNER: (ownerId: string) => `/farms/owner/${ownerId}`,
+        BY_OWNER: `/farms/owner`,
         BY_VETERINARY: (veterinaryId: string) => `/farms/veterinary/${veterinaryId}`,
         BY_STATUS: (status: string) => `/farms/status/${status}`,
         ACTIVE: '/farms/active',

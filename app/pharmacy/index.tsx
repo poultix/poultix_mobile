@@ -39,7 +39,7 @@ const PharmaciesScreen = () => {
 
     // Use new contexts
     const { pharmacies, setCurrentPharmacy, loading } = usePharmacies();
-    const {  calculateDistance } = usePharmacyActions();
+    const { calculateDistance } = usePharmacyActions();
 
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -196,7 +196,7 @@ const PharmaciesScreen = () => {
                                         Veterinary Services
                                     </Text>
                                     <Text style={tw`text-white text-2xl font-bold`}>
-                                        Find Pharmacies 🏥
+                                        Find Pharmacies 
                                     </Text>
                                     <Text style={tw`text-red-100 text-sm mt-1`}>
                                         Locate nearby veterinary pharmacies
@@ -231,7 +231,7 @@ const PharmaciesScreen = () => {
                         </LinearGradient>
                     </View>
 
-                    {/* Map View */}
+                    {/* Map View
                     <View style={tw`px-4 mb-4`}>
                         <View style={tw`h-80 rounded-2xl overflow-hidden shadow-lg`}>
                             <MapView
@@ -245,10 +245,7 @@ const PharmaciesScreen = () => {
                                 }}
                                 showsUserLocation={true}
                                 showsCompass={true}
-                                showsPointsOfInterest={true}
-                                showsBuildings={true}
-                                showsIndoors={true}
-                                mapType='satellite'
+                                mapType='standard'
                             >
                                 {filteredPharmacies.map((pharmacy) => (
                                     <Marker
@@ -264,7 +261,7 @@ const PharmaciesScreen = () => {
                                 ))}
                             </MapView>
                         </View>
-                    </View>
+                    </View> */}
 
                     <View style={tw`px-4`}>
 

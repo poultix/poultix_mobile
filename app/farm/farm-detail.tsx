@@ -127,7 +127,7 @@ export default function FarmDetailScreen() {
     return (
         <View className="flex-1 bg-gray-50">
             {/* Header */}
-            <View className="bg-amber-500 px-6 py-12 shadow-lg">
+            <View className="bg-gradient-to-br from-amber-400 to-orange-600 px-6 py-12 shadow-lg">
                 <View className="flex-row items-center justify-between">
                     <TouchableOpacity
                         className="bg-white/20 p-3 rounded-2xl"
@@ -155,7 +155,7 @@ export default function FarmDetailScreen() {
 
             <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
                 {/* Health Overview */}
-                <View className="bg-white rounded-2xl p-5 shadow-sm -mt-6 mb-6">
+                <View className="bg-white rounded-3xl p-6 shadow-lg border border-amber-100 -mt-8 mb-6">
                     <Text className="text-lg font-bold text-gray-800 mb-4">Health Overview</Text>
 
                     <View className="flex-row items-center justify-center mb-4">
@@ -193,7 +193,8 @@ export default function FarmDetailScreen() {
                         </View>
                     </View>
 
-                    <View className={`px-4 py-3 rounded-xl border ${healthClasses.bg} ${healthClasses.border}`}>
+                    <View className={`px-4 py-3 rounded-xl border ${healthClasses.bg} ${healthClasses.border} flex-row items-center justify-center`}>
+                        <Ionicons name="heart-circle" size={20} color="#10B981" className="mr-2" />
                         <Text className={`text-center font-semibold ${healthClasses.text}`}>
                             Farm Health Status: {getHealthStatusText(currentFarm.healthStatus)}
                         </Text>
@@ -202,7 +203,7 @@ export default function FarmDetailScreen() {
 
                 {/* Quick Stats */}
                 <View className="flex-row flex-wrap gap-3 mb-6">
-                    <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]">
+                    <View className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-4 shadow-md border border-blue-200 min-w-[45%]">
                         <View className="flex-row items-center justify-between mb-2">
                             <Ionicons name="analytics-outline" size={24} color="#3B82F6" />
                             <Text className="text-2xl font-bold text-gray-800">{currentFarm.livestock.total.toLocaleString()}</Text>
@@ -213,7 +214,7 @@ export default function FarmDetailScreen() {
                         </Text>
                     </View>
 
-                    <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]">
+                    <View className="flex-1 bg-gradient-to-br from-green-50 to-green-100 rounded-3xl p-4 shadow-md border border-green-200 min-w-[45%]">
                         <View className="flex-row items-center justify-between mb-2">
                             <Ionicons name="home-outline" size={24} color="#10B981" />
                             <Text className="text-2xl font-bold text-gray-800">{currentFarm.facilities.coops}</Text>
@@ -224,7 +225,7 @@ export default function FarmDetailScreen() {
                         </Text>
                     </View>
 
-                    <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm min-w-[45%]">
+                    <View className="flex-1 bg-gradient-to-br from-purple-50 to-purple-100 rounded-3xl p-4 shadow-md border border-purple-200 min-w-[45%]">
                         <View className="flex-row items-center justify-between mb-2">
                             <Ionicons name="location-outline" size={24} color="#8B5CF6" />
                             <Text className="text-2xl font-bold text-gray-800">
@@ -241,20 +242,23 @@ export default function FarmDetailScreen() {
 
 
                 {/* Farm Details */}
-                <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
-                    <Text className="text-lg font-bold text-gray-800 mb-4">Farm Details</Text>
+                <View className="bg-white rounded-3xl p-6 shadow-lg border border-amber-100 mb-6">
+                    <Text className="text-lg font-bold text-gray-800 mb-4 flex-row items-center">
+                        <Ionicons name="information-circle-outline" size={20} color="#F59E0B" className="mr-2" />
+                        Farm Details
+                    </Text>
                     <View className="space-y-3">
-                        <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
-                            <Text className="text-gray-600">Owner</Text>
+                        <View className="flex-row justify-between items-center py-3 px-4 bg-amber-50 rounded-xl">
+                            <Text className="text-gray-600 font-medium">Owner</Text>
                             <Text className="font-semibold text-gray-800">{currentFarm.owner.name}</Text>
                         </View>
 
-                        <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
-                            <Text className="text-gray-600">Water System</Text>
+                        <View className="flex-row justify-between items-center py-3 px-4 bg-blue-50 rounded-xl">
+                            <Text className="text-gray-600 font-medium">Water System</Text>
                             <Text className="font-semibold text-gray-800">{currentFarm.facilities.waterSystem}</Text>
                         </View>
-                        <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
-                            <Text className="text-gray-600">Electricity</Text>
+                        <View className="flex-row justify-between items-center py-3 px-4 bg-green-50 rounded-xl">
+                            <Text className="text-gray-600 font-medium">Electricity</Text>
                             <Text className="font-semibold text-gray-800">{currentFarm.facilities.electricityAccess ? 'Available' : 'Not Available'}</Text>
                         </View>
 
@@ -272,7 +276,7 @@ export default function FarmDetailScreen() {
             >
                 <View className="flex-1 bg-gray-50">
                     {/* Modal Header */}
-                    <View className="bg-amber-500 px-6 py-12 shadow-lg">
+                    <View className="bg-gradient-to-br from-amber-400 to-orange-600 px-6 py-12 shadow-lg">
                         <View className="flex-row items-center justify-between">
                             <TouchableOpacity
                                 className="bg-white/20 p-3 rounded-2xl"

@@ -1,4 +1,4 @@
-import { newsApi } from '@/services/api/news'
+import { newsService} from '@/services/api/news'
 import { News } from '@/types/news'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useAuth } from './AuthContext'
@@ -44,8 +44,8 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(true)
       setError('')
 
-      const newsData = await newsApi.getAllNews()
-      setNews(newsData)
+      const newsData = await newsService.getAllNews()
+      setNews(newsData.data)
     } catch (error: any) {
       console.error('Failed to load news:', error)
       setError(error.message || 'Failed to load news')
@@ -58,8 +58,8 @@ export const NewsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const getNewsById = async (id: string): Promise<News | null> => {
     try {
-      const newsItem = await newsApi.getNewsById(id)
-      return newsItem
+      const newsItem = await newsService.getNewsById(id)
+      return newsItem.data
     } catch (error: any) {
       console.error('Failed to get news by ID:', error)
       setError(error.message || 'Failed to get news')

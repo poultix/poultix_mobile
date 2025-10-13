@@ -120,9 +120,12 @@ export default function SignUpScreen() {
                                 <View style={tw`w-20 h-20 bg-white bg-opacity-20 rounded-full items-center justify-center mb-4`}>
                                     <Ionicons name="person-add" size={32} color="white" />
                                 </View>
-                                <Text style={tw`text-white text-3xl font-bold mb-2`}>Join Poultix! 🚀</Text>
+                                <Text style={tw`text-white text-3xl font-bold mb-2`}>Join Poultix!</Text>
                                 <Text style={tw`text-orange-100 text-base text-center`}>
-                                    Create your account to start managing your poultry farm
+                                    Create your account to start managing
+                                    {role === 'FARMER' && ' your poultry farm'}
+                                    {role === 'VETERINARY' && ' poultry farms'}
+                                    {role === 'PHARMACY' && ' your pharmacy'}
                                 </Text>
                             </View>
                         </LinearGradient>
@@ -130,9 +133,59 @@ export default function SignUpScreen() {
 
                     {/* Form */}
                     <View style={tw`flex-1`}>
+                        {/* Account Type Selection */}
+                        {/* Account Type Selection */}
+                        <View className=''>
+                            <Text style={tw`text-gray-700 font-semibold mb-4`}>Account Type</Text>
+                            <ScrollView style={tw`mb-8`}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                            >
+
+                                <View style={tw`flex-row flex-wrap gap-4`}>
+                                    {[
+                                        { label: 'Farmer', value: UserRole.FARMER, icon: 'home-outline' },
+                                        { label: 'Veterinary', value: UserRole.VETERINARY, icon: 'medical-outline' },
+                                        { label: 'Pharmacy', value: UserRole.PHARMACY, icon: 'medkit-outline' },
+                                    ].map((item) => {
+                                        const isSelected = role === item.value;
+                                        return (
+                                            <TouchableOpacity
+                                                key={item.value}
+                                                style={tw.style(
+                                                    `flex-1 px-4 py-3 items-center justify-center rounded-xl border`,
+                                                    isSelected ? `border-amber-500 bg-amber-50` : `border-gray-200 bg-gray-50`
+                                                )}
+                                                onPress={() => setRole(item.value)}
+                                            >
+                                                <View style={tw`items-center flex-row gap-3`}>
+                                                    <Ionicons
+                                                        name={item.icon as any}
+                                                        size={22}
+                                                        color={isSelected ? '#D97706' : '#9CA3AF'}
+                                                    />
+                                                    <Text
+                                                        style={tw.style(
+                                                            'font-semibold',
+                                                            isSelected ? 'text-amber-600' : 'text-gray-600'
+                                                        )}
+                                                    >
+                                                        {item.label}
+                                                    </Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        );
+                                    })}
+                                </View>
+                            </ScrollView>
+                        </View>
                         {/* Name Input */}
                         <View style={tw`mb-6`}>
-                            <Text style={tw`text-gray-700 font-semibold mb-2`}>Full Name</Text>
+                            <Text style={tw`text-gray-700 font-semibold mb-2`}>
+                                {role === 'FARMER' && 'Full Name'}
+                                {role === 'VETERINARY' && 'Full Name'}
+                                {role === 'PHARMACY' && 'Pharmacy Name'}
+                            </Text>
                             <View
                                 className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isNameFocused ? 'border-amber-400' : 'border-gray-200'} ${nameError ? 'border-red-500' : ''}`}
                             >
@@ -223,52 +276,7 @@ export default function SignUpScreen() {
                             </View>
                         </View>
 
-                        {/* Account Type Selection */}
-                        {/* Account Type Selection */}
-                        <View className='mb-8'>
-                            <Text style={tw`text-gray-700 font-semibold mb-4`}>Account Type</Text>
-                            <ScrollView style={tw`mb-8`}
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                            >
 
-                                <View style={tw`flex-row flex-wrap gap-4`}>
-                                    {[
-                                        { label: 'Farmer', value: UserRole.FARMER, icon: 'home-outline' },
-                                        { label: 'Veterinary', value: UserRole.VETERINARY, icon: 'medical-outline' },
-                                        { label: 'Pharmacy', value: UserRole.PHARMACY, icon: 'medkit-outline' },
-                                    ].map((item) => {
-                                        const isSelected = role === item.value;
-                                        return (
-                                            <TouchableOpacity
-                                                key={item.value}
-                                                style={tw.style(
-                                                    `flex-1 px-4 py-3 items-center justify-center rounded-xl border`,
-                                                    isSelected ? `border-amber-500 bg-amber-50` : `border-gray-200 bg-gray-50`
-                                                )}
-                                                onPress={() => setRole(item.value)}
-                                            >
-                                                <View style={tw`items-center flex-row gap-3`}>
-                                                    <Ionicons
-                                                        name={item.icon as any}
-                                                        size={22}
-                                                        color={isSelected ? '#D97706' : '#9CA3AF'}
-                                                    />
-                                                    <Text
-                                                        style={tw.style(
-                                                            'font-semibold',
-                                                            isSelected ? 'text-amber-600' : 'text-gray-600'
-                                                        )}
-                                                    >
-                                                        {item.label}
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-                                        );
-                                    })}
-                                </View>
-                            </ScrollView>
-                        </View>
 
 
                         {/* Sign Up Button */}

@@ -51,7 +51,7 @@ export default function DataManagementScreen() {
       duration: 800,
       useNativeDriver: true,
     }).start();
-  }, [currentUser]);
+  }, [currentUser, fadeAnim]);
 
   const getDataForTab = () => {
     switch (selectedTab) {
@@ -83,7 +83,7 @@ export default function DataManagementScreen() {
         {/* Header */}
         <View style={tw` pb-4`}>
           <LinearGradient
-            colors={['#7C3AED', '#5B21B6']}
+            colors={['#667EEA', '#764BA2']}
             style={tw` p-6 shadow-xl`}
           >
             <View style={tw`flex-row items-center justify-between`}>
@@ -96,7 +96,7 @@ export default function DataManagementScreen() {
               <View style={tw`flex-1 ml-4`}>
                 <Text style={tw`text-white font-medium`}>Admin Panel</Text>
                 <Text style={tw`text-white text-2xl font-bold`}>Data Management 📊</Text>
-                <Text style={tw`text-purple-100 text-sm`}>
+                <Text style={tw`text-blue-100 text-sm`}>
                   Manage system data and content
                 </Text>
               </View>
@@ -127,13 +127,13 @@ export default function DataManagementScreen() {
               {(['news', 'farms', 'users', 'pharmacies'] as const).map((tab) => (
                 <TouchableOpacity
                   key={tab}
-                  style={tw`px-4 py-2 rounded-full ${selectedTab === tab ? 'bg-purple-500' : 'bg-white'
+                  style={tw`px-4 py-2 rounded-full ${selectedTab === tab ? 'bg-blue-500' : 'bg-white'
                     } shadow-sm`}
                   onPress={() => setSelectedTab(tab)}
                 >
                   <Text style={tw`font-medium ${selectedTab === tab ? 'text-white' : 'text-gray-700'
                     }`}>
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)} ({getDataForTab().length})
+                    {tab === 'news' ? '📰 ' : tab === 'farms' ? '🌾 ' : tab === 'users' ? '👥 ' : '🏥 '}{tab.charAt(0).toUpperCase() + tab.slice(1)} ({getDataForTab().length})
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -157,7 +157,7 @@ export default function DataManagementScreen() {
             filteredData.map((item: any, index: number) => (
               <View
                 key={item.id || index}
-                style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm border border-gray-100`}
+                style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm border border-blue-100`}
               >
                 <View style={tw`flex-row items-start justify-between`}>
                   <View style={tw`flex-1 mr-3`}>
@@ -182,13 +182,13 @@ export default function DataManagementScreen() {
                   </View>
                 </View>
 
-                <View style={tw`flex-row items-center justify-between pt-3 border-t border-gray-100 mt-3`}>
+                <View style={tw`flex-row items-center justify-between pt-3 border-t border-blue-100 mt-3`}>
                   <Text style={tw`text-gray-400 text-xs`}>
                     {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'No date'}
                   </Text>
                   <View style={tw`flex-row gap-2`}>
                     <TouchableOpacity
-                      style={tw`bg-blue-500 px-3 py-1 rounded-lg`}
+                      style={tw`bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1 rounded-lg shadow-sm`}
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         console.log('Edit item:', item.id);
@@ -197,7 +197,7 @@ export default function DataManagementScreen() {
                       <Text style={tw`text-white text-xs font-medium`}>Edit</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={tw`bg-red-500 px-3 py-1 rounded-lg`}
+                      style={tw`bg-gradient-to-r from-red-500 to-red-600 px-3 py-1 rounded-lg shadow-sm`}
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         Alert.alert(

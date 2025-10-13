@@ -21,8 +21,8 @@ export class FarmService {
     }
 
     // Get Farms by Owner
-    async getFarmsByOwner(ownerId: string): Promise<ApiResponse<Farm[]>> {
-        return await apiClient.get<Farm[]>(API_ENDPOINTS.FARMS.BY_OWNER(ownerId));
+    async getFarmsByOwner(): Promise<ApiResponse<Farm[]>> {
+        return await apiClient.get<Farm[]>(API_ENDPOINTS.FARMS.BY_OWNER);
     }
 
     // Get Farms assigned to Veterinary

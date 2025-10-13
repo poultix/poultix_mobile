@@ -110,20 +110,31 @@ export default function SettingsScreen() {
   return (
     <ThemedContainer variant="background">
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
-        <PageHeader 
-          title="Settings" 
-          subtitle="Customize your experience"
-          showBack 
-        />
+        {/* Header with Gradient */}
+        <View style={tw`bg-gradient-to-br from-blue-500 to-purple-600 px-6 py-12 shadow-lg`}>
+          <View style={tw`flex-row items-center justify-between mb-4`}>
+            <TouchableOpacity
+              style={tw`bg-white/20 p-3 rounded-2xl`}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="arrow-back" size={24} color="white" />
+            </TouchableOpacity>
+            <View style={tw`flex-1 ml-4`}>
+              <Text style={tw`text-white font-medium text-sm`}>Settings</Text>
+              <Text style={tw`text-white text-2xl font-bold`}>App Preferences</Text>
+              <Text style={tw`text-blue-100 text-sm`}>Customize your experience</Text>
+            </View>
+          </View>
+        </View>
 
-        <ScrollView style={tw`flex-1 px-4`} showsVerticalScrollIndicator={false}>
+        <ScrollView style={tw`flex-1 px-4 -mt-6`} showsVerticalScrollIndicator={false}>
           {/* User Info Card */}
           <ThemedCard padding="lg" style={tw`mb-6`}>
             <View style={tw`flex-row items-center`}>
               <View 
                 style={[
-                  tw`w-16 h-16 rounded-full items-center justify-center mr-4`,
-                  { backgroundColor: theme.primary + '20' }
+                  tw`w-16 h-16 rounded-2xl items-center justify-center mr-4`,
+                  { backgroundColor: `linear-gradient(135deg, ${theme.primary}20, ${theme.primary}30)` }
                 ]}
               >
                 <Ionicons name="person" size={32} color={theme.primary} />
@@ -131,12 +142,25 @@ export default function SettingsScreen() {
               <View style={tw`flex-1`}>
                 <ThemedText size="lg" weight="bold">{currentUser?.name}</ThemedText>
                 <ThemedText variant="secondary" size="sm">{currentUser?.email}</ThemedText>
-                <ThemedText 
-                  size="xs" 
-                  style={[tw`mt-1 px-2 py-1 rounded-full text-center`, { color: theme.primary, backgroundColor: theme.primary + '20' }]}
-                >
-                  {currentUser?.role?.toLowerCase()}
-                </ThemedText>
+                <View style={tw`flex-row items-center mt-1`}>
+                  <View style={[
+                    tw`px-2 py-1 rounded-full`,
+                    { backgroundColor: theme.primary + '20' }
+                  ]}>
+                    <ThemedText 
+                      size="xs" 
+                      style={{ color: theme.primary, fontWeight: '600' }}
+                    >
+                      {currentUser?.role?.toLowerCase()}
+                    </ThemedText>
+                  </View>
+                  {currentUser?.isActive && (
+                    <View style={tw`ml-2 flex-row items-center`}>
+                      <View style={tw`w-2 h-2 rounded-full bg-green-500 mr-1`} />
+                      <ThemedText size="xs" variant="secondary">Active</ThemedText>
+                    </View>
+                  )}
+                </View>
               </View>
             </View>
           </ThemedCard>
@@ -154,11 +178,11 @@ export default function SettingsScreen() {
               >
                 <View 
                   style={[
-                    tw`w-10 h-10 rounded-full items-center justify-center mr-4`,
-                    { backgroundColor: theme.primary + '15' }
+                    tw`w-12 h-12 rounded-2xl items-center justify-center mr-4`,
+                    { backgroundColor: `linear-gradient(135deg, ${theme.primary}15, ${theme.primary}25)` }
                   ]}
                 >
-                  <Ionicons name={option.icon as any} size={20} color={theme.primary} />
+                  <Ionicons name={option.icon as any} size={22} color={theme.primary} />
                 </View>
                 <ThemedText weight="medium" style={tw`flex-1`}>
                   {option.title}
@@ -183,8 +207,8 @@ export default function SettingsScreen() {
               style={tw`flex-row items-center p-4`}
               onPress={handleLogout}
             >
-              <View style={tw`w-10 h-10 bg-red-100 rounded-full items-center justify-center mr-4`}>
-                <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+              <View style={tw`w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl items-center justify-center mr-4`}>
+                <Ionicons name="log-out-outline" size={22} color="white" />
               </View>
               <ThemedText weight="medium" style={tw`flex-1 text-red-600`}>
                 Sign Out

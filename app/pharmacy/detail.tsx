@@ -26,7 +26,7 @@ export default function PharmacyDetailScreen() {
             duration: 800,
             useNativeDriver: true,
         }).start();
-    }, []);
+    }, [fadeAnim]);
 
     // Open Google Maps for directions
     const openDirections = (address: string) => {
@@ -58,7 +58,7 @@ export default function PharmacyDetailScreen() {
                 {/* Header */}
                 <View style={tw`px-4 pt-2 pb-4`}>
                     <LinearGradient
-                        colors={['#EF4444', '#DC2626']}
+                        colors={['#EF4444', '#DC2626', '#B91C1C']}
                         style={tw`rounded-3xl p-8 shadow-xl`}
                     >
                         <View style={tw`flex-row items-center justify-between mb-4`}>
@@ -106,7 +106,7 @@ export default function PharmacyDetailScreen() {
                     </View>
 
                     {/* Pharmacy Info */}
-                    <View style={tw`bg-white rounded-2xl p-6 mb-6 shadow-md`}>
+                    <View style={tw`bg-white rounded-3xl p-6 mb-6 shadow-lg border border-red-100`}>
                         <Text style={tw`text-2xl font-bold text-gray-800 mb-2`}>
                             {currentPharmacy.name}
                         </Text>
@@ -164,16 +164,17 @@ export default function PharmacyDetailScreen() {
 
                     {/* Vaccines */}
                     {currentPharmacy.vaccines && currentPharmacy.vaccines.length > 0 && (
-                        <View style={tw`bg-white rounded-2xl p-6 mb-6 shadow-md`}>
-                            <Text style={tw`text-xl font-bold text-gray-800 mb-4`}>
+                        <View style={tw`bg-white rounded-3xl p-6 mb-6 shadow-lg border border-red-100`}>
+                            <Text style={tw`text-xl font-bold text-gray-800 mb-4 flex-row items-center`}>
+                                <Ionicons name="medkit-outline" size={20} color="#EF4444" style={tw`mr-2`} />
                                 Vaccines Available
                             </Text>
                             {currentPharmacy.vaccines.map((vaccine, index) => (
-                                <View key={index} style={tw`bg-blue-50 rounded-xl p-4 mb-3`}>
-                                    <Text style={tw`font-semibold text-blue-800 mb-1`}>
+                                <View key={index} style={tw`bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-4 mb-3 border border-red-200`}>
+                                    <Text style={tw`font-semibold text-red-800 mb-1`}>
                                         {vaccine.name}
                                     </Text>
-                                    <Text style={tw`text-blue-600 text-sm mb-2`}>
+                                    <Text style={tw`text-red-600 text-sm mb-2`}>
                                         Target: {vaccine.targetDisease}
                                     </Text>
                                     
@@ -185,7 +186,7 @@ export default function PharmacyDetailScreen() {
                     {/* Action Buttons */}
                     <View style={tw`flex-row justify-between mb-8`}>
                         <TouchableOpacity
-                            style={tw`bg-blue-500 rounded-2xl p-4 flex-1 mr-3 shadow-md`}
+                            style={tw`bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl p-4 flex-1 mr-3 shadow-lg`}
                             onPress={() => openDirections(currentPharmacy.address)}
                         >
                             <View style={tw`items-center`}>
@@ -198,7 +199,7 @@ export default function PharmacyDetailScreen() {
 
                         {currentPharmacy.phone && (
                             <TouchableOpacity
-                                style={tw`bg-green-500 rounded-2xl p-4 flex-1 shadow-md`}
+                                style={tw`bg-gradient-to-r from-green-500 to-green-600 rounded-3xl p-4 flex-1 shadow-lg`}
                                 onPress={() => makePhoneCall(currentPharmacy.phone)}
                             >
                                 <View style={tw`items-center`}>

@@ -54,6 +54,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           password: '', // Not provided by API for security
           emailVerified: true,
           recoverMode: false,
+          isVerified: apiUser.isVerified,
           location: apiUser.location,
           createdAt: new Date(apiUser.createdAt || Date.now()).toISOString(),
           updatedAt: new Date(apiUser.updatedAt || Date.now()).toISOString(),
@@ -92,6 +93,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           role: response.data.role,
           password: '', // Not provided by API for security
           emailVerified: true,
+          isVerified: response.data.isVerified,
           recoverMode: false,
           location: response.data.location,
           createdAt: new Date(response.data.createdAt || Date.now()).toISOString(),

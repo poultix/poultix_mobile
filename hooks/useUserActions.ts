@@ -36,7 +36,7 @@ export const useUserActions = () => {
       if (response.success && response.data) {
         const updatedUser: User = {
           id: response.data.id,
-          email: response.data.email,
+          email: response.data.email, 
           name: response.data.name,
           role: response.data.role,
           password: '', // Not provided by API for security

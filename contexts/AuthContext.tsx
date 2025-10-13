@@ -1,4 +1,5 @@
 import { authService } from '@/services/api/auth';
+import { EmailVerificationRequest } from '@/types/auth';
 import { User, UserRole, UserRegistrationRequest, UserLoginRequest, Location } from '@/types/user';
 import { router } from 'expo-router';
 import React, { createContext, useContext, useState } from 'react';
@@ -11,6 +12,11 @@ interface AuthContextType {
     authenticated: boolean;
     loading: boolean;
     error: string;
+    isVerified: boolean;
+    isFarmer: boolean;
+    isVeterinary: boolean;
+    isPharmacy: boolean;
+    isAdmin: boolean;
     logout: () => Promise<void>
     login: (email: string, password: string) => Promise<void>
     signUp: (email: string, password: string, name: string, role: UserRole, location: Location) => Promise<void>
@@ -32,6 +38,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [authenticated, setAuthenticated] = useState(false)
+    const [isVerified, setIsVerified] = useState(false)
+    const [isFarmer, setIsFarmer] = useState(false)
+    const [isVeterinary, setIsVeterinary] = useState(false)
+    const [isPharmacy, setIsPharmacy] = useState(false)
+    const [isAdmin, setIsAdmin] = useState(false)
+
 
     const checkAuthStatus = async () => {
         try {
@@ -45,6 +57,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setAuthenticated(true)
                 setCurrentUser(userInfo)
                 navigateByRole(userInfo.role);
+                setIsVerified(userInfo.emailVerified);
+                setIsFarmer(userInfo.role === 'FARMER');
+                setIsVeterinary(userInfo.role === 'VETERINARY');
+                setIsPharmacy(userInfo.role === 'PHARMACY');
             } else {
                 setAuthenticated(false);
                 setCurrentUser(null);
@@ -89,13 +105,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const authData = await authApi.login(loginData);
 
             // Create user object from API response
-            const user: User = authData.user
+            const user: User = authData.data.user
 
             setAuthenticated(true);
             setCurrentUser(user);
 
             // Navigate based on role
             navigateByRole(user.role);
+            setIsVerified(user.emailVerified);
+            setIsFarmer(user.role === 'FARMER');
+            setIsVeterinary(user.role === 'VETERINARY');
+            setIsPharmacy(user.role === 'PHARMACY');
 
         } catch (error: any) {
             const errorMessage = error.message || 'Login failed. Please try again.';
@@ -144,13 +164,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             };
 
             const authData = await authApi.register(registrationData);
-            const user: User = authData.user
+            const user: User = authData.data.user
 
             setAuthenticated(true);
             setCurrentUser(user);
             navigateByRole(user.role);
 
-            Alert.alert('Success', 'Registration successful! You are now logged in.');
+            setIsVerified(user.emailVerified);
+            setIsFarmer(user.role === 'FARMER');
+            setIsVeterinary(user.role === 'VETERINARY');
+            setIsPharmacy(user.role === 'PHARMACY');
         } catch (error: any) {
             const errorMessage = error.message || 'Registration failed. Please try again.';
             setError(errorMessage);
@@ -176,7 +199,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const verifyCode = async (verificationToken: string): Promise<void> => {
+    const verifyCode = async (verificationToken: EmailVerificationRequest): Promise<void> => {
         try {
             setLoading(true);
             setError('');
@@ -246,6 +269,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         authenticated,
         loading,
         error,
+        isVerified,
+        isFarmer,
+        isVeterinary,
+        isPharmacy,
+        isAdmin,
         login,
         logout,
         signUp,

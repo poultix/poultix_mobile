@@ -20,8 +20,8 @@ import { useUsers } from '@/contexts/UserContext';
  ;
 
 export default function AdminDashboard() {
+    const { loading } = useAdmin();
     const { currentUser } = useAuth();
-    const { dashboardStats, loading } = useAdmin();
     const { farms } = useFarms();
     const { users } = useUsers();
     const { news } = useNews();
@@ -34,7 +34,7 @@ export default function AdminDashboard() {
             duration: 800,
             useNativeDriver: true,
         }).start();
-    }, []);
+    }, [fadeAnim]);
 
     if (loading || !currentUser) {
         return (
@@ -51,7 +51,7 @@ export default function AdminDashboard() {
                     {/* Header */}
                     <View style={tw` pb-4`}>
                         <LinearGradient
-                            colors={['#7C3AED', '#5B21B6']}
+                            colors={['#667EEA', '#764BA2']}
                             style={tw`p-8 shadow-xl`}
                         >
                             <View style={tw`flex-row items-center justify-between mb-4`}>
@@ -60,7 +60,7 @@ export default function AdminDashboard() {
                                         Admin Dashboard
                                     </Text>
                                     <Text style={tw`text-white text-2xl font-bold`}>Welcome, {currentUser.name}</Text>
-                                    <Text style={tw`text-purple-100 text-base`}>System Administrator</Text>
+                                    <Text style={tw`text-blue-100 text-base`}>System Administrator</Text>
                                 </View>
                             </View>
                             
@@ -70,15 +70,15 @@ export default function AdminDashboard() {
                                 <View style={tw`flex-row justify-between`}>
                                     <View style={tw`items-center flex-1`}>
                                         <Text style={tw`text-white text-3xl font-bold`}>{users.length}</Text>
-                                        <Text style={tw`text-purple-100 text-xs font-medium`}>Total Users</Text>
+                                        <Text style={tw`text-blue-100 text-xs font-medium`}>Total Users</Text>
                                     </View>
                                     <View style={tw`items-center flex-1`}>
                                         <Text style={tw`text-green-200 text-3xl font-bold`}>{farms.length}</Text>
-                                        <Text style={tw`text-purple-100 text-xs font-medium`}>Active Farms</Text>
+                                        <Text style={tw`text-blue-100 text-xs font-medium`}>Active Farms</Text>
                                     </View>
                                     <View style={tw`items-center flex-1`}>
                                         <Text style={tw`text-blue-200 text-3xl font-bold`}>{news.length}</Text>
-                                        <Text style={tw`text-purple-100 text-xs font-medium`}>News Articles</Text>
+                                        <Text style={tw`text-blue-100 text-xs font-medium`}>News Articles</Text>
                                     </View>
                                 </View>
                             </View>
@@ -89,24 +89,24 @@ export default function AdminDashboard() {
                         {/* Quick Actions */}
                         <View style={tw`flex-row flex-wrap justify-between mb-6`}>
                             <TouchableOpacity 
-                                style={tw`bg-white rounded-2xl p-4 w-[48%] mb-4 shadow-md border border-purple-100`}
+                                style={tw`bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-4 w-[48%] mb-4 shadow-md border border-blue-200`}
                                 onPress={() => router.push('/news/add-news')}
                             >
                                 <View style={tw`items-center`}>
-                                    <Ionicons name="newspaper-outline" size={24} color="#7C3AED" />
-                                    <Text style={tw`text-purple-600 font-semibold text-sm mt-2 text-center`}>
+                                    <Ionicons name="newspaper-outline" size={24} color="white" />
+                                    <Text style={tw`text-white font-semibold text-sm mt-2 text-center`}>
                                         Add News
                                     </Text>
                                 </View>
                             </TouchableOpacity>
                             
                             <TouchableOpacity 
-                                style={tw`bg-white rounded-2xl p-4 w-[48%] mb-4 shadow-md border border-purple-100`}
+                                style={tw`bg-gradient-to-r from-green-500 to-teal-600 rounded-2xl p-4 w-[48%] mb-4 shadow-md border border-green-200`}
                                 onPress={() => router.push('/admin/data-management')}
                             >
                                 <View style={tw`items-center`}>
-                                    <Ionicons name="server-outline" size={24} color="#10B981" />
-                                    <Text style={tw`text-green-600 font-semibold text-sm mt-2 text-center`}>
+                                    <Ionicons name="server-outline" size={24} color="white" />
+                                    <Text style={tw`text-white font-semibold text-sm mt-2 text-center`}>
                                         Data Management
                                     </Text>
                                 </View>
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
                         </View>
 
                         {/* System Health */}
-                        <View style={tw`bg-white rounded-2xl p-5 mb-6 shadow-md border border-purple-100`}>
+                        <View style={tw`bg-white rounded-2xl p-5 mb-6 shadow-md border border-blue-100`}>
                             <Text style={tw`text-xl font-bold text-gray-800 mb-4`}>
                                 System Health
                             </Text>
@@ -144,13 +144,13 @@ export default function AdminDashboard() {
                         </View>
 
                         {/* Recent Activity */}
-                        <View style={tw`bg-white rounded-2xl p-5 shadow-md border border-purple-100`}>
+                        <View style={tw`bg-white rounded-2xl p-5 shadow-md border border-blue-100`}>
                             <Text style={tw`text-xl font-bold text-gray-800 mb-4`}>
                                 Recent Activity
                             </Text>
                             <View style={tw`space-y-3`}>
                                 <View style={tw`flex-row items-center py-2`}>
-                                    <Ionicons name="person-add-outline" size={20} color="#7C3AED" />
+                                    <Ionicons name="person-add-outline" size={20} color="#667EEA" />
                                     <Text style={tw`text-gray-600 ml-3 flex-1`}>New farmer registered</Text>
                                     <Text style={tw`text-gray-400 text-xs`}>2h ago</Text>
                                 </View>

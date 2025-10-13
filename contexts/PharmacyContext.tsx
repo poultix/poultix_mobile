@@ -29,7 +29,7 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { handleApiError } = useError(); // ✅ Use ErrorContext for routing
+  const { handleApiError } = useError();
   // Load pharmacies on mount
   useEffect(() => {
     if (authenticated) {

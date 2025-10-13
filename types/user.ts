@@ -14,7 +14,7 @@ export enum UserRole {
 
 // User interface - matches backend UserDTO exactly
 export interface User {
-    id: string; // UUID format
+    id: string; 
     name: string;
     email: string;
     password: string;
@@ -100,7 +100,7 @@ export interface AuthResponse {
     accessToken: string;
     refreshToken: string;
     tokenType: string;
-    expiresAt: string; // ISO date-time
+    expiresAt: string; 
     user: User;
 }
 
