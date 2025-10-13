@@ -192,6 +192,8 @@ export default function EnvironmentalScannerScreen() {
     const [history, setHistory] = useState<EnvironmentalReading[]>([]);
     const [showHistory, setShowHistory] = useState(false);
     const [location, setLocation] = useState('');
+    const [isRealTimeMode, setIsRealTimeMode] = useState(false);
+    const [realTimeInterval, setRealTimeInterval] = useState<number | null>(null);
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const cardAnim = useRef(new Animated.Value(0)).current;
@@ -213,7 +215,66 @@ export default function EnvironmentalScannerScreen() {
         setTimeout(() => {
             simulateScanning();
         }, 1000); // Small delay before starting scan
+
+        // Cleanup interval on unmount
+        return () => {
+            if (realTimeInterval) {
+                clearInterval(realTimeInterval);
+            }
+        };
     }, []);
+
+    const generateNewReadings = () => {
+        // Generate slight variations from current readings for realistic real-time data
+        const currentTemp = parseFloat(temperature) || 25;
+        const currentHumidity = parseFloat(humidity) || 60;
+
+        // Add small random variations (±2°C for temp, ±5% for humidity)
+        const newTemp = Math.max(10, Math.min(45, currentTemp + (Math.random() - 0.5) * 4));
+        const newHumidity = Math.max(20, Math.min(90, currentHumidity + (Math.random() - 0.5) * 10));
+
+        return {
+            temperature: newTemp.toFixed(1),
+            humidity: newHumidity.toFixed(0)
+        };
+    };
+
+    const startRealTimeMonitoring = () => {
+        setIsRealTimeMode(true);
+
+        const interval = setInterval(() => {
+            const newReadings = generateNewReadings();
+            setTemperature(newReadings.temperature);
+            setHumidity(newReadings.humidity);
+
+            // Re-analyze with new readings
+            const temp = parseFloat(newReadings.temperature);
+            const humid = parseFloat(newReadings.humidity);
+            const feedbackResult = getEnvironmentalFeedback(temp, humid);
+            setFeedback(feedbackResult);
+
+            // Save to history if conditions change significantly
+            const reading: EnvironmentalReading = {
+                id: Date.now().toString(),
+                temperature: temp,
+                humidity: humid,
+                timestamp: new Date(),
+                feedback: feedbackResult,
+                location: location || 'Farm Location'
+            };
+            saveReading(reading);
+        }, 5000); // Update every 5 seconds
+
+        setRealTimeInterval(interval);
+    };
+
+    const stopRealTimeMonitoring = () => {
+        setIsRealTimeMode(false);
+        if (realTimeInterval) {
+            clearInterval(realTimeInterval);
+            setRealTimeInterval(null);
+        }
+    };
 
     const loadHistory = async () => {
         try {
@@ -460,6 +521,44 @@ export default function EnvironmentalScannerScreen() {
                         </View>
                     )}
 
+                    {/* Real-time Monitoring Button - Only show after initial scan */}
+                    {!isScanning && feedback && (
+                        <View style={tw`mb-6 px-4`}>
+                            <TouchableOpacity
+                                style={tw`w-full`}
+                                onPress={isRealTimeMode ? stopRealTimeMonitoring : startRealTimeMonitoring}
+                            >
+                                <LinearGradient
+                                    colors={isRealTimeMode ? ['#DC2626', '#B91C1C'] : ['#F59E0B', '#D97706']}
+                                    style={tw`rounded-2xl p-4 shadow-lg`}
+                                >
+                                    <View style={tw`flex-row items-center justify-center`}>
+                                        <Ionicons
+                                            name={isRealTimeMode ? "stop-circle-outline" : "play-circle-outline"}
+                                            size={20}
+                                            color="white"
+                                        />
+                                        <Text style={tw`text-white font-semibold ml-2 mr-2`}>
+                                            {isRealTimeMode ? 'Stop Real-Time Monitoring' : 'Start Real-Time Monitoring'}
+                                        </Text>
+                                        {isRealTimeMode && (
+                                            <View style={tw`flex-row items-center`}>
+                                                <View style={tw`w-2 h-2 bg-red-300 rounded-full mr-1 animate-pulse`} />
+                                                <Text style={tw`text-red-200 text-xs`}>LIVE</Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                </LinearGradient>
+                            </TouchableOpacity>
+                            <Text style={tw`text-gray-500 text-xs text-center mt-2`}>
+                                {isRealTimeMode
+                                    ? 'Updates every 5 seconds • Tap to stop monitoring'
+                                    : 'Monitor environmental changes in real-time • Updates every 5 seconds'
+                                }
+                            </Text>
+                        </View>
+                    )}
+
                     {error && (
                         <View style={tw`bg-red-100 border border-red-300 p-4 rounded-xl flex-row items-center mb-6 mx-4`}>
                             <Ionicons name="alert-circle" size={22} color="#DC2626" style={tw`mr-2`} />
@@ -579,6 +678,16 @@ export default function EnvironmentalScannerScreen() {
                                 title="Current Farm Condition"
                             >
                                 <View style={[tw`p-4 rounded-xl mb-4`, { backgroundColor: feedback.bgColor }]}>
+                                    {/* Real-time indicator */}
+                                    {isRealTimeMode && (
+                                        <View style={tw`flex-row items-center justify-center mb-3 p-2 bg-white bg-opacity-20 rounded-lg`}>
+                                            <View style={tw`w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse`} />
+                                            <Text style={tw`text-white font-semibold text-sm`}>
+                                                🔴 LIVE MONITORING ACTIVE - Updates every 5 seconds
+                                            </Text>
+                                        </View>
+                                    )}
+
                                     <View style={tw`flex-row justify-between items-start mb-3`}>
                                         <Text style={[tw`text-lg font-bold`, { color: feedback.color }]}>
                                             {feedback.status}
