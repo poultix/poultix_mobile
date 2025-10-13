@@ -2,8 +2,9 @@ import BottomTabs from '@/components/BottomTabs';
 import CustomDrawer from '@/components/CustomDrawer';
 import DrawerButton from '@/components/DrawerButton';
 import { useDrawer } from '@/contexts/DrawerContext';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
+import { router } from 'expo-router'
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
@@ -115,6 +116,7 @@ export default function FarmerDashboardScreen() {
             {[
               { key: 'overview', label: 'Overview', icon: 'analytics-outline' },
               { key: 'farms', label: 'My Farms', icon: 'leaf-outline' },
+              { key: 'medicines', label: 'Medicines', icon: 'medical-outline' },
               { key: 'schedules', label: 'Schedules', icon: 'calendar-outline' },
             ].map((tab) => (
               <TouchableOpacity
@@ -123,7 +125,13 @@ export default function FarmerDashboardScreen() {
                   { backgroundColor: selectedTab === tab.key ? theme.primary : 'transparent' }
                 ]}
                 className={`flex-1 py-3 rounded-xl flex-row items-center justify-center`}
-                onPress={() => setSelectedTab(tab.key as any)}
+                onPress={() => {
+                  if (tab.key === 'medicines') {
+                    router.push('/medicine');
+                  } else {
+                    setSelectedTab(tab.key as any);
+                  }
+                }}
               >
                 <Ionicons
                   name={tab.icon as any}

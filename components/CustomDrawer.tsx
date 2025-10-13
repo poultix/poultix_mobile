@@ -110,6 +110,14 @@ const allDrawerItems: DrawerItem[] = [
     color: '#F59E0B'
   },
   {
+    label: 'Climate Scanner',
+    route: '/device/environmental-scanner',
+    icon: 'thermometer-outline',
+    description: 'Environmental health monitoring',
+    badge: 'BETA',
+    color: '#10B981'
+  },
+  {
     label: 'Settings',
     route: '/settings',
     icon: 'settings-outline',
@@ -400,6 +408,16 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
                     <Ionicons name="flask-outline" size={20} color="#3B82F6" />
                   </View>
                   <Text style={tw`text-blue-600 text-xs font-medium text-center`}>PH Scan</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={tw`bg-green-50 rounded-2xl p-4 flex-1 ml-2 items-center`}
+                  onPress={() => handleItemPress('/device/environmental-scanner')}
+                  activeOpacity={0.7}
+                >
+                  <View style={tw`w-10 h-10 bg-green-100 rounded-full items-center justify-center mb-2`}>
+                    <Ionicons name="thermometer-outline" size={20} color="#10B981" />
+                  </View>
+                  <Text style={tw`text-green-600 text-xs font-medium text-center`}>Climate</Text>
                 </TouchableOpacity>
               </View>
 

@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 
-export const SERVER_URL = "http://10.12.75.125:8080"
+export const SERVER_URL = "http://192.168.42.174:8080"
 
 export const API_CONFIG = {
     BASE_URL: SERVER_URL,

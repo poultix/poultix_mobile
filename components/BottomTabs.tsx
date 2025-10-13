@@ -75,7 +75,9 @@ export default function BottomTabs({ style }: BottomTabsProps) {
                     router.push('/dashboard/admin-dashboard');
                 } else if (currentUser?.role === UserRole.VETERINARY) {
                     router.push('/dashboard/veterinary-dashboard');
-                } else {
+                } else if(currentUser?.role==='PHARMACY') {
+                    router.push('/dashboard/pharmacy-dashboard');
+                }else {
                     router.push('/dashboard/farmer-dashboard');
                 }
                 break;

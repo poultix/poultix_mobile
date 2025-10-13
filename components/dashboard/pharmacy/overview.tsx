@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text, View } from "react-native";
+import { router } from "expo-router";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function PharmacyOverview() {
     // Mock data for demonstration
@@ -61,22 +62,26 @@ export default function PharmacyOverview() {
             <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
                 <Text className="text-lg font-bold text-gray-800 mb-4">Quick Actions</Text>
                 <View className="flex-row flex-wrap gap-3">
-                    <View className="bg-green-50 rounded-xl p-4 flex-1 min-w-[45%] items-center">
+                    <TouchableOpacity className="bg-green-50 rounded-xl p-4 flex-1 min-w-[45%] items-center"
+                        onPress={() => router.push('/pharmacy/add-medicine')}>
                         <Ionicons name="add-circle-outline" size={24} color="#059669" />
                         <Text className="text-green-700 font-medium mt-2">Add Medicine</Text>
-                    </View>
-                    <View className="bg-blue-50 rounded-xl p-4 flex-1 min-w-[45%] items-center">
+                    </TouchableOpacity>
+                    <TouchableOpacity className="bg-blue-50 rounded-xl p-4 flex-1 min-w-[45%] items-center"
+                        >
                         <Ionicons name="cart-outline" size={24} color="#3B82F6" />
                         <Text className="text-blue-700 font-medium mt-2">New Order</Text>
-                    </View>
-                    <View className="bg-orange-50 rounded-xl p-4 flex-1 min-w-[45%] items-center">
+                    </TouchableOpacity>
+                    <TouchableOpacity className="bg-orange-50 rounded-xl p-4 flex-1 min-w-[45%] items-center"
+                    onPress={()=>router.push('/pharmacy/inventory')}>
                         <Ionicons name="stats-chart-outline" size={24} color="#F59E0B" />
                         <Text className="text-orange-700 font-medium mt-2">Reports</Text>
-                    </View>
-                    <View className="bg-purple-50 rounded-xl p-4 flex-1 min-w-[45%] items-center">
+                    </TouchableOpacity>
+                    <TouchableOpacity className="bg-purple-50 rounded-xl p-4 flex-1 min-w-[45%] items-center"
+                    onPress={()=>router.push('/pharmacy/profile')}>
                         <Ionicons name="settings-outline" size={24} color="#8B5CF6" />
                         <Text className="text-purple-700 font-medium mt-2">Settings</Text>
-                    </View>
+                    </TouchableOpacity>
                 </View>
             </View>
 

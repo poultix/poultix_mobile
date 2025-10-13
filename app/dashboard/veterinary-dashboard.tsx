@@ -107,6 +107,7 @@ export default function VeterinaryDashboardScreen() {
             {[
               { key: 'overview', label: 'Overview', icon: 'analytics-outline' },
               { key: 'farms', label: 'My Farms', icon: 'leaf-outline' },
+              { key: 'medicines', label: 'Medicines', icon: 'medical-outline' },
               { key: 'schedules', label: 'Schedule', icon: 'calendar-outline' },
             ].map((tab) => (
               <TouchableOpacity
@@ -115,7 +116,13 @@ export default function VeterinaryDashboardScreen() {
                   tw`flex-1 py-3 px-2 rounded-xl flex-row items-center justify-center`,
                   selectedTab === tab.key ? [tw`shadow-md`, { backgroundColor: theme.primary }] : tw`bg-transparent`
                 ]}
-                onPress={() => setSelectedTab(tab.key as any)}
+                onPress={() => {
+                  if (tab.key === 'medicines') {
+                    router.push('/medicine');
+                  } else {
+                    setSelectedTab(tab.key as any);
+                  }
+                }}
               >
                 <Ionicons
                   name={tab.icon as any}

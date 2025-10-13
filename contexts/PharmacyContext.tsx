@@ -43,7 +43,7 @@ export const PharmacyProvider = ({ children }: { children: React.ReactNode }) =>
       setError('');
 
       const response = await pharmacyService.getAllPharmacies();
-
+console.log(response)
       if (response.success && response.data) {
         setPharmacies(response.data);
       } else {
