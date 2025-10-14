@@ -6,6 +6,8 @@ import { HTTP_STATUS } from '@/services/constants';
 import { useAuth } from './AuthContext';
 interface ScheduleContextType {
   schedules: Schedule[];
+  farmerSchedules:Schedule[]
+  veterinarySchedules:Schedule[]
   currentSchedule: Schedule | null;
   loading: boolean;
   error: string | null;
@@ -13,8 +15,6 @@ interface ScheduleContextType {
   // API operations
   addSchedule: (scheduleData: Schedule) => void;
   getScheduleById: (id: string) => Promise<Schedule | null>;
-  getSchedulesByFarmer: (farmerId: string) => Promise<Schedule[]>;
-  getSchedulesByVeterinary: (veterinaryId: string) => Promise<Schedule[]>;
   getSchedulesByStatus: (status: ScheduleStatus) => Promise<Schedule[]>;
   getSchedulesByDate: (date: string) => Promise<Schedule[]>;
   getSchedulesByDateRange: (startDate: string, endDate: string) => Promise<Schedule[]>;
@@ -28,8 +28,10 @@ interface ScheduleContextType {
 const ScheduleContext = createContext<ScheduleContextType | undefined>(undefined);
 // Provider component
 export const ScheduleProvider = ({ children }: { children: React.ReactNode }) => {
-  const { authenticated } = useAuth()
+  const { authenticated,isFarmer,isVeterinary } = useAuth()
   const [schedules, setSchedules] = useState<Schedule[]>([])
+  const [farmerSchedules, setFarmerSchedules] = useState<Schedule[]>([])
+  const [veterinarySchedules, setVeterinarySchedules] = useState<Schedule[]>([])
   const [currentSchedule, setCurrentSchedule] = useState<Schedule | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -38,6 +40,8 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
   useEffect(() => {
     if (authenticated) {
       loadSchedules().catch(handleApiError);
+      if(isVeterinary)getSchedulesByVeterinary()
+        else if(isFarmer)getSchedulesByFarmer()
     }
   }, [authenticated]);
 
@@ -84,14 +88,13 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-  const getSchedulesByFarmer = async (farmerId: string): Promise<Schedule[]> => {
+  const getSchedulesByFarmer = async () => {
     try {
-      const response = await scheduleService.getSchedulesByFarmer(farmerId);
+      const response = await scheduleService.getSchedulesByFarmer();
 
       if (response.success && response.data) {
-        return response.data;
+        setFarmerSchedules(response.data)
       }
-      return [];
     } catch (error: any) {
       console.error('Failed to get schedules by farmer:', error);
       setError(error.message || 'Failed to get schedules');
@@ -99,14 +102,12 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-  const getSchedulesByVeterinary = async (veterinaryId: string): Promise<Schedule[]> => {
+  const getSchedulesByVeterinary = async () => {
     try {
-      const response = await scheduleService.getSchedulesByVeterinary(veterinaryId);
-
+      const response = await scheduleService.getSchedulesByVeterinary();
       if (response.success && response.data) {
-        return response.data;
+       setVeterinarySchedules(response.data)
       }
-      return [];
     } catch (error: any) {
       console.error('Failed to get schedules by veterinary:', error);
       setError(error.message || 'Failed to get schedules');
@@ -184,13 +185,13 @@ export const ScheduleProvider = ({ children }: { children: React.ReactNode }) =>
 
   const contextValue: ScheduleContextType = {
     schedules,
+    veterinarySchedules,
+    farmerSchedules,
     currentSchedule,
     loading,
     error,
     addSchedule,
     getScheduleById,
-    getSchedulesByFarmer,
-    getSchedulesByVeterinary,
     getSchedulesByStatus,
     getSchedulesByDate,
     getSchedulesByDateRange,

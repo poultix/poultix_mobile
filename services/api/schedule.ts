@@ -21,13 +21,13 @@ export class ScheduleService {
     }
 
     // Get Schedules by Farmer
-    async getSchedulesByFarmer(farmerId: string): Promise<ApiResponse<Schedule[]>> {
-        return await apiClient.get<Schedule[]>(API_ENDPOINTS.SCHEDULES.BY_FARMER(farmerId));
+    async getSchedulesByFarmer(): Promise<ApiResponse<Schedule[]>> {
+        return await apiClient.get<Schedule[]>(API_ENDPOINTS.SCHEDULES.BY_FARMER);
     }
 
     // Get Schedules by Veterinary
-    async getSchedulesByVeterinary(veterinaryId: string): Promise<ApiResponse<Schedule[]>> {
-        return await apiClient.get<Schedule[]>(API_ENDPOINTS.SCHEDULES.BY_VETERINARY(veterinaryId));
+    async getSchedulesByVeterinary(): Promise<ApiResponse<Schedule[]>> {
+        return await apiClient.get<Schedule[]>(API_ENDPOINTS.SCHEDULES.BY_VETERINARY);
     }
 
     // Get Schedules by Status

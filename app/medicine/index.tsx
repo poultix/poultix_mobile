@@ -25,7 +25,7 @@ const mockMedicines = [
         category: 'Antibiotics',
         description: 'AI-recommended broad-spectrum antibiotic for bacterial infections in livestock. Effective against respiratory and urinary tract infections.',
         dosage: '15mg/kg body weight',
-        price: '₹2,500',
+        price: '2500RWF',
         availability: 'In Stock',
         prescriptionRequired: true,
         manufacturer: 'VetCare Pharmaceuticals',
@@ -39,7 +39,7 @@ const mockMedicines = [
         category: 'Antiparasitic',
         description: 'AI-analyzed effective treatment for internal and external parasites. Smart dosing system reduces resistance development.',
         dosage: '1ml per 10kg body weight',
-        price: '₹1,800',
+        price: '1,800RWF',
         availability: 'In Stock',
         prescriptionRequired: false,
         manufacturer: 'AgriVet Solutions',
@@ -53,7 +53,7 @@ const mockMedicines = [
         category: 'Minerals & Vitamins',
         description: 'AI-formulated calcium supplement for milk fever prevention. Enhanced bioavailability through smart delivery system.',
         dosage: '450ml IV for 500kg cattle',
-        price: '₹850',
+        price: '850RWF',
         availability: 'Low Stock',
         prescriptionRequired: true,
         manufacturer: 'NutriVet Labs',
@@ -67,7 +67,7 @@ const mockMedicines = [
         category: 'Anti-inflammatory',
         description: 'AI-optimized NSAID for pain and inflammation management. Precise targeting reduces side effects.',
         dosage: '0.5mg/kg subcutaneous',
-        price: '₹1,200',
+        price: '1,200RWF',
         availability: 'In Stock',
         prescriptionRequired: true,
         manufacturer: 'PainFree Veterinary',
@@ -81,7 +81,7 @@ const mockMedicines = [
         category: 'Minerals & Vitamins',
         description: 'AI-balanced vitamin complex for metabolic support. Smart-release formula ensures optimal absorption.',
         dosage: '10ml IM daily for 5 days',
-        price: '₹650',
+        price: '650RWF',
         availability: 'In Stock',
         prescriptionRequired: false,
         manufacturer: 'VitalVet Nutrition',
@@ -275,11 +275,10 @@ const MedicineScreen = () => {
                             {categories.map((category) => (
                                 <TouchableOpacity
                                     key={category.name}
-                                    style={tw`mr-3 px-4 py-3 rounded-xl flex-row items-center ${
-                                        selectedCategory === category.name
+                                    style={tw`mr-3 px-4 py-3 rounded-xl flex-row items-center ${selectedCategory === category.name
                                             ? 'bg-indigo-500 shadow-lg'
                                             : 'bg-white border border-gray-200'
-                                    }`}
+                                        }`}
                                     onPress={() => setSelectedCategory(category.name)}
                                 >
                                     <Ionicons
@@ -289,11 +288,10 @@ const MedicineScreen = () => {
                                         style={tw`mr-2`}
                                     />
                                     <Text
-                                        style={tw`font-medium ${
-                                            selectedCategory === category.name
+                                        style={tw`font-medium ${selectedCategory === category.name
                                                 ? 'text-white'
                                                 : 'text-gray-700'
-                                        }`}
+                                            }`}
                                     >
                                         {category.name}
                                     </Text>
@@ -337,11 +335,7 @@ const MedicineScreen = () => {
                                         onPress={() => handleMedicinePress(medicine)}
                                         activeOpacity={0.7}
                                     >
-                                        <View style={tw`flex-row items-start`}>
-                                            <View style={tw`w-20 h-20 rounded-xl mr-4 items-center justify-center bg-gray-100`}>
-                                                <Ionicons name="medical" size={32} color="#4F46E5" />
-                                            </View>
-                                            
+                                        <View style={tw`flex-col items-start`}>
                                             <View style={tw`flex-1`}>
                                                 <View style={tw`flex-row items-center justify-between mb-2`}>
                                                     <Text style={tw`text-gray-900 font-bold text-lg flex-1 mr-2`}>
@@ -353,7 +347,7 @@ const MedicineScreen = () => {
                                                         </Text>
                                                     </View>
                                                 </View>
-                                                
+
                                                 <View style={tw`flex-row items-center mb-2`}>
                                                     <View style={tw`px-2 py-1 rounded bg-indigo-100 mr-3`}>
                                                         <Text style={tw`text-indigo-600 text-xs font-medium`}>
@@ -367,11 +361,11 @@ const MedicineScreen = () => {
                                                         </Text>
                                                     </View>
                                                 </View>
-                                                
+
                                                 <Text style={tw`text-gray-600 text-sm mb-3 leading-5`} numberOfLines={2}>
                                                     {medicine.description}
                                                 </Text>
-                                                
+
                                                 <View style={tw`flex-row items-center justify-between`}>
                                                     <View style={tw`flex-row items-center`}>
                                                         <Ionicons name="pricetag" size={16} color="#6B7280" />
@@ -379,7 +373,7 @@ const MedicineScreen = () => {
                                                             {medicine.price}
                                                         </Text>
                                                     </View>
-                                                    
+
                                                     <View style={tw`flex-row items-center`}>
                                                         {medicine.prescriptionRequired && (
                                                             <View style={tw`flex-row items-center mr-3`}>

@@ -26,8 +26,8 @@ export class FarmService {
     }
 
     // Get Farms assigned to Veterinary
-    async getFarmsByVeterinary(veterinaryId: string): Promise<ApiResponse<Farm[]>> {
-        return await apiClient.get<Farm[]>(API_ENDPOINTS.FARMS.BY_VETERINARY(veterinaryId));
+    async getFarmsByVeterinary(): Promise<ApiResponse<Farm[]>> {
+        return await apiClient.get<Farm[]>(API_ENDPOINTS.FARMS.BY_VETERINARY);
     }
 
     // Get Farms by Health Status

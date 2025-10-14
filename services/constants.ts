@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 
-export const SERVER_URL = "http://192.168.42.174:8080"
+export const SERVER_URL = "http://10.12.75.99:8080"
 
 export const API_CONFIG = {
     BASE_URL: SERVER_URL,
@@ -51,7 +51,7 @@ export const API_ENDPOINTS = {
         BY_ID: (id: string) => `/farms/${id}`,
         ALL: '/farms',
         BY_OWNER: `/farms/owner`,
-        BY_VETERINARY: (veterinaryId: string) => `/farms/veterinary/${veterinaryId}`,
+        BY_VETERINARY:  `/farms/veterinary`,
         BY_STATUS: (status: string) => `/farms/status/${status}`,
         ACTIVE: '/farms/active',
         UPDATE: (id: string) => `/farms/${id}`,
@@ -83,8 +83,8 @@ export const API_ENDPOINTS = {
         CREATE: '/schedules',
         BY_ID: (id: string) => `/schedules/${id}`,
         ALL: '/schedules',
-        BY_FARMER: (farmerId: string) => `/schedules/farmer/${farmerId}`,
-        BY_VETERINARY: (veterinaryId: string) => `/schedules/veterinary/${veterinaryId}`,
+        BY_FARMER: `/schedules/farmer`,
+        BY_VETERINARY: `/schedules/veterinary`,
         BY_STATUS: (status: string) => `/schedules/status/${status}`,
         BY_DATE: (date: string) => `/schedules/date/${date}`,
         BY_DATE_RANGE: (startDate: string, endDate: string) => `/schedules/date-range?startDate=${startDate}&endDate=${endDate}`,

@@ -62,7 +62,7 @@ const mockPharmacies = [
 ];
 
 const PharmacyLocatorScreen = () => {
-    const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
+    const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
     const [userLocation, setUserLocation] = useState<{latitude: number, longitude: number} | null>(null);
     const [loading, setLoading] = useState(false);
     const mapRef = useRef<MapView>(null);

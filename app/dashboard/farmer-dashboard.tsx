@@ -22,49 +22,25 @@ import FarmerSchedulesDashboard from '@/components/dashboard/farmer/schedules';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import { getRoleTheme } from '@/utils/theme';
-import { VerificationStatus } from '@/types/pharmacy';
-import { useTheme } from '@/contexts/ThemeContext';
-import { ThemedContainer, ThemedText, ThemedButton } from '@/components/ui/ThemedComponents';
-import { DashboardHeader } from '@/components/ui/ThemedHeader';
 
 
 export default function FarmerDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const { currentUser } = useAuth();
-  const { farms } = useFarms();
+  const { farmerFarms: myFarms } = useFarms();
   const theme = getRoleTheme(currentUser?.role);
 
   const [selectedTab, setSelectedTab] = useState<'overview' | 'farms' | 'schedules'>('overview');
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    if (!currentUser || currentUser.role !== 'FARMER') {
-      Alert.alert('Access Denied', 'Farmer access required', [
-        { text: 'OK' }
-      ]);
-      return;
-    }
-
+    useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 800,
+      duration: 500,
       useNativeDriver: true,
     }).start();
-  }, [currentUser, fadeAnim]);
-
-  if (!currentUser || currentUser.role !== 'FARMER') {
-    return (
-      <View className={`flex-1 bg-gray-50 justify-center items-center`}>
-        <Ionicons name="lock-closed-outline" size={64} color="#6B7280" />
-        <Text className={`text-gray-600 text-lg mt-4`}>Access Denied</Text>
-      </View>
-    );
-  }
-
-  // Filter data for current user
-  const myFarms = farms
-
+  }, []);
   return (
     <View className={'flex-1 bg-transparent'}>
       <Animated.View style={{ opacity: fadeAnim }}
@@ -81,7 +57,7 @@ export default function FarmerDashboardScreen() {
                   Farmer Dashboard
                 </Text>
                 <Text className={`text-white text-2xl font-bold`}>
-                  Welcome, {currentUser.name} 🚜
+                  Welcome, {currentUser?.name}
                 </Text>
                 <Text className={`text-white opacity-80 text-sm mt-1`}>
                   Farmer • {myFarms.length} farms
@@ -89,16 +65,16 @@ export default function FarmerDashboardScreen() {
               </View>
               <DrawerButton />
             </View>
-            
+
             {/* Verification Status Banner */}
-            {currentUser.isVerified === false && (
+            {currentUser?.isVerified === false && (
               <View className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mt-4 mx-4">
                 <View className="flex-row items-center">
                   <Ionicons name="warning-outline" size={20} color="#F59E0B" />
                   <Text className="text-yellow-800 font-medium ml-2 flex-1">
                     Account verification pending
                   </Text>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     className="bg-yellow-500 px-3 py-1 rounded-lg"
                     onPress={() => Alert.alert('Verification', 'Please complete your profile verification to access all features.')}
                   >
@@ -116,7 +92,6 @@ export default function FarmerDashboardScreen() {
             {[
               { key: 'overview', label: 'Overview', icon: 'analytics-outline' },
               { key: 'farms', label: 'My Farms', icon: 'leaf-outline' },
-              { key: 'medicines', label: 'Medicines', icon: 'medical-outline' },
               { key: 'schedules', label: 'Schedules', icon: 'calendar-outline' },
             ].map((tab) => (
               <TouchableOpacity

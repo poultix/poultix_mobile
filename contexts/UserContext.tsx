@@ -27,6 +27,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const { authenticated, currentUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
+  
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { handleApiError } = useError(); // ✅ Use ErrorContext for routing

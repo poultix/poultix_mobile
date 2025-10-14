@@ -7,6 +7,8 @@ import { Alert } from 'react-native';
 // Farm context interface
 interface FarmContextType {
   farms: Farm[];
+  farmerFarms:Farm[]
+  veterinaryFarms:Farm[]
   currentFarm: Farm | null;
   loading: boolean;
   error: string | null;
@@ -25,9 +27,10 @@ const FarmContext = createContext<FarmContextType | undefined>(undefined);
 
 // Provider component
 export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
-  const { authenticated, isFarmer } = useAuth()
+  const { authenticated, isFarmer ,isVeterinary} = useAuth()
   const [farms, setFarms] = useState<Farm[]>([])
   const [farmerFarms, setFarmerFarms] = useState<Farm[]>([])
+  const [veterinaryFarms,setVeterinaryFarms]=useState<Farm[]>([])
   const [currentFarm, setCurrentFarm] = useState<Farm | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -63,9 +66,24 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
 
+
+    const loadVeterinaryFarms = async () => {
+      try {
+        setLoading(true)
+        const response = await farmService.getFarmsByVeterinary()
+        setVeterinaryFarms(response.data)
+      } catch (error) {
+        console.error('Failed to load farms:', error);
+        Alert.alert('Error', 'Failed to load farms');
+      } finally {
+        setLoading(false);
+      }
+    }
+
     if (authenticated) {
       loadAllFarms();
       if (isFarmer) loadFarmerFarms();
+      if(isVeterinary)loadVeterinaryFarms()
     }
 
   }, [authenticated, isFarmer]);
@@ -111,6 +129,8 @@ export const FarmProvider = ({ children }: { children: React.ReactNode }) => {
 
   const contextValue: FarmContextType = {
     farms,
+    farmerFarms,
+    veterinaryFarms,
     currentFarm,
     loading,
     error,

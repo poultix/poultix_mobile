@@ -15,8 +15,6 @@ import {
 } from 'react-native';
 import tw from 'twrnc';
 
-const { width } = Dimensions.get('window');
-
 // Mock detailed medicine data (AI-generated for learning)
 const getMedicineDetails = (id: string) => {
     const medicines: any = {
@@ -113,8 +111,8 @@ const MedicineDetailScreen = () => {
         switch (activeTab) {
             case 'overview':
                 return (
-                    <View>
-                        <View style={tw`bg-white rounded-2xl p-6 mb-4 shadow-sm`}>
+                    <View >
+                        <View style={tw` bg-white rounded-2xl p-6 mb-4 shadow-sm`}>
                             <Text style={tw`text-gray-900 font-bold text-lg mb-4`}>Product Information</Text>
                             
                             <View style={tw`space-y-4`}>
@@ -399,10 +397,10 @@ const MedicineDetailScreen = () => {
                 {tabs.map((tab) => (
                     <TouchableOpacity
                         key={tab.id}
-                        style={tw`mr-6 pb-2 ${activeTab === tab.id ? 'border-b-2 border-indigo-500' : ''}`}
+                        style={tw` mr-6 pb-2 ${activeTab === tab.id ? 'border-b-2 border-indigo-500' : ''} `}
                         onPress={() => setActiveTab(tab.id)}
                     >
-                        <View style={tw`flex-row items-center`}>
+                        <View style={tw`flex-row items-center `}>
                             <Ionicons
                                 name={tab.icon as any}
                                 size={20}

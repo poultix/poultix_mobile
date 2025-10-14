@@ -1,9 +1,11 @@
-import { useAuth } from '@/contexts/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import { useAuth } from "@/contexts/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -14,8 +16,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import tw from 'twrnc';
+} from "react-native";
+import tw from "twrnc";
 
 interface DrawerItem {
   label: string;
@@ -37,92 +39,86 @@ interface UserInfo {
 const allDrawerItems: DrawerItem[] = [
   // Role-specific features
   {
-    label: 'Admin Panel',
-    route: '/admin',
-    icon: 'shield-outline',
-    description: 'System administration',
-    badge: 'ADMIN',
+    label: "Admin Panel",
+    route: "/admin",
+    icon: "shield-outline",
+    description: "System administration",
+    badge: "ADMIN",
     adminOnly: true,
-    color: '#7C3AED'
+    color: "#7C3AED",
   },
   {
-    label: 'Data Management',
-    route: '/admin/data-management',
-    icon: 'server-outline',
-    description: 'Edit content',
+    label: "Data Management",
+    route: "/admin/data-management",
+    icon: "server-outline",
+    description: "Edit content",
     adminOnly: true,
-    color: '#10B981'
+    color: "#10B981",
   },
 
   // Secondary features
   {
-    label: 'Veterinary Care',
-    route: '/farm/veterinary-care',
-    icon: 'medical-outline',
-    description: 'Find expert help',
-    color: '#EF4444'
+    label: "Veterinary Care",
+    route: "/farm/veterinary-care",
+    icon: "medical-outline",
+    description: "Find expert help",
+    color: "#EF4444",
+  },
+
+  {
+    label: "Medecine",
+    route: "/medicine",
+    icon: "medkit-outline",
+    description: "User directory",
+    color: "#6B7280",
   },
   {
-    label: 'Contacts',
-    route: '/chat',
-    icon: 'people-outline',
-    description: 'User directory',
-    color: '#6B7280'
+    label: "Pharmacies",
+    route: "/map/pharmacy-locator",
+    icon: "storefront-outline",
+    description: "Locate nearby pharmacies",
+    color: "#3B82F6",
   },
   {
-    label: 'Pharmacies',
-    route: '/pharmacy',
-    icon: 'storefront-outline',
-    description: 'Locate nearby pharmacies',
-    color: '#3B82F6'
-  },
-  {
-    label: 'Health News',
-    route: '/news',
-    icon: 'newspaper-outline',
-    description: 'Latest updates',
-    color: '#8B5CF6'
-  },
-  {
-    label: 'AI Assistant',
-    route: '/ai',
-    icon: 'chatbubble-ellipses-outline',
-    description: 'Get AI-powered advice',
-    badge: 'BETA',
-    color: '#06B6D4'
+    label: "AI Assistant",
+    route: "/ai",
+    icon: "chatbubble-ellipses-outline",
+    description: "Get AI-powered advice",
+    badge: "BETA",
+    color: "#06B6D4",
   },
 
   // Device features
   {
-    label: 'Bluetooth Devices',
-    route: '/device/pairing',
-    icon: 'bluetooth-outline',
-    description: 'Connect to devices',
-    badge: 'BETA',
-    color: '#0EA5E9'
+    label: "Bluetooth Devices",
+    route: "/device/pairing",
+    icon: "bluetooth-outline",
+    description: "Connect to devices",
+    badge: "BETA",
+    color: "#0EA5E9",
   },
   {
-    label: 'PH Analyzer',
-    route: '/device/reading',
-    icon: 'flask-outline',
-    description: 'Analyze stool samples',
-    badge: 'BETA',
-    color: '#F59E0B'
+    label: "PH Analyzer",
+    route: "/device/readings",
+    icon: "flask-outline",
+    description: "Analyze stool samples",
+    badge: "BETA",
+    color: "#F59E0B",
   },
   {
-    label: 'Climate Scanner',
-    route: '/device/environmental-scanner',
-    icon: 'thermometer-outline',
-    description: 'Environmental health monitoring',
-    badge: 'BETA',
-    color: '#10B981'
+    label: "Climate Scanner",
+    route: "/device/environmental-scanner",
+    icon: "thermometer-outline",
+    description: "Environmental health monitoring",
+    badge: "BETA",
+    color: "#10B981",
   },
   {
-    label: 'Settings',
-    route: '/settings',
-    icon: 'settings-outline',
-    description: 'App preferences',
-    color: '#6B7280'
+    label: "Settings",
+    route: "/settings",
+    icon: "settings-outline",
+    description: "App preferences",
+    color: "#6B7280",
   },
 ];
 
@@ -131,17 +127,21 @@ interface CustomDrawerProps {
   onClose: () => void;
 }
 
-export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) {
+export default function CustomDrawer({
+  isVisible,
+  onClose,
+}: CustomDrawerProps) {
   const { currentUser, logout } = useAuth();
-  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
   const drawerWidth = screenWidth * 0.85; // 85% of screen width
   const slideAnim = useRef(new Animated.Value(-drawerWidth)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
-  const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 0;
+  const statusBarHeight =
+    Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 0;
   const [userInfo, setUserInfo] = useState<UserInfo>({
-    name: 'Loading...',
-    email: 'Loading...',
-    role: 'farmer'
+    name: "Loading...",
+    email: "Loading...",
+    role: "farmer",
   });
   const [filteredItems, setFilteredItems] = useState<DrawerItem[]>([]);
 
@@ -151,7 +151,7 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
       setUserInfo({
         name: currentUser.name,
         email: currentUser.email,
-        role: currentUser.role
+        role: currentUser.role,
       });
     } else {
       // Load from AsyncStorage if not in context (fallback)
@@ -166,25 +166,26 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
   const loadUserInfo = async () => {
     try {
       // This is a fallback - should primarily use AppContext
-      const role = await AsyncStorage.getItem('role') || 'FARMER';
-      const email = await AsyncStorage.getItem('userEmail') || 'user@example.com';
-      const name = email.split('@')[0];
+      const role = (await AsyncStorage.getItem("role")) || "FARMER";
+      const email =
+        (await AsyncStorage.getItem("userEmail")) || "user@example.com";
+      const name = email.split("@")[0];
 
       setUserInfo({
         name: name.charAt(0).toUpperCase() + name.slice(1),
         email,
-        role
+        role,
       });
     } catch (error) {
-      console.error('Error loading user info:', error);
+      console.error("Error loading user info:", error);
     }
   };
 
   const filterItemsByRole = () => {
-    if (userInfo.role === 'ADMIN') {
+    if (userInfo.role === "ADMIN") {
       setFilteredItems(allDrawerItems);
     } else {
-      setFilteredItems(allDrawerItems.filter(item => !item.adminOnly));
+      setFilteredItems(allDrawerItems.filter((item) => !item.adminOnly));
     }
   };
 
@@ -230,27 +231,34 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
     onClose();
     try {
       await logout();
-
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'ADMIN': return 'shield';
-      case 'VETERINARY': return 'medical';
-      case 'FARMER': return 'leaf';
-      default: return 'person';
+      case "ADMIN":
+        return "shield";
+      case "VETERINARY":
+        return "medical";
+      case "FARMER":
+        return "leaf";
+      default:
+        return "person";
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'ADMIN': return '#7C3AED';
-      case 'VETERINARY': return '#EF4444';
-      case 'FARMER': return '#10B981';
-      default: return '#6B7280';
+      case "ADMIN":
+        return "#7C3AED";
+      case "VETERINARY":
+        return "#EF4444";
+      case "FARMER":
+        return "#10B981";
+      default:
+        return "#6B7280";
     }
   };
 
@@ -261,13 +269,12 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
       animationType="slide"
       onRequestClose={onClose}
       statusBarTranslucent
+     
+      
     >
       {/* iOS-style Overlay */}
       <Animated.View
-        style={[
-          tw`absolute inset-0 bg-black`,
-          { opacity: overlayOpacity },
-        ]}
+        style={[tw`absolute inset-0 bg-black`, { opacity: overlayOpacity }]}
       >
         <TouchableOpacity
           style={tw`flex-1`}
@@ -280,27 +287,33 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
       <Animated.View
         style={[
           {
-            position: 'absolute',
+            position: "absolute",
             left: 0,
             top: 0,
             width: drawerWidth,
             height: screenHeight,
-            backgroundColor: '#FFFFFF',
+            backgroundColor: "#FFFFFF",
             transform: [{ translateX: slideAnim }],
-            shadowColor: '#000',
-            shadowOffset: { width: 2, height: 0 },
-            shadowOpacity: 0.25,
-            shadowRadius: 10,
-            elevation: 16,
+            shadowColor: "#000",
+            shadowOffset: { width: 4, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 12,
+            elevation: 18,
+            borderTopRightRadius: 24,
+            borderBottomRightRadius: 24,
+            overflow: "hidden",
           },
         ]}
       >
         <View style={tw`flex-1`}>
           {/* iOS-style Header */}
-          <View style={[
-            tw`px-4 py-3 border-b border-gray-100`,
-            { paddingTop: statusBarHeight + 16 }
-          ]}>
+          <LinearGradient
+            colors={["#F8FAFC", "#FFFFFF"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={[tw`px-4 py-3 border-b border-gray-100`, { paddingTop: statusBarHeight + 16 }]}
+          >
+
             <View style={tw`flex-row items-center justify-between mb-4`}>
               <Text style={tw`text-3xl font-bold text-gray-900`}>Menu</Text>
               <TouchableOpacity
@@ -313,33 +326,42 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
             </View>
 
             {/* User Profile Section */}
-            <TouchableOpacity onPress={() => router.push('/user/profile')}
-              style={tw`flex-row items-center py-3 px-3 bg-gray-50 rounded-2xl`}>
-              <View style={[
-                tw`w-12 h-12 rounded-full items-center justify-center mr-3`,
-                { backgroundColor: getRoleColor(userInfo.role) }
-              ]}>
+            <TouchableOpacity
+              onPress={() => router.push("/user/profile")}
+              style={tw`flex-row items-center py-3 px-3 bg-gray-50 rounded-2xl`}
+            >
+              <View
+                style={[
+                  tw`w-12 h-12 rounded-full items-center justify-center mr-3`,
+                  { backgroundColor: getRoleColor(userInfo.role) },
+                ]}
+              >
                 <Ionicons
-                  name={getRoleIcon(userInfo.role) as keyof typeof Ionicons.glyphMap}
+                  name={
+                    getRoleIcon(userInfo.role) as keyof typeof Ionicons.glyphMap
+                  }
                   size={20}
                   color="white"
                 />
               </View>
               <View style={tw`flex-1`}>
-                <Text style={tw`text-lg font-semibold text-gray-900`}>{userInfo.name}</Text>
+                <Text style={tw`text-lg font-semibold text-gray-900`}>
+                  {userInfo.name}
+                </Text>
                 <Text style={tw`text-sm text-gray-500`}>
-                  {userInfo.role.charAt(0) + userInfo.role.slice(1).toLowerCase()}
+                  {userInfo.role.charAt(0) +
+                    userInfo.role.slice(1).toLowerCase()}
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => handleItemPress('/user/profile')}
+                onPress={() => handleItemPress("/user/profile")}
                 style={tw`p-2`}
                 activeOpacity={0.7}
               >
                 <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
               </TouchableOpacity>
             </TouchableOpacity>
-          </View>
+          </LinearGradient>
 
           {/* iOS-style Navigation Items */}
           <ScrollView style={tw`flex-1`} showsVerticalScrollIndicator={false}>
@@ -349,33 +371,52 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
                   key={item.route}
                   style={[
                     tw`flex-row items-center py-3 px-3 rounded-xl mb-1`,
-                    tw`active:bg-gray-100`
+                    tw`active:bg-gray-100`,
                   ]}
                   onPress={() => handleItemPress(item.route)}
                   activeOpacity={0.7}
                 >
-                  <View style={[
-                    tw`w-8 h-8 rounded-lg items-center justify-center mr-3`,
-                    { backgroundColor: (item.color || '#6B7280') + '15' }
-                  ]}>
-                    <Ionicons
-                      name={item.icon}
-                      size={18}
-                      color={item.color || '#6B7280'}
-                    />
+                  <View
+                    style={[
+                      tw`w-8 h-8 rounded-lg items-center justify-center mr-3`,
+                      {
+                        backgroundColor: "transparent",
+                      },
+                    ]}
+                  >
+                    <LinearGradient
+                      colors={[
+                        (item.color || "#6B7280") + "22",
+                        (item.color || "#6B7280") + "10",
+                      ]}
+                      style={tw`w-full h-full rounded-lg items-center justify-center`}
+                    >
+                      <Ionicons
+                        name={item.icon}
+                        size={18}
+                        color={item.color || "#6B7280"}
+                      />
+                    </LinearGradient>
                   </View>
+
                   <View style={tw`flex-1`}>
-                    <Text style={tw`text-gray-900 font-medium text-base`}>{item.label}</Text>
+                    <Text style={tw`text-gray-900 font-medium text-base`}>
+                      {item.label}
+                    </Text>
                   </View>
                   {item.badge && (
-                    <View style={[
-                      tw`px-2 py-1 rounded-full mr-2`,
-                      { backgroundColor: (item.color || '#6B7280') + '20' }
-                    ]}>
-                      <Text style={[
-                        tw`text-xs font-bold`,
-                        { color: item.color || '#6B7280' }
-                      ]}>
+                    <View
+                      style={[
+                        tw`px-2 py-1 rounded-full mr-2`,
+                        { backgroundColor: (item.color || "#6B7280") + "20" },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          tw`text-xs font-bold`,
+                          { color: item.color || "#6B7280" },
+                        ]}
+                      >
                         {item.badge}
                       </Text>
                     </View>
@@ -387,40 +428,71 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
 
             {/* iOS-style Quick Actions */}
             <View style={tw`px-4 py-4 border-t border-gray-100 mt-2`}>
-              <Text style={tw`text-gray-600 font-semibold mb-3 text-sm uppercase tracking-wide`}>Quick Actions</Text>
+              <Text
+                style={tw`text-gray-600 font-semibold mb-3 text-sm uppercase tracking-wide`}
+              >
+                Quick Actions
+              </Text>
               <View style={tw`flex-row justify-between mb-3`}>
                 <TouchableOpacity
                   style={tw`bg-sky-50 rounded-2xl p-4 flex-1 mr-2 items-center`}
-                  onPress={() => handleItemPress('/device/pairing')}
+                  onPress={() => handleItemPress("/device/pairing")}
                   activeOpacity={0.7}
                 >
-                  <View style={tw`w-10 h-10 bg-sky-100 rounded-full items-center justify-center mb-2`}>
-                    <Ionicons name="bluetooth-outline" size={20} color="#0EA5E9" />
+                  <View
+                    style={tw`w-10 h-10 bg-sky-100 rounded-full items-center justify-center mb-2`}
+                  >
+                    <Ionicons
+                      name="bluetooth-outline"
+                      size={20}
+                      color="#0EA5E9"
+                    />
                   </View>
-                  <Text style={tw`text-sky-600 text-xs font-medium text-center`}>Connect</Text>
+                  <Text
+                    style={tw`text-sky-600 text-xs font-medium text-center`}
+                  >
+                    Connect
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={tw`bg-blue-50 rounded-2xl p-4 flex-1 mx-1 items-center`}
-                  onPress={() => handleItemPress('/device/reading')}
+                  onPress={() => handleItemPress("/device/reading")}
                   activeOpacity={0.7}
                 >
-                  <View style={tw`w-10 h-10 bg-blue-100 rounded-full items-center justify-center mb-2`}>
+                  <View
+                    style={tw`w-10 h-10 bg-blue-100 rounded-full items-center justify-center mb-2`}
+                  >
                     <Ionicons name="flask-outline" size={20} color="#3B82F6" />
                   </View>
-                  <Text style={tw`text-blue-600 text-xs font-medium text-center`}>PH Scan</Text>
+                  <Text
+                    style={tw`text-blue-600 text-xs font-medium text-center`}
+                  >
+                    PH Scan
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={tw`bg-green-50 rounded-2xl p-4 flex-1 ml-2 items-center`}
-                  onPress={() => handleItemPress('/device/environmental-scanner')}
+                  onPress={() =>
+                    handleItemPress("/device/environmental-scanner")
+                  }
                   activeOpacity={0.7}
                 >
-                  <View style={tw`w-10 h-10 bg-green-100 rounded-full items-center justify-center mb-2`}>
-                    <Ionicons name="thermometer-outline" size={20} color="#10B981" />
+                  <View
+                    style={tw`w-10 h-10 bg-green-100 rounded-full items-center justify-center mb-2`}
+                  >
+                    <Ionicons
+                      name="thermometer-outline"
+                      size={20}
+                      color="#10B981"
+                    />
                   </View>
-                  <Text style={tw`text-green-600 text-xs font-medium text-center`}>Climate</Text>
+                  <Text
+                    style={tw`text-green-600 text-xs font-medium text-center`}
+                  >
+                    Climate
+                  </Text>
                 </TouchableOpacity>
               </View>
-
             </View>
           </ScrollView>
 
@@ -431,10 +503,14 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
               onPress={handleLogout}
               activeOpacity={0.7}
             >
-              <View style={tw`w-8 h-8 rounded-lg bg-red-100 items-center justify-center mr-3`}>
+              <View
+                style={tw`w-8 h-8 rounded-lg bg-red-100 items-center justify-center mr-3`}
+              >
                 <Ionicons name="log-out-outline" size={18} color="#EF4444" />
               </View>
-              <Text style={tw`text-red-600 font-medium text-base flex-1`}>Sign Out</Text>
+              <Text style={tw`text-red-600 font-medium text-base flex-1`}>
+                Sign Out
+              </Text>
               <Ionicons name="chevron-forward" size={16} color="#EF4444" />
             </TouchableOpacity>
 
@@ -445,6 +521,6 @@ export default function CustomDrawer({ isVisible, onClose }: CustomDrawerProps) 
           </View>
         </View>
       </Animated.View>
-    </Modal>
+    </Modal >
   );
 }

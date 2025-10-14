@@ -111,12 +111,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setCurrentUser(user);
 
             // Navigate based on role
-            navigateByRole(user.role);
+          
             setIsVerified(user.emailVerified);
             setIsFarmer(user.role === 'FARMER');
             setIsVeterinary(user.role === 'VETERINARY');
             setIsPharmacy(user.role === 'PHARMACY');
-
+  navigateByRole(user.role);
         } catch (error: any) {
             const errorMessage = error.message || 'Login failed. Please try again.';
             setError(errorMessage);
@@ -168,12 +168,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             setAuthenticated(true);
             setCurrentUser(user);
-            navigateByRole(user.role);
+          
 
             setIsVerified(user.emailVerified);
             setIsFarmer(user.role === 'FARMER');
             setIsVeterinary(user.role === 'VETERINARY');
             setIsPharmacy(user.role === 'PHARMACY');
+              navigateByRole(user.role);
         } catch (error: any) {
             const errorMessage = error.message || 'Registration failed. Please try again.';
             setError(errorMessage);

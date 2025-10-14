@@ -3,7 +3,6 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import React, { useEffect, useRef, useState } from 'react'
 import {
-    Alert,
     Animated,
     ScrollView,
     Text,
@@ -22,7 +21,6 @@ import PharmacyInventory from '@/components/dashboard/pharmacy/inventory'
 import PharmacyOrders from '@/components/dashboard/pharmacy/orders'
 import { useAuth } from '@/contexts/AuthContext'
 import { getRoleTheme } from '@/utils/theme'
-import { VerificationStatus } from '@/types/pharmacy'
 
 export default function PharmacyDashboardScreen() {
     const { isDrawerVisible, setIsDrawerVisible } = useDrawer()
@@ -33,32 +31,12 @@ export default function PharmacyDashboardScreen() {
     const fadeAnim = useRef(new Animated.Value(0)).current
 
     useEffect(() => {
-        if (!currentUser || currentUser.role !== 'PHARMACY') {
-            Alert.alert('Access Denied', 'Pharmacy access required', [
-                { text: 'OK', onPress: () => router.back() }
-            ])
-            return
-        }
-
         Animated.timing(fadeAnim, {
             toValue: 1,
-            duration: 800,
+            duration: 500,
             useNativeDriver: true,
-        }).start()
-    }, [currentUser, fadeAnim])
-
-    if (!currentUser || currentUser.role !== 'PHARMACY') {
-        return (
-            <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
-                <View style={tw`bg-green-100 p-6 rounded-2xl items-center shadow-lg`}>
-                    <Ionicons name="medkit-outline" size={56} color="#059669" />
-                    <Text style={tw`text-green-600 text-base font-semibold mt-3`}>Access Denied</Text>
-                    <Text style={tw`text-green-700 text-sm mt-2 text-center`}>Pharmacy credentials required</Text>
-                </View>
-            </View>
-        )
-    }
-
+        }).start();
+    }, []);
     return (
         <View style={tw`flex-1 bg-gray-50`}>
             <Animated.View style={[tw`flex-1 `, { opacity: fadeAnim }]}>
@@ -79,7 +57,7 @@ export default function PharmacyDashboardScreen() {
                                     </Text>
                                 </View>
                                 <Text style={tw`text-white text-2xl font-bold mb-1`}>
-                                    {currentUser.name}
+                                    {currentUser?.name}
                                 </Text>
                                 <View style={tw`flex-row items-center`}>
                                     <View style={tw`bg-white bg-opacity-15 px-3 py-1 rounded-full mr-2`}>
@@ -87,7 +65,7 @@ export default function PharmacyDashboardScreen() {
                                             PHARMACY
                                         </Text>
                                     </View>
-                                    {currentUser.isVerified ? (
+                                    {currentUser?.isVerified ? (
                                         <View style={tw`flex-row items-center`}>
                                             <Ionicons name="checkmark-circle" size={16} color="white" />
                                             <Text style={tw`text-white text-xs opacity-80 ml-1`}>
@@ -106,16 +84,16 @@ export default function PharmacyDashboardScreen() {
                             </View>
                             <DrawerButton />
                         </View>
-                        
+
                         {/* Verification Status Banner for Unverified Pharmacies */}
-                        {!currentUser.isVerified && (
+                        {!currentUser?.isVerified && (
                             <View style={tw`bg-yellow-100 border border-yellow-300 rounded-xl p-3 mt-4 mx-4`}>
                                 <View style={tw`flex-row items-center`}>
                                     <Ionicons name="warning-outline" size={20} color="#D97706" />
                                     <Text style={tw`text-yellow-800 font-medium ml-2 flex-1`}>
                                         Complete verification to access all features
                                     </Text>
-                                    <TouchableOpacity 
+                                    <TouchableOpacity
                                         style={[tw`px-3 py-1 rounded-lg`, { backgroundColor: theme.primary }]}
                                         onPress={() => router.push('/pharmacy/verification-dashboard')}
                                     >

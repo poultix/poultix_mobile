@@ -3,12 +3,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    Animated,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  Animated,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import tw from 'twrnc';
 
@@ -27,41 +26,19 @@ import { getRoleTheme } from '@/utils/theme';
 export default function VeterinaryDashboardScreen() {
   const { isDrawerVisible, setIsDrawerVisible } = useDrawer();
   const { currentUser } = useAuth();
-  const { farms } = useFarms();
+  const { veterinaryFarms: assignedFarms } = useFarms();
   const theme = getRoleTheme(currentUser?.role);
   const [selectedTab, setSelectedTab] = useState<'overview' | 'farms' | 'schedules'>('overview');
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    if (!currentUser || currentUser.role !== 'VETERINARY') {
-      Alert.alert('Access Denied', 'Veterinary access required', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
-      return;
-    }
-
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 800,
+      duration: 500,
       useNativeDriver: true,
     }).start();
-  }, [currentUser]);
-
-  if (!currentUser || currentUser.role !== 'VETERINARY') {
-    return (
-      <View style={tw`flex-1 bg-gray-50 justify-center items-center`}>
-        <View style={tw`bg-amber-100 p-6 rounded-2xl items-center shadow-lg`}>
-          <Ionicons name="medical-outline" size={56} color="#D97706" />
-          <Text style={tw`text-amber-600 text-base font-semibold mt-3`}>Access Denied</Text>
-          <Text style={tw`text-amber-700 text-sm mt-2 text-center`}>Veterinary credentials required</Text>
-        </View>
-      </View>
-    );
-  }
-
-  // Filter data for current veterinary
-  const assignedFarms = farms.filter(farm => farm.assignedVeterinary?.id === currentUser.id);
+  }, []);
 
   return (
     <View style={tw`flex-1 bg-gray-50`}>
@@ -83,7 +60,7 @@ export default function VeterinaryDashboardScreen() {
                   </Text>
                 </View>
                 <Text style={tw`text-white text-2xl font-bold mb-1`}>
-                  Dr. {currentUser.name}
+                  Dr. {currentUser?.name}
                 </Text>
                 <View style={tw`flex-row items-center`}>
                   <View style={tw`bg-white bg-opacity-15 px-3 py-1 rounded-full mr-2`}>
@@ -107,7 +84,6 @@ export default function VeterinaryDashboardScreen() {
             {[
               { key: 'overview', label: 'Overview', icon: 'analytics-outline' },
               { key: 'farms', label: 'My Farms', icon: 'leaf-outline' },
-              { key: 'medicines', label: 'Medicines', icon: 'medical-outline' },
               { key: 'schedules', label: 'Schedule', icon: 'calendar-outline' },
             ].map((tab) => (
               <TouchableOpacity
@@ -141,8 +117,8 @@ export default function VeterinaryDashboardScreen() {
         </View>
 
         {/* Content */}
-        <ScrollView 
-          style={tw`flex-1`} 
+        <ScrollView
+          style={tw`flex-1`}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 160 }}
         >

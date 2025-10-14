@@ -553,12 +553,12 @@ export default function PoultryPHInputScreen() {
                 >
                   <View style={tw`gap-y-3`}>
                     <TouchableOpacity style={tw`bg-blue-50 p-4 rounded-xl border border-blue-200`}
-                      onPress={() => router.push('/farm/veterinary-care')}>
+                      onPress={() => router.push('/map/veterinary-locator')}>
                       <Text style={tw`text-blue-800 font-semibold mb-1`}> Find Veterinarian</Text>
                       <Text style={tw`text-blue-600 text-sm`}>Locate nearby veterinary services</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={tw`bg-green-50 p-4 rounded-xl border border-green-200`}
-                      onPress={() => router.push('/pharmacy')}>
+                      onPress={() => router.push('/map/pharmacy-locator')}>
                       <Text style={tw`text-green-800 font-semibold mb-1`}> Find Pharmacy</Text>
                       <Text style={tw`text-green-600 text-sm`}>Get medications and supplements</Text>
                     </TouchableOpacity>

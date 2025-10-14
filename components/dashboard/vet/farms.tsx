@@ -8,7 +8,7 @@ import { useFarms } from "@/contexts/FarmContext";
 
 export default function VetDashboardFarms() {
     const { currentUser } = useAuth();
-    const { farms } = useFarms();
+    const { farms,setCurrentFarm } = useFarms();
     const assignedFarms = farms.filter(farm => farm.assignedVeterinary?.id === currentUser?.id);
     const getHealthStatusColor = (status: string) => {
         switch (status) {
@@ -60,7 +60,7 @@ export default function VetDashboardFarms() {
                     <TouchableOpacity
                         key={farm.id}
                         style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}
-                        onPress={() => router.push('/farm/farm-detail')}
+                        onPress={() =>{ setCurrentFarm(farm);router.push('/farm/farm-detail')}}
                     >
                         <View style={tw`flex-row items-start justify-between mb-3`}>
                             <View style={tw`flex-1`}>

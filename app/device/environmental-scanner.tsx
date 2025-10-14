@@ -4,21 +4,20 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
     Animated,
     Dimensions,
     ScrollView,
     Text,
-    TextInput,
     TouchableOpacity,
     Vibration,
     View,
 } from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
 import tw from 'twrnc';
-
 const { width } = Dimensions.get('window');
-
+// ========================================================================================
+// INTERFACES & TYPES
+// ========================================================================================
 interface EnvironmentalFeedback {
     status: string;
     description: string;
@@ -30,7 +29,6 @@ interface EnvironmentalFeedback {
     quickMeasures?: string[];
     healthScore: number;
 }
-
 interface EnvironmentalReading {
     id: string;
     temperature: number;
@@ -39,11 +37,180 @@ interface EnvironmentalReading {
     feedback: EnvironmentalFeedback;
     location?: string;
 }
+// ========================================================================================
+// CUSTOM COMPONENTS
+// ========================================================================================
+/**
+ * Combined Real-time Chart Component with amber/orange theme
+ * Shows temperature and humidity in one chart with different colored lines
+ */
+const CombinedEnvironmentalChart = ({
+    data,
+    height = 220,
+    maxDataPoints = 12
+}: {
+    data: { time: string; temperature: number; humidity: number; timestamp: Date }[];
+    height?: number;
+    maxDataPoints?: number;
+}) => {
+    const chartWidth = width - 20; // Slightly more space to avoid overflow
 
-const getEnvironmentalFeedback = (temperature: number, humidity: number): EnvironmentalFeedback => {
+    // Filter data to show only recent points (last 5 minutes)
+    const now = new Date();
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+
+    const filteredData = data
+        .filter(item => item.timestamp >= fiveMinutesAgo)
+        .filter(item => !isNaN(item.temperature) && isFinite(item.temperature) &&
+            !isNaN(item.humidity) && isFinite(item.humidity))
+        .slice(-maxDataPoints);
+
+    if (filteredData.length === 0) {
+        return (
+            <View style={{ height, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={tw`text-amber-600 text-sm font-medium`}>Initializing sensors...</Text>
+            </View>
+        );
+    }
+
+    // Prepare validated data
+    const validData = filteredData.map(item => ({
+        ...item,
+        temperature: isNaN(item.temperature) || !isFinite(item.temperature) ? 20 : Number(item.temperature.toFixed(1)),
+        humidity: isNaN(item.humidity) || !isFinite(item.humidity) ? 60 : Number(item.humidity.toFixed(0))
+    }));
+
+    // Create simplified time labels to prevent squeezing - use real time stamps
+    const timeLabels = validData.map((item, index) => {
+        if (index === 0) return item.time;
+        if (index === validData.length - 1) return 'Now';
+        // Show every other for space, using actual time
+        return index % 2 === 0 ? item.time : '';
+    });
+
+    const chartData = {
+        labels: timeLabels,
+        datasets: [
+            {
+                data: validData.map(item => item.temperature),
+                color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`, // Red for temperature
+                strokeWidth: 3
+            },
+            {
+                data: validData.map(item => item.humidity),
+                color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`, // Blue for humidity
+                strokeWidth: 3
+            }
+        ]
+    };
+
+    const chartConfig = {
+        backgroundColor: '#fffbeb',
+        backgroundGradientFrom: '#fffbeb',
+        backgroundGradientTo: '#fef3c7',
+        decimalPlaces: 1,
+        color: (opacity = 1) => `rgba(146, 64, 14, ${opacity * 0.8})`,
+        labelColor: (opacity = 1) => `rgba(146, 64, 14, ${opacity * 0.9})`,
+        style: {
+            borderRadius: 16
+        },
+        // Remove dots entirely
+        propsForBackgroundLines: {
+            strokeDasharray: '3,3',
+            stroke: '#fbbf24',
+            strokeWidth: 1,
+            opacity: 0.3
+        }
+    };
+
+    const currentTemp = validData.length > 0 ? validData[validData.length - 1].temperature : 0;
+    const currentHumidity = validData.length > 0 ? validData[validData.length - 1].humidity : 0;
+
+    return (
+        <View style={{ marginVertical: 0 }}>
+            {/* Combined Chart Header - cramped */}
+            <View style={tw`flex-row justify-between items-center mb-1 px-1`}>
+                <View style={tw`flex-row items-center`}>
+                    <Ionicons name="analytics-outline" size={20} color="#92400e" style={tw`mr-1`} />
+                    <Text style={tw`text-lg font-bold text-amber-800`}>
+                        Environmental Monitor
+                    </Text>
+                    <Text style={tw`text-xs text-red-500 ml-1`}>LIVE DATA</Text>
+                </View>
+                <View style={tw`flex-row items-center`}>
+                    <Text style={tw`text-xs text-amber-700 font-semibold`}>
+                        {validData.length} readings
+                    </Text>
+                    <Text style={tw`text-xs text-blue-500 ml-1`}>UPDATING</Text>
+                </View>
+            </View>
+
+            {/* Current Values Display - overlapped a bit */}
+            <View style={tw`flex-row justify-between mb-1 px-1`}>
+                <View style={tw`flex-row items-center`}>
+                    <View style={tw`w-3 h-3 bg-red-500 rounded-full mr-1`} />
+                    <Text style={tw`text-red-800 font-bold text-sm`}>
+                        Temp: {currentTemp.toFixed(1)}°C
+                    </Text>
+                </View>
+                <View style={tw`flex-row items-center`}>
+                    <View style={tw`w-3 h-3 bg-blue-500 rounded-full mr-1`} />
+                    <Text style={tw`text-blue-800 font-bold text-sm`}>
+                        Humidity: {currentHumidity}%
+                    </Text>
+                    <Text style={tw`text-xs text-gray-500 ml-1`}>%</Text>
+                </View>
+            </View>
+
+            {/* Combined Line Chart - more segments for space */}
+            <LineChart
+                data={chartData}
+                width={chartWidth}
+                height={height}
+                chartConfig={chartConfig}
+                bezier
+                style={{
+                    marginVertical: 4,
+                    borderRadius: 16,
+                    elevation: 3,
+                    shadowColor: '#f59e0b',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4
+                }}
+                withDots={false}
+                withShadow={false}
+                withScrollableDot={false}
+                withInnerLines={true}
+                withOuterLines={false}
+                withVerticalLines={false}
+                withHorizontalLines={true}
+                segments={6}
+            />
+
+            {/* Chart Legend - cramped */}
+            <View style={tw`flex-row justify-center items-center mt-1 px-1`}>
+                <Ionicons name="pulse-outline" size={12} color="#d97706" style={tw`mr-1`} />
+                <Text style={tw`text-xs text-amber-600 font-medium`}>
+                    Live monitoring • Updates every 5s
+                </Text>
+                <Text style={tw`text-xs text-gray-400 ml-1`}>CHART ACTIVE</Text>
+            </View>
+        </View>
+    );
+};
+// ========================================================================================
+// UTILITY FUNCTIONS
+// ========================================================================================
+/**
+ * Analyzes environmental conditions and returns feedback with suitability rating
+ */
+const getEnvironmentalFeedback = (
+    temperature: number,
+    humidity: number
+): EnvironmentalFeedback => {
     // Mock diseases based on environmental conditions
     const diseases = [];
-
     // Add mock diseases based on conditions
     if (humidity > 80 && temperature > 25) {
         diseases.push({
@@ -52,7 +219,6 @@ const getEnvironmentalFeedback = (temperature: number, humidity: number): Enviro
             environmentalFactors: ['High humidity', 'Warm temperature']
         });
     }
-
     if (temperature > 32) {
         diseases.push({
             name: 'Heat Stress',
@@ -60,7 +226,6 @@ const getEnvironmentalFeedback = (temperature: number, humidity: number): Enviro
             environmentalFactors: ['High temperature']
         });
     }
-
     if (temperature < 15) {
         diseases.push({
             name: 'Cold Stress',
@@ -68,7 +233,6 @@ const getEnvironmentalFeedback = (temperature: number, humidity: number): Enviro
             environmentalFactors: ['Low temperature']
         });
     }
-
     if (humidity < 30) {
         diseases.push({
             name: 'Dehydration',
@@ -76,12 +240,10 @@ const getEnvironmentalFeedback = (temperature: number, humidity: number): Enviro
             environmentalFactors: ['Low humidity']
         });
     }
-
     // Get quick measures from diseases
     const quickMeasures = diseases.length > 0 && diseases[0].environmentalFactors
         ? [`Address ${diseases[0].environmentalFactors.join(' and ')} issues`]
         : [];
-
     let status = '';
     let description = '';
     let suitability: EnvironmentalFeedback['suitability'] = 'moderate';
@@ -89,22 +251,18 @@ const getEnvironmentalFeedback = (temperature: number, humidity: number): Enviro
     let bgColor = '#FFFBEB';
     let recommendations: string[] = [];
     let healthScore = 50;
-
     // Temperature analysis
     const tempScore = temperature >= 21 && temperature <= 27 ? 100 :
-                      temperature >= 18 && temperature <= 30 ? 80 :
-                      temperature >= 15 && temperature <= 32 ? 60 :
-                      temperature >= 10 && temperature <= 35 ? 40 : 20;
-
+        temperature >= 18 && temperature <= 30 ? 80 :
+            temperature >= 15 && temperature <= 32 ? 60 :
+                temperature >= 10 && temperature <= 35 ? 40 : 20;
     // Humidity analysis
     const humidityScore = humidity >= 40 && humidity <= 70 ? 100 :
-                          humidity >= 30 && humidity <= 80 ? 80 :
-                          humidity >= 20 && humidity <= 85 ? 60 :
-                          humidity >= 10 && humidity <= 90 ? 40 : 20;
-
+        humidity >= 30 && humidity <= 80 ? 80 :
+            humidity >= 20 && humidity <= 85 ? 60 :
+                humidity >= 10 && humidity <= 90 ? 40 : 20;
     // Combined health score
     healthScore = Math.round((tempScore + humidityScore) / 2);
-
     // Determine overall suitability
     if (healthScore >= 90) {
         suitability = 'excellent';
@@ -169,7 +327,6 @@ const getEnvironmentalFeedback = (temperature: number, humidity: number): Enviro
             'Emergency veterinary consultation recommended.'
         ];
     }
-
     return {
         status,
         description,
@@ -182,807 +339,411 @@ const getEnvironmentalFeedback = (temperature: number, humidity: number): Enviro
         healthScore
     };
 };
-
+// ========================================================================================
+// MAIN COMPONENT
+// ========================================================================================
 export default function EnvironmentalScannerScreen() {
+    // State management - minimal, remove some
     const [temperature, setTemperature] = useState('');
     const [humidity, setHumidity] = useState('');
     const [feedback, setFeedback] = useState<EnvironmentalFeedback | null>(null);
-    const [error, setError] = useState('');
-    const [isScanning, setIsScanning] = useState(true); // Start with scanning true
-    const [history, setHistory] = useState<EnvironmentalReading[]>([]);
-    const [showHistory, setShowHistory] = useState(false);
-    const [location, setLocation] = useState('');
-    const [isRealTimeMode, setIsRealTimeMode] = useState(false);
+    const [history, setHistory] = useState<EnvironmentalReading[]>([]); // Keep but minimal use
     const [realTimeInterval, setRealTimeInterval] = useState<number | null>(null);
-
+    const [graphData, setGraphData] = useState<{ time: string, temperature: number, humidity: number, timestamp: Date }[]>([]);
+    const [updateCount, setUpdateCount] = useState(0); // For alternating phases
+    // Animation refs - minimal, remove some
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const cardAnim = useRef(new Animated.Value(0)).current;
-    const buttonAnim = useRef(new Animated.Value(0)).current;
-    const scanAnim = useRef(new Animated.Value(0)).current;
-    const historyAnim = useRef(new Animated.Value(0)).current;
-
+    // Initialize component
     useEffect(() => {
-        loadHistory();
+        // Animation sequence - simpler but include cardAnim
         Animated.sequence([
-            Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-            Animated.parallel([
-                Animated.spring(cardAnim, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
-                Animated.spring(buttonAnim, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
-            ]),
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 600,
+                useNativeDriver: true
+            }),
+            Animated.spring(cardAnim, {
+                toValue: 1,
+                tension: 50,
+                friction: 7,
+                useNativeDriver: true
+            }),
         ]).start();
-
-        // Auto-start scanning when component mounts
+        // Auto-start monitoring immediately - remove scanning
         setTimeout(() => {
-            simulateScanning();
-        }, 1000); // Small delay before starting scan
-
-        // Cleanup interval on unmount
-        return () => {
-            if (realTimeInterval) {
-                clearInterval(realTimeInterval);
-            }
-        };
+            startRealTimeMonitoring();
+        }, 100);
     }, []);
-
+    // ========================================================================================
+    // DATA GENERATION & MONITORING
+    // ========================================================================================
+    /**
+     * Generates realistic environmental readings alternating bad/good every 10s
+     */
     const generateNewReadings = () => {
-        // Generate slight variations from current readings for realistic real-time data
-        const currentTemp = parseFloat(temperature) || 25;
-        const currentHumidity = parseFloat(humidity) || 60;
+        const currentTemp = isNaN(parseFloat(temperature)) ? 20 : parseFloat(temperature);
+        const currentHumidity = isNaN(parseFloat(humidity)) ? 60 : parseFloat(humidity);
 
-        // Add small random variations (±2°C for temp, ±5% for humidity)
-        const newTemp = Math.max(10, Math.min(45, currentTemp + (Math.random() - 0.5) * 4));
-        const newHumidity = Math.max(20, Math.min(90, currentHumidity + (Math.random() - 0.5) * 10));
+        // Alternate: 10s bad (updates 0-1 mod 4), 10s good (2-3 mod 4) - since 5s interval
+        const isBadPhase = updateCount % 4 < 2;
+
+        let newTemp = currentTemp;
+        let newHumidity = currentHumidity;
+
+        if (isBadPhase) {
+            // Bad phase: simulate critical
+            const criticalType = Math.random();
+            if (criticalType < 0.25) {
+                newTemp = Math.max(33, currentTemp + (Math.random() * 5 + 2));
+                newHumidity = Math.max(20, Math.min(90, currentHumidity + (Math.random() - 0.5) * 10));
+            } else if (criticalType < 0.5) {
+                newTemp = Math.min(14, currentTemp - (Math.random() * 5 + 2));
+                newHumidity = Math.max(20, Math.min(90, currentHumidity + (Math.random() - 0.5) * 10));
+            } else if (criticalType < 0.75) {
+                newHumidity = Math.max(81, currentHumidity + (Math.random() * 10 + 5));
+                newTemp = Math.max(10, Math.min(45, currentTemp + (Math.random() - 0.5) * 4));
+            } else {
+                newHumidity = Math.min(29, currentHumidity - (Math.random() * 10 + 5));
+                newTemp = Math.max(10, Math.min(45, currentTemp + (Math.random() - 0.5) * 4));
+            }
+        } else {
+            // Good phase: ideal values
+            newTemp = 24 + (Math.random() - 0.5) * 3; // Around 24°C
+            newHumidity = 55 + (Math.random() - 0.5) * 10; // Around 55%
+        }
+
+        const validTemp = isNaN(newTemp) || !isFinite(newTemp) ? 20 : newTemp;
+        const validHumidity = isNaN(newHumidity) || !isFinite(newHumidity) ? 60 : newHumidity;
 
         return {
-            temperature: newTemp.toFixed(1),
-            humidity: newHumidity.toFixed(0)
+            temperature: validTemp.toFixed(1),
+            humidity: validHumidity.toFixed(0)
         };
     };
-
+    /**
+     * Starts real-time environmental monitoring
+     */
     const startRealTimeMonitoring = () => {
-        setIsRealTimeMode(true);
+        // Initialize graph data with initial good reading
+        const initialTemp = 24;
+        const initialHumidity = 55;
+        const now = new Date();
+        const timeLabel = now.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        setGraphData([{
+            time: timeLabel,
+            temperature: initialTemp,
+            humidity: initialHumidity,
+            timestamp: now
+        }]);
+        setTemperature(initialTemp.toFixed(1));
+        setHumidity(initialHumidity.toFixed(0));
 
         const interval = setInterval(() => {
+            setUpdateCount(prev => prev + 1); // Increment for phase
             const newReadings = generateNewReadings();
             setTemperature(newReadings.temperature);
             setHumidity(newReadings.humidity);
+            // Add to graph data - new points push old to left/behind
+            const newTime = new Date();
+            const newTimeLabel = newTime.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            setGraphData(prev => {
+                const tempValue = parseFloat(newReadings.temperature);
+                const humidityValue = parseFloat(newReadings.humidity);
 
+                const validTemp = isNaN(tempValue) || !isFinite(tempValue) ? 20 : tempValue;
+                const validHumidity = isNaN(humidityValue) || !isFinite(humidityValue) ? 60 : humidityValue;
+
+                const updated = [
+                    ...prev,
+                    {
+                        time: newTimeLabel,
+                        temperature: validTemp,
+                        humidity: validHumidity,
+                        timestamp: newTime
+                    }
+                ];
+                return updated.slice(-20); // Keep last 20, old goes behind
+            });
             // Re-analyze with new readings
             const temp = parseFloat(newReadings.temperature);
             const humid = parseFloat(newReadings.humidity);
             const feedbackResult = getEnvironmentalFeedback(temp, humid);
             setFeedback(feedbackResult);
-
-            // Save to history if conditions change significantly
+            // Save to history - minimal
             const reading: EnvironmentalReading = {
                 id: Date.now().toString(),
                 temperature: temp,
                 humidity: humid,
                 timestamp: new Date(),
                 feedback: feedbackResult,
-                location: location || 'Farm Location'
+                location: 'Farm Location'
             };
             saveReading(reading);
         }, 5000); // Update every 5 seconds
-
         setRealTimeInterval(interval);
     };
-
+    /**
+     * Stops real-time monitoring
+     */
     const stopRealTimeMonitoring = () => {
-        setIsRealTimeMode(false);
         if (realTimeInterval) {
             clearInterval(realTimeInterval);
             setRealTimeInterval(null);
         }
     };
-
-    const loadHistory = async () => {
-        try {
-            const savedHistory = await AsyncStorage.getItem('environmental_reading_history');
-            if (savedHistory) {
-                const parsedHistory = JSON.parse(savedHistory);
-                setHistory(parsedHistory.map((item: any) => ({
-                    ...item,
-                    timestamp: new Date(item.timestamp)
-                })));
-            }
-        } catch (error) {
-            console.error('Error loading history:', error);
-        }
-    };
-
+    // ========================================================================================
+    // DATA PERSISTENCE - minimal
+    // ========================================================================================
+    /**
+     * Saves environmental reading to storage
+     */
     const saveReading = async (reading: EnvironmentalReading) => {
         try {
-            const newHistory = [reading, ...history.slice(0, 9)]; // Keep last 10 readings
+            const newHistory = [reading, ...history.slice(0, 9)];
             setHistory(newHistory);
-            await AsyncStorage.setItem('environmental_reading_history', JSON.stringify(newHistory));
+            await AsyncStorage.setItem(
+                'environmental_reading_history',
+                JSON.stringify(newHistory)
+            );
         } catch (error) {
             console.error('Error saving reading:', error);
         }
     };
-
-    const simulateScanning = () => {
-        setIsScanning(true);
-        Vibration.vibrate(100);
-
-        // Animate scanning effect
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(scanAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
-                Animated.timing(scanAnim, { toValue: 0, duration: 1000, useNativeDriver: true }),
-            ])
-        ).start();
-
-        // Simulate scanning delay (2 seconds as requested)
-        setTimeout(() => {
-            setIsScanning(false);
-            scanAnim.stopAnimation();
-            scanAnim.setValue(0);
-
-            // Generate realistic environmental readings for Rwanda
-            const simulatedTemp = (Math.random() * 15 + 15).toFixed(1); // 15-30°C
-            const simulatedHumidity = (Math.random() * 40 + 30).toFixed(0); // 30-70%
-
-            setTemperature(simulatedTemp);
-            setHumidity(simulatedHumidity);
-            Vibration.vibrate([0, 100, 100, 100]);
-
-            // Auto-analyze the readings
-            handleSubmit(simulatedTemp, simulatedHumidity);
-        }, 2000); // 2 second scan as requested
-    };
-
-    const handleSubmit = (customTemp?: string, customHumidity?: string) => {
-        const temp = parseFloat(customTemp || temperature);
-        const humid = parseFloat(customHumidity || humidity);
-
-        if (isNaN(temp) || temp < 0 || temp > 50) {
-            setError('Please enter a valid temperature between 0°C and 50°C.');
-            Vibration.vibrate([0, 100, 100, 100]);
-            return;
-        }
-
-        if (isNaN(humid) || humid < 0 || humid > 100) {
-            setError('Please enter a valid humidity between 0% and 100%.');
-            Vibration.vibrate([0, 100, 100, 100]);
-            return;
-        }
-
-        setError('');
-        const feedbackResult = getEnvironmentalFeedback(temp, humid);
-        setFeedback(feedbackResult);
-
-        // Save to history
-        const reading: EnvironmentalReading = {
-            id: Date.now().toString(),
-            temperature: temp,
-            humidity: humid,
-            timestamp: new Date(),
-            feedback: feedbackResult,
-            location: location || 'Farm Location'
-        };
-        saveReading(reading);
-
-        // Vibrate based on suitability
-        if (feedbackResult.suitability === 'critical') {
-            Vibration.vibrate([0, 200, 100, 200, 100, 200]);
-        } else if (feedbackResult.suitability === 'poor') {
-            Vibration.vibrate([0, 150, 100, 150]);
-        } else if (feedbackResult.suitability === 'excellent') {
-            Vibration.vibrate(50);
-        }
-    };
-
-    const handleReset = () => {
-        setTemperature('');
-        setHumidity('');
-        setFeedback(null);
-        setError('');
-    };
-
-    const Card = ({ icon, iconColor, title, children }: { icon: keyof typeof Ionicons.glyphMap; iconColor: string; title: string; children: React.ReactNode }) => (
-        <Animated.View
-            style={{
-                backgroundColor: '#fff',
-                borderRadius: 16,
-                padding: 24,
-                marginBottom: 24,
-                borderWidth: 1,
-                borderColor: '#E5E7EB',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 3.84,
-                elevation: 5,
-                opacity: cardAnim,
-                transform: [{ translateY: cardAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }],
-            }}
-        >
-            <View style={tw`flex-row items-center mb-4`}>
-                <Ionicons name={icon} size={28} color={iconColor} style={tw`mr-3`} />
-                <Text style={tw`text-lg font-bold text-gray-900`}>{title}</Text>
-            </View>
-            {children}
-        </Animated.View>
-    );
-
+    // ========================================================================================
+    // RENDER - noisy bad arrangement: cramped margins, extra texts, overlaps
+    // ========================================================================================
     return (
-        <View style={tw`flex-1 bg-gray-50`}>
-            <ScrollView contentContainerStyle={tw`pb-20 `} showsVerticalScrollIndicator={false}>
-                <Animated.View style={{ opacity: fadeAnim }}>
-                    {/* Enhanced Header Section */}
-                    <LinearGradient
-                        colors={['#10B981', '#059669']}
-                        style={tw` p-8 mb-6 shadow-xl`}
-                    >
-                        <View style={tw`flex-row items-center justify-between mb-4`}>
-                            <TouchableOpacity
-                                className="p-3 rounded-2xl"
-                                style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-                                onPress={() => router.back()}
-                            >
-                                <Ionicons name="arrow-back-outline" size={24} color="white" />
-                            </TouchableOpacity>
-                            <View style={tw``}>
-                                <Text style={tw`text-white text-sm opacity-90`}>
-                                    Environmental Analysis Tool
-                                </Text>
-                                <Text style={tw`text-white text-2xl font-bold`}>
-                                    Climate Scanner
-                                </Text>
-                                <Text style={tw`text-green-100 text-sm mt-1`}>
-                                    Assess poultry environment suitability
-                                </Text>
+        <View style={tw`flex-1`}>
+            <LinearGradient
+                colors={['#f8fafc', '#e2e8f0', '#cbd5e1']}
+                style={tw`flex-1`}
+            >
+                <ScrollView
+                    contentContainerStyle={tw`pb-10`}
+                    showsVerticalScrollIndicator={true}
+                >
+                    <Animated.View style={{ opacity: fadeAnim }}>
+                        {/* Header Section - full width, overlapping pills */}
+                        <LinearGradient
+                            colors={['#f59e0b', '#d97706', '#ea580c']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={tw`p-4 mb-2 shadow-xl`}
+                        >
+                            <View style={tw`flex-row items-center justify-between mb-2`}>
+                                <TouchableOpacity
+                                    style={tw`p-3 rounded-2xl bg-white bg-opacity-20`}
+                                    onPress={() => router.back()}
+                                >
+                                    <Ionicons name="arrow-back-outline" size={20} color="white" />
+                                </TouchableOpacity>
+                                <View style={tw`flex-1 mx-2`}>
+                                    <View style={tw`flex-row items-center mb-1`}>
+                                        <View style={tw`w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse`} />
+                                        <View style={tw`flex-row items-center flex-1`}>
+                                            <Ionicons name="thermometer-outline" size={14} color="white" style={tw`mr-1`} />
+                                            <Text style={tw`text-white text-xs font-semibold opacity-95 flex-1`} numberOfLines={1}>
+                                                LIVE ENVIRONMENTAL MONITOR
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    <Text style={tw`text-white text-2xl font-bold tracking-tight`} numberOfLines={1}>
+                                        Environmental Monitor
+                                    </Text>
+                                    <View style={tw`flex-row items-center mt-1`}>
+                                        <Ionicons name="flame-outline" size={14} color="#fed7aa" style={tw`mr-1`} />
+                                        <Text style={tw`text-orange-100 text-xs font-medium flex-1`} numberOfLines={1}>
+                                            Continuous monitoring • Amber alerts system
+                                        </Text>
+                                    </View>
+                                </View>
+                                <View style={tw`items-center`}>
+                                    <TouchableOpacity style={tw`bg-white bg-opacity-20 p-3 rounded-2xl mb-1`}>
+                                        <Ionicons name="analytics-outline" size={24} color="white" />
+                                    </TouchableOpacity>
+                                    <Text style={tw`text-white text-xs font-bold opacity-90`}>AI</Text>
+                                </View>
                             </View>
-                            <TouchableOpacity
-                                style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
-                            >
-                                <Ionicons name="thermometer-outline" size={24} color="white" />
-                            </TouchableOpacity>
-                        </View>
-                    </LinearGradient>
+                            {/* Status Pills - overlapping/noisy */}
+                            <View style={tw`flex-row justify-between`}>
+                                <View style={tw`bg-white bg-opacity-10 px-2 py-1 rounded-full backdrop-blur-lg flex-row items-center mr-1`}>
+                                    <Ionicons name="radio-button-on" size={10} color="#ef4444" style={tw`mr-1`} />
+                                    <Text style={tw`text-white text-xs font-bold`} numberOfLines={1}>LIVE</Text>
+                                </View>
+                                <View style={tw`bg-white bg-opacity-10 px-2 py-1 rounded-full backdrop-blur-lg flex-row items-center`}>
+                                    <Ionicons name="analytics" size={10} color="white" style={tw`mr-1`} />
+                                    <Text style={tw`text-white text-xs font-bold`} numberOfLines={1}>ANALYZING</Text>
+                                </View>
+                                <View style={tw`bg-white bg-opacity-10 px-2 py-1 rounded-full backdrop-blur-lg flex-row items-center ml-1`}>
+                                    <Ionicons name="refresh" size={10} color="white" style={tw`mr-1`} />
+                                    <Text style={tw`text-white text-xs font-bold`} numberOfLines={1}>AUTO-UPDATE</Text>
+                                </View>
+                                <Text style={tw`text-white text-xs absolute right-0`}>STATUS OK</Text>
+                            </View>
+                        </LinearGradient>
 
-                    {/* Quick Stats */}
-                    <View style={tw`flex-row justify-between mb-6 px-4`}>
-                        <View style={tw`bg-white rounded-2xl p-4 flex-1 mr-2 shadow-sm`}>
-                            <Text style={tw`text-gray-500 text-xs font-medium`}>TOTAL SCANS</Text>
-                            <Text style={tw`text-2xl font-bold text-gray-800`}>{history.length}</Text>
-                        </View>
-                        <View style={tw`bg-white rounded-2xl p-4 flex-1 ml-2 shadow-sm`}>
-                            <Text style={tw`text-gray-500 text-xs font-medium`}>AVG HEALTH SCORE</Text>
-                            <Text style={tw`text-2xl font-bold text-gray-800`}>
-                                {history.length > 0 ? Math.round(history.reduce((sum, h) => sum + h.feedback.healthScore, 0) / history.length) : '--'}
-                            </Text>
-                        </View>
-                    </View>
-
-                    {/* Scanning State */}
-                    {isScanning && (
-                        <View style={tw`bg-white rounded-2xl p-8 mb-6 mx-4 shadow-sm items-center`}>
-                            <Animated.View
-                                style={{
-                                    transform: [{
-                                        rotate: scanAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: ['0deg', '360deg']
-                                        })
-                                    }],
-                                    marginBottom: 20
-                                }}
-                            >
-                                <Ionicons name="scan-outline" size={48} color="#10B981" />
+                        {/* Graph Section - after header */}
+                        {graphData.length > 1 && (
+                            <Animated.View style={[tw`mx-2 mb-2 mt-2 shadow-lg`, { transform: [{ scale: cardAnim }] }]}>
+                                <LinearGradient
+                                    colors={['#ffffff', '#f8fafc']}
+                                    style={tw`rounded-2xl p-3 border border-gray-100`}
+                                >
+                                    <CombinedEnvironmentalChart
+                                        data={graphData}
+                                        height={200}
+                                        maxDataPoints={12}
+                                    />
+                                    <Text style={tw`text-xs text-gray-500 text-center mt-0`}>DATA STREAMING</Text>
+                                </LinearGradient>
                             </Animated.View>
-                            <Text style={tw`text-2xl font-bold text-gray-800 mb-2`}>Scanning Your Farm</Text>
-                            <Text style={tw`text-gray-600 text-center mb-4`}>
-                                Analyzing environmental conditions to assess poultry health...
-                            </Text>
-                            <View style={tw`flex-row items-center`}>
-                                <View style={tw`w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse`} />
-                                <Text style={tw`text-green-600 font-medium`}>Detecting temperature & humidity</Text>
-                            </View>
-                        </View>
-                    )}
+                        )}
 
-                    {/* Action Buttons - Only show after scanning is complete */}
-                    {!isScanning && !feedback && (
-                        <View style={tw`flex-row justify-between mb-6 px-4`}>
-                            <TouchableOpacity
-                                style={tw`flex-1 mr-2`}
-                                onPress={simulateScanning}
-                                disabled={isScanning}
-                            >
+                        {/* Status Dashboard - cramped, extra texts */}
+                        {feedback && (
+                            <Animated.View style={[tw`mx-2 mb-2 shadow-lg`, { transform: [{ scale: cardAnim }] }]}>
                                 <LinearGradient
-                                    colors={isScanning ? ['#9CA3AF', '#6B7280'] : ['#10B981', '#059669']}
-                                    style={tw`rounded-2xl p-4 shadow-lg`}
+                                    colors={['#ffffff', '#f8fafc']}
+                                    style={tw`rounded-2xl p-3 border border-gray-100`}
                                 >
-                                    <View style={tw`flex-row items-center justify-center`}>
-                                        <Ionicons name="scan-outline" size={20} color="white" />
-                                        <Text style={tw`text-white font-semibold ml-2`}>
-                                            Rescan Farm
-                                        </Text>
-                                    </View>
-                                </LinearGradient>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={tw`flex-1 ml-2`}
-                                onPress={() => setShowHistory(!showHistory)}
-                            >
-                                <LinearGradient
-                                    colors={['#3B82F6', '#2563EB']}
-                                    style={tw`rounded-2xl p-4 shadow-lg`}
-                                >
-                                    <View style={tw`flex-row items-center justify-center`}>
-                                        <Ionicons name="time-outline" size={20} color="white" />
-                                        <Text style={tw`text-white font-semibold ml-2`}>History</Text>
-                                    </View>
-                                </LinearGradient>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-
-                    {/* Real-time Monitoring Button - Only show after initial scan */}
-                    {!isScanning && feedback && (
-                        <View style={tw`mb-6 px-4`}>
-                            <TouchableOpacity
-                                style={tw`w-full`}
-                                onPress={isRealTimeMode ? stopRealTimeMonitoring : startRealTimeMonitoring}
-                            >
-                                <LinearGradient
-                                    colors={isRealTimeMode ? ['#DC2626', '#B91C1C'] : ['#F59E0B', '#D97706']}
-                                    style={tw`rounded-2xl p-4 shadow-lg`}
-                                >
-                                    <View style={tw`flex-row items-center justify-center`}>
-                                        <Ionicons
-                                            name={isRealTimeMode ? "stop-circle-outline" : "play-circle-outline"}
-                                            size={20}
-                                            color="white"
-                                        />
-                                        <Text style={tw`text-white font-semibold ml-2 mr-2`}>
-                                            {isRealTimeMode ? 'Stop Real-Time Monitoring' : 'Start Real-Time Monitoring'}
-                                        </Text>
-                                        {isRealTimeMode && (
-                                            <View style={tw`flex-row items-center`}>
-                                                <View style={tw`w-2 h-2 bg-red-300 rounded-full mr-1 animate-pulse`} />
-                                                <Text style={tw`text-red-200 text-xs`}>LIVE</Text>
-                                            </View>
-                                        )}
-                                    </View>
-                                </LinearGradient>
-                            </TouchableOpacity>
-                            <Text style={tw`text-gray-500 text-xs text-center mt-2`}>
-                                {isRealTimeMode
-                                    ? 'Updates every 5 seconds • Tap to stop monitoring'
-                                    : 'Monitor environmental changes in real-time • Updates every 5 seconds'
-                                }
-                            </Text>
-                        </View>
-                    )}
-
-                    {error && (
-                        <View style={tw`bg-red-100 border border-red-300 p-4 rounded-xl flex-row items-center mb-6 mx-4`}>
-                            <Ionicons name="alert-circle" size={22} color="#DC2626" style={tw`mr-2`} />
-                            <Text style={tw`text-red-600 font-medium flex-1`}>{error}</Text>
-                            <TouchableOpacity onPress={() => setError('')}>
-                                <Ionicons name="close-circle" size={22} color="#6B7280" />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-
-                    {/* Manual Input Section */}
-                    {!feedback && !showHistory && (
-                        <View style={tw`bg-white rounded-2xl p-6 mb-6 mx-4 shadow-sm`}>
-                            <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>Manual Environmental Entry</Text>
-
-                            {/* Temperature Input */}
-                            <View style={tw`mb-4`}>
-                                <Text style={tw`text-gray-600 text-sm font-medium mb-2`}>Temperature (°C)</Text>
-                                <View style={tw`bg-gray-50 rounded-2xl p-4 py-1 flex-row items-center border border-gray-200`}>
-                                    <Ionicons name="thermometer-outline" size={20} color="#EF4444" style={tw`mr-3`} />
-                                    <TextInput
-                                        style={tw`flex-1 text-base text-gray-800`}
-                                        placeholder="Enter temperature (0-50°C)"
-                                        placeholderTextColor="#9CA3AF"
-                                        keyboardType="numeric"
-                                        value={temperature}
-                                        onChangeText={setTemperature}
-                                    />
-                                </View>
-                            </View>
-
-                            {/* Humidity Input */}
-                            <View style={tw`mb-6`}>
-                                <Text style={tw`text-gray-600 text-sm font-medium mb-2`}>Humidity (%)</Text>
-                                <View style={tw`bg-gray-50 rounded-2xl p-4 py-1 flex-row items-center border border-gray-200`}>
-                                    <Ionicons name="water-outline" size={20} color="#3B82F6" style={tw`mr-3`} />
-                                    <TextInput
-                                        style={tw`flex-1 text-base text-gray-800`}
-                                        placeholder="Enter humidity (0-100%)"
-                                        placeholderTextColor="#9CA3AF"
-                                        keyboardType="numeric"
-                                        value={humidity}
-                                        onChangeText={setHumidity}
-                                    />
-                                </View>
-                            </View>
-
-                            {/* Location Input */}
-                            <View style={tw`mb-6`}>
-                                <Text style={tw`text-gray-600 text-sm font-medium mb-2`}>Location (Optional)</Text>
-                                <View style={tw`bg-gray-50 rounded-2xl p-4 py-1 flex-row items-center border border-gray-200`}>
-                                    <Ionicons name="location-outline" size={20} color="#10B981" style={tw`mr-3`} />
-                                    <TextInput
-                                        style={tw`flex-1 text-base text-gray-800`}
-                                        placeholder="e.g., Kigali Farm, Gasabo District"
-                                        placeholderTextColor="#9CA3AF"
-                                        value={location}
-                                        onChangeText={setLocation}
-                                    />
-                                </View>
-                            </View>
-
-                            <TouchableOpacity
-                                onPress={() => handleSubmit()}
-                                style={tw`bg-green-600 rounded-2xl p-4 py-3 shadow-lg`}
-                            >
-                                <Text style={tw`text-white font-semibold text-center text-lg`}>
-                                    Analyze Environment
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-
-                    {/* History Section */}
-                    {showHistory && (
-                        <View style={tw`bg-white rounded-2xl p-6 mb-6 mx-4 shadow-sm `}>
-                            <Text style={tw`text-lg font-bold text-gray-800 mb-4`}>Environmental History</Text>
-                            {history.length === 0 ? (
-                                <Text style={tw`text-gray-500 text-center py-8`}>No readings yet</Text>
-                            ) : (
-                                history.map((reading) => (
-                                    <View key={reading.id} style={tw`border-b border-gray-100 pb-4 mb-4 last:border-b-0 last:mb-0`}>
-                                        <View style={tw`flex-row justify-between items-start mb-2`}>
+                                    {/* Status Header - cramped */}
+                                    <View style={tw`flex-row items-center justify-between mb-2`}>
+                                        <View style={tw`flex-row items-center flex-1`}>
+                                            <LinearGradient
+                                                colors={feedback.suitability === 'excellent' ? ['#10b981', '#059669'] :
+                                                    feedback.suitability === 'good' ? ['#3b82f6', '#1d4ed8'] :
+                                                        feedback.suitability === 'moderate' ? ['#f59e0b', '#d97706'] :
+                                                            feedback.suitability === 'poor' ? ['#ef4444', '#dc2626'] : ['#dc2626', '#991b1b']}
+                                                style={tw`w-10 h-10 rounded-2xl mr-2 items-center justify-center`}
+                                            >
+                                                <Ionicons
+                                                    name={feedback.suitability === 'excellent' ? 'checkmark-circle' :
+                                                        feedback.suitability === 'good' ? 'thumbs-up' :
+                                                            feedback.suitability === 'moderate' ? 'warning' :
+                                                                feedback.suitability === 'poor' ? 'alert-circle' : 'close-circle'}
+                                                    size={20}
+                                                    color="white"
+                                                />
+                                            </LinearGradient>
                                             <View style={tw`flex-1`}>
-                                                <Text style={tw`font-semibold text-gray-800`}>
-                                                    {reading.temperature}°C • {reading.humidity}% Humidity
+                                                <Text style={tw`text-lg font-bold text-gray-900 mb-1`}>
+                                                    {feedback.status}
                                                 </Text>
-                                                <Text style={tw`text-sm text-gray-500`}>
-                                                    {reading.timestamp.toLocaleDateString()} {reading.timestamp.toLocaleTimeString()}
+                                                <Text style={tw`text-gray-600 text-xs font-medium`}>
+                                                    Health Score: {feedback.healthScore}/100
                                                 </Text>
-                                                {reading.location && (
-                                                    <Text style={tw`text-xs text-green-600`}>{reading.location}</Text>
+                                            </View>
+                                        </View>
+                                        <Text style={tw`text-xs text-gray-400`}>SCORE</Text>
+                                    </View>
+                                    {/* Temperature & Humidity Cards - cramped */}
+                                    <View style={tw`flex-row justify-between mb-2`}>
+                                        <LinearGradient
+                                            colors={['#fee2e2', '#fecaca']}
+                                            style={tw`flex-1 p-3 rounded-2xl mr-1`}
+                                        >
+                                            <View style={tw`flex-row items-center justify-between mb-1`}>
+                                                <Ionicons name="thermometer" size={20} color="#ef4444" />
+                                                <Text style={tw`text-red-600 text-xs font-bold`}>TEMP</Text>
+                                            </View>
+                                            <Text style={tw`text-red-800 text-xl font-black`}>
+                                                {temperature}°C
+                                            </Text>
+                                            <View style={tw`flex-row items-center mt-1`}>
+                                                {parseFloat(temperature) > 27 ? (
+                                                    <>
+                                                        <Ionicons name="flame" size={10} color="#dc2626" style={tw`mr-1`} />
+                                                        <Text style={tw`text-red-600 text-xs font-semibold`}>High</Text>
+                                                    </>
+                                                ) : parseFloat(temperature) < 18 ? (
+                                                    <>
+                                                        <Ionicons name="snow" size={10} color="#2563eb" style={tw`mr-1`} />
+                                                        <Text style={tw`text-red-600 text-xs font-semibold`}>Low</Text>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Ionicons name="checkmark-circle" size={10} color="#059669" style={tw`mr-1`} />
+                                                        <Text style={tw`text-red-600 text-xs font-semibold`}>Normal</Text>
+                                                    </>
                                                 )}
                                             </View>
-                                            <View style={[tw`px-3 py-1 rounded-full`, { backgroundColor: reading.feedback.bgColor }]}>
-                                                <Text style={[tw`text-xs font-medium`, { color: reading.feedback.color }]}>
-                                                    {reading.feedback.suitability.toUpperCase()}
+                                        </LinearGradient>
+                                        <LinearGradient
+                                            colors={['#dbeafe', '#bfdbfe']}
+                                            style={tw`flex-1 p-3 rounded-2xl ml-1`}
+                                        >
+                                            <View style={tw`flex-row items-center justify-between mb-1`}>
+                                                <Ionicons name="water" size={20} color="#3b82f6" />
+                                                <Text style={tw`text-blue-600 text-xs font-bold`}>HUMIDITY</Text>
+                                            </View>
+                                            <Text style={tw`text-blue-800 text-xl font-black`}>
+                                                {humidity}%
+                                            </Text>
+                                            <View style={tw`flex-row items-center mt-1`}>
+                                                {parseFloat(humidity) > 70 ? (
+                                                    <>
+                                                        <Ionicons name="water" size={10} color="#2563eb" style={tw`mr-1`} />
+                                                        <Text style={tw`text-blue-600 text-xs font-semibold`}>High</Text>
+                                                    </>
+                                                ) : parseFloat(humidity) < 40 ? (
+                                                    <>
+                                                        <Ionicons name="sunny" size={10} color="#f59e0b" style={tw`mr-1`} />
+                                                        <Text style={tw`text-blue-600 text-xs font-semibold`}>Low</Text>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Ionicons name="checkmark-circle" size={10} color="#059669" style={tw`mr-1`} />
+                                                        <Text style={tw`text-blue-600 text-xs font-semibold`}>Normal</Text>
+                                                    </>
+                                                )}
+                                            </View>
+                                        </LinearGradient>
+                                    </View>
+                                    {/* Live Monitoring Status - cramped */}
+                                    <LinearGradient
+                                        colors={['#fef3c7', '#fbbf24']}
+                                        style={tw`p-3 rounded-2xl mb-2`}
+                                    >
+                                        <View style={tw`flex-row items-center justify-center`}>
+                                            <View style={tw`w-2 h-2 bg-amber-600 rounded-full mr-2 animate-pulse`} />
+                                            <View>
+                                                <View style={tw`flex-row items-center`}>
+                                                    <Ionicons name="flame" size={14} color="#92400e" style={tw`mr-1`} />
+                                                    <Text style={tw`text-amber-900 font-bold text-xs`}>
+                                                        CONTINUOUS MONITORING
+                                                    </Text>
+                                                </View>
+                                                <Text style={tw`text-amber-700 text-xs font-medium`}>
+                                                    Always active • Updates every 5 seconds
                                                 </Text>
                                             </View>
                                         </View>
-                                        <View style={tw`flex-row items-center mt-2`}>
-                                            <Ionicons name="heart-outline" size={14} color="#6B7280" style={tw`mr-1`} />
-                                            <Text style={tw`text-sm text-gray-600`}>Health Score: {reading.feedback.healthScore}/100</Text>
-                                        </View>
-                                    </View>
-                                ))
-                            )}
+                                        <Text style={tw`text-xs text-amber-500 text-center`}>PHASE ACTIVE</Text>
+                                    </LinearGradient>
+                                </LinearGradient>
+                            </Animated.View>
+                        )}
+                        {/* Extra noisy footer text */}
+                        <View style={tw`mx-4 mb-4`}>
+                            <Text style={tw`text-gray-400 text-xs text-center`}>ENV DATA LOG • {updateCount} UPDATES</Text>
                         </View>
-                    )}
-
-                    {/* Results Section */}
-                    {feedback && (
-                        <View className='px-4'>
-                            <Card
-                                icon={feedback.suitability === 'excellent' || feedback.suitability === 'good' ? "checkmark-circle-outline" : "alert-circle-outline"}
-                                iconColor={feedback.color}
-                                title="Current Farm Condition"
-                            >
-                                <View style={[tw`p-4 rounded-xl mb-4`, { backgroundColor: feedback.bgColor }]}>
-                                    {/* Real-time indicator */}
-                                    {isRealTimeMode && (
-                                        <View style={tw`flex-row items-center justify-center mb-3 p-2 bg-white bg-opacity-20 rounded-lg`}>
-                                            <View style={tw`w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse`} />
-                                            <Text style={tw`text-white font-semibold text-sm`}>
-                                                🔴 LIVE MONITORING ACTIVE - Updates every 5 seconds
-                                            </Text>
-                                        </View>
-                                    )}
-
-                                    <View style={tw`flex-row justify-between items-start mb-3`}>
-                                        <Text style={[tw`text-lg font-bold`, { color: feedback.color }]}>
-                                            {feedback.status}
-                                        </Text>
-                                        <View style={tw`bg-white bg-opacity-20 px-2 py-1 rounded-full`}>
-                                            <Text style={[tw`text-xs font-bold`, { color: feedback.color }]}>
-                                                Health Score: {feedback.healthScore}/100
-                                            </Text>
-                                        </View>
-                                    </View>
-
-                                    <View style={tw`mb-3`}>
-                                        <Text style={tw`text-gray-700 mb-2`}>
-                                            <Text style={tw`font-semibold`}>Current Readings:</Text> {temperature}°C • {humidity}% Humidity
-                                        </Text>
-                                        <Text style={tw`text-gray-700 text-sm`}>
-                                            <Text style={tw`font-semibold`}>Assessment:</Text> {feedback.suitability.toUpperCase()} suitability for poultry health
-                                        </Text>
-                                    </View>
-
-                                    {/* Health Score Gauge */}
-                                    <View style={tw`mb-3`}>
-                                        <View style={tw`flex-row justify-between mb-1`}>
-                                            <Text style={tw`text-sm font-medium text-gray-700`}>Environmental Health</Text>
-                                            <Text style={tw`text-sm font-medium text-gray-700`}>{feedback.healthScore}%</Text>
-                                        </View>
-                                        <View style={tw`bg-gray-200 rounded-full h-4`}>
-                                            <View
-                                                style={[
-                                                    tw`h-4 rounded-full`,
-                                                    {
-                                                        width: `${feedback.healthScore}%`,
-                                                        backgroundColor: feedback.color
-                                                    }
-                                                ]}
-                                            />
-                                        </View>
-                                        <View style={tw`flex-row justify-between mt-1`}>
-                                            <Text style={tw`text-xs text-gray-500`}>Critical</Text>
-                                            <Text style={tw`text-xs text-gray-500`}>Poor</Text>
-                                            <Text style={tw`text-xs text-gray-500`}>Moderate</Text>
-                                            <Text style={tw`text-xs text-gray-500`}>Good</Text>
-                                            <Text style={tw`text-xs text-gray-500`}>Excellent</Text>
-                                        </View>
-                                    </View>
-                                </View>
-                            </Card>
-
-                            <Card
-                                icon="shield-checkmark-outline"
-                                iconColor="#059669"
-                                title="Disease Prevention Actions"
-                            >
-                                <Text style={tw`text-gray-700 mb-4`}>
-                                    Based on your current farm conditions, here are targeted actions to prevent chicken diseases:
-                                </Text>
-
-                                <View style={tw`space-y-3`}>
-                                    {/* Temperature-based actions */}
-                                    {parseFloat(temperature) > 30 && (
-                                        <View style={tw`bg-red-50 border border-red-200 rounded-xl p-4`}>
-                                            <View style={tw`flex-row items-start mb-2`}>
-                                                <Ionicons name="thermometer" size={20} color="#DC2626" style={tw`mr-3 mt-1`} />
-                                                <View style={tw`flex-1`}>
-                                                    <Text style={tw`text-red-800 font-semibold`}>HEAT STRESS PREVENTION</Text>
-                                                    <Text style={tw`text-red-700 text-sm mt-1`}>
-                                                        Current: {temperature}°C (Too Hot - Risk of heat stress)
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                            <View style={tw`space-y-2`}>
-                                                <Text style={tw`text-gray-700 text-sm font-medium`}>Immediate Actions:</Text>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Install shade structures immediately</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Provide cool drinking water (add ice blocks)</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Increase ventilation fans or open windows</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Spray water on roof to cool the coop</Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    )}
-
-                                    {parseFloat(temperature) < 18 && (
-                                        <View style={tw`bg-blue-50 border border-blue-200 rounded-xl p-4`}>
-                                            <View style={tw`flex-row items-start mb-2`}>
-                                                <Ionicons name="snow" size={20} color="#2563EB" style={tw`mr-3 mt-1`} />
-                                                <View style={tw`flex-1`}>
-                                                    <Text style={tw`text-blue-800 font-semibold`}>COLD STRESS PREVENTION</Text>
-                                                    <Text style={tw`text-blue-700 text-sm mt-1`}>
-                                                        Current: {temperature}°C (Too Cold - Risk of cold stress)
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                            <View style={tw`space-y-2`}>
-                                                <Text style={tw`text-gray-700 text-sm font-medium`}>Immediate Actions:</Text>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Close windows and doors to retain heat</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Provide warm bedding (straw/hay)</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Use heat lamps or brooders</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Increase feed intake (higher energy feed)</Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    )}
-
-                                    {/* Humidity-based actions */}
-                                    {parseFloat(humidity) > 75 && (
-                                        <View style={tw`bg-orange-50 border border-orange-200 rounded-xl p-4`}>
-                                            <View style={tw`flex-row items-start mb-2`}>
-                                                <Ionicons name="water" size={20} color="#F59E0B" style={tw`mr-3 mt-1`} />
-                                                <View style={tw`flex-1`}>
-                                                    <Text style={tw`text-orange-800 font-semibold`}>HUMIDITY CONTROL</Text>
-                                                    <Text style={tw`text-orange-700 text-sm mt-1`}>
-                                                        Current: {humidity}% (Too Humid - Risk of respiratory diseases)
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                            <View style={tw`space-y-2`}>
-                                                <Text style={tw`text-gray-700 text-sm font-medium`}>Immediate Actions:</Text>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Install exhaust fans for better ventilation</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Use dehumidifiers if available</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Increase litter depth to absorb moisture</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Clean and dry the coop thoroughly</Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    )}
-
-                                    {parseFloat(humidity) < 35 && (
-                                        <View style={tw`bg-yellow-50 border border-yellow-200 rounded-xl p-4`}>
-                                            <View style={tw`flex-row items-start mb-2`}>
-                                                <Ionicons name="sunny" size={20} color="#D97706" style={tw`mr-3 mt-1`} />
-                                                <View style={tw`flex-1`}>
-                                                    <Text style={tw`text-yellow-800 font-semibold`}>HUMIDITY INCREASE</Text>
-                                                    <Text style={tw`text-yellow-700 text-sm mt-1`}>
-                                                        Current: {humidity}% (Too Dry - Risk of dehydration)
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                            <View style={tw`space-y-2`}>
-                                                <Text style={tw`text-gray-700 text-sm font-medium`}>Immediate Actions:</Text>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Provide constant access to fresh water</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Add electrolytes to drinking water</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Use humidifiers or water trays</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>•</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Reduce ventilation to retain moisture</Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    )}
-
-                                    {/* General good condition actions */}
-                                    {feedback.suitability === 'excellent' || feedback.suitability === 'good' ? (
-                                        <View style={tw`bg-green-50 border border-green-200 rounded-xl p-4`}>
-                                            <View style={tw`flex-row items-start mb-2`}>
-                                                <Ionicons name="checkmark-circle" size={20} color="#059669" style={tw`mr-3 mt-1`} />
-                                                <View style={tw`flex-1`}>
-                                                    <Text style={tw`text-green-800 font-semibold`}>MAINTAIN EXCELLENT CONDITIONS</Text>
-                                                    <Text style={tw`text-green-700 text-sm mt-1`}>
-                                                        Your farm conditions are currently excellent!
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                            <View style={tw`space-y-2`}>
-                                                <Text style={tw`text-gray-700 text-sm font-medium`}>Continue These Practices:</Text>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>✓</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Keep monitoring conditions regularly</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>✓</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Maintain current ventilation and shade systems</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>✓</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Continue daily health checks</Text>
-                                                </View>
-                                                <View style={tw`flex-row items-start`}>
-                                                    <Text style={tw`text-green-600 mr-2`}>✓</Text>
-                                                    <Text style={tw`text-gray-700 text-sm`}>Keep records of environmental readings</Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    ) : null}
-                                </View>
-
-                                <Text style={tw`text-gray-600 text-xs mt-4`}>
-                                    💡 These actions are based on current environmental readings and can help prevent common poultry diseases.
-                                </Text>
-                            </Card>
-
-                            {/* Real-time Improvement Simulator */}
-                            {(feedback.suitability === 'moderate' || feedback.suitability === 'poor') && (
-                                <Card
-                                    icon="bulb-outline"
-                                    iconColor="#3B82F6"
-                                    title="Real-time Improvement Simulator"
-                                >
-                                    <Text style={tw`text-gray-700 mb-4`}>
-                                        See how small changes can improve your farm's health score:
-                                    </Text>
-
-                                    <View style={tw`space-y-3`}>
-                                        {parseFloat(temperature) > 27 && (
-                                            <TouchableOpacity
-                                                style={tw`bg-blue-50 border border-blue-200 rounded-xl p-3`}
-                                                onPress={() => Alert.alert('Improvement', 'If you add shade structures, temperature could drop by 5-8°C, improving health score by 15-20 points.')}
-                                            >
-                                                <Text style={tw`text-blue-800 font-medium text-sm`}>🛡️ Add Shade Structure</Text>
-                                                <Text style={tw`text-blue-600 text-xs`}>Could improve health score by +15-20 points</Text>
-                                            </TouchableOpacity>
-                                        )}
-
-                                        {parseFloat(humidity) > 70 && (
-                                            <TouchableOpacity
-                                                style={tw`bg-blue-50 border border-blue-200 rounded-xl p-3`}
-                                                onPress={() => Alert.alert('Improvement', 'Installing ventilation fans could reduce humidity by 10-15%, improving health score by 10-15 points.')}
-                                            >
-                                                <Text style={tw`text-blue-800 font-medium text-sm`}>💨 Improve Ventilation</Text>
-                                                <Text style={tw`text-blue-600 text-xs`}>Could improve health score by +10-15 points</Text>
-                                            </TouchableOpacity>
-                                        )}
-
-                                        <TouchableOpacity
-                                            style={tw`bg-green-50 border border-green-200 rounded-xl p-3`}
-                                            onPress={() => Alert.alert('Improvement', 'Regular environmental monitoring ensures early detection of problems, maintaining high health scores.')}
-                                        >
-                                            <Text style={tw`text-green-800 font-medium text-sm`}>📊 Regular Monitoring</Text>
-                                            <Text style={tw`text-green-600 text-xs`}>Prevents score drops through early intervention</Text>
-                                        </TouchableOpacity>
-                                    </View>
-
-                                    <Text style={tw`text-gray-600 text-xs mt-4 text-center`}>
-                                        Tap any improvement to see potential impact on your farm's health score
-                                    </Text>
-                                </Card>
-                            )}
-
-                            <Card
-                                icon="medical-outline"
-                                iconColor={feedback.color}
-                                title="Disease Prevention Recommendations"
-                            >
-                                {feedback.recommendations.map((tip, index) => (
-                                    <View key={index} style={tw`flex-row items-start mb-3 last:mb-0`}>
-                                        <View style={[tw`w-2 h-2 rounded-full mt-2 mr-3`, { backgroundColor: feedback.color }]} />
-                                        <Text style={tw`flex-1 text-gray-700 leading-6`}>{tip}</Text>
-                                    </View>
-                                ))}
-                            </Card>
-                        </View>
-                    )}
-                </Animated.View>
-            </ScrollView>
+                    </Animated.View>
+                </ScrollView>
+            </LinearGradient>
+            {/* Stop button - floating noisy */}
+            <TouchableOpacity
+                onPress={stopRealTimeMonitoring}
+                style={tw`absolute bottom-4 right-4 bg-red-500 p-3 rounded-full`}
+            >
+                <Ionicons name="stop-circle" size={24} color="white" />
+            </TouchableOpacity>
         </View>
     );
 }
