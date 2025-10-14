@@ -1,12 +1,12 @@
-import Constants from 'expo-constants';
+import Constants from 'expo-constants'
 
-export const SERVER_URL = "http://10.12.75.99:8080"
+export const SERVER_URL = "http://192.168.42.250:8080"
 
 export const API_CONFIG = {
     BASE_URL: SERVER_URL,
     API_VERSION: 'v1',
     TIMEOUT: 20000,
-};
+}
 
 export const API_ENDPOINTS = {
     // Authentication
@@ -213,33 +213,33 @@ export const GoogleAuthConfig = {
     // Redirect URI scheme (should match app.json scheme)
     redirectScheme: 'myapp',
     redirectPath: 'auth/google',
-};
+}
 
 // Helper function to validate configuration
-export const validateGoogleAuthConfig = (): { isValid: boolean; errors: string[] } => {
-    const errors: string[] = [];
+export const validateGoogleAuthConfig = (): { isValid: boolean, errors: string[] } => {
+    const errors: string[] = []
     
     if (GoogleAuthConfig.androidClientId.includes('YOUR_ANDROID_CLIENT_ID')) {
-        errors.push('Android Client ID not configured');
+        errors.push('Android Client ID not configured')
     }
     
     if (GoogleAuthConfig.iosClientId.includes('YOUR_IOS_CLIENT_ID')) {
-        errors.push('iOS Client ID not configured');
+        errors.push('iOS Client ID not configured')
     }
     
     if (GoogleAuthConfig.webClientId.includes('YOUR_WEB_CLIENT_ID')) {
-        errors.push('Web Client ID not configured');
+        errors.push('Web Client ID not configured')
     }
 
     return {
         isValid: errors.length === 0,
         errors
-    };
-};
+    }
+}
 
 // Development helper to show configuration status
 export const getConfigurationStatus = () => {
-    const validation = validateGoogleAuthConfig();
+    const validation = validateGoogleAuthConfig()
     
     return {
         ...validation,
@@ -255,5 +255,5 @@ export const getConfigurationStatus = () => {
                 : '✅ Configured',
             redirectUri: `${GoogleAuthConfig.redirectScheme}://${GoogleAuthConfig.redirectPath}`,
         }
-    };
-};
+    }
+}

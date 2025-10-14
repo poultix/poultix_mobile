@@ -1,9 +1,8 @@
 import BottomTabs from '@/components/BottomTabs';
-import DrawerButton from '@/components/DrawerButton';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   ScrollView,
@@ -15,13 +14,10 @@ import {
 } from 'react-native';
 import tw from 'twrnc';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import { ThemedContainer, ThemedText, ThemedCard } from '@/components/ui/ThemedComponents';
-import { PageHeader } from '@/components/ui/ThemedHeader';
 
 export default function SettingsScreen() {
   const { currentUser, logout } = useAuth();
-  const { theme, isDark, toggleTheme } = useTheme();
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -45,7 +41,7 @@ export default function SettingsScreen() {
             try {
               await logout();
               router.replace('/auth/login');
-            } catch (error) {
+            } catch {
               Alert.alert('Error', 'Failed to logout. Please try again.');
             }
           }
@@ -66,9 +62,9 @@ export default function SettingsScreen() {
       id: 'appearance', 
       title: 'Dark Mode', 
       icon: 'moon-outline', 
-      action: toggleTheme,
+      action: () => setIsDarkMode(!isDarkMode),
       hasToggle: true,
-      toggleValue: isDark
+      toggleValue: isDarkMode
     },
     { 
       id: 'privacy', 
@@ -108,119 +104,116 @@ export default function SettingsScreen() {
   ];
 
   return (
-    <ThemedContainer variant="background">
+    <View style={tw`flex-1 bg-amber-50`}>
       <Animated.View style={[tw`flex-1`, { opacity: fadeAnim }]}>
-        {/* Header with Gradient */}
-        <View style={tw`bg-gradient-to-br from-blue-500 to-purple-600 px-6 py-12 shadow-lg`}>
+        {/* Amber Header */}
+        <LinearGradient
+          colors={['#f59e0b', '#d97706', '#b45309']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={tw`px-6 py-12`}
+        >
           <View style={tw`flex-row items-center justify-between mb-4`}>
             <TouchableOpacity
-              style={tw`bg-white/20 p-3 rounded-2xl`}
+              style={tw`bg-white bg-opacity-20 p-3 rounded-2xl`}
               onPress={() => router.back()}
             >
               <Ionicons name="arrow-back" size={24} color="white" />
             </TouchableOpacity>
             <View style={tw`flex-1 ml-4`}>
-              <Text style={tw`text-white font-medium text-sm`}>Settings</Text>
+              <Text style={tw`text-white font-medium text-sm opacity-90`}>Settings</Text>
               <Text style={tw`text-white text-2xl font-bold`}>App Preferences</Text>
-              <Text style={tw`text-blue-100 text-sm`}>Customize your experience</Text>
+              <Text style={tw`text-amber-100 text-sm font-medium`}>Manage your account</Text>
             </View>
           </View>
-        </View>
+        </LinearGradient>
 
         <ScrollView style={tw`flex-1 px-4 -mt-6`} showsVerticalScrollIndicator={false}>
           {/* User Info Card */}
-          <ThemedCard padding="lg" style={tw`mb-6`}>
+          <View style={tw`bg-white rounded-3xl p-6 mb-4 shadow-lg border border-amber-100`}>
             <View style={tw`flex-row items-center`}>
-              <View 
-                style={[
-                  tw`w-16 h-16 rounded-2xl items-center justify-center mr-4`,
-                  { backgroundColor: `linear-gradient(135deg, ${theme.primary}20, ${theme.primary}30)` }
-                ]}
+              <LinearGradient
+                colors={['#fef3c7', '#fed7aa']}
+                style={tw`w-16 h-16 rounded-2xl items-center justify-center mr-4`}
               >
-                <Ionicons name="person" size={32} color={theme.primary} />
-              </View>
+                <Ionicons name="person" size={32} color="#d97706" />
+              </LinearGradient>
               <View style={tw`flex-1`}>
-                <ThemedText size="lg" weight="bold">{currentUser?.name}</ThemedText>
-                <ThemedText variant="secondary" size="sm">{currentUser?.email}</ThemedText>
-                <View style={tw`flex-row items-center mt-1`}>
-                  <View style={[
-                    tw`px-2 py-1 rounded-full`,
-                    { backgroundColor: theme.primary + '20' }
-                  ]}>
-                    <ThemedText 
-                      size="xs" 
-                      style={{ color: theme.primary, fontWeight: '600' }}
-                    >
-                      {currentUser?.role?.toLowerCase()}
-                    </ThemedText>
+                <Text style={tw`text-lg font-bold text-gray-900`}>{currentUser?.name || 'User Name'}</Text>
+                <Text style={tw`text-gray-600 text-sm`}>{currentUser?.email || 'user@example.com'}</Text>
+                <View style={tw`flex-row items-center mt-2`}>
+                  <View style={tw`bg-amber-100 px-3 py-1 rounded-full`}>
+                    <Text style={tw`text-amber-800 text-xs font-bold`}>
+                      {currentUser?.role?.toLowerCase() || 'farmer'}
+                    </Text>
                   </View>
-                  {currentUser?.isActive && (
-                    <View style={tw`ml-2 flex-row items-center`}>
-                      <View style={tw`w-2 h-2 rounded-full bg-green-500 mr-1`} />
-                      <ThemedText size="xs" variant="secondary">Active</ThemedText>
-                    </View>
-                  )}
+                  <View style={tw`ml-3 flex-row items-center`}>
+                    <View style={tw`w-2 h-2 rounded-full bg-green-500 mr-2`} />
+                    <Text style={tw`text-gray-500 text-xs font-medium`}>Active</Text>
+                  </View>
                 </View>
               </View>
             </View>
-          </ThemedCard>
+          </View>
 
           {/* Settings Options */}
-          <ThemedCard padding="sm" style={tw`mb-6`}>
+          <View style={tw`bg-white rounded-3xl mb-4 shadow-lg border border-amber-100`}>
             {settingsOptions.map((option, index) => (
               <TouchableOpacity
                 key={option.id}
                 style={[
                   tw`flex-row items-center p-4`,
-                  index < settingsOptions.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.divider }
+                  index < settingsOptions.length - 1 && tw`border-b border-amber-50`,
+                  index === 0 && tw`rounded-t-3xl`,
+                  index === settingsOptions.length - 1 && tw`rounded-b-3xl`
                 ]}
                 onPress={option.action}
               >
-                <View 
-                  style={[
-                    tw`w-12 h-12 rounded-2xl items-center justify-center mr-4`,
-                    { backgroundColor: `linear-gradient(135deg, ${theme.primary}15, ${theme.primary}25)` }
-                  ]}
-                >
-                  <Ionicons name={option.icon as any} size={22} color={theme.primary} />
+                <View style={tw`w-12 h-12 bg-amber-50 rounded-2xl items-center justify-center mr-4`}>
+                  <Ionicons name={option.icon as any} size={22} color="#d97706" />
                 </View>
-                <ThemedText weight="medium" style={tw`flex-1`}>
+                <Text style={tw`flex-1 text-gray-900 font-medium text-base`}>
                   {option.title}
-                </ThemedText>
+                </Text>
                 {option.hasToggle ? (
                   <Switch
                     value={option.toggleValue}
                     onValueChange={option.action}
-                    trackColor={{ false: '#D1D5DB', true: theme.primary + '80' }}
-                    thumbColor={option.toggleValue ? theme.primary : '#F3F4F6'}
+                    trackColor={{ false: '#D1D5DB', true: '#fed7aa' }}
+                    thumbColor={option.toggleValue ? '#d97706' : '#F3F4F6'}
                   />
                 ) : (
-                  <Ionicons name="chevron-forward-outline" size={20} color={theme.text.secondary} />
+                  <Ionicons name="chevron-forward-outline" size={20} color="#9CA3AF" />
                 )}
               </TouchableOpacity>
             ))}
-          </ThemedCard>
+          </View>
 
-          {/* Danger Zone */}
-          <ThemedCard padding="sm" style={tw`mb-20`}>
+          {/* Logout Section */}
+          <View style={tw`bg-white rounded-3xl mb-20 shadow-lg border border-red-100`}>
             <TouchableOpacity
-              style={tw`flex-row items-center p-4`}
+              style={tw`flex-row items-center p-4 rounded-3xl`}
               onPress={handleLogout}
             >
-              <View style={tw`w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl items-center justify-center mr-4`}>
+              <LinearGradient
+                colors={['#ef4444', '#dc2626']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={tw`w-12 h-12 rounded-2xl items-center justify-center mr-4`}
+              >
                 <Ionicons name="log-out-outline" size={22} color="white" />
-              </View>
-              <ThemedText weight="medium" style={tw`flex-1 text-red-600`}>
+              </LinearGradient>
+              <Text style={tw`flex-1 text-red-600 font-bold text-base`}>
                 Sign Out
-              </ThemedText>
+              </Text>
               <Ionicons name="chevron-forward-outline" size={20} color="#EF4444" />
             </TouchableOpacity>
-          </ThemedCard>
+          </View>
         </ScrollView>
       </Animated.View>
       
       <BottomTabs />
-    </ThemedContainer>
+    </View>
   );
 }
  

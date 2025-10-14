@@ -10,6 +10,9 @@ import {
     View,
 } from 'react-native';
 import tw from 'twrnc';
+import { i18n } from '../../services/i18n/i18n';
+import { useOfflineSupport } from '../../hooks/useOfflineSupport';
+import { offlineEmergencyData } from '../../services/storage/offlineData';
 
 // Mock first aid guide data
 const firstAidGuides = [
@@ -96,9 +99,11 @@ const firstAidGuides = [
 ];
 
 const FirstAidScreen = () => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const { isOnline, getDataWithOfflineSupport } = useOfflineSupport();
+
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [filteredGuides, setFilteredGuides] = useState(firstAidGuides);
-    const fadeAnim = useRef(new Animated.Value(0)).current;
 
     const categories = [
         { name: 'All', count: firstAidGuides.length },

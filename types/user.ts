@@ -4,6 +4,15 @@ export interface Location {
     longitude: number;
 }
 
+// Language enum - matches backend
+export enum Language {
+    EN = 'EN',
+    KN = 'KN', // Kinyarwanda
+    FR = 'FR',
+    SW = 'SW', // Swahili
+    KR = 'KR'  // Korean
+}
+
 // User roles enum - matches backend
 export enum UserRole {
     ADMIN = 'ADMIN',
@@ -22,6 +31,7 @@ export interface User {
     phone?: string;
     location: Location;
     role: UserRole;
+    language: Language;
     isActive: boolean;
     emailVerified: boolean;
     isVerified: boolean; // For role-specific verification (pharmacy, veterinary, etc.)
@@ -85,6 +95,7 @@ export interface UserRegistrationRequest {
     avatar?: string;
     location: Location;
     role: UserRole;
+    language?: Language;
 }
 
 // User update request - matches backend
@@ -93,6 +104,7 @@ export interface UserUpdateRequest {
     avatar?: string;
     phone?: string;
     location?: Location;
+    language?: Language;
 }
 
 // Auth related types
