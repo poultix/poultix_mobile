@@ -150,10 +150,10 @@ const FirstAidScreen = () => {
 
                 <Animated.View style={[{ opacity: fadeAnim }]}>
                     <Text style={tw`text-white text-2xl font-bold mb-2`}>
-                        First Aid Guide
+                        {i18n.emergency('firstAid')}
                     </Text>
-                    <Text style={tw`text-green-100 text-sm`}>
-                        Essential animal first aid knowledge
+                    <Text style={tw`text-red-100 text-sm`}>
+                        Quick reference guides for livestock emergency care
                     </Text>
                 </Animated.View>
             </LinearGradient>

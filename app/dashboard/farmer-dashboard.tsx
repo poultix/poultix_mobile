@@ -22,6 +22,7 @@ import FarmerSchedulesDashboard from '@/components/dashboard/farmer/schedules';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFarms } from '@/contexts/FarmContext';
 import { getRoleTheme } from '@/utils/theme';
+import { i18n } from '../../services/i18n/i18n';
 
 
 export default function FarmerDashboardScreen() {
@@ -54,13 +55,13 @@ export default function FarmerDashboardScreen() {
             <View className={`flex-row items-center justify-between mb-4`}>
               <View className="flex-1">
                 <Text className={`text-white text-sm opacity-90`}>
-                  Farmer Dashboard
+                  {i18n.navigation('dashboard')}
                 </Text>
                 <Text className={`text-white text-2xl font-bold`}>
-                  Welcome, {currentUser?.name}
+                  {i18n.common('welcome')}, {currentUser?.name}
                 </Text>
                 <Text className={`text-white opacity-80 text-sm mt-1`}>
-                  Farmer • {myFarms.length} farms
+                  {i18n.common('farmer')} • {myFarms.length} {i18n.common('farms')}
                 </Text>
               </View>
               <DrawerButton />
@@ -72,13 +73,13 @@ export default function FarmerDashboardScreen() {
                 <View className="flex-row items-center">
                   <Ionicons name="warning-outline" size={20} color="#F59E0B" />
                   <Text className="text-yellow-800 font-medium ml-2 flex-1">
-                    Account verification pending
+                    {i18n.common('accountVerificationPending')}
                   </Text>
                   <TouchableOpacity
                     className="bg-yellow-500 px-3 py-1 rounded-lg"
                     onPress={() => Alert.alert('Verification', 'Please complete your profile verification to access all features.')}
                   >
-                    <Text className="text-white text-xs font-semibold">Verify</Text>
+                    <Text className="text-white text-xs font-semibold">{i18n.common('verify')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -90,9 +91,9 @@ export default function FarmerDashboardScreen() {
         <View className="px-4 mb-4">
           <View className="bg-white rounded-2xl p-2 flex-row shadow-sm">
             {[
-              { key: 'overview', label: 'Overview', icon: 'analytics-outline' },
-              { key: 'farms', label: 'My Farms', icon: 'leaf-outline' },
-              { key: 'schedules', label: 'Schedules', icon: 'calendar-outline' },
+              { key: 'overview', label: i18n.common('overview'), icon: 'analytics-outline' },
+              { key: 'farms', label: i18n.common('myFarms'), icon: 'leaf-outline' },
+              { key: 'schedules', label: i18n.common('schedules'), icon: 'calendar-outline' },
             ].map((tab) => (
               <TouchableOpacity
                 key={tab.key}

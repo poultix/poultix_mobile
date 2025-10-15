@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import tw from 'twrnc';
+import { i18n } from '../../services/i18n/i18n';
 
 const { width } = Dimensions.get('window');
 
@@ -59,16 +60,16 @@ const getPhFeedback = (ph: number): Feedback => {
   if (ph < 4.5) {
     return {
       isSick: true,
-      status: 'Severe Acidosis',
-      description: 'pH is critically low. Immediate veterinary attention is needed.',
+      status: i18n.phReader('severeAcidosis'),
+      description: i18n.phReader('severeAcidosisDesc'),
       severity: 'critical',
       color: '#DC2626',
       bgColor: '#FEF2F2',
       recommendations: [
-        'Provide immediate access to clean, alkaline water.',
-        'Consult a vet for electrolyte therapy.',
-        'Avoid acidic feed.',
-        'Monitor chicken closely for signs of distress.',
+        i18n.phReader('severeAcidosisRec1'),
+        i18n.phReader('severeAcidosisRec2'),
+        i18n.phReader('severeAcidosisRec3'),
+        i18n.phReader('severeAcidosisRec4'),
       ],
       diseases,
       quickMeasures

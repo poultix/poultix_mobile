@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import tw from 'twrnc';
+import { i18n } from '../../services/i18n/i18n';
 
 // Mock map data for learning
 const mockMapPoints = [
@@ -49,10 +50,10 @@ const MapScreen = () => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     const filters = [
-        { id: 'all', label: 'All', icon: 'grid-outline', color: 'bg-gray-500' },
-        { id: 'pharmacy', label: 'Pharmacies', icon: 'storefront-outline', color: 'bg-orange-500' },
-        { id: 'veterinary', label: 'Veterinarians', icon: 'person-outline', color: 'bg-green-500' },
-        { id: 'farm', label: 'Farms', icon: 'home-outline', color: 'bg-blue-500' }
+        { id: 'all', label: i18n.common('all'), icon: 'grid-outline', color: 'bg-gray-500' },
+        { id: 'pharmacy', label: i18n.map('pharmacies'), icon: 'storefront-outline', color: 'bg-orange-500' },
+        { id: 'veterinary', label: i18n.map('veterinarians'), icon: 'person-outline', color: 'bg-green-500' },
+        { id: 'farm', label: i18n.map('farms'), icon: 'home-outline', color: 'bg-blue-500' }
     ];
 
     useEffect(() => {
@@ -112,10 +113,10 @@ const MapScreen = () => {
 
                 <Animated.View style={[{ opacity: fadeAnim }]}>
                     <Text style={tw`text-white text-2xl font-bold`}>
-                        Interactive Map
+                        {i18n.map('interactiveMap')}
                     </Text>
                     <Text style={tw`text-purple-100 text-sm mt-1`}>
-                        Explore veterinary services near you
+                        {i18n.map('exploreServices')}
                     </Text>
                 </Animated.View>
             </LinearGradient>

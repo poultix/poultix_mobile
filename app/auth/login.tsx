@@ -15,6 +15,7 @@ import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useAuth } from '@/contexts/AuthContext'
 import { StatusBar } from 'expo-status-bar'
+import { i18n } from '../../services/i18n/i18n'
 
 export default function SignInScreen() {
     const { currentUser, loading: authLoading, login } = useAuth()
@@ -124,7 +125,7 @@ export default function SignInScreen() {
                     {/* Email */}
                     <Animated.View className="space-y-6" style={{ transform: [{ translateX: shakeAnim }] }}>
                         <View className="mb-6">
-                            <Text className="text-gray-700 font-medium mb-2 ml-1">Email</Text>
+                            <Text className="text-gray-700 font-medium mb-2 ml-1">{i18n.auth('email')}</Text>
                             <View
                                 className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isEmailFocused ? 'border-amber-400' : 'border-gray-200'} ${emailError ? 'border-red-500' : ''}`}
                             >
@@ -138,7 +139,7 @@ export default function SignInScreen() {
                                 <TextInput
                                     ref={inputRefs.email}
                                     className="flex-1 h-14 text-base text-gray-800"
-                                    placeholder="Enter your email"
+                                    placeholder={i18n.auth('enterEmail')}
                                     value={email}
                                     onChangeText={t => { setEmail(t); if (emailError) setEmailError('') }}
                                     keyboardType="email-address"
@@ -155,7 +156,7 @@ export default function SignInScreen() {
 
                         {/* Password */}
                         <View className="mb-4">
-                            <Text className="text-gray-700 font-medium mb-2 ml-1">Password</Text>
+                            <Text className="text-gray-700 font-medium mb-2 ml-1">{i18n.auth('password')}</Text>
                             <View
                                 className={`flex-row items-center bg-gray-50 rounded-xl overflow-hidden border shadow-sm ${isPasswordFocused ? 'border-amber-400' : 'border-gray-200'} ${passwordError ? 'border-red-500' : ''}`}
                             >
@@ -169,7 +170,7 @@ export default function SignInScreen() {
                                 <TextInput
                                     ref={inputRefs.password}
                                     className="flex-1 h-14 text-base text-gray-800"
-                                    placeholder="Enter your password"
+                                    placeholder={i18n.auth('enterPassword')}
                                     autoCapitalize="none"
                                     secureTextEntry={!showPassword}
                                     value={password}
@@ -193,7 +194,7 @@ export default function SignInScreen() {
 
                         {/* Forgot Password */}
                         <TouchableOpacity onPress={() => router.push('/auth/forgot-password')} className="items-end mb-7 mt-1" activeOpacity={0.7}>
-                            <Text className="text-amber-500 font-medium">Forgot Password?</Text>
+                            <Text className="text-amber-500 font-medium">{i18n.auth('forgotPassword')}</Text>
                         </TouchableOpacity>
 
                         {/* Sign In */}
@@ -213,10 +214,10 @@ export default function SignInScreen() {
                                     {authLoading ? (
                                         <View className="flex-row items-center">
                                             <ActivityIndicator size="small" color="white" />
-                                            <Text className="text-white font-semibold text-lg ml-2">Signing In...</Text>
+                                            <Text className="text-white font-semibold text-lg ml-2">{i18n.auth('signingIn')}</Text>
                                         </View>
                                     ) : (
-                                        <Text className="text-white font-semibold text-lg">Sign In</Text>
+                                        <Text className="text-white font-semibold text-lg">{i18n.auth('signIn')}</Text>
                                     )}
                                 </LinearGradient>
                             </TouchableOpacity>
@@ -225,7 +226,7 @@ export default function SignInScreen() {
                         {/* Divider */}
                         <View className="flex-row items-center my-8">
                             <View className="flex-1 h-[1px] bg-gray-200" />
-                            <Text className="mx-4 text-gray-400 font-medium">OR CONTINUE WITH</Text>
+                            <Text className="mx-4 text-gray-400 font-medium">{i18n.auth('orContinueWith')}</Text>
                             <View className="flex-1 h-[1px] bg-gray-200" />
                         </View>
 

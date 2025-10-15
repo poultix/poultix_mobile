@@ -4,6 +4,7 @@ import { ScheduleStatus } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
+import { i18n } from '../../../services/i18n/i18n';
 
 export default function FarmerOverview() {
     const { farms, } = useFarms()
@@ -30,9 +31,9 @@ export default function FarmerOverview() {
                             <Ionicons name="leaf-outline" size={24} color="#10B981" />
                             <Text className="text-2xl font-bold text-gray-800">{farms.length}</Text>
                         </View>
-                        <Text className="text-gray-600 font-medium">My Farms</Text>
+                        <Text className="text-gray-600 font-medium">{i18n.common('myFarms')}</Text>
                         <Text className="text-xs text-gray-500 mt-1">
-                            {farms.reduce((sum, farm) => sum + farm.size, 0).toFixed(1)} hectares total
+                            {farms.reduce((sum, farm) => sum + farm.size, 0).toFixed(1)} {i18n.common('hectares')} {i18n.common('total')}
                         </Text>
                     </View>
 
@@ -41,9 +42,9 @@ export default function FarmerOverview() {
                             <Ionicons name="analytics-outline" size={24} color="#3B82F6" />
                             <Text className="text-2xl font-bold text-gray-800">{totalChickens.toLocaleString()}</Text>
                         </View>
-                        <Text className="text-gray-600 font-medium">Total Chickens</Text>
+                        <Text className="text-gray-600 font-medium">{i18n.common('totalChickens')}</Text>
                         <Text className="text-xs text-gray-500 mt-1">
-                            {((healthyChickens / totalChickens) * 100).toFixed(1)}% healthy
+                            {((healthyChickens / totalChickens) * 100).toFixed(1)}% {i18n.common('healthy')}
                         </Text>
                     </View>
 
@@ -52,9 +53,9 @@ export default function FarmerOverview() {
                             <Ionicons name="calendar-outline" size={24} color="#F59E0B" />
                             <Text className="text-2xl font-bold text-gray-800">{upcomingSchedules.length}</Text>
                         </View>
-                        <Text className="text-gray-600 font-medium">Upcoming Visits</Text>
+                        <Text className="text-gray-600 font-medium">{i18n.common('upcomingVisits')}</Text>
                         <Text className="text-xs text-gray-500 mt-1">
-                            Next: {new Date(upcomingSchedules[0]?.scheduledDate).toLocaleDateString() || 'None'}
+                            {i18n.common('next')}: {new Date(upcomingSchedules[0]?.scheduledDate).toLocaleDateString() || i18n.common('none')}
                         </Text>
                     </View>
 
@@ -63,24 +64,24 @@ export default function FarmerOverview() {
                             <Ionicons name="warning-outline" size={24} color="#EF4444" />
                             <Text className="text-2xl font-bold text-gray-800">{sickChickens + atRiskChickens}</Text>
                         </View>
-                        <Text className="text-gray-600 font-medium">Need Attention</Text>
+                        <Text className="text-gray-600 font-medium">{i18n.common('needAttention')}</Text>
                         <Text className="text-xs text-gray-500 mt-1">
-                            {sickChickens} sick, {atRiskChickens} at risk
+                            {sickChickens} {i18n.common('sick')}, {atRiskChickens} {i18n.common('atRisk')}
                         </Text>
                     </View>
                 </View>
             ) : (
                 <View className="bg-white rounded-2xl p-6 shadow-sm mb-6 items-center">
                     <Ionicons name="leaf-outline" size={48} color="#D1D5DB" />
-                    <Text className="text-lg font-bold text-gray-800 mt-3">No Farms Yet</Text>
+                    <Text className="text-lg font-bold text-gray-800 mt-3">{i18n.common('noFarmsYet')}</Text>
                     <Text className="text-gray-600 text-center mt-2">
-                        Get started by adding your first farm to track your poultry operations
+                        {i18n.common('getStartedAddFarm')}
                     </Text>
                     <TouchableOpacity
                         className="bg-blue-500 px-6 py-3 rounded-xl mt-4"
                         onPress={() => router.push('/farm/create')}
                     >
-                        <Text className="text-white font-semibold">Add Your First Farm</Text>
+                        <Text className="text-white font-semibold">{i18n.common('addYourFirstFarm')}</Text>
                     </TouchableOpacity>
                 </View>
             )}

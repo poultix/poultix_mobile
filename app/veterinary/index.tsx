@@ -16,6 +16,7 @@ import tw from 'twrnc';
 
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
+import { i18n } from '../../services/i18n/i18n';
 
 // Mock AI-generated veterinarian data for learning
 const mockVeterinarians = [
@@ -225,7 +226,7 @@ const VeterinaryScreen = () => {
                                     AI-Verified Professional Network
                                 </Text>
                                 <Text style={tw`text-white text-2xl font-bold`}>
-                                    Find Veterinarians
+                                    {i18n.veterinary('findVeterinarian')}
                                 </Text>
                                 <Text style={tw`text-green-100 text-sm mt-1`}>
                                     Connect with certified veterinary professionals
@@ -234,7 +235,7 @@ const VeterinaryScreen = () => {
 
                             {/* Stats */}
                             <View style={tw`bg-white bg-opacity-15 rounded-2xl p-4 mt-4`}>
-                                <Text style={tw`text-white font-bold text-base mb-3`}>Network Stats</Text>
+                                <Text style={tw`text-white font-bold text-base mb-3`}>{i18n.veterinary('networkStats')}</Text>
                                 <View style={tw`flex-row justify-between`}>
                                     <View style={tw`items-center flex-1`}>
                                         <Text style={tw`text-white text-xl font-bold`}>

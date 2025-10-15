@@ -10,6 +10,7 @@ import {
   View
 } from 'react-native';
 import tw from 'twrnc';
+import { i18n } from '../../services/i18n/i18n';
 
 import CustomDrawer from '@/components/CustomDrawer';
 import DrawerButton from '@/components/DrawerButton';
@@ -56,11 +57,11 @@ export default function VeterinaryDashboardScreen() {
                     <Ionicons name="medical-outline" size={20} color="white" />
                   </View>
                   <Text style={tw`text-white text-xs opacity-90 font-medium`}>
-                    Veterinary Dashboard
+                    {i18n.navigation('dashboard')}
                   </Text>
                 </View>
                 <Text style={tw`text-white text-2xl font-bold mb-1`}>
-                  Dr. {currentUser?.name}
+                  Dr. Welcome, {currentUser?.name}
                 </Text>
                 <View style={tw`flex-row items-center`}>
                   <View style={tw`bg-white bg-opacity-15 px-3 py-1 rounded-full mr-2`}>

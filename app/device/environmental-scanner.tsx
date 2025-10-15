@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import tw from 'twrnc';
+import { i18n } from '../../services/i18n/i18n';
 const { width } = Dimensions.get('window');
 // ========================================================================================
 // INTERFACES & TYPES
@@ -555,7 +556,7 @@ export default function EnvironmentalScannerScreen() {
                                         </View>
                                     </View>
                                     <Text style={tw`text-white text-2xl font-bold tracking-tight`} numberOfLines={1}>
-                                        Environmental Monitor
+                                        {i18n.environment('scanner')}
                                     </Text>
                                     <View style={tw`flex-row items-center mt-1`}>
                                         <Ionicons name="flame-outline" size={14} color="#fed7aa" style={tw`mr-1`} />

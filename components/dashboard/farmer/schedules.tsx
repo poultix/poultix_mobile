@@ -3,6 +3,7 @@ import { useSchedules } from "@/contexts/ScheduleContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
+import { i18n } from '../../../services/i18n/i18n';
 
 export default function FarmerSchedulesDashboard() {
     const { schedules, setCurrentSchedule } = useSchedules()
@@ -10,13 +11,13 @@ export default function FarmerSchedulesDashboard() {
     return (
         <View className="px-4">
             <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-xl font-bold text-gray-800">My Schedules</Text>
+                <Text className="text-xl font-bold text-gray-800">{i18n.common('schedules')}</Text>
                 <TouchableOpacity
                     className="bg-amber-500 px-4 py-2 rounded-xl flex-row items-center"
                     onPress={() => router.push('/schedule/schedule-request')}
                 >
                     <Ionicons name="add-outline" size={16} color="white" />
-                    <Text className="text-white font-semibold ml-1">Request Visit</Text>
+                    <Text className="text-white font-semibold ml-1">{i18n.common('requestVisit')}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -67,7 +68,7 @@ export default function FarmerSchedulesDashboard() {
                             <View className="flex-row items-center justify-between">
                                 <View className={`px-2 py-1 rounded-full ${schedule.priority === 'URGENT' ? 'bg-red-100' : schedule.priority === 'HIGH' ? 'bg-orange-100' : schedule.priority === 'MEDIUM' ? 'bg-yellow-100' : 'bg-gray-100'}`}>
                                     <Text className={`text-xs font-bold capitalize ${schedule.priority === 'URGENT' ? 'text-red-600' : schedule.priority === 'HIGH' ? 'text-orange-600' : schedule.priority === 'MEDIUM' ? 'text-yellow-600' : 'text-gray-600'}`}>
-                                        {schedule.priority} priority
+                                        {schedule.priority} {i18n.activities('priority')}
                                     </Text>
                                 </View>
                                 <Ionicons name="chevron-forward-outline" size={16} color="#9CA3AF" />
@@ -78,16 +79,16 @@ export default function FarmerSchedulesDashboard() {
             ) : (
                 <View className="flex-1 items-center justify-center py-16">
                     <Ionicons name="calendar-outline" size={64} color="#D1D5DB" />
-                    <Text className="text-xl font-bold text-gray-800 mt-4">No Schedules Yet</Text>
+                    <Text className="text-xl font-bold text-gray-800 mt-4">{i18n.activities('noSchedulesYet')}</Text>
                     <Text className="text-gray-600 text-center mt-2 px-8">
-                        Schedule veterinary visits for your farms to maintain poultry health and prevent diseases. Regular check-ups keep your flock healthy and productive.
+                        {i18n.activities('scheduleVisitsText')}
                     </Text>
                     <TouchableOpacity
                         className="bg-blue-500 px-8 py-4 rounded-xl mt-6 flex-row items-center"
                         onPress={() => router.push('/schedule/schedule-request')}
                     >
                         <Ionicons name="add-outline" size={20} color="white" />
-                        <Text className="text-white font-semibold ml-2">Request Your First Visit</Text>
+                        <Text className="text-white font-semibold ml-2">{i18n.activities('requestFirstVisit')}</Text>
                     </TouchableOpacity>
                 </View>
             )}

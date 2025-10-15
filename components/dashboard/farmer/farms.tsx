@@ -2,6 +2,7 @@ import { useFarms } from "@/contexts/FarmContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
+import { i18n } from '../../../services/i18n/i18n';
 
 export default function FarmsDashboard() {
     const { farms, setCurrentFarm } = useFarms()
@@ -18,13 +19,13 @@ export default function FarmsDashboard() {
     return (
         <View className="px-4">
             <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-xl font-bold text-gray-800">My Farms</Text>
+                <Text className="text-xl font-bold text-gray-800">{i18n.common('myFarms')}</Text>
                 <TouchableOpacity
                     className="bg-amber-500 px-4 py-2 rounded-xl flex-row items-center"
                     onPress={() => router.push('/farm/create')}
                 >
                     <Ionicons name="add-outline" size={16} color="white" />
-                    <Text className="text-white font-semibold ml-1">Add Farm</Text>
+                    <Text className="text-white font-semibold ml-1">{i18n.common('addFarm')}</Text>
                 </TouchableOpacity>
             </View>
 

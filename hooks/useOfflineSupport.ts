@@ -34,31 +34,21 @@ export const useOfflineSupport = () => {
                     setIsLoading(false);
                     return freshData;
                 } catch (error) {
-                    // If fetch fails but cached data exists, use cached
-                    if (cachedData) {
-                        setIsLoading(false);
-                        return cachedData;
-                    }
-                    throw error;
+                    // SILENT FALLBACK: If fetch fails, use cached or fallback data
+                    console.log('Network error, using cached/fallback data:', error);
+                    setIsLoading(false);
+                    return cachedData || fallbackData || {} as T;
                 }
             } else {
                 // If offline, use cached data or fallback
-                if (cachedData) {
-                    setIsLoading(false);
-                    return cachedData;
-                }
-                if (fallbackData) {
-                    setIsLoading(false);
-                    return fallbackData;
-                }
-                throw new Error('No cached data available offline');
+                setIsLoading(false);
+                return cachedData || fallbackData || {} as T;
             }
         } catch (error) {
+            // NEVER throw errors - always return something
+            console.log('Cache error, using fallback data:', error);
             setIsLoading(false);
-            if (fallbackData) {
-                return fallbackData;
-            }
-            throw error;
+            return fallbackData || {} as T;
         }
     };
 

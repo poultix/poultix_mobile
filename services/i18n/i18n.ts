@@ -96,6 +96,22 @@ export class I18nService {
     ai(key: string): string {
         return this.t('ai', key);
     }
+
+    map(key: string): string {
+        return this.t('map', key);
+    }
+
+    drawer(key: string): string {
+        return this.t('drawer', key);
+    }
+
+    activities(key: string): string {
+        return this.t('activities', key);
+    }
+
+    phReader(key: string): string {
+        return this.t('phReader', key);
+    }
 }
 
 export const i18n = I18nService.getInstance();

@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
+import { i18n } from '../../services/i18n/i18n';
 import {
   Alert,
   Animated,
@@ -434,8 +435,8 @@ export default function ProfileScreen() {
                 <Ionicons name="time-outline" size={20} color={roleColors.primary} />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-800 font-semibold">Activity History</Text>
-                <Text className="text-gray-500 text-sm">View your recent activities</Text>
+                <Text className="text-gray-800 font-semibold">{i18n.activities('activityHistory')}</Text>
+                <Text className="text-gray-500 text-sm">{i18n.activities('viewRecentActivities')}</Text>
               </View>
               <Ionicons name="chevron-forward-outline" size={20} color="#9CA3AF" />
             </TouchableOpacity>

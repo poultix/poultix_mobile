@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import tw from 'twrnc';
+import { i18n } from '../../services/i18n/i18n';
 
 import CustomDrawer from '@/components/CustomDrawer';
 import DrawerButton from '@/components/DrawerButton';
@@ -67,7 +68,7 @@ export default function AdminDashboardScreen() {
             <View style={tw`flex-row items-center justify-between mb-4`}>
               <View style={tw`flex-1`}>
                 <Text style={tw`text-white text-sm opacity-90`}>
-                  Admin Dashboard
+                  {i18n.navigation('dashboard')}
                 </Text>
                 <Text style={tw`text-white text-2xl font-bold`}>
                   Welcome, {currentUser?.name} 👑

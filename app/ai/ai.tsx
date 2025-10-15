@@ -20,6 +20,7 @@ import {
     View,
 } from 'react-native';
 import tw from 'twrnc';
+import { i18n } from '../../services/i18n/i18n';
 
 export default function AIScreen() {
     
@@ -102,7 +103,7 @@ export default function AIScreen() {
                 setMessages(prev => {
                     const withoutTyping = prev.filter(msg => !msg.isTyping);
                     const errorResponse = AIService.createMessage(
-                        'Sorry, I encountered an error. Please try again.', 
+                        i18n.ai('error') || 'Sorry, I encountered an error. Please try again.', 
                         false
                     );
                     return [...withoutTyping, errorResponse];
@@ -138,7 +139,7 @@ export default function AIScreen() {
                                     fontSize: IOSDesign.typography.subheadline.fontSize,
                                     color: IOSDesign.colors.text.secondary,
                                 }
-                            ]}>AI is thinking...</Text>
+                            ]}>{ i18n.ai('thinking') }</Text>
                         </View>
                     </View>
                 </View>
@@ -216,6 +217,7 @@ export default function AIScreen() {
                         ]}>
                             <View style={tw`flex-row items-center justify-between mb-4`}>
                                 <View style={tw`flex-1`}>
+                                    <Ionicons name="arrow-back" size={24} color="white" onPress={() => router.back()} />
                                     <Text style={[
                                         tw`mb-1`,
                                         {
@@ -278,7 +280,7 @@ export default function AIScreen() {
                                     color: IOSDesign.colors.text.primary,
                                 }
                             ]}>
-                                Quick Questions
+                                {i18n.ai('quickQuestions')}
                             </Text>
                             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                 <View style={tw`flex-row gap-3`}>
@@ -333,7 +335,7 @@ export default function AIScreen() {
                                             color: IOSDesign.colors.text.primary,
                                         }
                                     ]}
-                                    placeholder="Ask about poultry farming..."
+                                    placeholder={i18n.ai('askAboutPoultry')}
                                     placeholderTextColor={IOSDesign.colors.text.tertiary}
                                     value={question}
                                     onChangeText={setQuestion}
@@ -369,6 +371,7 @@ export default function AIScreen() {
                         </View>
                     </View>
                 </Animated.View>
+                
             </KeyboardAvoidingView>
         </View>
     );

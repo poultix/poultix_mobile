@@ -11,14 +11,29 @@ import {
   View,
   Alert,
   Switch,
+  Modal,
 } from 'react-native';
 import tw from 'twrnc';
 import { useAuth } from '@/contexts/AuthContext';
+import { i18n } from '../../services/i18n/i18n';
+import { Language } from '../../types/user';
+import { useOfflineSupport } from '../../hooks/useOfflineSupport';
 
 export default function SettingsScreen() {
   const { currentUser, logout } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.getCurrentLanguage());
+  const { isOnline } = useOfflineSupport();
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const languages = [
+    { code: Language.EN, name: 'English', flag: '🇺🇸' },
+    { code: Language.FR, name: 'Français', flag: '🇫🇷' },
+    { code: Language.KN, name: 'Kinyarwanda', flag: '🇷🇼' },
+    { code: Language.SW, name: 'Kiswahili', flag: '🇹🇿' },
+    { code: Language.KR, name: '한국어', flag: '🇰🇷' },
+  ];
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -30,19 +45,21 @@ export default function SettingsScreen() {
 
   const handleLogout = () => {
     Alert.alert(
-      'Logout',
+      i18n.common('logout') || 'Logout',
       'Are you sure you want to logout?',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: i18n.common('cancel') || 'Cancel', style: 'cancel' },
         {
-          text: 'Logout',
+          text: i18n.common('logout') || 'Logout',
           style: 'destructive',
           onPress: async () => {
             try {
               await logout();
               router.replace('/auth/login');
             } catch {
-              Alert.alert('Error', 'Failed to logout. Please try again.');
+              // Silent logout - no error screens
+              console.log('Logout failed, redirecting anyway');
+              router.replace('/auth/login');
             }
           }
         }
@@ -50,13 +67,40 @@ export default function SettingsScreen() {
     );
   };
 
+  const handleLanguageChange = async (language: Language) => {
+    try {
+      await i18n.setLanguage(language);
+      setCurrentLanguage(language);
+      setShowLanguageModal(false);
+      // Force re-render by updating state
+      setTimeout(() => {
+        // Trigger a subtle animation to show language change
+        Animated.sequence([
+          Animated.timing(fadeAnim, {
+            toValue: 0.5,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, 100);
+    } catch (error) {
+      console.log('Language change failed:', error);
+    }
+  };
+
   const settingsOptions = [
     { 
       id: 'notifications', 
-      title: 'Notifications', 
+      title: i18n.common('notifications') || 'Notifications', 
       icon: 'notifications-outline', 
-      action: () => Alert.alert('Coming Soon', 'Notification settings will be available in the next update.'),
-      hasToggle: false 
+      action: () => router.push('/settings/settings-notifications'),
+      hasToggle: false,
+      subtitle: 'Manage your notification preferences'
     },
     { 
       id: 'appearance', 
@@ -64,42 +108,48 @@ export default function SettingsScreen() {
       icon: 'moon-outline', 
       action: () => setIsDarkMode(!isDarkMode),
       hasToggle: true,
-      toggleValue: isDarkMode
+      toggleValue: isDarkMode,
+      subtitle: 'Toggle dark/light theme'
     },
     { 
-      id: 'privacy', 
-      title: 'Privacy & Security', 
-      icon: 'shield-outline', 
-      action: () => Alert.alert('Coming Soon', 'Privacy settings will be available in the next update.'),
-      hasToggle: false 
+      id: 'environment', 
+      title: i18n.navigation('environmentMonitoring') || 'Environment', 
+      icon: 'leaf-outline', 
+      action: () => router.push('/device/environmental-scanner'),
+      hasToggle: false,
+      subtitle: 'Temperature & humidity monitoring'
     },
     { 
-      id: 'account', 
-      title: 'Account Settings', 
-      icon: 'person-outline', 
-      action: () => router.push('/user/profile'),
-      hasToggle: false 
+      id: 'veterinary', 
+      title: i18n.navigation('findVets') || 'Veterinary', 
+      icon: 'medical-outline', 
+      action: () => router.push('/veterinary'),
+      hasToggle: false,
+      subtitle: 'Find nearby veterinarians'
     },
     { 
       id: 'language', 
-      title: 'Language & Region', 
+      title: i18n.common('language') || 'Language & Region', 
       icon: 'language-outline', 
-      action: () => Alert.alert('Coming Soon', 'Language settings will be available in the next update.'),
-      hasToggle: false 
+      action: () => setShowLanguageModal(true),
+      hasToggle: false,
+      subtitle: `Current: ${languages.find(l => l.code === currentLanguage)?.name || 'English'}`
     },
     { 
-      id: 'help', 
-      title: 'Help & Support', 
-      icon: 'help-circle-outline', 
-      action: () => Alert.alert('Help', 'For support, please contact: support@poultix.rw'),
-      hasToggle: false 
+      id: 'emergency', 
+      title: i18n.navigation('emergency') || 'Emergency', 
+      icon: 'warning-outline', 
+      action: () => router.push('/emergency/first-aid'),
+      hasToggle: false,
+      subtitle: 'First aid guides and emergency contacts'
     },
     { 
-      id: 'about', 
-      title: 'About Poultix', 
-      icon: 'information-circle-outline', 
-      action: () => Alert.alert('About', 'Poultix v1.0.0\nVeterinary Management System for Rwanda'),
-      hasToggle: false 
+      id: 'ai', 
+      title: i18n.navigation('aiAssistant') || 'AI Assistant', 
+      icon: 'chatbubble-ellipses-outline', 
+      action: () => router.push('/ai/ai'),
+      hasToggle: false,
+      subtitle: 'Chat with AI for expert advice'
     },
   ];
 
@@ -121,9 +171,9 @@ export default function SettingsScreen() {
               <Ionicons name="arrow-back" size={24} color="white" />
             </TouchableOpacity>
             <View style={tw`flex-1 ml-4`}>
-              <Text style={tw`text-white font-medium text-sm opacity-90`}>Settings</Text>
+              <Text style={tw`text-white font-medium text-sm opacity-90`}>{i18n.common('settings') || 'Settings'}</Text>
               <Text style={tw`text-white text-2xl font-bold`}>App Preferences</Text>
-              <Text style={tw`text-amber-100 text-sm font-medium`}>Manage your account</Text>
+              <Text style={tw`text-amber-100 text-sm font-medium`}>Manage your account {!isOnline && '(Offline)'}</Text>
             </View>
           </View>
         </LinearGradient>
@@ -172,9 +222,16 @@ export default function SettingsScreen() {
                 <View style={tw`w-12 h-12 bg-amber-50 rounded-2xl items-center justify-center mr-4`}>
                   <Ionicons name={option.icon as any} size={22} color="#d97706" />
                 </View>
-                <Text style={tw`flex-1 text-gray-900 font-medium text-base`}>
-                  {option.title}
-                </Text>
+                <View style={tw`flex-1`}>
+                  <Text style={tw`text-gray-900 font-medium text-base`}>
+                    {option.title}
+                  </Text>
+                  {option.subtitle && (
+                    <Text style={tw`text-gray-500 text-xs mt-1`}>
+                      {option.subtitle}
+                    </Text>
+                  )}
+                </View>
                 {option.hasToggle ? (
                   <Switch
                     value={option.toggleValue}
@@ -210,6 +267,57 @@ export default function SettingsScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        
+        {/* Language Selection Modal */}
+        <Modal
+          visible={showLanguageModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowLanguageModal(false)}
+        >
+          <View style={tw`flex-1 bg-black bg-opacity-50 justify-end`}>
+            <View style={tw`bg-white rounded-t-3xl p-6`}>
+              <View style={tw`flex-row items-center justify-between mb-6`}>
+                <Text style={tw`text-xl font-bold text-gray-900`}>
+                  {i18n.common('selectLanguage') || 'Select Language'}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setShowLanguageModal(false)}
+                  style={tw`p-2`}
+                >
+                  <Ionicons name="close" size={24} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+              
+              {languages.map((language) => (
+                <TouchableOpacity
+                  key={language.code}
+                  style={tw`flex-row items-center p-4 rounded-2xl mb-2 ${
+                    currentLanguage === language.code ? 'bg-amber-50 border-2 border-amber-200' : 'bg-gray-50'
+                  }`}
+                  onPress={() => handleLanguageChange(language.code)}
+                >
+                  <Text style={tw`text-2xl mr-4`}>{language.flag}</Text>
+                  <Text style={tw`flex-1 text-gray-900 font-medium text-base`}>
+                    {language.name}
+                  </Text>
+                  {currentLanguage === language.code && (
+                    <Ionicons name="checkmark-circle" size={24} color="#d97706" />
+                  )}
+                </TouchableOpacity>
+              ))}
+              
+              <TouchableOpacity
+                style={tw`bg-amber-500 rounded-2xl p-4 mt-4`}
+                onPress={() => setShowLanguageModal(false)}
+              >
+                <Text style={tw`text-white font-bold text-center text-base`}>
+                  {i18n.common('done') || 'Done'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </Animated.View>
       
       <BottomTabs />

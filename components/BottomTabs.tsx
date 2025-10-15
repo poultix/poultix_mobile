@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import tw from 'twrnc';
 import { getRoleTheme } from '@/utils/theme';
+import { i18n } from '../services/i18n/i18n';
 
 interface TabItem {
     key: string;
@@ -24,35 +25,43 @@ interface TabItem {
 const tabItems: TabItem[] = [
     {
         key: 'home',
-        label: 'Home',
+        label: i18n.navigation('dashboard') || 'Dashboard',
         icon: 'home-outline',
         activeIcon: 'home',
         route: '/',
         color: '#3B82F6'
     },
     {
-        key: 'chat',
-        label: 'Chat',
-        icon: 'chatbubbles-outline',
-        activeIcon: 'chatbubbles',
-        route: '/chat',
+        key: 'explore',
+        label: i18n.navigation('exploreApp') || 'Explore',
+        icon: 'compass-outline',
+        activeIcon: 'compass',
+        route: '/search',
         color: '#10B981'
     },
     {
-        key: 'news',
-        label: 'News',
-        icon: 'newspaper-outline',
-        activeIcon: 'newspaper',
-        route: '/general/news',
-        color: '#EF4444'
+        key: 'ai',
+        label: i18n.navigation('aiAssistant') || 'AI Assistant',
+        icon: 'bulb-outline',
+        activeIcon: 'bulb',
+        route: '/ai/ai',
+        color: '#8B5CF6'
     },
     {
-        key: 'profile',
-        label: 'Profile',
-        icon: 'person-outline',
-        activeIcon: 'person',
-        route: '/user/profile',
+        key: 'settings',
+        label: i18n.common('settings') || 'Settings',
+        icon: 'settings-outline',
+        activeIcon: 'settings',
+        route: '/settings',
         color: '#8B5CF6'
+    },
+    {
+        key:'profile',
+        label:i18n.common('profile')||'Profile',
+        icon:'person-outline',
+        activeIcon:'person',
+        route:'/user/profile',
+        color:'#8B5CF6'
     }
 ];
 
@@ -81,15 +90,19 @@ export default function BottomTabs({ style }: BottomTabsProps) {
                     router.push('/dashboard/farmer-dashboard');
                 }
                 break;
-            case 'chat':
-                router.push('/chat');
+            case 'explore':
+                router.push('/search');
                 break;
-            case 'news':
-                router.push('/news');
+            case 'ai':
+                router.push('/ai/ai');
+                break;
+            case 'settings':
+                router.push('/settings');
                 break;
             case 'profile':
                 router.push('/user/profile');
                 break;
+                
             default:
                 break
         }
@@ -98,9 +111,9 @@ export default function BottomTabs({ style }: BottomTabsProps) {
     const isTabActive = (tabKey: string) => {
         // Determine active tab based on current pathname
         if (pathname.includes('/dashboard') || pathname === '/') return tabKey === 'home';
-        if (pathname.includes('/chat') || pathname.includes('/user/directory') || pathname === '/chat') return tabKey === 'chat';
-        if (pathname.includes('/general/news') || pathname === '/news') return tabKey === 'news';
-        if (pathname.includes('/user/profile') || pathname.includes('/settings/')) return tabKey === 'profile';
+        if (pathname.includes('/search') || pathname.includes('/explore')) return tabKey === 'explore';
+        if (pathname.includes('/ai')) return tabKey === 'ai';
+        if (pathname.includes('/settings')) return tabKey === 'settings';
         return false; // No default active tab, rely on pathname detection
     };
 
@@ -127,12 +140,7 @@ export default function BottomTabs({ style }: BottomTabsProps) {
                                         size={24}
                                         color={isActive ? theme.primary : '#9CA3AF'}
                                     />
-                                    <Text style={[
-                                        tw`text-xs font-semibold mt-1`,
-                                        { color: isActive ? theme.primary : '#9CA3AF' }
-                                    ]}>
-                                        {tab.label}
-                                    </Text>
+                                   
                                 </View>
                             </TouchableOpacity>
                         );

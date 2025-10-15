@@ -13,6 +13,7 @@ import {
     View
 } from 'react-native';
 import tw from 'twrnc';
+import { i18n } from '../../services/i18n/i18n';
 
 import CustomDrawer from '@/components/CustomDrawer';
 import { useDrawer } from '@/contexts/DrawerContext';
@@ -203,7 +204,7 @@ const MedicineScreen = () => {
                                     AI-Powered Medicine Discovery
                                 </Text>
                                 <Text style={tw`text-white text-2xl font-bold`}>
-                                    Veterinary Medicines
+                                    {i18n.pharmacy('medicines')}
                                 </Text>
                                 <Text style={tw`text-purple-100 text-sm mt-1`}>
                                     Smart recommendations for animal health
@@ -251,7 +252,7 @@ const MedicineScreen = () => {
                                 <Ionicons name="search-outline" size={20} color="#6B7280" style={tw`mr-3`} />
                                 <TextInput
                                     style={tw`flex-1 text-gray-800 text-base`}
-                                    placeholder="Search medicines, categories..."
+                                    placeholder={i18n.pharmacy('searchMedicines') || 'Search medicines...'}
                                     placeholderTextColor="#6B7280"
                                     value={searchQuery}
                                     onChangeText={setSearchQuery}
@@ -303,7 +304,7 @@ const MedicineScreen = () => {
                         {loading ? (
                             <View style={tw`items-center py-20`}>
                                 <ActivityIndicator size="large" color="#4F46E5" />
-                                <Text style={tw`text-gray-600 mt-4`}>Loading medicines...</Text>
+                                <Text style={tw`text-gray-600 mt-4`}>{i18n.pharmacy('loading')}</Text>
                             </View>
                         ) : filteredMedicines.length === 0 ? (
                             <View style={tw`items-center py-20`}>

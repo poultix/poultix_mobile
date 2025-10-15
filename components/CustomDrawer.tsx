@@ -18,6 +18,7 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
+import { i18n } from '../services/i18n/i18n';
 
 interface DrawerItem {
   label: string;
@@ -39,85 +40,85 @@ interface UserInfo {
 const allDrawerItems: DrawerItem[] = [
   // Role-specific features
   {
-    label: "Admin Panel",
+    label: i18n.drawer('adminPanel'),
     route: "/admin",
     icon: "shield-outline",
-    description: "System administration",
+    description: i18n.drawer('systemAdministration'),
     badge: "ADMIN",
     adminOnly: true,
     color: "#7C3AED",
   },
   {
-    label: "Data Management",
+    label: i18n.drawer('dataManagement'),
     route: "/admin/data-management",
     icon: "server-outline",
-    description: "Edit content",
+    description: i18n.drawer('editContent'),
     adminOnly: true,
     color: "#10B981",
   },
 
   // Secondary features
   {
-    label: "Veterinary Care",
+    label: i18n.drawer('veterinaryCare'),
     route: "/farm/veterinary-care",
     icon: "medical-outline",
-    description: "Find expert help",
+    description: i18n.drawer('findExpertHelp'),
     color: "#EF4444",
   },
 
   {
-    label: "Medecine",
+    label: i18n.drawer('medicine'),
     route: "/medicine",
     icon: "medkit-outline",
-    description: "User directory",
+    description: i18n.drawer('medicineDirectory'),
     color: "#6B7280",
   },
   {
-    label: "Pharmacies",
+    label: i18n.drawer('pharmacies'),
     route: "/map/pharmacy-locator",
     icon: "storefront-outline",
-    description: "Locate nearby pharmacies",
+    description: i18n.drawer('locatePharmacies'),
     color: "#3B82F6",
   },
   {
-    label: "AI Assistant",
+    label: i18n.drawer('aiAssistant'),
     route: "/ai",
     icon: "chatbubble-ellipses-outline",
-    description: "Get AI-powered advice",
+    description: i18n.drawer('getAiAdvice'),
     badge: "BETA",
     color: "#06B6D4",
   },
 
   // Device features
   {
-    label: "Bluetooth Devices",
+    label: i18n.drawer('bluetoothDevices'),
     route: "/device/pairing",
     icon: "bluetooth-outline",
-    description: "Connect to devices",
+    description: i18n.drawer('connectDevices'),
     badge: "BETA",
     color: "#0EA5E9",
   },
   {
-    label: "PH Analyzer",
+    label: i18n.drawer('phAnalyzer'),
     route: "/device/readings",
     icon: "flask-outline",
-    description: "Analyze stool samples",
+    description: i18n.drawer('analyzeStoolSamples'),
     badge: "BETA",
     color: "#F59E0B",
   },
   {
-    label: "Climate Scanner",
+    label: i18n.drawer('climateScanner'),
     route: "/device/environmental-scanner",
     icon: "thermometer-outline",
-    description: "Environmental health monitoring",
+    description: i18n.drawer('environmentalMonitoring'),
     badge: "BETA",
     color: "#10B981",
   },
   {
-    label: "Settings",
+    label: i18n.drawer('settings'),
     route: "/settings",
     icon: "settings-outline",
-    description: "App preferences",
+    description: i18n.drawer('appPreferences'),
     color: "#6B7280",
   },
 ];
