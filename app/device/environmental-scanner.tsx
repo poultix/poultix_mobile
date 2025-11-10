@@ -136,14 +136,9 @@ const CombinedEnvironmentalChart = ({
                     <Text style={tw`text-lg font-bold text-amber-800`}>
                         Environmental Monitor
                     </Text>
-                    <Text style={tw`text-xs text-red-500 ml-1`}>LIVE DATA</Text>
+
                 </View>
-                <View style={tw`flex-row items-center`}>
-                    <Text style={tw`text-xs text-amber-700 font-semibold`}>
-                        {validData.length} readings
-                    </Text>
-                    <Text style={tw`text-xs text-blue-500 ml-1`}>UPDATING</Text>
-                </View>
+
             </View>
 
             {/* Current Values Display - overlapped a bit */}
@@ -157,7 +152,7 @@ const CombinedEnvironmentalChart = ({
                 <View style={tw`flex-row items-center`}>
                     <View style={tw`w-3 h-3 bg-blue-500 rounded-full mr-1`} />
                     <Text style={tw`text-blue-800 font-bold text-sm`}>
-                        Humidity: {currentHumidity}%
+                        Humidity: {currentHumidity}
                     </Text>
                     <Text style={tw`text-xs text-gray-500 ml-1`}>%</Text>
                 </View>
@@ -186,15 +181,13 @@ const CombinedEnvironmentalChart = ({
                 withOuterLines={false}
                 withVerticalLines={false}
                 withHorizontalLines={true}
-                segments={6}
+                segments={3}
             />
 
             {/* Chart Legend - cramped */}
             <View style={tw`flex-row justify-center items-center mt-1 px-1`}>
                 <Ionicons name="pulse-outline" size={12} color="#d97706" style={tw`mr-1`} />
-                <Text style={tw`text-xs text-amber-600 font-medium`}>
-                    Live monitoring • Updates every 5s
-                </Text>
+
                 <Text style={tw`text-xs text-gray-400 ml-1`}>CHART ACTIVE</Text>
             </View>
         </View>
@@ -546,22 +539,14 @@ export default function EnvironmentalScannerScreen() {
                                     <Ionicons name="arrow-back-outline" size={20} color="white" />
                                 </TouchableOpacity>
                                 <View style={tw`flex-1 mx-2`}>
-                                    <View style={tw`flex-row items-center mb-1`}>
-                                        <View style={tw`w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse`} />
-                                        <View style={tw`flex-row items-center flex-1`}>
-                                            <Ionicons name="thermometer-outline" size={14} color="white" style={tw`mr-1`} />
-                                            <Text style={tw`text-white text-xs font-semibold opacity-95 flex-1`} numberOfLines={1}>
-                                                LIVE ENVIRONMENTAL MONITOR
-                                            </Text>
-                                        </View>
-                                    </View>
+
                                     <Text style={tw`text-white text-2xl font-bold tracking-tight`} numberOfLines={1}>
-                                        {i18n.environment('scanner')}
+                                        {i18n.environment('Scanner')}
                                     </Text>
                                     <View style={tw`flex-row items-center mt-1`}>
                                         <Ionicons name="flame-outline" size={14} color="#fed7aa" style={tw`mr-1`} />
                                         <Text style={tw`text-orange-100 text-xs font-medium flex-1`} numberOfLines={1}>
-                                            Continuous monitoring • Amber alerts system
+                                            Continuous monitoring
                                         </Text>
                                     </View>
                                 </View>
@@ -586,7 +571,7 @@ export default function EnvironmentalScannerScreen() {
                                     <Ionicons name="refresh" size={10} color="white" style={tw`mr-1`} />
                                     <Text style={tw`text-white text-xs font-bold`} numberOfLines={1}>AUTO-UPDATE</Text>
                                 </View>
-                                <Text style={tw`text-white text-xs absolute right-0`}>STATUS OK</Text>
+
                             </View>
                         </LinearGradient>
 
@@ -602,7 +587,7 @@ export default function EnvironmentalScannerScreen() {
                                         height={200}
                                         maxDataPoints={12}
                                     />
-                                    <Text style={tw`text-xs text-gray-500 text-center mt-0`}>DATA STREAMING</Text>
+
                                 </LinearGradient>
                             </Animated.View>
                         )}
@@ -707,34 +692,11 @@ export default function EnvironmentalScannerScreen() {
                                             </View>
                                         </LinearGradient>
                                     </View>
-                                    {/* Live Monitoring Status - cramped */}
-                                    <LinearGradient
-                                        colors={['#fef3c7', '#fbbf24']}
-                                        style={tw`p-3 rounded-2xl mb-2`}
-                                    >
-                                        <View style={tw`flex-row items-center justify-center`}>
-                                            <View style={tw`w-2 h-2 bg-amber-600 rounded-full mr-2 animate-pulse`} />
-                                            <View>
-                                                <View style={tw`flex-row items-center`}>
-                                                    <Ionicons name="flame" size={14} color="#92400e" style={tw`mr-1`} />
-                                                    <Text style={tw`text-amber-900 font-bold text-xs`}>
-                                                        CONTINUOUS MONITORING
-                                                    </Text>
-                                                </View>
-                                                <Text style={tw`text-amber-700 text-xs font-medium`}>
-                                                    Always active • Updates every 5 seconds
-                                                </Text>
-                                            </View>
-                                        </View>
-                                        <Text style={tw`text-xs text-amber-500 text-center`}>PHASE ACTIVE</Text>
-                                    </LinearGradient>
+
                                 </LinearGradient>
                             </Animated.View>
                         )}
-                        {/* Extra noisy footer text */}
-                        <View style={tw`mx-4 mb-4`}>
-                            <Text style={tw`text-gray-400 text-xs text-center`}>ENV DATA LOG • {updateCount} UPDATES</Text>
-                        </View>
+
                     </Animated.View>
                 </ScrollView>
             </LinearGradient>
